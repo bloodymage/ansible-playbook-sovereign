@@ -1,0 +1,28 @@
+---
+# ==================================================================================================
+#
+# Create a self-hosted network
+#
+# We do this by:
+# 1. Configuring the control node for any requirements for the rest of the playbook to run
+# 2. Creating the certificate authorities
+#    a. ownca for internal ssl certificates
+#    b. sshca to make SSH logon easier
+# 3. Base configuration for all nodes
+# 4. Configure DNS
+# 5. Configure Realm Identity management
+# 6. Configure file servers
+# 6. Configure database servers
+# 7. Configure webservers
+# 8. Configure mailservers
+#
+# ==================================================================================================
+- import_playbook: control.yml
+- import_playbook: certificate_authorities.yml
+- import_playbook: all.yml
+- import_playbook: dnsservers.yml
+- import_playbook: realm.yml
+- import_playbook: fileservers.yml
+- import_playbook: dbservers.yml
+- import_playbook: webservers.yml
+- import_playbook: mailservers.yml

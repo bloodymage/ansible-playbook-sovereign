@@ -1,0 +1,48 @@
+//
+// {{ ansible_managed }}
+//
+// Do any local configuration here
+//
+
+include "/etc/bind/ansible.key";
+include "/etc/bind/rndc.key";
+
+{% for localzone in bind_zones -%}
+  zone "{{ localzone.name }}" {
+  type master;
+  notify no;
+  allow-query { any; };
+  allow-transfer { any; };
+  allow-update { key ansible; };
+  file "{{ bind_zone_dir }}/db.{{ localzone.name }}"; # zone file path
+  };
+
+{% endfor %}
+
+{% for localzone in bind_reverse_zones -%}
+  zone "{{ localzone.name.split('.')[1] }}.{{ localzone.name.split('.')[0] }}.in-addr.arpa" {
+  type master;
+  notify no;
+  allow-query { any; };
+  allow-transfer { any; };
+  allow-update { key ansible; };
+  file "{{ bind_zone_dir }}/db.{{ localzone.name }}"; # zone file path
+  };
+
+{% endfor %}
+
+{% if secondary_bind_zones is defined -%}
+  {% for localzone in secondary_bind_zones -%}
+    zone "{{ localzone.name }}" {
+    type slave;
+    notify no;
+    allow-query { any; };
+    masters {
+    192.168.2.1;
+    192.168.2.2;
+    };
+    file "{{ bind_cache_dir }}/db.{{ localzone.name }}"; # zone file path
+    };
+    
+  {% endfor %}
+{% endif %}

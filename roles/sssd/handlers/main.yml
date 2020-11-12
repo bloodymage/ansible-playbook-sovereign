@@ -1,0 +1,13 @@
+---
+# handlers file for sssd
+- name: start sssd
+  service:
+    name: sssd
+    state: started
+  become: yes
+
+- name: restart sssd
+  service:
+    name: sssd
+    state: restarted
+  become: yes

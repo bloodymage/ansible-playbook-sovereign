@@ -1,0 +1,59 @@
+---
+- name: reload bind
+  service:
+    name: bind9
+    state: reloaded
+  become: yes
+
+- name: restart bind
+  service:
+    name: bind9
+    state: restarted
+  become: yes
+
+- name: start samba-ad-dc
+  service:
+    name: samba-ad-dc
+    state: started
+  become: yes
+
+- name: restart samba-ad-dc
+  service:
+    name: samba-ad-dc
+    state: restarted
+  become: yes
+
+- name: start smbd
+  service:
+    name: smbd
+    state: started
+  become: yes
+
+- name: restart smbd
+  service:
+    name: smbd
+    state: restarted
+  become: yes
+
+- name: start nmbd
+  service:
+    name: nmbd
+    state: started
+  become: yes
+
+- name: restart nmbd
+  service:
+    name: rmbd
+    state: restarted
+  become: yes
+
+- name: restart samba-fileserver
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - smbd
+    - nmbd
+    - winbindd
+  become: yes
+

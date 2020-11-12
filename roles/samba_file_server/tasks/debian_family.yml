@@ -1,0 +1,16 @@
+# ---
+# This playbook contains common plays that will be run on all Samba Nodes.
+# ======================================================================
+#
+# Install Samba Packages
+#
+# ======================================================================
+- name: Install Samba Packages
+  apt:
+    name: "{{ samba_packages }}"
+    state: present
+  become: yes
+  notify: restart samba-domain-member
+  tags:
+    - samba
+    - samba-domain-member

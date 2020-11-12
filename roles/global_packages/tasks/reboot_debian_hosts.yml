@@ -1,0 +1,13 @@
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Rebooting {{ host }} if kernel/libs updated and requested by the system"
+  reboot:
+  become: yes
+  when:
+    - node_setup is defined
+    - node_setup
+  tags:
+    - reboot

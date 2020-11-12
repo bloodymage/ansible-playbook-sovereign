@@ -1,0 +1,10 @@
+[Unit]
+Description={{ keycloak_service_description }}
+After=network.target
+
+[Service]
+ExecStart={{ keycloak_binary }} {{ keycloak_service_switches }}
+Restart=on-abort
+
+[Install]
+WantedBy=multi-user.target

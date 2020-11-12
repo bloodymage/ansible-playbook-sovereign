@@ -1,0 +1,321 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - default.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - ownca-host-certs
+    - install-packages
+    - ownca-all
+
+# ==================================================================================================
+#
+# Create SSL Private Key and CRS Directories
+#
+# Creates the following Directories:
+#   - /etc/ssl/private mode: 0700
+#   - /etc/ssl/csr     mode: 0700
+#   - /etc/ssl/certs   mode: 0755
+#
+# ==================================================================================================
+- name: "Create SSL Directories"
+  file:
+    path: '{{ etc }}/{{ item.name }}'
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  become: yes
+  loop: "{{ ownca_host_certs_directories }}"
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+# ==================================================================================================
+#
+# Generate Passwords if they don't exist
+#
+# ==================================================================================================
+- name: "Ensure we have a password for the Component Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_component_password"
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - ownca_component_password == "password"
+  tags:
+    - ownca-host-certs
+
+- name: Generate Host Private Key
+  openssl_privatekey:
+    path: '/etc/ssl/private/{{ inventory_hostname }}.key'
+    type: '{{ ca_type }}'
+    size: 4096
+    owner: root
+    group: root
+    mode: '0600'
+    force: no
+  become: yes
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Print CSR Variables
+  debug:
+    msg:
+      - "country_name: {{ ownca_country_code | default(none) }}"
+      - "state_or_province_name: {{ loc_st | default(none) }}"
+      - "locality_name: {{ loc_city | default(none) }}"
+      - "organization_name: {{ sovereign_org_name | title }}"
+      - "organizational_unit_name: {{ sovereign_org_unit_name | title }}"
+      - "common_name: {{ inventory_hostname }}"
+      - "key_usage: {{ ownca_host_certs_key_usage }}"
+      - "extended_key_usage: {{ ownca_host_certs_extended_key_usage }}"
+      - "privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key"
+      - "subject_alt_name: {{ ownca_host_certs_subject_alt_name }}"
+    verbosity: 1
+  become: no
+  tags:
+    - never
+    - debug
+    - debug-ownca-host-certs
+
+- name: Generate Host CSR
+  community.crypto.openssl_csr:
+    path: "/etc/ssl/csr/{{ inventory_hostname }}.csr"
+    mode: "0644"
+    owner: root
+    group: root
+    country_name: "{{ ownca_country_code }}"
+    state_or_province_name: "{{ loc_st | default(none) }}"
+    locality_name: "{{ loc_city | default(none) }}"
+    organization_name: "{{ sovereign_org_name | title }}"
+    organizational_unit_name: "{{ sovereign_org_unit_name | title }}"
+    common_name: "{{ inventory_hostname }}"
+    key_usage: "{{ ownca_host_certs_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ ownca_host_certs_extended_key_usage }}"
+    extended_key_usage_critical: yes
+    privatekey_path: "/etc/ssl/private/{{ inventory_hostname }}.key"
+    subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
+  become: yes
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+# ==================================================================================================
+#
+# Tasks:
+#  
+#
+# ==================================================================================================
+- name: Fetch CSRs.
+  fetch:
+    src: "/etc/ssl/csr/{{ inventory_hostname }}.csr"
+    dest: "{{ ownca_hosts_directory }}/csr/"
+    flat: yes
+  become: yes
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Generate Host Certificate
+  community.crypto.x509_certificate:
+    path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
+    csr_path: "{{ ownca_hosts_directory }}/csr/{{ inventory_hostname }}.csr"
+    ownca_path: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.crt"
+    ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.key"
+    ownca_privatekey_passphrase: "{{ ownca_component_password }}"
+    provider: ownca
+  become: no
+  delegate_to: localhost
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Create Complete Chain Bundles
+  community.crypto.certificate_complete_chain:
+    input_chain: "{{ lookup('file', '{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt') }}"
+    intermediate_certificates:
+      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.crt"
+    root_certificates:
+      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-root-ca.crt"
+  register: parent_cert_authorities
+  become: no
+  delegate_to: localhost
+  tags:
+    - ownca-host-certs
+    - ownca-bundles
+    - ownca-all
+
+- name: Cert Chain (Name, Ownca, Chain, Complete Chain)
+  debug:
+    msg:
+      - "{{ parent_cert_authorities.chain }}"
+      - "{{ parent_cert_authorities.complete_chain }}"
+      - "{{ parent_cert_authorities.root }}"
+    verbosity: 1
+  delegate_to: localhost
+  when:
+    - parent_cert_authorities.chain is defined
+  tags:
+    - ownca-host-certs
+    - ownca-bundles
+    - ownca-all
+
+- name: Print Cert Authorities (Full)
+  debug:
+    msg:
+      - "{{ parent_cert_authorities }}"
+    verbosity: 4
+  when:
+    - parent_cert_authorities is defined
+  delegate_to: localhost
+  tags:
+    - ownca-host-certs
+    - ownca-bundles
+    - ownca-all
+
+- name: Write complete chain to disk
+  copy:
+    dest: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}-chain.crt"
+    content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
+  become: no
+  when:
+    - parent_cert_authorities.complete_chain is defined
+  delegate_to: localhost
+  tags:
+    - ownca-host-certs
+    - ownca-bundles
+    - ownca-all
+
+# ==================================================================================================
+#
+# Tasks: Copy Host Certificate back to Server.
+#  
+#
+# ==================================================================================================
+- name: Copy Host Certificate back to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop:
+    - "{{ inventory_hostname }}"
+    - "{{ inventory_hostname }}-chain"
+  notify: restart daemons
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Copy domain controllers' certificate back to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
+  when:
+    - sovereign_realm_managed_identities
+  notify: restart daemons
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Copy domain controllers' certificate chain back to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
+  when:
+    - sovereign_realm_managed_identities
+  notify: restart daemons
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Copy CA Certificates to server.
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "/usr/local/share/ca-certificates/"
+  loop:
+    - "{{ sovereign_org_name }}-root-ca.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca-chain.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca-chain.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-identity-ca-chain.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-identity-ca.crt"
+    - "{{ sovereign_org_name }}-swg-ca-chain.crt"
+    - "{{ sovereign_org_name }}-swg-component-ca-chain.crt"
+    - "{{ sovereign_org_name }}-swg-identity-ca-chain.crt"
+    - "{{ sovereign_org_name }}-swg-ca.crt"
+    - "{{ sovereign_org_name }}-swg-component-ca.crt"
+    - "{{ sovereign_org_name }}-swg-identity-ca.crt"
+  become: yes
+  notify: restart daemons
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Convert CA Certs to DER
+  command: "openssl x509 -in {{ item }}.crt -inform PEM -out {{ item }}.der -outform DER"
+  become: no
+  loop:
+    - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-root-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-identity-ca-chain"
+  delegate_to: localhost
+  run_once: yes
+  tags:
+    - ownca-host-certs
+    - ownca-all
+
+- name: Copy CA Certificates Samba File Server.
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "/srv/samba/pki/"
+  loop:
+    - "{{ sovereign_org_name }}"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-identity-ca.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca-chain.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca-chain.crt"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-identity-ca-chain.crt"
+    - "{{ sovereign_org_name }}-root-ca.der"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.der"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.der"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-identity-ca.der"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca-chain.der"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca-chain.der"
+    - "{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-identity-ca-chain.der"
+  become: yes
+  when:
+    - inventory_hostname == groups['samba_file_servers'][0] | default([])
+  tags:
+    - ownca-host-certs
+    - ownca-all

@@ -1,0 +1,65 @@
+# Do not edit -- this file documents how Postfix was built for your machine.
+#----------------------------------------------------------------
+# Start of summary of user-configurable 'make makefiles' options.
+# CCARGS=-DDEBIAN -DHAS_PCRE -DHAS_LDAP -DUSE_LDAP_SASL -DHAS_SQLITE -DMYORIGIN_FROM_FILE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAS_CDB -DHAS_LMDB -DHAS_MYSQL -I/usr/include/mysql -DHAS_PGSQL -I/usr/include/postgresql -DHAS_SQLITE -I/usr/include -DHAS_SSL -I/usr/include/openssl -DUSE_SASL_AUTH -I/usr/include/sasl -DUSE_CYRUS_SASL -DUSE_TLS
+# AUXLIBS=-lssl -lcrypto -lsasl2 -lpthread -L/build/postfix-ZQtGAv/postfix-3.4.14/debian
+# AUXLIBS_CDB=-lcdb -L../../lib -L. -lpostfix-util
+# AUXLIBS_LMDB=-llmdb -L../../lib -L. -lpostfix-util
+# AUXLIBS_MYSQL=-lmysqlclient -L../../lib -L. -lpostfix-util -lpostfix-global
+# AUXLIBS_LDAP=-lldap -llber -L../../lib -L. -lpostfix-util -lpostfix-global
+# AUXLIBS_PCRE=-lpcre -L../../lib -L. -lpostfix-util
+# AUXLIBS_SQLITE=-lsqlite3 -L../../lib -L. -lpostfix-util -lpostfix-global -lpthread
+# AUXLIBS_PGSQL=-lpq -L../../lib -L. -lpostfix-util -lpostfix-global
+# shared=yes
+# dynamicmaps=yes
+# pie=yes
+# daemon_directory=/usr/lib/postfix/sbin
+# html_directory=/usr/share/doc/postfix/html
+# manpage_directory=/usr/share/man
+# readme_directory=/usr/share/doc/postfix
+# End of summary of user-configurable 'make makefiles' options.
+#--------------------------------------------------------------
+# System-dependent settings and compiler/linker overrides.
+SYSTYPE	= LINUX4
+_AR	= ar
+ARFL	= rv
+_RANLIB	= ranlib
+SYSLIBS	= -pie -z relro -z now -lssl -lcrypto -lsasl2 -lpthread -L/build/postfix-ZQtGAv/postfix-3.4.14/debian -ldb -lnsl -lresolv -ldl -licui18n -licuuc -licudata 
+AUXLIBS_CDB = -lcdb -L../../lib -L. -lpostfix-util
+AUXLIBS_LDAP = -lldap -llber -L../../lib -L. -lpostfix-util -lpostfix-global
+AUXLIBS_LMDB = -llmdb -L../../lib -L. -lpostfix-util
+AUXLIBS_MYSQL = -lmysqlclient -L../../lib -L. -lpostfix-util -lpostfix-global
+AUXLIBS_PCRE = -lpcre -L../../lib -L. -lpostfix-util
+AUXLIBS_PGSQL = -lpq -L../../lib -L. -lpostfix-util -lpostfix-global
+AUXLIBS_SQLITE = -lsqlite3 -L../../lib -L. -lpostfix-util -lpostfix-global -lpthread
+CC	= gcc -fPIC -I. -I../../include -DDEBIAN -DHAS_PCRE -DHAS_LDAP -DUSE_LDAP_SASL -DHAS_SQLITE -DMYORIGIN_FROM_FILE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAS_CDB -DHAS_LMDB -DHAS_MYSQL -I/usr/include/mysql -DHAS_PGSQL -I/usr/include/postgresql -DHAS_SQLITE -I/usr/include -DHAS_SSL -I/usr/include/openssl -DUSE_SASL_AUTH -I/usr/include/sasl -DUSE_CYRUS_SASL -DUSE_TLS -DHAS_DEV_URANDOM -DDEF_DAEMON_DIR=\"/usr/lib/postfix/sbin\" -DDEF_HTML_DIR=\"/usr/share/doc/postfix/html\" -DDEF_MANPAGE_DIR=\"/usr/share/man\" -DDEF_README_DIR=\"/usr/share/doc/postfix\" -DUSE_DYNAMIC_LIBS -DUSE_DYNAMIC_MAPS $(WARN)
+OPT	= -O2
+DEBUG	= -g
+AWK	= awk
+STRCASE = 
+EXPORT	= CCARGS='-I. -I../../include -DDEBIAN -DHAS_PCRE -DHAS_LDAP -DUSE_LDAP_SASL -DHAS_SQLITE -DMYORIGIN_FROM_FILE -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DHAS_CDB -DHAS_LMDB -DHAS_MYSQL -I/usr/include/mysql -DHAS_PGSQL -I/usr/include/postgresql -DHAS_SQLITE -I/usr/include -DHAS_SSL -I/usr/include/openssl -DUSE_SASL_AUTH -I/usr/include/sasl -DUSE_CYRUS_SASL -DUSE_TLS -DHAS_DEV_URANDOM -DDEF_DAEMON_DIR=\"/usr/lib/postfix/sbin\" -DDEF_HTML_DIR=\"/usr/share/doc/postfix/html\" -DDEF_MANPAGE_DIR=\"/usr/share/man\" -DDEF_README_DIR=\"/usr/share/doc/postfix\" -DUSE_DYNAMIC_LIBS -DUSE_DYNAMIC_MAPS' OPT='-O2' DEBUG='-g'
+WARN	= -Wall -Wno-comment -Wformat -Wimplicit -Wmissing-prototypes \
+	-Wparentheses -Wstrict-prototypes -Wswitch -Wuninitialized \
+	-Wunused -Wno-missing-braces -fcommon
+DEFINED_MAP_TYPES = pcre ldap sqlite cdb lmdb mysql pgsql ssl dev_urandom
+MAKE_FIX = 
+# Switch between Postfix static and dynamically-linked libraries.
+AR	= :
+RANLIB	= :
+LIB_PREFIX = postfix-
+LIB_SUFFIX = .so
+SHLIB_CFLAGS = -fPIC
+SHLIB_DIR = /usr/lib/postfix
+SHLIB_ENV = LD_LIBRARY_PATH=/build/postfix-ZQtGAv/postfix-3.4.14/lib
+SHLIB_LD = gcc -shared -Wl,-soname,${LIB}
+SHLIB_SYSLIBS = -lssl -lcrypto -lsasl2 -lpthread -L/build/postfix-ZQtGAv/postfix-3.4.14/debian -ldb -lnsl -lresolv -ldl -licui18n -licuuc -licudata
+SHLIB_RPATH = -Wl,--enable-new-dtags -Wl,-rpath,${SHLIB_DIR}
+# Switch between dynamicmaps.cf plugins and hard-linked databases.
+NON_PLUGIN_MAP_OBJ = 
+PLUGIN_MAP_OBJ = $(MAP_OBJ)
+PLUGIN_MAP_OBJ_UPDATE = plugin_map_obj_update
+PLUGIN_MAP_SO_MAKE = plugin_map_so_make
+PLUGIN_MAP_SO_UPDATE = plugin_map_so_update
+PLUGIN_LD = gcc -shared
+POSTFIX_INSTALL_OPTS = 
+# Application-specific rules.

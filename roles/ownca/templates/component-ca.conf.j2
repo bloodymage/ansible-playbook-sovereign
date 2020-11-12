@@ -1,0 +1,143 @@
+# {{ ansible_managed }}
+
+# {{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[0] }} Component CA
+
+[ default ]
+ca                      = {{ ansible_domain.split('.')[1] }}-{{ Ansible_Domain.Split('.')[0] }}-component-ca          # CA name
+dir                     = .                     # Top dir
+base_url                = http://{{ pki_url }}    # CA base URL
+aia_url                 = $base_url/$ca.cer     # CA certificate URL
+crl_url                 = $base_url/$ca.crl     # CRL distribution point
+ocsp_url                = http://{{ ocsp_url }}   # OCSP responder URL
+name_opt                = multiline,-esc_msb,utf8 # Display UTF-8 characters
+openssl_conf            = openssl_init          # Library config section
+
+# CA certificate request
+
+[ req ]
+default_bits            = 4096                  # RSA key size
+encrypt_key             = yes                   # Protect private key
+default_md              = sha256                # MD to use
+utf8                    = yes                   # Input is UTF-8
+string_mask             = utf8only              # Emit UTF-8 strings
+prompt                  = no                    # Don't prompt for DN
+distinguished_name      = ca_dn                 # DN section
+req_extensions          = ca_reqext             # Desired extensions
+
+[ ca_dn ]
+countryName             = "US"
+organizationName        = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }}"
+organizationalUnitName  = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[0] }} Component CA"
+commonName              = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[0] }} Component CA"
+
+[ ca_reqext ]
+keyUsage                = critical,keyCertSign,cRLSign
+basicConstraints        = critical,CA:true,pathlen:0
+subjectKeyIdentifier    = hash
+
+# CA operational settings
+
+[ ca ]
+default_ca              = component_ca          # The default CA section
+
+[ component_ca ]
+certificate             = $dir/certs/$ca.crt        # The CA cert
+private_key             = $dir/private/$ca.key.pem  # CA private key
+new_certs_dir           = $dir/newcerts             # Certificate archive
+serial                  = $dir/db/$ca.cert.srl      # Serial number file
+crlnumber               = $dir/db/$ca.crl.srl       # CRL number file
+database                = $dir/db/$ca.db            # Index file
+unique_subject          = no                        # Require unique subject
+default_days            = 3650                      # How long to certify for
+default_md              = sha512                    # MD to use
+policy                  = match_pol                 # Default naming policy
+email_in_dn             = no                        # Add email to cert DN
+preserve                = no                        # Keep passed DN ordering
+name_opt                = $name_opt                 # Subject DN display options
+cert_opt                = ca_default                # Certificate display options
+copy_extensions         = none                      # Copy extensions from CSR
+x509_extensions         = server_ext                # Default cert extensions
+default_crl_days        = 1                         # How long before next CRL
+crl_extensions          = crl_ext                   # CRL extensions
+
+[ match_pol ]
+countryName             = match
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+
+[ any_pol ]
+domainComponent         = optional
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = optional
+emailAddress            = optional
+
+# Extensions
+
+[ server_ext ]
+keyUsage                = critical,digitalSignature,keyEncipherment
+basicConstraints        = CA:false
+extendedKeyUsage        = serverAuth,clientAuth
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @ocsp_info
+crlDistributionPoints   = @crl_info
+certificatePolicies     = {{ ansible_domain.split('.')[1] }}MediumDevice
+
+[ client_ext ]
+keyUsage                = critical,digitalSignature
+basicConstraints        = CA:false
+extendedKeyUsage        = clientAuth
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @ocsp_info
+crlDistributionPoints   = @crl_info
+certificatePolicies     = {{ ansible_domain.split('.')[1] }}MediumDevice
+
+[ timestamp_ext ]
+keyUsage                = critical,digitalSignature
+basicConstraints        = CA:false
+extendedKeyUsage        = critical,timeStamping
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+crlDistributionPoints   = @crl_info
+certificatePolicies     = {{ ansible_domain.split('.')[1] }}MediumDevice
+
+[ ocspsign_ext ]
+keyUsage                = critical,digitalSignature
+basicConstraints        = CA:false
+extendedKeyUsage        = critical,OCSPSigning
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+noCheck                 = null
+certificatePolicies     = {{ ansible_domain.split('.')[1] }}MediumDevice
+
+[ crl_ext ]
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+
+[ ocsp_info ]
+caIssuers;URI.0         = $aia_url
+OCSP;URI.0              = $ocsp_url
+
+[ issuer_info ]
+caIssuers;URI.0         = $aia_url
+
+[ crl_info ]
+URI.0                   = $crl_url
+
+# Policy OIDs
+
+[ openssl_init ]
+oid_section             = additional_oids
+
+[ additional_oids ]
+{{ ansible_domain.split('.')[1] }}MediumDevice        = {{ Ansible_Domain.Split('.')[1] }} Medium Device Assurance, 1.3.6.1.4.1.0.1.7.9

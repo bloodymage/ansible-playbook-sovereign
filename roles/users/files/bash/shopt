@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Enable options: 
+shopt -s cdspell 
+shopt -s cdable_vars 
+shopt -s checkhash 
+
+# check the window size after each command and, if necessary,
+# update the values of LINES and COLUMNS.
+shopt -s checkwinsize 
+shopt -s sourcepath 
+shopt -s no_empty_cmd_completion 
+shopt -s cmdhist
+
+# If set, the pattern "**" used in a pathname expansion context will
+# match all files and zero or more directories and subdirectories.
+shopt -s globstar
+
+
+# Append history file, don't overwrite it
+# Allow edit of history
+#
+shopt -s histappend histreedit histverify 
+shopt -s extglob # Necessary for programmable completion. 
+
+# Disable options: 
+shopt -u mailwarn 
+unset MAILCHECK # Don't want my shell to warn me of incoming mail.

@@ -1,0 +1,217 @@
+{{ ansible_managed | comment }}
+
+{% if item.gpg_keys is defined %}
+  [user]
+  name = "{{ item.gpg_keys[0].name }}"
+  email = "{{ item.gpg_keys[0].email }}"
+  {% if item.gpg_keys[0].sign_keyid is defined %}
+    signingkey = "{{ item.gpg_keys[0].sign_keyid }}"
+  {% endif %}
+{% endif %}
+
+[core]
+editor = emacsclient -t
+pager = less -FRSX
+whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+excludesfile = ~/.gitignore # Creates a global git ignore
+
+[github]
+user = gderber
+
+[branch "master"]
+remote = origin
+merge = refs/heads/master
+
+[color]
+branch = always
+diff = always
+grep = always
+interactive = always
+pager = true
+showbranch = auto
+status = auto
+ui = always
+
+[color "interactive"]
+error = red bold
+
+[color "branch"]
+current = yellow reverse
+local = yellow
+remote = green
+
+[color "diff"]
+meta = yellow
+frag = magenta
+old = red
+new = green
+whitespace = white reverse
+
+[color "status"]
+added = yellow
+changed = green
+untracked = cyan
+branch = magenta
+
+[diff]
+tool = vimdiff
+
+[difftool]
+prompt = false
+
+[merge]
+tool = vimdiff
+
+[alias]
+# branch
+b   = branch
+bc  = checkout -b
+bl  = branch -v
+bL  = branch -av
+bx  = branch -d
+bX  = branch -D
+bmv = branch -m
+bM  = branch -M
+bs  = show-branch
+bS  = show-branch -a
+
+cl = clone
+
+# Config files
+ec = config --global -e
+
+# Git Flow
+fi    = flow init
+flf   = flow feature
+flh   = flow hotfix
+flr   = flow release
+flff  = flow feature finish
+flhf  = flow hotfix finish
+flrf  = flow release finish
+flfs  = flow feature start
+flhs  = flow hotfix start
+flrs  = flow release start
+
+# Logging Aliases
+ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+lnc = log --pretty=format:"%h\\ %s\\ [%cn]"
+lds = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=short
+ld = log --pretty=format:"%C(yellow)%h\\ %ad%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --date=relative
+le = log --oneline --decorate
+fl = log -u
+
+# Recent Commit information
+dl = "!git ll -1"
+dlc = diff --cached HEAD^
+#dr  = '!f() { git diff "$1"^.."$1"; }; f'
+#lc  = '!f() { git ll "$1"^.."$1"; }; f'
+#diffr  = '!f() { git diff "$1"^.."$1"; }; f'
+
+#
+up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+
+# Find files ...
+f = "!git ls-files | grep -i"
+grep = "!git ls-files | grep -Ii"
+gr = "!git ls-files | grep -Ii"
+
+# List Aliases
+la = "!git config -l | grep alias | cut -c 7-"
+
+# checkout/fetch/merge/push/rebase
+# Checkout Aliases
+co  = checkout
+co0 = checkout HEAD --
+cob = checkout -b
+cod = checkout develop
+coh = checkout hotfix
+com = checkout master
+cor = checkout release
+
+# fetch
+f   = fetch
+fm  = pull
+fo  = fetch origin
+# merge
+m   = merge
+mom = merge origin/master
+# push
+p   = push
+pa  = push --all
+pt  = push --tags
+# rebase
+r   = rebase
+ra  = rebase --abort
+rc  = rebase --continue
+ri  = rebase --interactive
+rs  = rebase --skip
+rom = rebase origin/master
+
+# Commit Aliases
+# commit
+{% if item.gpg_keys[0].sign_keyid is defined -%}
+  c      = commit -S -
+  ca     = !git add -A && git commit -S --all -v
+  cm     = !git add -A && git commit -S --all -v --message
+{%- else -%}
+  c      = commit -
+  ca     = !git add -A && git commit --all -v
+  cm     = !git add -A && git commit --all -v --message
+{%- endif %}
+
+cam    = commit -S --all --message
+camend = commit --amend --reuse-message HEAD
+cundo  = reset --soft "HEAD^"
+cp     = cherry-pick
+save = !git add -A && git commit -m 'SAVEPOINT'
+wip = !git add -u && git commit -m "WIP"
+undo = reset HEAD~1 --mixed
+amend = commit -a --amend
+wipe = !git add -A && git commit -qm 'WIPE SAVEPOINT' && git reset HEAD~1 --hard
+bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
+bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+untrack = rm --cache --
+o = !git push origin --all && git push --prune
+
+# diff
+d    = diff          # Diff working dir to index
+ds   = diff --staged # Diff index to HEAD
+dc   = diff --staged # Diff index to HEAD
+dh   = diff HEAD     # Diff working dir and index to HEAD
+hub  = browse
+hubd = compare
+
+# index
+s  = status
+a  = add
+ia = add
+ir = reset
+
+# log
+l   = log --topo-order --pretty=format:'%C(yellow)%h %C(cyan)%cn %C(blue)%cr%C(reset) %s'
+ls  = log --topo-order --stat --pretty=format:'%C(bold)%C(yellow)Commit:%C(reset) %C(yellow)%H%C(red)%d%n%C(bold)%C(yellow)Author:%C(reset) %C(cyan)%an <%ae>%n%C(bold)%C(yellow)Date:%C(reset)   %C(blue)%ai (%ar)%C(reset)%n%+B'
+ld  = log --topo-order --stat --patch --full-diff --pretty=format:'%C(bold)%C(yellow)Commit:%C(reset) %C(yellow)%H%C(red)%d%n%C(bold)%C(yellow)Author:%C(reset) %C(cyan)%an <%ae>%n%C(bold)%C(yellow)Date:%C(reset)   %C(blue)%ai (%ar)%C(reset)%n%+B'
+lg  = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+lga = log --topo-order --all --graph --pretty=format:'%C(yellow)%h %C(cyan)%cn%C(reset) %s %C(red)%d%C(reset)%n'
+lm  = log --topo-order --pretty=format:'%s'
+lh  = shortlog --summary --numbered
+llf = fsck --lost-found
+
+lg1 = log --graph --abbrev-commit --decorate --date=relative --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(dim white)- %an%C(reset)%C(bold yellow)%d%C(reset)' --all
+lg2 = log --graph --abbrev-commit --decorate --format=format:'%C(bold blue)%h%C(reset) - %C(bold cyan)%aD%C(reset) %C(bold green)(%ar)%C(reset)%C(bold yellow)%d%C(reset)%n''          %C(white)%s%C(reset) %C(dim white)- %an%C(reset)' --all
+
+# remote
+re  = remote
+rel = remote --verbose
+rea = remote add
+rex = remote rm
+rem = remote rename
+
+flow-setup = "!git branch --track develop origin/develop 2>/dev/null ; git flow init -fd && git checkout master && git pull origin master && git checkout develop && git pull origin develop"
+
+[push]
+default = matching
+
+[url "git@github.com:"]
+insteadof = github:

@@ -1,0 +1,26 @@
+---
+# defaults file for linux-users
+emacs_layers:
+  - drbr
+  - drbr-ansible
+  - drbr-apache
+  - drbr-common
+  - drbr-emms
+  - drbr-git
+  - drbr-gui
+  - drbr-mediawiki
+  - drbr-org-mode
+  - drbr-passwordstore
+
+pineentry_program: "/usr/bin/pinentry-curses"
+
+dotfiles_gpg_keyserver: "hkps://pool.sks-keyservers.net"
+dotfiles_gpg_no_greeting: yes
+dotfiles_gpg_use_agent: yes
+dotfiles_gpg_pinentry_mode: "loopback"
+dotfiles_gpg_list_options:
+  - show-uid-validity
+  - show-notations
+  - show-std-notations
+  - show-user-notations
+dotfiles_gpg_keyid_format: "0xlong"

@@ -1,0 +1,127 @@
+---
+# roles/bind/defaults/main.yml
+
+# defaults file for ansible-bind
+# Define acls for defining ip addresses or networks allowed to query bind
+bind_acls: []
+
+bind_root_zones:
+  - name: a.root-servers.net
+    ipv4: 198.41.0.4
+    ipv6: 2001:503:ba3e::2:30
+  - name: b.root-servers.net
+    ipv4: 199.9.14.201
+    ipv6: 2001:500:200::b
+  - name: c.root-servers.net
+    ipv4: 2001:500:2::c
+  - name: d.root-servers.net
+    ipv4: 199.7.91.13
+    ipv6: 2001:500:2d::d
+  - name: e.root-servers.net
+    ipv4: 192.203.230.10
+    ipv6: 2001:500:a8::e
+  - name: f.root-servers.net
+    ipv4: 192.5.5.241
+    ipv6: 2001:500:2f::f
+  - name: g.root-servers.net
+    ipv4: 192.112.36.4
+    ipv6: 2001:500:12::d0d
+  - name: h.root-servers.net
+    ipv4: 198.97.190.53
+    ipv6: 2001:500:1::53
+  - name: i.root-servers.net
+    ipv4: 192.36.148.17
+    ipv6: 2001:7fe::53
+  - name: j.root-servers.net
+    ipv4: 2001:503:c27::2:30
+  - name: k.root-servers.net
+    ipv4: 193.0.14.129
+    ipv6: 2001:7::1
+  - name: l.root-servers.net
+    ipv4: 199.7.83.42
+    ipv6: 2001:500:9f::42
+  - name: m.root-servers.net
+    ipv4: 202.12.27.33
+    ipv6: 2001:dc3::35
+
+bind_zones_dir: /etc/bind/zones
+
+bind_dnssec_enable: "yes"
+bind_dnssec_validation: "no"
+
+zone_ttl: "604800"
+zone_refresh: "604800"
+zone_retry: "86400"
+zone_expire: "2419200"
+zone_negative_cache_ttl: "604800"
+zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+
+bind_log: "data/named.run"
+
+bind_zone_domains:
+  - name: "example.com"
+    hostmaster_email: "hostmaster"
+    networks:
+      - "10.0.2"
+
+# List of acls.
+bind_acls: []
+
+# Key binding for slaves
+bind_dns_keys: []
+#  - name: master_key
+#    algorithm: hmac-sha256
+#    secret: "azertyAZERTY123456"
+
+# List of IPv4 address of the network interface(s) to listen on. Set to "any"
+# to listen on all interfaces
+bind_listen_ipv4:
+  - "127.0.0.1"
+
+# List of IPv6 address of the network interface(s) to listen on.
+bind_listen_ipv6:
+  - "::1"
+
+# List of hosts that are allowed to query this DNS server.
+bind_allow_query:
+  - "localhost"
+
+# Determines whether recursion should be allowed. Typically, an authoritative
+# name server should have recursion turned OFF.
+bind_recursion: false
+bind_allow_recursion:
+  - "any"
+
+# Allows BIND to be set up as a caching name server
+bind_forward_only: false
+
+# List of name servers to forward DNS requests to.
+bind_forwarders: []
+
+# DNS round robin order (random or cyclic)
+bind_rrset_order: "random"
+
+# statistics channels configuration
+bind_statistics_channels: false
+bind_statistics_port: 8053
+bind_statistics_host: 127.0.0.1
+bind_statistics_allow:
+  - "127.0.0.1"
+
+bind_extra_include_files: []
+
+# DNSSEC configuration
+bind_dnssec_enable: true
+bind_dnssec_validation: true
+
+bind_extra_include_files: []
+
+# SOA information
+bind_zone_ttl: "1W"
+bind_zone_time_to_refresh: "1D"
+bind_zone_time_to_retry: "1H"
+bind_zone_time_to_expire: "1W"
+bind_zone_minimum_ttl: "1D"
+
+# File mode for master zone files (needs to be something like 0660 for dynamic updates)
+bind_zone_file_mode: "0640"

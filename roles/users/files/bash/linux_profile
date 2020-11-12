@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Already in exports
+# Emacs
+#export ALTERNATE_EDITOR=""
+# $EDITOR opens in terminal
+#export EDITOR="emacsclient -t"
+# GUI editor
+#export VISUAL="emacsclient -c -a emacs"

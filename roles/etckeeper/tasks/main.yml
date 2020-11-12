@@ -1,0 +1,7 @@
+---
+- include: debian_family.yml
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_network_os is undefined
+    - node_setup is defined
+    - node_setup

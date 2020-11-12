@@ -1,0 +1,5 @@
+---
+deb_repo_url: "https://deb.debian.org/debian/"
+#deb_src_repo_url: "https://archive.raspbian.org/raspbian/"
+deb_repos: "main contrib non-free"
+debian_security_updates_repo_url: "https://deb.debian.org/debian-security"

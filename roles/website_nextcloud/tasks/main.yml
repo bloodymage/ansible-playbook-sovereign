@@ -1,0 +1,262 @@
+---
+# tasks file for nextcloud
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - nextcloud
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - nextcloud
+    - websites
+    - install-packages
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Download Nextcloud Sources"
+  get_url:
+    url: "{{ item.source }}"
+    dest: "/tmp/{{ item.file }}"
+    checksum: "sha256:{{ item.checksum }}"
+    mode: '0644'
+  loop: "{{ nextcloud_source_url }}"
+  tags:
+    - nextcloud
+    - websites
+    - download-sources
+
+- name: Extract Sources
+  unarchive:
+    src: "/tmp/{{ nextcloud_source_url[0].file }}"
+    dest: "/srv/www/{{ item.name }}"
+    remote_src: yes
+    owner: www-data
+    group: www-data
+    extra_opts: [--strip-components=1]
+    creates: "/srv/www/{{ item.name }}/public.php"
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - nextcloud
+    - websites
+
+- name: Install Apache site.conf
+  template:
+    src: "apache-site.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  notify: reload apache
+  tags:
+    - nextcloud
+    - websites
+
+# - name: "Enable Apache modules"
+#   community.general.apache2_module:
+#     state: present
+#     name: "{{ item }}"
+#   loop:
+#     - rewrite
+#     - headers
+#     - env
+#     - dir
+#     - mime
+#   notify: reload apache
+#   tags:
+#     - nextcloud
+#     - websites
+
+- name: Determine New Data Directory
+  set_fact:
+    nextcloud_data_directory: "/srv/www-data/{{ item.name }}/data"
+  become: no
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - websites
+
+- name: Create Data Directory
+  file:
+    path: "{{ nextcloud_data_directory }}"
+    state: directory
+    owner: www-data
+    group: www-data
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - websites
+
+- name: Check If Data Directory in default location
+  stat:
+    path: "/srv/www/{{ item.name }}/data"
+  loop: "{{ hosts }}"
+  register: dir_stat
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - websites
+
+- name: Print dir_stat
+  debug:
+    msg:
+      - "{{ item.stat.path | default('Not Applicable') }}"
+      - "{{ item.stat.exists }}"
+    verbosity: 1
+  loop: "{{ dir_stat.results }}"
+  become: no
+  when:
+    - item.stat is defined
+  tags:
+    - nextcloud
+    - websites
+
+- name: Move Data Directory
+  copy:
+      src: "{{ item.msg.stat.path }}"
+      dest: "{{ nextcloud_data_directory }}"
+      remote_src: yes
+      owner: www-data
+      group: www-data
+      directory_mode: "0755"
+      mode: "0644"
+  become: yes
+  loop: "{{ dir_stat.results }}"
+  when:
+    - item.stat is defined
+    - item.stat.exists
+  tags:
+    - nextcloud
+    - websites
+
+- name: Delete old Data directory
+  file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  become: yes
+  loop: "{{ dir_stat.results }}"
+  when:
+    - item.stat is defined
+    - item.stat.exists
+  notify: restart apache2
+  tags:
+    - nextcloud
+    - websites
+
+- name: Update php.ini
+  template:
+    src: "php.ini.j2"
+    dest: "/etc/php/7.3/apache2/php.ini"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: restart apache
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - websites
+
+- name: Install Nextcloud
+  command:
+    cmd: "php occ  maintenance:install --database '{{ item.database }}' --database-name '{{ item.db_name }}'  --database-user '{{ item.db_user }}' --database-pass '{{ item.db_password }}' --admin-user '{{ nextcloud_admin_user }}' --admin-pass '{{ nextcloud_admin_password }}'"
+    chdir: "/srv/www/{{ item.name }}"
+    creates: "/srv/www/{{ item.name }}/config/config.php"
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  when:
+    - item.database is defined
+    - item.content == "nextcloud"
+  tags:
+    - never
+    - nextcloud
+    - websites
+
+- name: Update nextcloud config
+  template:
+    src: "config.php.j2"
+    dest: "/srv/www/{{ item.name }}/config/config.php"
+    owner: www-data
+    group: www-data
+    mode: "0644"
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - websites
+
+- name: "Install Nextcloud apps"
+  include: nextcloud_apps.yml
+  loop: "{{ hosts }}"
+  loop_control:
+    loop_var: host
+  when:
+    - hosts is defined
+    - host.content is defined
+    - host.content == "nextcloud"
+  tags:
+    - nextcloud
+    - websites

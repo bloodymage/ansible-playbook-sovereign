@@ -1,0 +1,6 @@
+---
+# tasks file for firefox
+- name: Install kerberos config
+  template:
+    src: kerberos.j2
+    dest: /usr/lib64/firefox/browser/defaults/preferences/kerberos.js

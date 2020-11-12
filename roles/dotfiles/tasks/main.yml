@@ -1,0 +1,906 @@
+---
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+# - name: Ensure User Home directory exists
+#   file:
+#     dest: "{{ item.unix_home }}"
+#     state: directory
+#     owner: "{{ item.uusername }}"
+#     group: "OLYMPUS\\unix admins"
+#     mode: "3771"
+#   loop: "{{ domain_users }}"
+#   become: yes
+#   #become_user: "{{ item.username }}"
+#   when:
+#     - inventory_hostname in groups['samba_file_servers']
+#     - item.unix_home is defined
+#     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+#   tags:
+#     - dotfiles
+
+- name: get user home directory
+  shell: >-
+    getent passwd {{ item.username }}  | awk -F: '{ print $6 }'
+  changed_when: false
+  register: user_home
+  become: yes
+  loop: "{{ users }}"
+  when:
+    - users is defined
+  tags:
+    - dotfiles
+
+- name: debug output
+  debug:
+    var: user_home
+  become: no
+  tags:
+    - dotfiles
+
+- name: Ensure User Home directory exists
+  file:
+    dest: "{{ item.unix_home }}"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0700"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - inventory_hostname not in groups['samba_file_servers']
+    - item.unix_home is defined
+    - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Ensure User Config directory exists
+  file:
+    dest: "{{ item.unix_home }}/.config/"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0755"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Ensure User Systemd directory exists
+  file:
+    dest: "{{ item.unix_home }}/.config/systemd/user/"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0755"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+- name: Install User systemd service config
+  file:
+    path: "{{ item.unix_home }}/.config/systemd/user/user.conf"
+    state: absent
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+    - item.id_number is defined
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+# Determine if user's .emacs.d is a git repo
+#
+# ==================================================================================================
+
+
+# ==================================================================================================
+#
+# If it's not a git repo, remove it.
+#
+# ==================================================================================================
+# - name: "Remove .emacs.d"
+#   file:
+#     dest: "{{ user.home }}/.emacs.d"
+#     state: absent
+
+
+# ==================================================================================================
+#
+# Install Spacemacs
+#
+# ==================================================================================================
+# - name: "Reset Spacemacs repo to HEAD"
+#   command: "git reset --hard HEAD"
+#   args:
+#     chdir: "{{ item.unix_home }}/.emacs.d"
+#   loop: "{{ users }}"
+#   become: yes
+#   become_user: "{{ item.username }}"
+#   when:
+#     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+#     - item.unix_home is defined
+#   tags:
+#     - dotfiles
+#     - install-spacemacs
+
+# ==================================================================================================
+#
+# Install Spacemacs
+#
+# ==================================================================================================
+- name: "Install Spacemacs for users"
+  git:
+    repo: "http://github.com/syl20bnr/spacemacs.git"
+    dest: "{{ item.unix_home }}/.emacs.d/"
+  loop: "{{ users }}"
+  become: yes
+  become_user: "{{ item.username }}"
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+    - install-spacemacs
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install Emacs Layers
+  include: "emacs_layers.yml"
+  loop: "{{ users }}"
+  loop_control:
+    loop_var: user
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+    - install-spacemacs
+
+# - name: "Install Emacs Layers"
+#   git:
+#     repo: "https://github.com/gderber/{{ item }}.git"
+#     dest: "{{ item[0].home }}/.emacs.d/private/{{ item[1] }}"
+#   remote_user: "{{ item[0].username }}"
+#   loop:
+#     - "{{ users | product(emacs_layers) | list }}"
+#   when:
+#     - item[0].username is defined
+#     - item[0].home is defined
+#     - (item[0].shell is not defined) or (item[0].shell != "/usr/sbin/nologin")
+#   tags:
+#     - dotfiles
+#     - install-spacemacs
+
+# ==================================================================================================
+#
+# Clean-up .spacemacs.orig (From previous manual installs, not ansible controlled
+#
+# ==================================================================================================
+- name: "Remove .spacemacs.orig for users"
+  file:
+    path: "{{ item.unix_home }}/.spacemacs.orig"
+    state: absent
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - item.unix_home is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+    - install-spacemacs
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install emacs User systemd service
+  copy:
+    src: "emacs.service"
+    dest: "{{ item.unix_home }}/.config/systemd/user/emacs.service"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  notify: enable emacs
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install User gitconfig
+  template:
+    src: "gitconfig.j2"
+    dest: "{{ item.unix_home }}/.gitconfig"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# - name: Add public ssh keys of users
+#   authorized_key:
+#     user: "{{ item }}"
+#     exclusive: yes
+#     key: https://github.com/{{ item }}.keys
+#     state: present
+#   with_items: "{{ developers }}"
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Ensure User .bash directory exists
+  file:
+    dest: "{{ item.unix_home }}/.bash/"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0755"
+    recurse: yes
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+# Template?
+#
+# ==================================================================================================
+- name: Install bash agent
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/agent"
+    dest: "{{ item.unix_home }}/.bash/agent"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash aliases
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/aliases"
+    dest: "{{ item.unix_home }}/.bash/aliases"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash bashrc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/bashrc"
+    dest: "{{ item.unix_home }}/.bash/bashrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash colors
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/colors"
+    dest: "{{ item.unix_home }}/.bash/colors"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash commonfunctions
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/commonfunctions"
+    dest: "{{ item.unix_home }}/.bash/commonfunctions"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash exports
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/exports"
+    dest: "{{ item.unix_home }}/.bash/exports"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash functions
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/functions"
+    dest: "{{ item.unix_home }}/.bash/functions"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash laptop_functions
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/laptop_functions"
+    dest: "{{ item.unix_home }}/.bash/laptop_functions"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash linux_profile
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/linux_profile"
+    dest: "{{ item.unix_home }}/.bash/linux_profile"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash prompt
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/prompt"
+    dest: "{{ item.unix_home }}/.bash/prompt"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash shopt
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/shopt"
+    dest: "{{ item.unix_home }}/.bash/shopt"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash sudo_functions
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/sudo_functions"
+    dest: "{{ item.unix_home }}/.bash/sudo_functions"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash xdisplay
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash/xdisplay"
+    dest: "{{ item.unix_home }}/.bash/xdisplay"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash_logout
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash_logout"
+    dest: "{{ item.unix_home }}/.bash_logout"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bash_profile
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bash_profile"
+    dest: "{{ item.unix_home }}/.bash_profile"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install bashrc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/bashrc"
+    dest: "{{ item.unix_home }}/.bashrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install editrc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/editrc"
+    dest: "{{ item.unix_home }}/.editrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install globale gitignore
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/.gitignore"
+    dest: "{{ item.unix_home }}/.gitignore"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Ensure user .gnupg folder exists
+  file:
+    path: "{{ item.unix_home }}/.gnupg"
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0700"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install gpg.conf
+  template:
+    src: "gpg.conf.j2"
+    dest: "{{ item.unix_home }}/.gnupg/gpg.conf"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install gpg-agent.conf
+  template:
+    src: "gpg-agent.conf.j2"
+    dest: "{{ item.unix_home }}/.gnupg/gpg-agent.conf"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install inputrc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/inputrc"
+    dest: "{{ item.unix_home }}/.inputrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install kshrc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/kshrc"
+    dest: "{{ item.unix_home }}/.kshrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install netrc
+  template:
+    src: "{{ role_path }}/templates/netrc.j2"
+    dest: "{{ item.unix_home }}/.netrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install profile
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/profile"
+    dest: "{{ item.unix_home }}/.profile"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install pylintrc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/pylintrc"
+    dest: "{{ item.unix_home }}/.pylintrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install pythonrc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/pythonrc"
+    dest: "{{ item.unix_home }}/.pythonrc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install toprc
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/toprc"
+    dest: "{{ item.unix_home }}/.toprc"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ users }}"
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+# - name: Install wgetrc
+#   get_url:
+#     url: "https://raw.githubusercontent.com/gderber/dotfiles/master/wgetrc"
+#     dest: "{{ item.unix_home }}/.wgetrc"
+#     owner: "{{ item.username }}"
+#     group: "{{ item.username }}"
+#     mode: "0644"
+#   become: yes
+#   loop: "{{ users }}"
+#   when:
+#     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+#   tags:
+#     - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install Xdefaults
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/Xdefaults"
+    dest: "{{ item.unix_home }}/.Xdefaults"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ users }}"
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install xscreensaver
+  get_url:
+    url: "https://raw.githubusercontent.com/gderber/dotfiles/master/xscreensaver"
+    dest: "{{ item.unix_home }}/.xscreensaver"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ users }}"
+  when:
+    - users is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles

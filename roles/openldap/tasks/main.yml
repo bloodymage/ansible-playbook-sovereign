@@ -1,0 +1,77 @@
+---
+# tasks file for openldap
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - openldap
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - openldap
+    - install-packages
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Create Config Ldifs
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/ldap/schema/{{ item }}"
+    mode: "0644"
+  become: yes
+  loop:
+    - certinfo.ldif
+  tags:
+    - openldap
+
+- name: Create Backend schemas
+  template:
+    src: backend.ldif.j2
+    dest: "/etc/ldap/schema/backend_{{ item.name }}.ldif"
+    mode: "0644"
+  become: yes
+  loop: "{{ openldap_backends }}"
+  tags:
+    - openldap
+
+- name: Create module ldif
+  template:
+    src: module.ldif.j2
+    dest: "/etc/ldap/schema/module_{{ item }}.ldif"
+    mode: "0644"
+  become: yes
+  loop: "{{ openldap_modules }}"
+  tags:
+    - openldap
+
+# Add schema
+# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/{{ item }}.ldif
+# loop:
+  # - certinfo
+  # - core
+  # - cosine
+  # - inetorgperson
+  # - misc
+  # - nis
+  # - module_rwm
+  # - gnupg-ldap-init
+  # - gnupg-ldap-schema
+

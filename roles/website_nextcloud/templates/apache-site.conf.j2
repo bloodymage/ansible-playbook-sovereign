@@ -1,0 +1,30 @@
+<VirtualHost *:80>
+	ServerName {{ item.name }}
+	Redirect / https://{{ item.name }}/
+</VirtualHost>
+
+<VirtualHost *:443>
+	ServerName {{ item.name }}
+	ServerAdmin webmaster@{{ item.name }}
+
+	DocumentRoot /srv/www/{{ item.name }}
+
+  <Directory /srv/www/{{ item.name }}>
+    Require all granted
+    AllowOverride All
+    Options FollowSymLinks MultiViews
+    <IfModule mod_headers.c>
+      Header always set Strict-Transport-Security "max-age={{ nextcloud_hsts_max_age }}; includeSubDomains"
+    </IfModule>
+    <IfModule mod_dav.c>
+      Dav off
+    </IfModule>
+  </Directory>
+
+  SSLEngine on
+  SSLCertificateFile "{{ item.ssl_certificate_file }}"
+  SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
+
+  ErrorLog ${APACHE_LOG_DIR}/{{ item.name }}/error.log
+  CustomLog ${APACHE_LOG_DIR}/{{ item.name }}/access.log combined
+</VirtualHost>

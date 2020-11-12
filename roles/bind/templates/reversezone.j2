@@ -1,0 +1,33 @@
+; ==================================================================================================
+;
+; BIND data file for {{ reverse_zone }}
+;
+; {{ ansible_managed }}
+;
+; ==================================================================================================
+$TTL	{{ zone_ttl }}
+@    IN      	SOA	{{ zone_soa }}. {{ zone_admin }}. (
+{{ zone_serial_number.ljust(20) }}  ; Serial
+{{ zone_refresh.ljust(20) }}  ; Refresh
+{{ zone_retry.ljust(20) }}  ; Retry
+{{ zone_expire.ljust(20) }}  ; Expire
+{{ zone_negative_cache_ttl.ljust(20) }}  ; Negative Cache TTL
+)  
+
+{% if reverse_zone == "10.0" -%}
+{% for ns in zone_dnsservers -%}
+  {{ reverse_zone.split('.')[1] }}.{{ reverse_zone.split('.')[0] }}.in-addr.arpa.  {{ 'IN NS'.ljust(6) }}{{ ns.name }}.{{ ansible_domain }}.
+{% endfor %}
+{% else %}
+{% for ns in zone_dnsservers -%}
+  {{ reverse_zone.split('.')[1] }}.{{ reverse_zone.split('.')[0] }}.in-addr.arpa.  {{ 'IN NS'.ljust(6) }}{{ ns.name }}.{{ zone }}.
+{% endfor %}
+{% endif %}
+
+{% for ns in zone_dnsservers -%}
+{% if reverse_zone == "10.3" -%}
+  {{ ns.address_ipv4.split('.')[3] }}.{{ ns.address_ipv4.split('.')[2] }}.{{ ns.address_ipv4.split('.')[1] }}.{{ ns.address_ipv4.split('.')[0] }}      IN PTR  {{ ns.name }}.{{ zone }}.
+{% else -%}
+  {{ ns.address_ipv4.split('.')[3] }}.{{ ns.address_ipv4.split('.')[2] }}.{{ ns.address_ipv4.split('.')[1] }}.{{ ns.address_ipv4.split('.')[0] }}      IN PTR  {{ ns.name }}.{{ ansible_domain }}.
+{% endif %}
+{% endfor %}

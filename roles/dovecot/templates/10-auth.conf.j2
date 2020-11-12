@@ -1,0 +1,36 @@
+# {{ ansible_managed }}
+
+auth_gssapi_hostname = "$ALL"
+auth_krb5_keytab = "/etc/dovecot/dovecot.keytab"
+
+{% if dovecot_auth_use_winbind is defined -%}
+  auth_use_winbind = {{ dovecot_auth_use_winbind }}
+{% endif %}
+{% if dovecot_auth_use_winbind is defined -%}
+  auth_winbind_helper_path = {{ dovecot_winbind_helper_path }} 
+{% endif %}
+#auth_failure_delay = 2 secs
+#auth_ssl_require_client_cert = no
+#auth_ssl_username_from_cert = no
+
+auth_mechanisms =
+{%- for mechanism in dovecot_auth_mechanisms -%}
+  {{ " " }}{{ mechanism }}
+{%- endfor %}
+
+
+#!include auth-deny.conf.ext
+#!include auth-master.conf.ext
+
+!include auth-system.conf.ext
+{% if "xoauth2" in dovecot_auth_mechanisms %}
+  !include auth-oauth2.conf.ext
+{% endif %}
+{% if "sql" in dovecot_auth_mechanisms %}
+  !include auth-sql.conf.ext
+{% endif %}
+#!include auth-ldap.conf.ext
+#!include auth-passwdfile.conf.ext
+#!include auth-checkpassword.conf.ext
+#!include auth-vpopmail.conf.ext
+#!include auth-static.conf.ext

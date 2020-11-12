@@ -1,0 +1,38 @@
+dn: CN=sshPublicKey,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+changetype: add
+objectClass: top
+objectClass: attributeSchema
+attributeID: 1.3.6.1.4.1.24552.500.1.1.1.13
+cn: sshPublicKey
+name: sshPublicKey
+lDAPDisplayName: sshPublicKey
+description: MANDATORY: OpenSSH Public key
+attributeSyntax: 2.5.5.10
+oMSyntax: 4
+isSingleValued: FALSE
+searchFlags: 8
+objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+schemaIDGUID:: cjDAZyEXzU+/akI0EGDW+g==
+
+dn: CN=ldapPublicKey,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+changetype: add
+objectClass: top
+objectClass: classSchema
+governsID: 1.3.6.1.4.1.24552.500.1.1.2.0
+cn: ldapPublicKey
+name: ldapPublicKey
+description: MANDATORY: OpenSSH LPK objectclass
+lDAPDisplayName: ldapPublicKey
+subClassOf: top
+objectClassCategory: 3
+objectCategory: CN=Class-Schema,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+defaultObjectCategory: CN=ldapPublicKey,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+mayContain: sshPublicKey
+schemaIDGUID:: +8nFQ43rpkWTOgbCCcSkqA==
+
+dn: CN=User,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+changetype: modify
+replace: auxiliaryClass
+auxiliaryClass: ldapPublicKey
+auxiliaryClass: posixAccount
+auxiliaryClass: shadowAccount

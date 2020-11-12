@@ -1,0 +1,55 @@
+---
+# defaults file for acmeca_host_certs
+packages:
+  - python3-cryptography
+
+letsencrypt_dir: /etc/letsencrypt
+letsencrypt_keys_dir: "{{ letsencrypt_dir }}/keys"
+letsencrypt_csr_dir: "{{ letsencrypt_dir }}/csr"
+letsencrypt_certs_dir: "{{ letsencrypt_dir }}/certs"
+letsencrypt_account_dir: "{{ letsencrypt_dir }}/accounts"
+letsencrypt_archive_directory: "{{ letsencrypt_dir }}/archive"
+letsencrypt_live_directory: "{{ letsencrypt_dir }}/live"
+letsencrypt_staging_directory: "acme-staging.api.letsencrypt.org/directory"
+letsencrypt_production_directory: "acme-v02.api.letsencrypt.org/directory"
+
+letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
+letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
+
+buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
+buypass_production_directory: "https://api.buypass.com/acme/directory"
+
+acmeca_staging: no
+
+acmeca_dir: "{{ letsencrypt_dir }}"
+acmeca_keys_dir: "{{ letsencrypt_keys_dir }}"
+acmeca_csr_dir: "{{ letsencrypt_csr_dir }}"
+acmeca_archive_dir: "{{ letsencrypt_archive_directory }}"
+acmeca_live_dir: "{{ letsencrypt_live_directory }}"
+
+acmeca_directory: "{{ letsencrypt_production_directory }}"
+acmeca_directory_url: "{{ letsencrypt_production_url }}"
+acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_production_directory }}"
+
+acmeca_country_code: "US"
+acmeca_domains: "{{ inventory_hostname }}"
+acmeca_challenge_type: "http-01"
+
+acmeca_version: 2
+acmeca_key_usage:
+  - digitalSignature
+  - keyAgreement
+acmeca_extended_key_usage:
+  - serverAuth
+  - clientAuth
+
+acmeca_account_email: "account@{{ inventory_hostname }}"
+acmeca_account_key: "account_at_{{ inventory_hostname }}.key"
+acmeca_account_key_path: "{{ acmeca_account_dir }}/{{ acmeca_account_key }}"
+acmeca_account_key_type: RSA
+acmeca_account_key_size: 4096
+
+acmeca_certificate_key_type: RSA
+acmeca_certificate_key_size: 4096
+
+acme_certificate_INTERNAL_force_regenerate_private_key: no

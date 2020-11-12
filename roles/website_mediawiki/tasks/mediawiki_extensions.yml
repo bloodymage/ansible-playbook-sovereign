@@ -1,0 +1,25 @@
+- name: "Get list of extensions to install"
+  set_fact:
+    mediawiki_extensions_install: "{{ mediawiki_extensions | difference(mediawiki_extensions_defaults) }}"
+  tags:
+    - mediawiki
+    - websites
+
+- name: "Install Extensions for {{ host.name }}"
+  git:
+    repo: "https://gerrit.wikimedia.org/r/mediawiki/extensions/{{ item.name }}"
+    dest: "/srv/www/{{ host.name }}/w/extensions/{{ item.name }}"
+    version: "{{ item.version | default(mediawiki_version) }}"
+    depth: 1
+    force: true
+  loop: "{{ mediawiki_extensions_install }}"
+  become: yes
+  become_user: www-data
+  when:
+    - host.content is defined
+    - host.content == "mediawiki"
+    - host.enabled is defined
+    - host.enabled 
+  tags:
+    - mediawiki
+    - websites

@@ -1,0 +1,3 @@
+{% if ssh_ca_host_pubkey is defined -%}
+  @cert-authority *.{{ ssh_ca_qdn }} ssh-{{ ssh_ca_host_key_type }} {{ ssh_ca_host_pubkey }} {{ sovereign_domain }} Host CA
+{% endif %}

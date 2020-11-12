@@ -1,0 +1,129 @@
+---
+# ======================================================================
+#
+# Task "Install Common Apps"
+#
+# Installs a set of common apps for all systems on the network
+#
+# ======================================================================
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - apache
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - apache
+    - install-packages
+
+- name: http service state
+  service:
+    name: apache2
+    state: started
+    enabled: yes
+  become: yes
+  tags:
+    - apache
+
+- name: "Enable Apache modules"
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  loop:
+    - ssl
+  notify: reload apache
+  tags:
+    - apache
+
+# ======================================================================
+#
+#
+#
+# ======================================================================
+# - name: Configure SELinux to allow httpd to connect to remote database
+#   seboolean:
+#     name: httpd_can_network_connect_db
+#     state: true
+#     persistent: yes
+#   when: sestatus.rc != 0
+
+- debug:
+    msg: "{{ hosts }}"
+    verbosity: 2
+  tags:
+    - apache
+
+- name: Create file directories for each site
+  file:
+    path: "/srv/www/{{ item.name }}"
+    owner: www-data
+    group: www-data
+    state: directory
+    mode: "0755"
+  become: yes
+  loop:
+    "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.name is defined
+  tags:
+    - apache
+    - websites
+
+# ======================================================================
+#
+#
+#
+# ======================================================================
+- name: Ensure file directories have proper permissions
+  file:
+    path: "/srv/www"
+    owner: www-data
+    group: www-data
+    state: directory
+    recurse: yes
+    mode: "0755"
+  become: yes
+  loop:
+    "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.enable is defined
+    - item.enabled
+  tags:
+    - apache
+    - websites
+
+- name: Create log directories for each site
+  file:
+    path: "/var/log/apache2/{{ item.name }}"
+    owner: root
+    group: root
+    state: directory
+    mode: "0770"
+  become: yes
+  loop:
+    "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.enable is defined
+    - item.enabled
+  tags:
+    - apache
+    - websites

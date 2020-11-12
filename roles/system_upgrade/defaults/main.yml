@@ -1,0 +1,45 @@
+---
+deb_src: false
+
+packages:
+  - aptitude
+  - avahi-daemon
+  - avahi-utils
+  - bash-completion
+  - curl
+  - expect
+  - git
+  - global
+  - gnupg
+  - ispell
+  - keychain
+  - make
+  - man
+  - members
+  - ntp
+  - pandoc
+  - pass
+  - python-cryptography
+  - python-openssl
+  - python-pexpect
+  - python-setuptools
+  - python3-cryptography
+  - python3-pexpect
+  - python3-pip
+  - python3-setuptools
+  - rename
+  - rsync
+  - screen
+  - sudo
+  - trash-cli
+
+pip_packages:
+  - cryptography
+
+ipv4_class: "{{ ansible_host.split('.')[0] }}"
+
+control_node_packages:
+  - nmap
+
+system_update_distribution_release: "{{ ansible_distribution_release }}"
+raspberrypi_distribution_release: "{{ ansible_distribution_release }}"

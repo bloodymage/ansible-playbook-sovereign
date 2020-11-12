@@ -1,0 +1,38 @@
+#!/bin/bash
+
+LOWUSE=50
+MEDUSE=75
+HIGHUSE=90
+ALERTUSE=95
+
+#LOWTEMP=
+#MEDTEMP=
+#HIGHTEMP=
+#ALERTTEMP=
+
+function loadave () {
+    echo $(cat /proc/loadavg | awk '{print $1}')
+}
+
+function loadper () {
+    local LOAD=$(loadave)
+    local CORES=$(grep 'model name' /proc/cpuinfo | wc -l)
+    local LOADPER=$(echo ${LOAD} ${CORES} | awk '{print $1 / $2 * 100}' | cut -d. -f1)
+    echo -ne "${LOADPER}"
+}
+
+function loadcolor () {
+    local LOADCOLOR=""
+    local LOADPER=$(loadper)
+    if [ ${LOADPER} -gt ${HIGHUSE} ]; then 
+	LOADCOLOR="${ALERT}"
+    elif [ ${LOADPER} -gt ${MEDUSE} ]; then 
+	LOADCOLOR="${RED}"
+    elif [ ${LOADPER} -gt ${LOWUSE} ]; then 
+	LOADCOLOR="${BRED}"
+    else
+	LOADCOLOR="${BLUE}"
+    fi
+    echo -ne "$LOADCOLOR"
+}
+

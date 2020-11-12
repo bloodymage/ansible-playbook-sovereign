@@ -1,0 +1,10 @@
+---
+# tasks file for mariadb
+- include: debian_family.yml
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_network_os is undefined
+    - inventory_hostname != 'localhost'
+  tags:
+    - basic_config
+    - upgrade

@@ -1,0 +1,29 @@
+{
+  "{{ ansible_domain }}": {
+{% for item in mediawiki_json_config %}
+  {% if item.options is defined %}
+    "{{ item.name }}": {
+    {% for option in item.options %}
+      {% if option.value_string is defined %}
+        "{{ option.name }}": "{{ option.value_string }}"{{ "," if not loop.last else "" }}
+      {% elif option.value_list is defined %}
+        "{{ option.name }}": [ 
+        {%- for item in option.value_list -%}
+          {{ " " }}"{{ item }}"{{ "," if not loop.last else " " }}
+        {%- endfor -%}
+        ]{{ "," if not loop.last else "" }}
+      {% elif option.value_dictionary is defined -%}
+        "{{ option.name }}": {
+        {% for suboption in option.value_dictionary -%}
+          "{{ suboption.name }}": "{{ suboption.value }}"{{ "," if not loop.last else "" }}
+        {% endfor %}
+        }{{ "," if not loop.last else "" }}
+      {% endif %}
+    {% endfor %}
+    }{{ "," if not loop.last else "" }}
+  {% else %}
+    "{{ item.name }}": []{{ "," if not loop.last else "" }}
+  {% endif %}
+{% endfor %}
+  }
+}

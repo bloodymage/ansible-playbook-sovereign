@@ -1,0 +1,97 @@
+---
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - sshca
+
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - sshca
+        - install-packages
+
+# ======================================================================
+#
+# Create a CA key directory
+#  
+#
+# ======================================================================
+- name: Create CA key directory
+  file:
+    path: "{{ ssh_ca_key_directory }}"
+    state: directory
+    mode: '0700'
+  tags:
+    - cert-auth
+    - sshca
+
+# ======================================================================
+#
+# Generate Host CA key
+#
+# Notes:
+#
+# 1. Looked at openssh_keypair module
+#    The module does not allow for using passwords
+#
+# 2. "echo -e 'n' |" is added because ssh-keygen will ask to overwrite
+#    the file if it already exists.  'n' for No 'y' for Yes
+#
+# ======================================================================
+# - name: Generate Host CA keys
+#   openssh_keypair:
+#     path: "{{ ssh_ca_key_directory }}/{{ ssh_ca_host_keyfile }}"
+#     type: "{{ ssh_ca_host_key_type }}"
+#     comment: "{{ ssh_ca_host_key_comment }}"
+
+- name: Generate Host CA keys
+  no_log: true
+  command: ssh-keygen -t "{{ ssh_ca_host_key_type }}"
+             -f "{{ ssh_ca_key_directory }}/{{ ssh_ca_host_keyfile }}"
+             -C "{{ ssh_ca_host_key_comment }}"
+             -N "{{ ssh_ca_host_key_password }}"
+  args:
+    creates: "{{ ssh_ca_key_directory }}/{{ ssh_ca_host_keyfile }}"
+  tags:
+    - cert-auth
+    - sshca
+
+# ======================================================================
+#
+# Generate User CA key
+#
+# ======================================================================
+- name: Generate User CA key
+  no_log: true
+  command: ssh-keygen -t "{{ ssh_ca_user_key_type }}"
+             -f "{{ ssh_ca_key_directory }}/{{ ssh_ca_user_keyfile }}"
+             -C "{{ ssh_ca_user_key_comment }}"
+             -N "{{ ssh_ca_user_key_password }}"
+  args:
+    creates: "{{ ssh_ca_key_directory }}/{{ ssh_ca_user_keyfile }}"
+  tags:
+    - cert-auth
+    - sshca

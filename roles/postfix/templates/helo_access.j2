@@ -1,0 +1,5 @@
+{{ ansible_domain }}  REJECT
+{{ ansible_domain.split('.')[1:] | join('.') }}  REJECT
+mail.{{ ansible_domain }} REJECT
+{{ ansible_fqdn }}  REJECT
+mail.{{ ansible_domain.split('.')[1:] | join('.') }}  REJECT

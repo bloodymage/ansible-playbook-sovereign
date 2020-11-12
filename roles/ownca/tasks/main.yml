@@ -1,0 +1,403 @@
+---
+# This playbook contains common plays that will be run on all nodes.
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - ownca
+    - ownca-all
+
+- name: "Install packages"
+  package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+  tags:
+    - ownca
+    - ownca-all
+    - install-packages
+
+# ==================================================================================================
+#
+# Tasks: Create Directories
+#
+# 
+#
+# ==================================================================================================
+- name: Create PKI Directory
+  file:
+    path: '{{ ownca_ca_directory }}/{{ item }}'
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0700'
+  loop:
+    - private
+    - certs
+    - crl
+    - csr
+    - newcerts
+    - db
+  delegate_to: localhost
+  run_once: true
+  tags:
+    - ownca
+    - ownca-all
+
+# ==================================================================================================
+#
+# Create Database
+#
+# ==================================================================================================
+# - name: Create an index file
+#   file:
+#     path: '{{ ownca_ca_directory }}/index.txt'
+#     owner: root
+#     group: root
+#     mode: '0600'
+#   delegate_to: localhost
+#   run_once: true
+
+- name: Print Variable
+  debug:
+    msg:
+      - "{{ ownca_certificate_authorities }}"
+      - "{{ sovereign_org_unit_name }}"
+    verbosity: 2
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-all
+
+- name: Create database
+  copy:
+    src: "/dev/null"
+    dest: "{{ ownca_ca_directory }}/db/{{ sovereign_org_name }}-{{ item.name }}-ca.db"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0600'
+    force: no
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-all
+
+- name: Create a serial file
+  template:
+    src: "{{ role_path }}/templates/serial.j2"
+    dest: "{{ ownca_ca_directory }}/db/{{ sovereign_org_name }}-{{ item.name }}-ca.cert.srl"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+    force: no
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-all
+
+- name: Create crl serial file
+  template:
+    src: "{{ role_path }}/templates/serial.j2"
+    dest: "{{ ownca_ca_directory }}/db/{{ sovereign_org_name }}-{{ item.name }}-ca.crl.srl"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0600"
+    force: no
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-all
+
+# ==================================================================================================
+#
+# Generate Passwords if they don't exist
+#
+# ==================================================================================================
+- name: "Ensure we have a password for the Root CA"
+  ansible.builtin.set_fact:
+    ownca_root_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ sovereign_org_name }}_common/ownca/ownca_root_password"
+  when:
+    - ownca_root_password == "password"
+  tags:
+    - ownca
+
+- name: "Ensure we have a password for the Intermediate CA"
+  ansible.builtin.set_fact:
+    ownca_intermediate_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_intermediate_password"
+  when:
+    - ownca_intermediate_password == "password"
+  tags:
+    - ownca
+
+- name: "Ensure we have a password for the Component Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_component_password"
+  when:
+    - ownca_component_password == "password"
+  tags:
+    - ownca
+
+- name: "Ensure we have a password for the Identity Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_identity_password"
+  when:
+    - ownca_identity_password == "password"
+  tags:
+    - ownca
+
+- name: "Ensure we have a password for the Code Sign Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_codesign_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_codesign_password"
+  when:
+    - ownca_codesign_password == "password"
+  tags:
+    - ownca
+
+# ==================================================================================================
+#
+# Task: Generate CA Private Key
+#
+# ==================================================================================================
+- name: Generate CA Private Key
+  openssl_privatekey:
+    path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
+    passphrase: "{{ item.password }}"
+    type: "{{ ownca_type }}"
+    cipher: "auto"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0400"
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-all
+
+- name: Generate Certificate Authority Certificate Signing Request (CSR)
+  openssl_csr:
+    path: "{{ ownca_ca_directory }}/csr/{{ sovereign_org_name }}-{{ item.name }}-ca.csr"
+    privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
+    privatekey_passphrase: "{{ item.password }}"
+    common_name: "{{ item.common_name }}"
+    country_name: "{{ item.country_name | default(omit) }}"
+    email_address: "{{ item.email_address | default(omit) }}"
+    organization_name: "{{ item.organization_name | default(sovereign_org_name | title ) }}"
+    organizational_unit_name: "{{ item.organizational_unit_name | default(item.common_name) }}"
+    state_or_province_name: "{{ item.state_or_province_name | default(omit) }}"
+    key_usage: "{{ item.keyusage }}"
+    key_usage_critical: "{{ item.keyusage_critical | default('no')}}"
+    basic_constraints: "{{ item.basic_constraints }}"
+    basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
+    create_subject_key_identifier: yes
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-all
+
+- name: Generate Selfsigned Certificate
+  openssl_certificate:
+    path: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ item.name }}-ca.crt"
+    privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
+    privatekey_passphrase: "{{ item.password }}"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ sovereign_org_name }}-{{ item.name }}-ca.csr"
+    provider: "{{ item.provider }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  when:
+    - item.provider == "selfsigned"
+  tags:
+    - ownca
+    - ownca-all
+
+- name: Generate OwnCA Signed Certificate
+  openssl_certificate:
+    path: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ item.name }}-ca.crt"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ sovereign_org_name }}-{{ item.name }}-ca.csr"
+    ownca_path: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ item.ownca }}-ca.crt"
+    ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.ownca }}-ca.key"
+    ownca_privatekey_passphrase: "{{ item.ownca_privatekey_passphrase }}"
+    provider: "{{ item.provider }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  when:
+    - item.provider == "ownca"
+  tags:
+    - ownca
+    - ownca-all
+
+# ==================================================================================================
+#
+# Create PEM Bundles
+#
+# ==================================================================================================
+- name: Find root certificate
+  community.crypto.certificate_complete_chain:
+    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-{{ item }}-ca.crt') }}"
+    intermediate_certificates:
+      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.crt"
+    root_certificates:
+      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-root-ca.crt"
+  loop: "{{ ownca_issuing_authorities }}"
+  register: parent_cert_authorities
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Cert Chain (Name, Complete Chain)
+  debug:
+    msg:
+      - "{{ item.item }}"
+      - "{{ item.complete_chain }}"
+      - "BREAK"
+      - ""
+    verbosity: 1
+  loop: "{{ parent_cert_authorities.results }}"
+  delegate_to: localhost
+  when:
+    - item.chain is defined
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Print Cert Authorities Results (Item)
+  debug:
+    msg:
+      - "{{ item }}"
+    verbosity: 2
+  loop: "{{ parent_cert_authorities.results }}"
+  when:
+    - parent_cert_authorities is defined
+    - parent_cert_authorities.results is defined
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Print Cert Authorities Results
+  debug:
+    msg:
+      - "{{ parent_cert_authorities.results }}"
+    verbosity: 3
+  when:
+    - parent_cert_authorities is defined
+    - parent_cert_authorities.results is defined
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Print Cert Authorities (Full)
+  debug:
+    msg:
+      - "{{ parent_cert_authorities }}"
+    verbosity: 4
+  when:
+    - parent_cert_authorities is defined
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Find root certificate
+  community.crypto.certificate_complete_chain:
+    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.crt') }}"
+    root_certificates:
+      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-root-ca.crt"
+  register: root_cert_authorities
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Cert Chain (Name, Ownca, Chain, Complete Chain)
+  debug:
+    msg:
+      - "{{ root_cert_authorities.chain }}"
+      - "{{ root_cert_authorities.complete_chain }}"
+      - "{{ root_cert_authorities.root }}"
+    verbosity: 1
+  delegate_to: localhost
+  when:
+    - parent_cert_authorities.chain is defined
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Print Cert Authorities (Full)
+  debug:
+    msg:
+      - "{{ root_cert_authorities }}"
+    verbosity: 4
+  when:
+    - parent_cert_authorities is defined
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Write complete chain to disk
+  copy:
+    dest: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-{{ item.item }}-ca-chain.crt"
+    content: "{{ ''.join(item.complete_chain) }}"
+  loop: "{{ parent_cert_authorities.results }}"
+  when:
+    - item.complete_chain is defined
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all
+
+- name: Write root chain (intermediates and root) to disk
+  copy:
+    dest: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca-chain.crt"
+    content: "{{ ''.join(root_cert_authorities.complete_chain) }}"
+  when:
+    - root_cert_authorities.complete_chain is defined
+  tags:
+    - ownca
+    - ownca-bundles
+    - ownca-all

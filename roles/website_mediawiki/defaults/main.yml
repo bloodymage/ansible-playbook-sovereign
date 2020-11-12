@@ -1,0 +1,129 @@
+---
+# defaults file for website_mediawiki
+mediawiki_version: REL1_34
+mediawiki_lts_version: REL1_31
+lua_version: 5.1
+
+packages:
+  - composer
+  - "lua{{ lua_version }}"
+  - libapache2-mod-auth-kerb
+
+mediawiki_apache_ldap_modules:
+  - authnz_ldap
+
+mediawiki_apache_kerberos_ad_sso_modules:
+  - auth_ldap
+  - auth_krb5
+
+mediawiki_apache_modules: "{{ mediawiki_apache_ldap_modules + mediawiki_apache_kerberos_ad_sso_modules }}"
+
+mediawiki_enable_debugging: no
+mediawiki_debug_modules: []
+
+mediawiki_extensions_defaults:
+  - name: 'Cite'
+  - name: 'CiteThisPage'
+  - name: 'CodeEditor'
+  - name: 'ConfirmEdit'
+  - name: 'DynamicSidebar'
+  - name: 'Gadgets'
+  - name: 'ImageMap'
+  - name: 'InputBox'
+  - name: 'Interwiki'
+  - name: 'LocalisationUpdate'
+  - name: 'MultimediaViewer'
+  - name: 'Nuke'
+  - name: 'ParserFunctions'
+  - name: 'PdfHandler'
+  - name: 'Poem'
+  - name: 'Renameuser'
+  - name: 'SpamBlacklist'
+  - name: 'SyntaxHighlight_GeSHi'
+  - name: 'TitleBlacklist'
+  - name: 'WikiEditor'
+
+mediawiki_extensions_ldap:
+  - name: PluggableAuth
+  - name: LDAPProvider
+    version: "{{ mediawiki_lts_version }}"
+  - name: LDAPAuthentication2
+    version: "{{ mediawiki_lts_version }}"
+  - name: LDAPUserInfo
+    version: "{{ mediawiki_lts_version }}"
+  - name: LDAPGroups
+    version: "{{ mediawiki_lts_version }}"
+  - name: LDAPAuthorization
+    version: "{{ mediawiki_lts_version }}"
+
+mediawiki_extensions: []
+
+mediawiki_skins_defaults:
+  - Timeless
+  - MonoBook
+  - Vector
+
+mediawiki_cookie_domain: "{{ ansible_domain }}"
+
+mediawiki_default_skin: Timeless
+mediawiki_skins: []
+
+mediawiki_kerberos_ad_sso: no
+
+mediawiki_ldap_config: no
+mediawiki_ldap_authenticator: "mediawiki"
+mediawiki_ldap_password: "password"
+mediawiki_ldap_basedn: "dc={{ ansible_domain.split('.')[0] }},dc={{ ansible_domain.split('.')[1] }},dc={{ ansible_domain.split('.')[2] }}"
+mediawiki_ldap_userdn: "cn=users,dc={{ ansible_domain.split('.')[0] }},dc={{ ansible_domain.split('.')[1] }},dc={{ ansible_domain.split('.')[2] }}"
+mediawiki_ldap_groupdn: "cn=users,dc={{ ansible_domain.split('.')[0] }},dc={{ ansible_domain.split('.')[1] }},dc={{ ansible_domain.split('.')[2] }}"
+mediawiki_json_config:
+  - name: connection
+    options:
+      - name: server
+        value_string: "dc.{{ ansible_domain }}"
+      - name: port
+        value_string: 389
+      - name: user
+        value_string: "cn={{ mediawiki_ldap_authenticator }},cn=users,{{ mediawiki_ldap_basedn }}"
+      - name: pass
+        value_string: "{{ mediawiki_ldap_password }}"
+      - name: "enctype"
+        value_string: "tls"
+      - name: "options"
+        value_dictionary:
+          - name: "LDAP_OPT_DEREF"
+            value: 1
+      - name: basedn
+        value_string: "{{ mediawiki_ldap_basedn }}"
+      - name: userbasedn
+        value_string: "{{ mediawiki_ldap_userdn }}"
+      - name: groupbasedn
+        value_string: "{{ mediawiki_ldap_groupdn }}"
+      - name: searchattribute
+        value_string: "samaccountname"
+      - name: "usernameattribute"
+        value_string: "samaccountname"
+      - name: "realnameattribute"
+        value_string: "cn" 
+      - name: "emailattribute"
+        value_string: "mail" 
+      - name: "grouprequest"
+        value_string: "MediaWiki\\\\Extension\\\\LDAPProvider\\\\UserGroupsRequest\\\\UserMemberOf::factory"
+      - name: "presearchusernamemodifiers"
+        value_list:
+          - "spacestounderscores"
+          - "lowercase"
+  - name: userinfo
+  - name: authorization
+  - name: groupsync
+    options:
+      - name: "mapping"
+        value_dictionary:
+          - name: "engineering"
+            value: "cn=EngineeringCoreTeam,{{ mediawiki_ldap_groupdn }}"
+          - name: "bureaucrat"
+            value: "cn=Mediawiki Admin,{{ mediawiki_ldap_groupdn }}"
+          - name: "interface-admin"
+            value: "cn=Mediawiki Admin,{{ mediawiki_ldap_groupdn }}"
+          - name: "sysop"
+            value: "cn=Mediawiki Admin,{{ mediawiki_ldap_groupdn }}"

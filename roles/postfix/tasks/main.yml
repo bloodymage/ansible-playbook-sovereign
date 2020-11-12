@@ -1,0 +1,114 @@
+---
+# tasks file for mail-server
+- name: Source specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family | lower }}_family.yml"
+  tags:
+    - bind
+    - pretask
+
+- name: "Install Common Apps"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - install-packages
+
+- name: Install config files
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop:
+    - krb5.conf
+    - mailname
+
+- name: Install Aliases
+  template:
+    src: "aliases.j2"
+    dest: "/etc/aliases"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: update aliases
+
+- name: "Install configuration files (Perms=644)"
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop:
+    - dynamicmaps.cf
+    - main.cf
+    - makedefs.out
+    - master.cf
+  notify: restart postfix
+  tags:
+    - postfix
+
+- name: "Install configuration files (Perms=644)"
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop:
+    - ad_sender_login_maps.cf
+    - ad_virtual_group_maps.cf
+    - ad_virtual_mailbox_maps.cf
+    - ad_virtual_user_aliases_maps.cf
+    - ad_virtual_user_maps.cf
+  when:
+    - inventory_hostname in groups['samba_domain_members']
+    - mail_user_password is defined
+  notify: restart postfix
+  tags:
+    - postfix
+
+- name: "Install Configuration files (postmap update required)"
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: 644
+  become: yes
+  loop:
+    - canonical
+    - client_access
+    - helo_access
+    - sasl_passwd
+    - sender_relay
+    - transport
+    - virtual
+    - virtual-mailbox-domains
+    - virtual-mailbox-users
+  notify: map {{ item }}
+  tags:
+    - postfix
+
+- name: Create configuration files (Perms=600)
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: 0600
+  become: yes
+  loop:
+    - sasl_passwd
+  notify: restart postfix
+  tags:
+    - postfix

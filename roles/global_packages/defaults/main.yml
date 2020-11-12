@@ -1,0 +1,20 @@
+---
+packages:
+  - aptitude
+  - bash-completion
+  - curl
+  - git
+  - global
+  - ispell
+  - keychain
+  - make
+  - man
+  - members
+  - rename
+  - rsync
+  - screen
+  - trash-cli
+
+
+pip_packages:
+  - cryptography

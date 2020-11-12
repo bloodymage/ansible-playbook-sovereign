@@ -1,0 +1,132 @@
+---
+# ==================================================================================================
+#
+# This playbook contains common plays that will be run on RouterOS nodes.
+#
+# References:
+# - https://tools.ietf.org/html/draft-moskowitz-eddsa-pki-00
+# - https://pki-tutorial.readthedocs.io/en/latest/expert/index.html
+#
+# CAs:
+# - Root:
+#   - Network:
+#     - Identity:
+#     - Encryption:
+#     - Component:
+#     - Code Signing:
+#   - Network:
+#     - Identity:
+#     - Encryption:
+#     - Component:
+#     - Code Signing:
+#   ...
+#
+# ==================================================================================================
+
+# ==================================================================================================
+#
+# Create Host Key
+#
+# ==================================================================================================
+# - name: Generate Host Private Key
+#   openssl_privatekey:
+#     path: '{{ ca_directory }}/private/{{ ansible_hostname }}.key'
+#     type: '{{ ca_type }}'
+#     size: 4096
+#     mode: '0600'
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     force: no
+#   delegate_to: localhost
+
+# # ======================================================================
+# #
+# # Generate Host CSR
+# #
+# # ======================================================================
+# - name: Generate Host CSR
+#   openssl_csr:
+#     path: "{{ ca_directory }}/csr/{{ ansible_hostname }}.csr"
+#     mode: '0644'
+#     owner: "{{ ansible_user }}"
+#     group: "{{ ansible_user }}"
+#     country_name: "{{ loc_country_code }}"
+#     state_or_province_name: "{{ loc_st }}"
+#     locality_name: "{{ loc_city }}"
+#     organization_name: "{{ ca_org_name }}"
+#     organizational_unit_name: "{{ ca_org_unit_name }}"
+#     common_name: "{{ ca_org_name }} {{ ansible_fqdn }}"
+#     key_usage: "digitalSignature,keyEncipherment"
+#     key_usage_critical: yes
+#     extended_key_usage: "serverAuth,clientAuth"
+#     privatekey_path: "{{ ca_directory }}/private/{{ ansible_hostname }}.key"
+#     subject_alt_name: "{{ hosts.name | map('regex_replace', '^', 'DNS:') | list }}"
+#   delegate_to: localhost
+
+# # ======================================================================
+# #
+# # Generate Host Cert
+# #
+# # ======================================================================
+# - name: Generate Host Cert
+#   shell:
+#     "{{ item }}"
+#   args:
+#     chdir: "{{ ca_directory }}"
+#   with_items:
+#     - "openssl ca -batch -config {{ role_path }}/files/{{ ansible_domain.split('.')[0] }}-component-ca.conf -in {{ ca_directory }}/csr/{{ ansible_hostname }}.csr -out {{ ca_directory }}/certs/{{ ansible_hostname }}.crt -extensions server_ext -keyfile {{ ca_directory }}/private/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-component-ca.key -keyform pem -key {{ssl_ca_component_password }}"
+#   delegate_to: localhost
+#   #when: _ca_missing_cert is undefined or ca_force_create == true
+
+
+# # ======================================================================
+# #
+# # Temporarily allow ftp access to upload cert
+# #
+# # ======================================================================
+# - name: Allow access to ftp
+#   routeros_command:
+#     commands:
+#       - /ip service enable ftp
+
+
+# # ======================================================================
+# #
+# # Tasks:
+# #  
+# #
+# # ======================================================================
+# - name: Copy certificates back to server.
+#   shell:
+#     "{{ item }}"
+#   with_items:
+#     - "curl -T {{ ca_directory }}/certs/{{ ansible_hostname }}.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+#     - "curl -T {{ ca_directory }}/private/{{ ansible_hostname }}.key ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}" 
+#     - "curl -T {{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-root-ca.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+#     - "curl -T {{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+#     - "curl -T {{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-component-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+
+# # ======================================================================
+# #
+# # Disable ftp access
+# #
+# # ======================================================================
+# - name: Disable access to ftp
+#   routeros_command:
+#     commands:
+#       - /ip service disable ftp
+
+# # ======================================================================
+# #
+# # Temporarily allow ftp access to upload cert
+# #
+# # ======================================================================
+# - name: Allow Import Certs
+#   routeros_command:
+#     commands:
+#       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_hostname }}.crt"
+#       - "/certificate import file-name={{ ca_directory }}/private/{{ ansible_hostname }}.key"
+#       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-root-ca.crt"
+#       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-ca-chain.crt"
+#       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-component-ca-chain.crt"
+

@@ -1,0 +1,9 @@
+---
+# defaults file for mariadb
+packages:
+  - mariadb-server
+  - mariadb-client
+  - python3-mysqldb
+
+mysql_datadir: /var/lib/mysql
+

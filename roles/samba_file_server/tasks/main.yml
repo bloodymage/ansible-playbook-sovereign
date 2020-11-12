@@ -1,0 +1,245 @@
+---
+# tasks file for samba-domain-member
+# ==================================================================================================
+#
+# Ensure samba is not currently running on the host system.
+#
+# Steps:
+#   1. Identify the processes
+#
+# Ref: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
+# ==================================================================================================
+- name: Get running processes
+  shell: >
+    ps -ef |
+    grep -v grep |
+    egrep 'samba|smbd|nmbd|winbindd' |
+    awk '{print $2}'
+  register: running_processes
+  become: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain
+  tags:
+    - samba
+    - samba-domain-members
+
+- name: Kill running processes
+  shell: "kill {{ item }}"
+  loop: "{{ running_processes.stdout_lines }}"
+  become: yes
+  ignore_errors: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+  tags:
+    - samba
+    - samba-domain-members
+
+- name: Wait for all processes to be killed
+  wait_for:
+    path: "/proc/{{ item }}/status"
+    state: absent
+  loop: "{{ running_processes.stdout_lines }}"
+  ignore_errors: yes
+  register: killed_processes
+  become: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+  tags:
+    - samba
+    - samba-domain-members
+
+- name: Force kill stuck processes
+  shell: "kill -9 {{ item }}"
+  loop: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
+  become: yes
+  ignore_errors: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+  tags:
+    - samba
+    - samba-domain-members
+
+# ==================================================================================================
+#
+# Ensure config file does not already exists
+#
+# ==================================================================================================
+- name: Identify config file if it exists
+  shell: >
+    smbd -b |
+    grep 'CONFIGFILE' |
+    cut -d: -f2 |
+    tr -s "[:blank:]"
+  register: config_file
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain
+  tags:
+    - samba
+    - samba-domain-members
+
+- name: Print Variables
+  debug:
+    var: config_file
+    verbosity: 2
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain
+  tags:
+    - samba
+    - samba-domain-members
+
+- name: Remove config file
+  file:
+    path: "{{ config_file }}"
+    state: absent
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+  tags:
+    - samba
+    - samba-domain-members
+
+# ==================================================================================================
+#
+# Ensure Samba databases do not exists
+#
+# ==================================================================================================
+#- name: Identify samba database directories
+#  shell: "smbd -b | egrep 'LOCKDIR|STATEDIR|CACHEDIR|PR0IVATE_DIR'|cut -d: -f2| sed -e 's/^[[:space:]]*//'"
+#  register: database_directories
+
+# - name: Identify samba database files
+#   find:
+#     path: "{{ item }}"
+#     pattern: "*.tdb, *.ldb"
+#   loop:
+#     - "/var/run/samba"
+#     - "/var/lib/samba"
+#     - "/var/cache/samba"
+#     - "/var/lib/samba/private"
+#   become: yes
+#   register: find_logs
+
+# - name: List tdb files
+#   debug:
+#     var: "{{ item.path }}"
+#     verbosity: 1
+#   loop: "{{ find_logs.files }}"
+
+# - name: Remove database files
+#   file:
+#     path: "{{ item.path }}"
+#     state: absent
+#   loop: "{{ find_logs.files }}"
+
+- name: Remove database files
+  shell:
+    cmd: "rm *.tdb *.ldb"
+    chdir: "{{ item }}"
+  loop:
+    - "/var/run/samba"
+    - "/var/lib/samba"
+    - "/var/cache/samba"
+    - "/var/lib/samba/private"
+  become: yes
+  ignore_errors: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+  tags:
+    - samba
+    - samba-domain-members
+
+# ==================================================================================================
+#
+# As a precaution, we remove the krb5.conf file
+#
+# ==================================================================================================
+- name: Remove krb5.conf
+  file:
+    path: "/etc/krb5.conf"
+    state: absent
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+  tags:
+    - samba
+    - samba-domain-members
+
+
+- include: "{{ ansible_os_family | lower }}_family.yml"
+  when:
+    - ansible_network_os is undefined
+  tags:
+    - samba
+    - samba-domain-members
+
+# ==================================================================================================
+#
+# Install Configuration files
+#
+# ==================================================================================================
+- name: Install krb5.conf configuration file
+  template:
+    src: "{{ role_path }}/templates/krb5.conf.j2"
+    dest: /etc/krb5.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  tags:
+    - samba
+    - samba-domain-members
+    - krb5
+
+# Create Config File
+- name: Install smb.conf configuration file
+  template:
+    src: "{{ role_path }}/templates/smb.conf.j2"
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: restart samba-domain-member
+  tags:
+    - samba
+    - samba-domain-members
+
+# Create Config File
+- name: Install user.map
+  template:
+    src: "{{ role_path }}/templates/user.map.j2"
+    dest: /etc/samba/user.map
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: restart samba-domain-member
+  tags:
+    - samba
+    - samba-domain-members
+
+# ==================================================================================================
+#
+# Join Domain
+#
+# ==================================================================================================
+# - name: Test if host is already join to domain
+
+- name: Join Domain
+  shell: "net ads join -U administrator -w {{ samba_administrator_password }}"
+  become: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain
+    # - domain_joined is false
+  tags:
+    - samba
+    - samba-domain-members
+  notify: start samba-domain-member

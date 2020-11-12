@@ -1,0 +1,4 @@
+---
+# defaults file for password_store
+packages:
+  - pass

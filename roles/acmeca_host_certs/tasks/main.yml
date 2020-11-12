@@ -1,0 +1,302 @@
+---
+# tasks file for acmeca_host_certs
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - acmeca
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  tags:
+    - acmeca
+    - install-packages
+
+- name: Determine whether to force private key regeneration
+  set_fact:
+    acme_certificate_INTERNAL_force_regenerate_private_key: yes
+  tags:
+    - never
+    - issue-tls-certs-newkey
+
+- name: Determine whether to use production or staging configuration
+  set_fact:
+    acmeca_directory: "{{ letsencrypt_staging_directory }}"
+    acmeca_directory_url: "{{ letsencrypt_staging_url }}"
+    acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_staging_directory }}"
+  tags:
+    - never
+    - issue-staging-certs
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Create required directories"
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ acmeca_account_dir }}"
+    - "{{ acmeca_csr_dir }}"
+    - "{{ acmeca_archive_dir }}"
+    - "{{ acmeca_keys_dir }}"
+    - "{{ acmeca_live_dir }}"
+  tags:
+    - acmeca
+
+- name: "Generate Let's Encrypt Account private key"
+  community.crypto.openssl_privatekey:
+    path: "{{ acmeca_account_key_path }}"
+    type: "{{ acmeca_account_key_type }}"
+    size: "{{ acmeca_account_key_size }}"
+    owner: root
+    group: root
+    mode: "0600"
+    backup: yes
+    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+  become: yes
+  tags:
+    - acmeca
+
+- name: Make sure account exists and has given contacts. We agree to TOS.
+  community.crypto.acme_account:
+    account_key_src: "{{ acmeca_account_key_path }}"
+    acme_directory: "{{ acmeca_directory_url }}"
+    acme_version: "{{ acmeca_version }}"
+    state: present
+    terms_agreed: yes
+    contact:
+      - mailto:{{ acmeca_account_email }}
+    validate_certs: yes
+  tags:
+    - acmeca
+
+- name: "Create Certificate Directories"
+  file:
+    path: "{{ acmeca_archive_dir }}/{{ item.name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ hosts }}"
+  tags:
+    - acmeca
+
+- name: "Generate Let's Encrypt Certificate private key"
+  community.crypto.openssl_privatekey:
+    path: '{{ acmeca_archive_dir }}/{{ item.name }}/privkey.pem'
+    type: '{{ acmeca_certificate_key_type }}'
+    size: "{{ acmeca_certificate_key_size }}"
+    backup: yes
+    owner: root
+    group: root
+    mode: '0600'
+    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca
+    - acmeca-private
+
+- name: "Generate Let's Encrypt CSR"
+  community.crypto.openssl_csr:
+    path: "{{ acmeca_csr_dir }}/{{ item.name }}.csr"
+    common_name: "{{ item.name }}"
+    key_usage: "{{ acmeca_key_usage }}"
+    extended_key_usage: "{{ acmeca_extended_key_usage }}"
+    subject_alt_name: "DNS:{{ item.name }}"
+    privatekey_path: "{{ acmeca_archive_dir }}/{{ item.name }}/privkey.pem"
+    owner: root
+    group: root
+    mode: "0644"
+    backup: yes
+    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca
+
+- name: "Begin Let's Encrypt challenges"
+  community.crypto.acme_certificate:
+    dest: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem"
+    chain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
+    fullchain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
+    csr: "{{ acmeca_csr_dir }}/{{ item.name }}.csr"
+    acme_directory: "{{ acmeca_directory_url }}"
+    acme_version: "{{ acmeca_version }}"
+    account_key_src: "{{ acmeca_account_key_path }}"
+    modify_account: no
+    challenge: "{{ acmeca_challenge_type }}"
+    remaining_days: 10
+    validate_certs: yes
+    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+  become: no
+  loop: "{{ hosts }}"
+  when:
+    - item.certificate == "acme"
+  register: acme_challenge
+  tags:
+    - acmeca
+    - acme-challenge
+
+- name: Print acme_challenge
+  debug:
+    msg:
+      - "{{ acmeca_directory_url }}"
+      - "{{ item }}"
+    verbosity: 1
+  loop: "{{ acme_challenge.results }}"
+  become: no
+  tags:
+    - acmeca
+    - acme-challenge
+
+- name: "Create .well-known/acme-challenge directory"
+  file:
+    path: /srv/www/{{ item.name }}/.well-known/acme-challenge
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca
+    - acme-challenge
+
+- name: "Implement http-01 challenge files"
+  copy:
+    content: "{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource_value'] }}"
+    dest: "/srv/www/{{ item.name }}/{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource'] }}"
+    owner: www-data
+    group: www-data
+    mode: "0644"
+  loop: "{{ hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
+  tags:
+    - acmeca
+    - acme-challenge
+
+- name: "Complete Let's Encrypt challenges"
+  community.crypto.acme_certificate:
+    acme_directory: "{{ acmeca_directory_url }}"
+    acme_version: "{{ acmeca_version }}"
+    account_key_src: "{{ acmeca_account_key_path }}"
+    modify_account: no
+    challenge: "{{ acmeca_challenge_type }}"
+    csr: "{{ acmeca_csr_dir }}/{{ item.name }}.csr"
+    dest: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem"
+    chain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
+    fullchain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
+    data: "{{ acme_challenge['results'][my_index] }}"
+    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+    validate_certs: yes
+  loop: "{{ hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'] is defined
+  tags:
+    - acmeca
+    - acme-challenge
+
+- name: Setup live link directories
+  file:
+    path: "{{ acmeca_live_dir }}/{{ item.name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca
+
+- name: Create live link certs
+  file:
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem" 
+    dest: "{{ acmeca_live_dir }}/{{ item.name }}/cert.pem"
+    state: link
+    owner: root
+    group: root
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca
+
+- name: Setup Live Link chain
+  file:
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem" 
+    dest: "{{ acmeca_live_dir }}/{{ item.name }}/chain.pem"
+    state: link
+    owner: root
+    group: root
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca
+
+- name: Setup Live Link fullchain
+  file:
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem" 
+    dest: "{{ acmeca_live_dir }}/{{ item.name }}/fullchain.pem"
+    state: link
+    owner: root
+    group: root
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca
+
+- name: Setup live link privkey
+  file:
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/privkey.pem" 
+    dest: "{{ acmeca_live_dir }}/{{ item.name }}/privkey.pem"
+    state: link
+    owner: root
+    group: root
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - item.certificate == "acme"
+  tags:
+    - acmeca

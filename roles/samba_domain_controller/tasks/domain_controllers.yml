@@ -1,0 +1,406 @@
+---
+# This playbook creates samba domain controllers
+# ==================================================================================================
+#
+# Test Kerberos
+#
+# ==================================================================================================
+# - name: Test First Active Directory Domain Controller (From New Server)
+#   shell: "{{ item }}"
+#   loop:
+#     - "kinit administrator"
+#     - "klist"
+#   become: yes
+#   when: inventory_hostname != primary_domain_controller
+
+# ==================================================================================================
+#
+# Provision Active Directory Domain Controllers
+#
+# ==================================================================================================
+- name: Provision Subsequent Active Directory Domain Controller
+  shell: "samba-tool domain join {{ ansible_domain }} DC --dns-backend=BIND9_DLZ -U'{{ ansible_domain.split('.')[0]|upper }}\administrator' --password={{ samba_administrator_password }}"
+  register: samba_ad_created
+  become: yes
+  when:
+    - inventory_hostname != primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+# ==================================================================================================
+#
+# Find idmap.ldb
+#
+# ==================================================================================================
+# - name: Find idmap.ldb
+#   find:
+#     path: "/var"
+#     pattern: idmap.ldb
+#     recurse: yes
+#   register: idmap_file
+#   when: inventory_hostname == primary_domain_controller
+
+- name: Backup idmap.ldb
+  shell: "tdbbackup -s .bak /var/lib/samba/private/idmap.ldb"
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+- name: Fetch idmap.ldb
+  fetch: 
+    src: "/var/lib/samba/private/idmap.ldb.bak"
+    dest: "/tmp/idmap.ldb"
+    flat: yes
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+- name: Copy idmap.ldb to New Servers
+  copy:
+    src: "/tmp/idmap.ldb"
+    dest: "/var/lib/samba/private/idmap.ldb"
+  become: yes
+  when:
+    - inventory_hostname != primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+- name: Flush Net Cache on New DC
+  shell: "net cache flush"
+  become: yes
+  when: inventory_hostname != primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+# ==================================================================================================
+#
+# Syncronize Sysvol to New Servers
+#
+# Command Equivalent:
+# - /usr/bin/rsync -XAavz --delete-after -f"+ */" -f"- *"  /var/lib/samba/sysvol root@DC2:/var/lib/samba
+#
+# References:
+# - https://wiki.samba.org/index.php/Bidirectional_Rsync/Unison_based_SysVol_replication_workaround
+#
+# ==================================================================================================
+# - name: Sync Sysvol to New Server
+#   synchronize:
+#     src: "/var/lib/samba/sysvol"
+#     dest: "/var/lib/samba/sysvol"
+#     archive: yes
+#     compress: yes
+#     rsync_opts:
+#       - "--xattrs"
+#       - "--acls"
+#       - "--delete-after"
+#       - '--filter="+ */"'
+#       - '--filter="- *"'
+#   delegate_to: "{{ primary_domain_controller }}"
+#   when: inventory_hostname != primary_domain_controller
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Reset Samba ACLs on Sysvol for New
+  shell: "samba-tool ntacl sysvolreset"
+  become: yes
+  when:
+    - inventory_hostname != primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+# Create Config File
+- name: Create krb5.conf configuration file
+  template:
+    src: "{{ role_path }}/templates/krb5.conf.j2"
+    dest: /etc/krb5.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  tags:
+    - samba
+    - samba-domain-controller
+
+- name: Configure smb.conf file
+  template:
+    src: "smb.conf.j2"
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: restart samba-ad-dc
+  tags:
+    - samba-domain-controller
+
+- name: Configure user.map file
+  template:
+    src: "user_map.j2"
+    dest: /etc/samba/user.map
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: restart samba-ad-dc
+  tags:
+    - samba-domain-controller
+
+- name: start samba-ad-dc
+  service:
+    name: samba-ad-dc
+    state: started
+  become: yes
+  tags:
+    - never
+    - samba-create-domain
+
+# ==================================================================================================
+#
+# Verify Samba Sysvol Replication
+#
+# Reference: https://wiki.samba.org/index.php/Verifying_the_Directory_Replication_Statuses
+#
+# ==================================================================================================
+- name: Verify Sysvol Replication
+  shell: "samba-tool drs showrepl"
+  become: yes
+  when:
+    - inventory_hostname != primary_domain_controller
+  notify: restart bind
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+# Test Active Directory Domain Controller from New Server
+#
+# ==================================================================================================
+- name: (Tests) List all shares provided by the First DC
+  shell: "smbclient -L localhost -U%"
+  register: shares
+  become: yes
+  when:
+    - inventory_hostname != primary_domain_controller
+  ignore_errors: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+# Test Active Directory Domain Controller from New Server
+#
+# ==================================================================================================
+# - name: Verify SMB Authentication
+#   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
+#   register: success
+#   become: yes
+#   when: inventory_hostname != primary_domain_controller
+#   ignore_errors: yes
+
+#- debug:
+#    var: success
+#    verbosity: 2
+
+# ==================================================================================================
+#
+# Test Active Directory Domain Controller
+#
+# ==================================================================================================
+- name: (Tests) The A record of the domain controller"
+  shell: "host -t A {{ ansible_fqdn }}."
+  register: success
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+# Test Active Directory Domain Controller
+#
+# ==================================================================================================
+- name: "(Tests) udp-based _kerberos SRV resource record in the domain"
+  shell: "host -t SRV _kerberos._udp.{{ ansible_domain }}."
+  register: success
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+# Test Active Directory Domain Controller
+#
+# ==================================================================================================
+# - name: Test Active Directory Domain Controller
+#   shell: "{{ item }}"
+#   loop:
+#     - "kinit administrator"
+#     - "klist"
+#   become: yes
+#   when: inventory_hostname != primary_domain_controller
+
+# ==================================================================================================
+#
+# Configure automated Sysvol Replication
+#
+# https://wiki.samba.org/index.php/SysVol_replication_(DFS-R)
+#
+# ==================================================================================================
+- name: Make Control Directory
+  file:
+    path: "~/.ssh/ctl"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Create SSH Control Configuration
+  template:
+    src: "{{ role_path }}/templates/control_ssh.j2"
+    dest: "~/.ssh/ctl/config"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Create Log File
+  file:
+    path: "/var/log/sysvol-sync.log"
+    state: touch
+    owner: root
+    group: root
+    mode: "0640"
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Ensure unison configuration directory exists
+  file:
+    path: "~/.unison"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Create Unison Preferences
+  template:
+    src: "{{ role_path }}/templates/unison.j2"
+    dest: "~/.unison/default.prf"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Create Backup of SysVol directory
+  archive:
+    path: /var/lib/samba/sysvol
+    dest: ~/sysvol.tar.xz
+  become: yes
+  tags:
+    - samba-domain-controller
+
+# ==================================================================================================
+#
+# Syncronize Sysvol to New Servers
+#
+# Command Equivalent:
+# - /usr/bin/rsync -XAavz --delete-after -f"+ */" -f"- *"  /var/lib/samba/sysvol root@DC2:/var/lib/samba
+#
+# References:
+# - https://wiki.samba.org/index.php/Bidirectional_Rsync/Unison_based_SysVol_replication_workaround
+#
+# ==================================================================================================
+# - name: "(Test) Sync Step 1: Rsync"
+#   synchronize:
+#     src: "/var/lib/samba/sysvol"
+#     dest: "/var/lib/samba"
+#     archive: yes
+#     compress: yes
+#     rsync_opts:
+#       - "--xattrs"
+#       - "--acls"
+#       - "--delete-after"
+#       - '--filter="+ */"'
+#       - '--filter="- *"'
+#   delegate_to: "{{ primary_domain_controller }}"
+#   when: inventory_hostname != primary_domain_controller
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+#- name: "(Test) Sync Step 2: Unison"
+#  shell: "/usr/bin/unison"
+#  become: yes
+#  when: inventory_hostname == primary_domain_controller  
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Create Cron Sync
+  cron:
+    name: "Syncronize SysVol Directories"
+    minute: "*/5"
+    hour: "*"
+    day: "*"
+    weekday: "*"
+    month: "*"
+    job: "/usr/bin/unison -silent"
+  when: inventory_hostname == primary_domain_controller
+  tags:
+    - samba-domain-controller

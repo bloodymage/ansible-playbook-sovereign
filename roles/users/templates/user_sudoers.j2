@@ -1,0 +1,5 @@
+{{ ansible_managed | comment }}
+
+{% for path in item.sudoers -%}
+  {{ item.username }} ALL=(ALL:ALL) NOPASSWD: {{ path }}
+{% endfor %}

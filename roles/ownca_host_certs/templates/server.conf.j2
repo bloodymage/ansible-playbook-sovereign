@@ -1,0 +1,60 @@
+# {{ansible_managed|comment}}
+# TLS server certificate request
+# ======================================================================
+#
+#
+#
+# ======================================================================
+[ default ]
+SAN                     = DNS:{{ ansible_fqdn }}    # Default value
+
+[ req ]
+default_bits            = 4096                  # RSA key size
+encrypt_key             = no                    # Protect private key
+default_md              = sha512                # MD to use
+utf8                    = yes                   # Input is UTF-8
+string_mask             = utf8only              # Emit UTF-8 strings
+prompt                  = no                    # Prompt for DN
+distinguished_name      = server_dn             # DN template
+req_extensions          = server_reqext         # Desired extensions
+
+[ server_dn ]
+countryName             = "{{ loc_country_code }}"
+stateOrProvinceName     = "{{ loc_st }}"
+localityName            = "{{ loc_city }}"
+organizationName        = "{{ ca_org_name }}"
+organizationalUnitName  = "{{ ca_org_unit_name }}"
+commonName              = "{{ ansible_fqdn }}"
+
+[ server_reqext ]
+keyUsage                = critical,digitalSignature,keyEncipherment
+extendedKeyUsage        = 
+{%- for usage in openssl_extended_key_usage -%}
+  {{ usage }}{{ "," if not loop.last else "" }}
+{%- endfor %}
+
+subjectKeyIdentifier    = hash
+subjectAltName          = @alt_names
+
+{% if openssl_subject_altnames is defined -%}
+  [ alt_names ]
+  {% for altname in openssl_subject_altnames %}
+    DNS.{{ loop.index }} = {{ altname }}
+  {% endfor %}
+{% endif %}
+{% if openssl_hosts is defined -%}
+  [ alt_names ]
+  {% for altname in openssl_hosts.dns_server %}
+    DNS.{{ loop.index }} = {{ altname }}
+  {% endfor %}
+{% endif %}
+{% if inventory_hostname in groups['samba_domain_controllers'] -%}
+  otherName = {{ msADGUID }};FORMAT:HEX,OCTETSTRING:{{ openssl_objectguid }}
+
+  #  [ openssl_init ]
+  #  oid_section     = additional_oids
+
+  #  [ additional_oids ]
+  #  msKDC=1.3.6.1.5.2.3.5
+  #  msADGUID=1.3.6.1.4.1.311.25.1
+{%- endif %}

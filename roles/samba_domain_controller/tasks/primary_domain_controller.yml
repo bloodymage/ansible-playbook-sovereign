@@ -1,0 +1,239 @@
+---
+# This playbook creates samba domain controllers
+# ==================================================================================================
+#
+# Provision First Active Directory Domain Controller
+#
+# ==================================================================================================
+- name: Provision First Active Directory Domain Controller
+  shell: "samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=BIND9_DLZ --realm={{ ansible_domain|upper }} --domain={{ ansible_domain.split('.')[0]|upper }} --adminpass={{ samba_administrator_password }}"
+  register: samba_ad_created
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  notify: restart bind
+  tags:
+    - never
+    - samba-create-domain
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Restart bind
+  service:
+    name: bind9
+    state: restarted
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - never
+    - samba_create_domain
+
+# ==================================================================================================
+#
+# Create Samba krb5.conf
+#
+# ==================================================================================================
+- name: Create krb5.conf configuration file
+  template:
+    src: "{{ role_path }}/templates/krb5.conf.j2"
+    dest: /etc/krb5.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba_create_domain 
+
+- name: start samba-ad-dc
+  service:
+    name: samba-ad-dc
+    state: started
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - never
+    - samba_create_domain 
+
+# ==================================================================================================
+#
+# Test Active Directory Domain Controller
+#
+# ==================================================================================================
+- name: (Tests) List all shares provided by the DC
+  shell: "smbclient -L localhost -U%"
+  register: shares
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+# - name: Verify SMB Authentication
+#   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
+#   register: success
+#   become: yes
+#   when: inventory_hostname == primary_domain_controller
+#   ignore_errors: yes
+
+#- debug:
+#    var: success
+#    verbosity: 2
+
+- name: "(Tests) Tcp-based _ldap SRV record in the domain"
+  shell: "host -t SRV _ldap._tcp.{{ ansible_domain }}."
+  register: success
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+- name: "(Tests) udp-based _kerberos SRV resource record in the domain"
+  shell: "host -t SRV _kerberos._udp.{{ ansible_domain }}."
+  register: success
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+- name: (Tests) The A record of the domain controller"
+  shell: "host -t A {{ ansible_fqdn }}."
+  register: success
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+- name: Test Active Directory Domain Controller
+  expect:
+    command: kinit administrator
+    responses:
+      (?i)password: "{{ samba_administrator_password }}"
+  no_log: true
+  become: no
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+- name: Test Active Directory Domain Controller
+  command:
+    cmd: "klist"
+  register: success
+  become: no
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+- name: Print Success
+  debug:
+    msg: "{{ success }}"
+    verbosity: 1
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+- name: Create Reverse Zone
+  command:
+    cmd: "samba-tool dns zonecreate localhost {{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa -U administrator --password={{ samba_administrator_password }}"
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+- name: Add Domain Controller to Reverse Zone
+  command:
+    cmd: "samba-tool dns add localhost {{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa {{ ansible_host.split('.')[3] }}.{{ ansible_host.split('.')[2] }} PTR {{ inventory_hostname }} -U administrator --password={{ samba_administrator_password }}"
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - never
+    - samba-create-domain
+
+- name: (Tests) The PTR record of the domain controller"
+  shell: "host -t PTR {{ ansible_host }}"
+  register: success
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controller
+    - samba-create-domain
+
+# ==================================================================================================
+#
+# Add a little hardening
+#
+# https://fy.blackhats.net.au/blog/html/2018/04/18/making_samba_4_the_default_ldap_server.html
+#
+# ==================================================================================================
+# - name: "Disallow any user to join host to AD"
+#   shell: "{{ item }}"
+#   register: success
+#   become: yes
+#   loop:
+#     - "samba-tool domain settings account_machine_join_quota 0"
+#   when: inventory_hostname == primary_domain_controller
+#   ignore_errors: yes
+
+- name: "Disable Guest Account"
+  shell: "{{ item }}"
+  register: success
+  become: yes
+  loop:
+    - "samba-tool user disable Guest"
+  when:
+    - inventory_hostname == primary_domain_controller
+  ignore_errors: yes
+  tags:
+    - samba
+    - samba-domain-controllers
+    - samba-create-domain
+
+# ==================================================================================================
+#
+# Modify Password Policy: these should only be changed if we have a reason to suspect they are comprimised.
+#
+# https://dev.tranquil.it/samba/en/samba_advanced_methods/samba_password_policies.html
+# https://oitibs.com/samba4-domain-password-policy/
+#
+# ==================================================================================================
+- name: Set Password Expiration
+  shell: "samba-tool domain passwordsettings set --max-pwd-age={{ samba_domain_password_expiration }}"
+  register: success
+  become: yes
+  when:
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controllers
+    - samba-create-domain

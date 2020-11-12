@@ -1,0 +1,13 @@
+---
+# handlers file for acmeca_host_certs
+- name: reload daemons
+  include: "{{ role_path }}/handlers/reload_daemons.yml"
+  loop: "{{group_names}}"
+  tags:
+    - acmeca
+
+- name: restart daemons
+  include: "{{ role_path }}/handlers/restart_daemons.yml"
+  loop: "{{group_names}}"
+  tags:
+    - acmeca

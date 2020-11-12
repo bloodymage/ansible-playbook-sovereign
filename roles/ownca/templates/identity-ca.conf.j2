@@ -1,0 +1,116 @@
+# {{ Ansible_Domain.Split('.')[1] }} Identity CA
+
+[ default ]
+ca                      = identity-ca           # CA name
+dir                     = .                     # Top dir
+base_url                = http://{{ pki_url }} # CA base URL
+aia_url                 = $base_url/$ca.cer     # CA certificate URL
+crl_url                 = $base_url/$ca.crl     # CRL distribution point
+name_opt                = multiline,-esc_msb,utf8 # Display UTF-8 characters
+openssl_conf            = openssl_init          # Library config section
+
+# CA certificate request
+
+[ req ]
+default_bits            = 2048                  # RSA key size
+encrypt_key             = yes                   # Protect private key
+default_md              = sha1                  # MD to use
+utf8                    = yes                   # Input is UTF-8
+string_mask             = utf8only              # Emit UTF-8 strings
+prompt                  = no                    # Don't prompt for DN
+distinguished_name      = ca_dn                 # DN section
+req_extensions          = ca_reqext             # Desired extensions
+
+[ ca_dn ]
+countryName             = "SE"
+organizationName        = "{{ Ansible_Domain.Split('.')[1] }} AB"
+organizationalUnitName  = "{{ Ansible_Domain.Split('.')[1] }} Identity CA"
+commonName              = "{{ Ansible_Domain.Split('.')[1] }} Identity CA"
+
+[ ca_reqext ]
+keyUsage                = critical,keyCertSign,cRLSign
+basicConstraints        = critical,CA:true,pathlen:0
+subjectKeyIdentifier    = hash
+
+# CA operational settings
+
+[ ca ]
+default_ca              = identity_ca           # The default CA section
+
+[ identity_ca ]
+certificate             = $dir/ca/$ca.crt       # The CA cert
+private_key             = $dir/ca/$ca/private/$ca.key # CA private key
+new_certs_dir           = $dir/ca/$ca           # Certificate archive
+serial                  = $dir/ca/$ca/db/$ca.crt.srl # Serial number file
+crlnumber               = $dir/ca/$ca/db/$ca.crl.srl # CRL number file
+database                = $dir/ca/$ca/db/$ca.db # Index file
+unique_subject          = no                    # Require unique subject
+default_days            = 1095                  # How long to certify for
+default_md              = sha1                  # MD to use
+policy                  = match_pol             # Default naming policy
+email_in_dn             = no                    # Add email to cert DN
+preserve                = no                    # Keep passed DN ordering
+name_opt                = $name_opt             # Subject DN display options
+cert_opt                = ca_default            # Certificate display options
+copy_extensions         = copy                  # Copy extensions from CSR
+x509_extensions         = identity_ext          # Default cert extensions
+default_crl_days        = 1                     # How long before next CRL
+crl_extensions          = crl_ext               # CRL extensions
+
+[ match_pol ]
+countryName             = match
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = match
+organizationalUnitName  = optional
+commonName              = supplied
+
+[ any_pol ]
+domainComponent         = optional
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+organizationName        = optional
+organizationalUnitName  = optional
+commonName              = optional
+emailAddress            = optional
+
+# Extensions
+
+[ identity_ext ]
+keyUsage                = critical,digitalSignature
+basicConstraints        = CA:false
+extendedKeyUsage        = emailProtection,clientAuth,msSmartcardLogin
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+crlDistributionPoints   = @crl_info
+certificatePolicies     = blueMediumAssurance
+
+[ encryption_ext ]
+keyUsage                = critical,keyEncipherment
+basicConstraints        = CA:false
+extendedKeyUsage        = emailProtection,msEFS
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+crlDistributionPoints   = @crl_info
+certificatePolicies     = blueMediumAssurance
+
+[ crl_ext ]
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+
+[ issuer_info ]
+caIssuers;URI.0         = $aia_url
+
+[ crl_info ]
+URI.0                   = $crl_url
+
+# Policy OIDs
+
+[ openssl_init ]
+oid_section             = additional_oids
+
+[ additional_oids ]
+{{ Ansible_Domain.Split('.')[1] }}MediumAssurance     = {{ Ansible_Domain.Split('.')[1] }} Medium Assurance, 1.3.6.1.4.1.0.1.7.8

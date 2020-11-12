@@ -1,0 +1,8 @@
+---
+# tasks file for ntp
+- name: Set timezone
+  timezone:
+    name: "America/New_York"
+  notify: restart ntp
+
+

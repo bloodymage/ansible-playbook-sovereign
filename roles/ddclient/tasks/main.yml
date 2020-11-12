@@ -1,0 +1,37 @@
+---
+# tasks file for ddclient
+# ======================================================================
+#
+# Task "Install ddclient apps"
+#
+# Installs a set of common apps for all systems on the network
+#
+# ======================================================================
+- name: Install ddclient apps
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  notify: restart ddclient
+  tags:
+    - ddclient
+    - packages
+    - install-packages
+    - ddclient-packages
+    - ddclient-install-packages
+
+- name: Install ddclient.conf
+  template:
+    src: ddclient.j2
+    dest: /etc/ddclient.conf
+    owner: root
+    group: root
+    mode: "0600"
+  become: yes
+  notify: restart ddclient
+  when:
+    - ddclient_sites is defined
+  tags:
+    - ddclient
+    - config
+    - ddclient-config

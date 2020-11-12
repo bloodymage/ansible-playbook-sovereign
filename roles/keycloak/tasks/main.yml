@@ -1,0 +1,147 @@
+---
+# tasks file for keycloak
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - keycloak
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - keycloak
+    - install-packages
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Download Keycloak Sources"
+  get_url:
+    url: "{{ item.source }}"
+    dest: "/tmp/{{ item.file }}"
+    checksum: "{{ item.checksum_type}}:{{ item.checksum }}"
+    mode: '0644'
+  loop: "{{ keycloak_source_url }}"
+  become: no
+  tags:
+    - keycloak
+    - download-sources
+
+- name: "Create Keycloak Directory"
+  file:
+    path: "{{ keycloak_install_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  tags:
+    - keycloak
+
+- name: Extract Sources
+  unarchive:
+    src: "/tmp/{{ keycloak_source_url[0].file }}"
+    dest: "{{ keycloak_install_dir }}"
+    remote_src: yes
+    owner: root
+    group: root
+    extra_opts: [--strip-components=1]
+    creates: "{{ keycloak_install_dir }}/docs/licenses-keycloak/org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
+  become: yes
+  tags:
+    - keycloak
+
+- name: "Ensure we have a password for the keycloak administrator user"
+  ansible.builtin.set_fact:
+    keycloak_admin_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_admin_password"
+  when:
+    - keycloak_admin_password == "password"
+  tags:
+    - keycloak
+
+- name: "Ensure we have a password for the keycloak keystore"
+  ansible.builtin.set_fact:
+    keycloak_keystore_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_keystore_password"
+  when:
+    - keycloak_keystore_password == "password"
+  tags:
+    - keycloak
+
+- name: "Install Service File"
+  template:
+    src: "service.conf.j2"
+    dest: "/etc/systemd/system/keycloak.service"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: enable keycloak
+  tags:
+    - keycloak
+
+- name: "Install Keycloak configuration file"
+  template:
+    src: "keycloak.xml.j2"
+    dest: "{{ keycloak_install_dir }}/{{ keycloak_mode }}/configuration/{{ keycloak_mode }}.xml"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: restart keycloak
+  tags:
+    - keycloak
+
+- name: "Create admin user"
+  command:
+    cmd: "{{ keycloak_binary_dir }}/add-user-keycloak.sh -r master -u {{ keycloak_admin_user }} -p {{ keycloak_admin_password }}"
+  become: yes
+  tags:
+    - never
+    - keycloak-admin-user
+
+- name: Generate PKCS#12 file
+  community.crypto.openssl_pkcs12:
+    action: export
+    path:  "{{ keycloak_install_dir }}/{{ keycloak_mode }}/configuration/keycloak.jks"
+    friendly_name: "{{ keycloak_keystore_alias }}"
+    passphrase: "{{ keycloak_keystore_password }}"
+    privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key
+    certificate_path: /etc/ssl/certs/{{ inventory_hostname }}-chain.pem
+    other_certificates:
+      - "/etc/ssl/certs/drbr-olympus-component-ca.pem"
+      - "/etc/ssl/certs/drbr-olympus-ca.pem"
+      - "/etc/ssl/certs/drbr-swg-component-ca.pem"
+      - "/etc/ssl/certs/drbr-swg-ca.pem"
+      - "/etc/ssl/certs/drbr-root-ca.pem"
+      - "/etc/ssl/certs/zeus.olympus.drbr.org-chain.pem"
+    state: present
+    iter_size: 0
+    maciter_size: 0
+    mode: '0600'
+    owner: root
+    group: root
+    force: yes
+  become: yes
+  notify: restart keycloak
+  tags:
+    - keycloak

@@ -1,0 +1,237 @@
+<?php
+
+# {{ansible_managed|comment}}
+
+# Enable Debugging
+
+#error_reporting( -1 );
+#ini_set( 'display_errors', 1 );
+#$wgShowExceptionDetails = true;
+#$wgShowDBErrorBacktrace = true;
+#$wgShowSQLErrors = true;
+
+/**
+* The debug log file must never be publicly accessible because it
+* contains private data. But ensure that the directory is writeable by the
+* PHP script running within your Web server.
+* The filename is with the database name of the wiki.
+*/
+$wgDebugLogFile = "/var/log/apache2/{{ host.name }}/debug-{$wgDBname}.log";
+
+
+// Groups from MediaWiki core
+$wgDBerrorLog = '/var/log/apache2/mediawiki/dberror.log';
+$wgRateLimitLog = '/var/log/apache2/mediawiki/ratelimit.log';
+$wgDebugLogGroups = array(
+   'resourceloader' => '/var/log/apache2/mediawiki/resourceloader.log',
+   'exception' => '/var/log/apache2/mediawiki/exception.log',
+   'error' => '/var/log/apache2/mediawiki/error.log',
+   #'exception-json' => '/var/log/mediawiki/exception.json',
+
+   // Extra log groups from your extension
+   #'myextension' => '/var/log/mediawiki/myextension.log',
+   #'somegroup' => '/var/log/mediawiki/somegroup.log',
+   );
+
+# Protect against web entry
+if ( !defined( 'MEDIAWIKI' ) ) {
+	exit;
+}
+
+## Uncomment this to disable output compression
+# $wgDisableOutputCompression = true;
+
+$wgSitename = "{{ host.full_name }}";
+$wgMetaNamespace = "{{ host.namespace }}";
+
+## The URL base path to the directory containing the wiki;
+## defaults for all runtime URL paths are based off of this.
+## For more information on customizing the URLs
+## (like /w/index.php/Page_title to /wiki/Page_title) please see:
+## https://www.mediawiki.org/wiki/Manual:Short_URL
+$wgScriptPath = "/w";
+## The protocol and server name to use in fully-qualified URLs
+$wgServer = "https://{{ host.name }}";
+
+ ## The URL path to the logo.
+ $wgLogo = "$wgResourceBasePath/resources/assets/wiki.png";
+
+$actions = array( 'edit', 'watch', 'unwatch', 'delete','revert', 'rollback', 'protect', 'unprotect', 'markpatrolled', 'render', 'submit', 'history', 'purge', 'info' );
+foreach ( $actions as $action ) {
+	$wgActionPaths[$action] = "/wiki/$action/$1";
+ }
+
+$wgActionPaths['view'] = "/wiki/$1";
+$wgArticlePath = $wgActionPaths['view'];
+
+## The URL path to static resources (images, scripts, etc.)
+$wgResourceBasePath = $wgScriptPath;
+
+## UPO means: this is also a user preference option
+
+$wgEnableEmail = true;
+$wgEnableUserEmail = true; # UPO
+
+$wgEmergencyContact = "{{ host.contact }}";
+$wgPasswordSender = "{{ host.contact }}";
+
+$wgEnotifUserTalk = false; # UPO
+$wgEnotifWatchlist = false; # UPO
+$wgEmailAuthentication = true;
+
+## Database settings
+$wgDBtype = "mysql";
+$wgDBserver = "{{ host.db_server }}";
+$wgDBname = "{{ host.db_name }}";
+$wgDBuser = "{{ host.db_user }}";
+$wgDBpassword = "{{ host.db_password }}";
+$wgDBprefix = "{{ host.db_prefix }}";
+$wgSharedDB = "{{ host.shared_db }}";
+$wgSharedPrefix = "{{ host.shared_prefix }}";
+$wgSecretKey = "{{ host.secret_key }}";
+
+# Cookies
+$wgCookieDomain = "{{ host.cookie_domain }}";
+# Changing this will log out all existing sessions.
+$wgAuthenticationTokenVersion = "1";
+
+# Site upgrade key. Must be set to a string (default provided) to turn on the
+# web installer while LocalSettings.php is in place
+$wgUpgradeKey = "{{ host.upgrade_key }}";
+
+
+# MySQL table options to use during installation or update
+$wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
+
+$wgSharedTables[] = 'ipblocks';
+$wgSharedTables[] = 'user_groups';
+$wgSharedTables[] = 'interwiki';
+
+# Experimental charset support for MySQL 5.0.
+$wgDBmysql5 = false;
+
+## Shared memory settings
+$wgMainCacheType = CACHE_NONE;
+$wgMemCachedServers = [];
+
+## To enable image uploads, make sure the 'images' directory
+## is writable, then set this to true:
+$wgEnableUploads = true;
+$wgUseImageMagick = true;
+$wgImageMagickConvertCommand = "/usr/bin/convert";
+
+# InstantCommons allows wiki to use images from https://commons.wikimedia.org
+$wgUseInstantCommons = false;
+
+## If you use ImageMagick (or any other shell command) on a
+## Linux server, this will need to be set to the name of an
+## available UTF-8 locale
+$wgShellLocale = "en_US.utf8";
+
+## Set $wgCacheDirectory to a writable directory on the web server
+## to make your wiki go slightly faster. The directory should not
+## be publically accessible from the web.
+#$wgCacheDirectory = "$IP/cache";
+
+# Site language code, should be one of the list in ./languages/data/Names.php
+$wgLanguageCode = "en";
+
+# Changing this will log out all existing sessions.
+$wgAuthenticationTokenVersion = "1";
+
+## For attaching licensing metadata to pages, and displaying an
+## appropriate copyright notice / icon. GNU Free Documentation
+## License and Creative Commons licenses are supported so far.
+$wgRightsPage = ""; # Set to the title of a wiki page that describes your license/copyright
+$wgRightsUrl = "";
+$wgRightsText = "";
+$wgRightsIcon = "";
+
+# Path to the GNU diff3 utility. Used for conflict resolution.
+$wgDiff3 = "/usr/bin/diff3";
+
+# The following permissions were set based on your choice in the installer
+$wgGroupPermissions['*']['createaccount'] = false;
+$wgGroupPermissions['*']['edit'] = false;
+
+## Default skin: you can change the default skin. Use the internal symbolic
+## names, ie 'vector', 'monobook':
+$wgDefaultSkin = "timeless";
+
+# Enabled skins.
+# The following skins were automatically enabled:
+wfLoadSkin( 'Timeless' );
+wfLoadSkin( 'MonoBook' );
+wfLoadSkin( 'Vector' );
+
+# Enabled extensions. Most of the extensions are enabled by adding
+# wfLoadExtensions('ExtensionName');
+# to LocalSettings.php. Check specific extension documentation for more details.
+# The following extensions were automatically enabled:
+wfLoadExtension( 'CategoryTree' );
+#wfLoadExtension( 'CirrusSearch' );
+#require_once "$IP/extensions/CirrusSearch/CirrusSearch.php"; # Old style required
+wfLoadExtension( 'Cite' );
+wfLoadExtension( 'CiteThisPage' );
+wfLoadExtension( 'CodeEditor' );
+wfLoadExtension( 'ConfirmEdit' );
+wfLoadExtension( 'DynamicSidebar' );
+//wfLoadExtension( 'Elastica' );
+wfLoadExtension( 'Gadgets' );
+wfLoadExtension( 'ImageMap' );
+wfLoadExtension( 'InputBox' );
+wfLoadExtension( 'Interwiki' );
+wfLoadExtension( 'LocalisationUpdate' );
+wfLoadExtension( 'MultimediaViewer' );
+wfLoadExtension( 'Nuke' );
+//wfLoadExtension( 'OATHAuth' );
+wfLoadExtension( 'ParserFunctions' );
+wfLoadExtension( 'PdfHandler' );
+wfLoadExtension( 'Poem' );
+wfLoadExtension( 'Renameuser' );
+wfLoadExtension( 'SpamBlacklist' );
+wfLoadExtension( 'SyntaxHighlight_GeSHi' );
+wfLoadExtension( 'TitleBlacklist' );
+wfLoadExtension( 'WikiEditor' );
+
+# End of automatically generated settings.
+# Add more configuration options below.
+
+// Extensions
+require_once "$IP/extensions/ConfirmAccount/ConfirmAccount.php"; # Requires Old Style format
+wfLoadExtension( 'Scribunto' );
+
+// Extension Settings
+// Scribunto
+$wgScribuntoDefaultEngine = 'luastandalone';
+//ARM Processor settings
+$wgScribuntoEngineConf['luastandalone']['luaPath'] = '/usr/bin/lua5.1';
+
+// DynamicSidebar
+// Enable debugging
+$wgDebugLogGroups["dynamic-sidebar"] = "/tmp/sidebar-debug.txt";
+// Allow users to create their own custom sidebars under User:<username>/Sidebar
+// Default: true
+$wgDynamicSidebarUseUserpages = true;
+// Allow group sidebars under MediaWiki:Sidebar/Group:<group>
+// Default: true
+$wgDynamicSidebarUseGroups = true;
+// Allow category based sidebars under MediaWiki:Sidebar/Category:<category>
+// Default: true
+$wgDynamicSidebarUseCategories = true;
+
+
+// Permissions
+// To grant sysops permissions to edit interwiki data
+$wgGroupPermissions['sysop']['interwiki'] = true;
+
+// Enable API access
+$wgEnableAPI=true;
+
+// Allowable file extensions for upload
+// default is ...
+$wgFileExtensions = array_merge( $wgFileExtensions,
+    array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
+            'tiff', 'odt', 'odg', 'ods', 'odp','png', 'svg'
+            )
+);

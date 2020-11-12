@@ -1,0 +1,91 @@
+- name: Determine Existing Apps
+  shell: 'ls /srv/www/{{ host.name }}/apps'
+  changed_when: false
+  register: existing_apps
+  tags:
+    - nextcloud
+    - websites
+
+- name: Install Nextcloud Apps
+  command:
+    cmd: "php occ app:install {{ item }}"
+    chdir: "/srv/www/{{ host.name }}"
+    creates: "/srv/www/{{ host.name }}/apps/{{ item }}/appinfo/info.xml"
+  become: yes
+  become_user: www-data
+  loop: "{{ nextcloud_apps }}"
+  when:
+    - item.content == "nextcloud"
+  tags:
+    - nextcloud
+    - websites
+
+- name: Enable Nextcloud Apps
+  command:
+    cmd: "php occ app:enable {{ item }}"
+    chdir: "/srv/www/{{ host.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ nextcloud_apps }}"
+  when:
+    - item.content == "nextcloud"
+  tags:
+    - nextcloud
+    - websites
+
+- name: Determine disabled apps
+  set_fact:
+    disabled_apps: "{{ existing_apps.stdout_lines | difference(nextcloud_apps) }}"
+  tags:
+    - nextcloud
+    - websites
+
+- name: Determine removed apps
+  set_fact:
+    removed_apps: "{{ disabled_apps | difference(nextcloud_default_apps) }}"
+  tags:
+    - nextcloud
+    - websites
+
+- name: Print Disabled Apps
+  debug:
+    msg: "{{ disabled_apps }}"
+    verbosity: 1
+  become: no
+  tags:
+    - nextcloud
+    - websites
+
+- name: Print Remove Apps
+  debug:
+    msg: "{{ removed_apps }}"
+    verbosity: 1
+  become: no
+  tags:
+    - nextcloud
+    - websites
+
+- name: Disable Nextcloud Apps
+  command:
+    cmd: "php occ app:disable {{ item }}"
+    chdir: "/srv/www/{{ host.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ disabled_apps }}"
+  when:
+    - item.content == "nextcloud"
+  tags:
+    - nextcloud
+    - websites
+
+- name: Remove Nextcloud Apps
+  file:
+    path: "/srv/www/{{ host.name }}/apps/{{ item }}"
+    state: absent
+  become: yes
+  loop: "{{ removed_apps }}"
+  when:
+    - item.content == "nextcloud"
+  tags:
+    - nextcloud
+    - websites

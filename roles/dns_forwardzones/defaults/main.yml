@@ -1,0 +1,4 @@
+---
+# defaults file for dns-update
+packages:
+  - python3-dnspython

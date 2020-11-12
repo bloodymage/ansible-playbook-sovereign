@@ -1,0 +1,98 @@
+---
+# tasks file for dns-update
+- name: "Install Apps"
+  apt:
+    name: "{{ item }}"
+    state: present
+  become: yes
+  loop:
+    - python3-dnspython
+  when:
+    - ansible_os_family is defined
+    - ansible_os_family == "Debian"
+    - ansible_network_os is undefined
+    - inventory_hostname != 'localhost'
+  tags:
+    - dns-forwardzones
+    - install-packages
+    - dns-update
+
+- name: "Add or modify host A records"
+  nsupdate:
+    key_name: "ansible"
+    key_secret: "{{ item.bind_dnssec_secret }}"
+    key_algorithm: "hmac-sha256"
+    server: "{{ item.address_ipv4 }}"
+    zone: "{{ zone }}"
+    record: "{{ inventory_hostname_short }}"
+    value: "{{ ansible_default_ipv4.address | default(ansible_host) }}"
+  loop: "{{ zone_dnsservers }}"
+  become: yes
+  when:
+    - zone is defined
+  remote_user: root
+  delegate_to: "{{ item.address_ipv4 }}"
+  tags:
+    - dns-forwardzones
+    - dns-update
+
+# tasks file for dns-update
+- name: "Add or modify host AAAA records"
+  nsupdate:
+    key_name: "ansible"
+    key_secret: "{{ item.bind_dnssec_secret }}"
+    key_algorithm: "hmac-sha256"
+    server: "{{ item.address_ipv4 }}"
+    zone: "{{ zone }}"
+    record: "{{ inventory_hostname_short }}"
+    value: "{{ ansible_default_ipv6.address }}"
+    type: "AAAA"
+  loop: "{{ zone_dnsservers }}"
+  become: yes
+  when:
+    - zone is defined
+    - ansible_default_ipv6.address is defined
+  remote_user: root
+  delegate_to: "{{ item.address_ipv4 }}"
+  tags:
+    - dns-forwardzones
+    - dns-update
+
+- name: "Add or modify host CNAME records"
+  nsupdate:
+    key_name: "ansible"
+    key_secret: "{{ item[0].bind_dnssec_secret }}"
+    key_algorithm: "hmac-sha256"
+    server: "{{ item[0].address_ipv4 }}"
+    zone: "{{ zone }}"
+    record: "{{ item[1].name.split('.')[0] }}"
+    value: "{{ inventory_hostname }}."
+    type: "CNAME"
+  loop: "{{ zone_dnsservers | product(hosts) | list }}"
+  become: yes
+  when:
+    - zone is defined
+    - hosts is defined
+  remote_user: root
+  delegate_to: "{{ item[0].address_ipv4 }}"
+  tags:
+    - dns-forwardzones
+    - dns-update
+
+# - name: "Add or modify MX records"
+#   nsupdate:
+#     key_name: "ansible"
+#     key_secret: "{{ item.bind_dnssec_secret }}"
+#     key_algorithm: "hmac-sha256"
+#     server: "{{ item.address_ipv4 }}"
+#     zone: "{{ zone }}"
+#     record: "{{ zone }}."
+#     value: "{{ ansible_fqdn }}."
+#     type: "MX"
+#   loop: "{{ zone_dnsservers }}"
+#   become: yes
+#   when:
+#     - zone is defined
+#     - bind_mx_record is defined
+#   remote_user: root
+#   delegate_to: "{{ item.address_ipv4 }}"

@@ -1,0 +1,52 @@
+---
+# tasks file for ownca-crl
+# ==================================================================================================
+#
+# Create SSL Private Key and CRS Directories
+#
+# Creates the following Directories:
+#   - /etc/ssl/private mode: 0700
+#   - /etc/ssl/csr     mode: 0700
+#   - /etc/ssl/certs   mode: 0755
+#
+# ==================================================================================================
+- name: "Create SSL CRL Directory"
+  file:
+    path: "/etc/ssl/crls"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  tags:
+    - ownca-crl
+
+# ==================================================================================================
+#
+# Create CRLs
+#
+# ==================================================================================================
+- name: Generate a CRL
+  community.crypto.x509_crl:
+    path: "{{ ownca_directory }}/crl/{{ sovereign_org_name }}-{{ item.name }}.crl"
+    privatekey_path: "{{ ownca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
+    privatekey_passphrase: "{{ item.password }}"
+    issuer:
+      CN: "{{ item.common_name }}"
+    last_update: "+0s"
+    next_update: "+7d"
+    revoked_certificates: "{{ item.revoked_certificates | default(ownca_revoked_certificates) }}"
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: true
+  tags:
+    - ownca-crl
+
+- name: Copy CA Certificates to server.
+  copy:
+    src: "{{ ownca_directory }}/crl/{{ sovereign_org_name }}-{{ item.name }}.crl"
+    dest: "/etc/ssl/crls/{{ sovereign_org_name }}-{{ item.name }}.crl"
+  loop: "{{ ownca_certificate_authorities }}"
+  become: yes
+  tags:
+    - ownca-crl

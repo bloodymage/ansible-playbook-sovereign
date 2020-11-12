@@ -1,0 +1,108 @@
+---
+# tasks file for sssd
+- name: "Install Common Apps"
+  apt:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - sssd
+    - install-packages
+  notify: restart sssd
+
+# - name: Create /etc/pki/nssdb directory
+#   file:
+#     path: "/etc/pki/nssdb"
+#     state: directory
+#     owner: root
+#     group: root
+#     mode: "0755"
+#   become: yes
+
+# - name: Create nssdb
+#   command: "certutil -N -d nssdb --empty-password"
+#   args:
+#     chdir: "/etc/pki"
+#   become: yes
+
+# - name: Install CA Certificates
+#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ item.name }}-ca.pem"
+#   become: yes
+#   loop: "{{ certificate_authorities }}"
+#   when:
+#     - item.name == "root"
+
+# - name: Install CA Certificates
+#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ item.name }}-ca-chain.pem"
+#   become: yes
+#   loop: "{{ certificate_authorities }}"
+#   when:
+#     - item.name != "root"
+
+# - name: Allow nss to read smartcards
+#   command: "modutil -dbdir /etc/pki/nssdb -add "OpenSC" -libfile opensc-pkcs11.so"
+
+- name: stop sssd
+  service:
+    name: sssd
+    state: stopped
+  become: yes
+  tags:
+    - never
+    - samba-domain-create
+
+- name: Leave Realm
+  command: "realm leave"
+  tags:
+    - never
+    - samba-domain-create
+
+- name: Clear old data
+  file:
+    path: /var/lib/sss/db
+    state: absent
+  tags:
+    - never
+    - samba-domain-create
+
+- name: Ensure DB directory exists
+  file:
+    path: /var/lib/sss/db
+    state: direcotory
+    owner: sssd
+    group: sssd
+    mode: "0755"
+  tags:
+    - never
+    - samba-domain-create
+
+- name: Join Realm
+  command: "realm join {{ ansible_domain }}"
+  become: yes
+  tags:
+    - never
+    - samba-domain-create
+
+- name: "Install krb5.conf"
+  template:
+    src: "{{ role_path }}/templates/krb5.conf.j2"
+    dest: "/etc/krb5.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: restart sssd
+  tags:
+    - sssd
+
+- name: "Install sssd.conf"
+  template:
+    src: "{{ role_path }}/templates/sssd.conf.j2"
+    dest: "/etc/sssd/sssd.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  become: yes
+  notify: restart sssd
+  tags:
+    - sssd

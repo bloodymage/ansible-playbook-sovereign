@@ -1,0 +1,215 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - mediawiki
+    - websites
+    - install-packages
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - mediawiki
+    - websites
+    - install-packages
+
+# - name: "Enable Apache Modules"
+#   community.general.apache2_module:
+#     state: present
+#     name: "{{ item }}"
+#   loop: "{{ mediawiki_apache_modules}}"
+#   notify: reload apache
+#   tags:
+#     - mediawiki
+#     - websites
+
+- name: "Install Mediawiki Site"
+  git:
+    repo: "https://gerrit.wikimedia.org/r/mediawiki/core.git" 
+    dest: "/srv/www/{{ item.name }}/w"
+    force: yes
+    depth: 1
+    version: "{{ mediawiki_version }}"
+    track_submodules: yes
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - mediawiki
+    - mediawiki-install
+    - websites
+
+- name: "Fetch External Libraries"
+  community.general.composer:
+    command: update
+    no-dev: yes
+    working_dir: "/srv/www/{{ item.name }}/w"
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - mediawiki
+    - mediawiki-install
+    - websites
+
+- name: "Install additional mediawiki extensions"
+  include: mediawiki_extensions.yml
+  loop: "{{ hosts }}"
+  loop_control:
+    loop_var: host
+  when:
+    - hosts is defined
+  tags:
+    - mediawiki
+    - mediawiki-install
+    - websites
+  
+- name: "Update Extensions"
+  command: "git submodule update --init --recursive"
+  args:
+    chdir: "/srv/www/{{ item.name }}/w/extensions"
+  loop: "{{ hosts }}"
+  become: yes
+  become_user: www-data
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - mediawiki
+    - mediawiki-install
+    - websites
+
+- name: "Install Additional mediawiki skins"
+  include: mediawiki_skins.yml
+  loop: "{{ hosts }}"
+  loop_control:
+    loop_var: host
+  when:
+    - hosts is defined
+  tags:
+    - mediawiki
+    - mediawiki-install
+    - websites
+
+- name: "Update Mediawiki Skins"
+  command: "git submodule update --init --recursive"
+  args:
+    chdir: "/srv/www/{{ item.name }}/w/skins"
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - mediawiki
+    - mediawiki-install
+    - websites
+
+- name: "Create ldap.json"
+  template:
+    src: "ldap.json.j2"
+    dest: "/srv/www/{{ item.name }}/w/ldap.json"
+    owner: www-data
+    group: www-data
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled
+    - mediawiki_ldap_config
+  tags:
+    - mediawiki
+    - mediawiki-config
+    - websites
+
+- name: "Update LocalSettings.php"
+  template:
+    src: "{{ role_path }}/templates/mediawiki_settings.php.j2"
+    dest: "/srv/www/{{ item.name }}/w/LocalSettings.php"
+    owner: www-data
+    group: www-data
+  become: yes
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - mediawiki
+    - mediawiki-config
+    - websites
+
+- name: "Update Mediawiki Database"
+  command: "php maintenance/update.php"
+  args:
+    chdir: "/srv/www/{{ item.name }}/w"
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled 
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  tags:
+    - mediawiki
+    - mediawiki-config
+    - websites
+
+- name: "Update Apache Sites-Available .conf"
+  template:
+    src: "{{ role_path }}/templates/mediawiki_apache.j2"
+    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "mediawiki"
+    - item.enabled is defined
+    - item.enabled 
+  notify: reload apache
+  tags:
+    - mediawiki
+    - mediawiki-config
+    - websites

@@ -1,0 +1,161 @@
+{{ ansible_managed | comment }}
+
+{% if myorigin is defined -%}
+  myorigin = {{ myorigin }}
+{% endif %}
+
+alias_maps =
+{% for map in  alias_maps %}
+  {{ map }}{{ "," if not loop.last else "" }}
+{% endfor %}
+alias_database = {{ alias_database }}
+
+append_dot_mydomain = {{ append_dot_mydomain }}
+biff = {{ biff }}
+delay_warning_time = {{ delay_warning_time }}
+readme_directory = {{ readme_directory }}
+{% if compatibility_level is defined -%}
+  compatibility_level = {{ compatibility_level }}
+{% endif %}
+inet_interfaces = {{ inet_interfaces }}
+inet_protocols = {{ inet_protocols }}
+{% if myorigin is defined -%}
+  myorigin = {{ myorigin }}
+{% endif %}
+mailbox_size_limit = {{ mailbox_size_limit }}
+
+{% if myhostname is defined -%}
+  myhostname = {{ myhostname }}
+{% endif %}
+mydestination =
+{% for destination in mydestination %}
+  {{ destination }}{{ "," if not loop.last else "" }}
+{% endfor %}
+{% if mynetworks is defined -%}
+  mynetworks =
+  {% for network in mynetworks %}
+    {{ network }}{{ "," if not loop.last else "" }}
+  {% endfor %}
+{% elif mynetworks_style is defined -%}
+  mynetworks_style = {{ mynetworks_style }}
+{% else -%}
+  mynetworks_style = host
+{% endif %}
+
+unknown_address_reject_code = {{ unknown_address_reject_code }}
+unknown_hostname_reject_code = {{ unknown_hostname_reject_code }}
+unknown_client_reject_code = {{ unknown_client_reject_code }}
+
+smtpd_use_tls = {{ smtpd_use_tls }}
+smtpd_tls_session_cache_database = {{ smtpd_tls_session_cache_database }}
+smtpd_tls_ask_ccert = {{ smtpd_tls_ask_ccert }}
+smtpd_tls_cert_file = {{ smtpd_tls_cert_file }}
+smtpd_tls_key_file = {{ smtpd_tls_key_file }}
+smtpd_tls_CAfile = {{ smtpd_tls_CAfile }}
+smtpd_tls_ciphers = {{ smtpd_tls_ciphers }}
+smtpd_tls_loglevel = {{ smtpd_tls_loglevel }}
+smtpd_tls_session_cache_timeout = {{ smtpd_tls_session_cache_timeout }}
+smtpd_tls_auth_only = {{ smtpd_tls_auth_only }}
+smtpd_tls_received_header = {{ smtpd_tls_received_header }}
+smtpd_banner = {{ smtpd_banner }}
+smtpd_client_restrictions =
+{% for restriction in smtpd_client_restrictions %}
+  {{ restriction }}{{ "," if not loop.last else "" }}
+{% endfor %}
+smtpd_helo_required = {{ smtpd_helo_required }}
+smtpd_helo_restrictions =
+{% for restriction in smtpd_helo_restrictions %}
+  {{ restriction }}{{ "," if not loop.last else "" }}
+{% endfor %}
+smtpd_sender_login_maps =
+{% for map in smtpd_sender_login_maps %}
+  {{ map }}{{ "," if not loop.last else "" }}
+{% endfor %}
+smtpd_sender_restrictions =
+{% for restriction in smtpd_sender_restrictions %}
+  {{ restriction }}{{ "," if not loop.last else "" }}
+{% endfor %}
+smtpd_recipient_restrictions =
+{% for restriction in smtpd_recipient_restrictions %}
+  {{ restriction }}{{ "," if not loop.last else "" }}
+{% endfor %}
+{% if relay_domains is defined -%}
+  relay domains =
+  {% for domain in relay_domains %}
+    {{ domain }}{{ "," if not loop.last else "" }}
+  {% endfor %}
+{% endif %}
+
+smtpd_relay_restrictions =
+{% for restriction in smtpd_relay_restrictions %}
+  {{ restriction }}{{ "," if not loop.last else "" }}
+{% endfor %}
+smtpd_sasl_path = {{ smtpd_sasl_path }}
+smtpd_sasl_type = {{ smtpd_sasl_type }}
+smtpd_sasl_auth_enable = {{ smtpd_sasl_auth_enable }}
+smtpd_sasl_security_options = {{ smtpd_sasl_security_options }}
+smtpd_sasl_tls_security_options = {{ smtpd_sasl_tls_security_options }}
+smtpd_sasl_authenticated_header = {{ smtpd_sasl_authenticated_header }}
+smtpd_sasl_local_domain = {{ smtpd_sasl_local_domain }}
+
+smtp_tls_note_starttls_offer = {{ smtp_tls_note_starttls_offer }}
+smtp_tls_session_cache_database = {{ smtp_tls_session_cache_database }}
+smtp_tls_security_level = {{ smtp_tls_security_level }}
+smtp_tls_wrappermode = {{ smtp_tls_wrappermode }}
+smtp_sasl_auth_enable = {{ smtp_sasl_auth_enable }}
+smtp_sasl_security_options = {{ smtp_sasl_security_options }}
+smtp_sasl_password_maps = {{ smtp_sasl_password_maps }}
+smtp_sender_dependent_authentication = {{ smtp_sender_dependent_authentication }}
+
+tls_random_source = {{ tls_random_source }}
+recipient_delimiter = {{ recipient_delimiter }}
+mailbox_transport = {{ mailbox_transport }}
+
+{% if relay_host is defined -%}
+  relayhost = {{ relay_host }}
+{% endif %}
+sender_dependent_relayhost_maps = {{ sender_dependent_relayhost_maps }}
+
+canonical_maps = {{ canonical_maps }}
+home_mailbox = {{ home_mailbox }}
+{% if message_size_limit is defined -%}
+  message_size_limit = {{ message_size_limit }}
+{% endif %}
+local_recipient_maps = {{ local_recipient_maps }}
+virtual_alias_maps =
+{% for map in virtual_alias_maps %}
+  {{ map }}{{ "," if not loop.last else "" }}
+{% endfor %}
+virtual_mailbox_domains =
+{% for domain in virtual_mailbox_domains %}
+  {{ domain }}{{ "," if not loop.last else "" }}
+{% endfor %}
+
+virtual_mailbox_maps =
+{% for map in virtual_mailbox_maps %}
+  {{ map }}{{ "," if not loop.last else "" }}
+{% endfor %}
+virtual_transport = {{ virtual_transport }}
+
+dovecot_destination_recipient_limit = {{ dovecot_destination_recipient_limit }}
+
+milter_default_action = {{ milter_default_action }}
+milter_connect_macros = {{ milter_connect_macros }}
+non_smtpd_milters = {{ non_smtpd_milters }}
+smtpd_milters =
+{% for milter in smtpd_milters %}
+  {{ milter }}{{ "," if not loop.last else "" }}
+{% endfor %}
+
+default_destination_concurrency_limit = {{ default_destination_concurrency_limit }}
+disable_vrfy_command = {{ disable_vrfy_command }}
+relay_destination_concurrency_limit = {{ relay_destination_concurrency_limit }}
+transport_maps = {{ transport_maps }}
+
+postscreen_access_list = {{ postscreen_access_list }}
+postscreen_dnsbl_action = {{ postscreen_dnsbl_action }}
+postscreen_dnsbl_sites =
+{% for site in postscreen_dnsbl_sites %}
+  {{ site }}{{ "," if not loop.last else "" }}
+{% endfor %}
+postscreen_greet_action = {{ postscreen_greet_action }}

@@ -1,0 +1,126 @@
+#!/bin/bash
+
+function decToBin () {
+    echo "ibase=10; obase=2; $1" | bc;
+}
+
+function decTohex() {
+    bc <<< "obase=16; $1";
+}
+
+function beep () {
+    echo -e -n \\a
+}
+
+function hexscroll() {
+    pv -qL 90 /dev/urandom | xxd -c $(( ($COLUMNS-10)*2/7 ));
+}
+
+# move up $@ directories
+function up() {
+    local d=""
+    limit=$1
+    for ((i=1 ; i <= limit ; i++))
+    do
+	      d=$d/..
+    done
+    d=$(echo $d | sed 's/^\///')
+    if [ -z "$d" ]; then
+	      d=..
+    fi
+    cd $d
+}
+
+# move up $@ directories
+function back() {
+    limit=$1
+    for ((i=1 ; i <= limit ; i++))
+    do
+	      popd
+    done
+}
+
+
+# Inspiration: http://serverfault.com/a/5551 (but basically rewritten)
+function fawk() {
+    USAGE="\
+usage:  fawk [<awk_args>] <field_no>
+        Ex: getent passwd | grep andy | fawk -F: 5
+"
+    if [ $# -eq 0 ]; then
+	      echo -e "$USAGE" >&2
+	      return
+	      #exit 1 # whoops! that would quit the shell!
+    fi
+
+    # bail if the *last* argument isn't a number (source:
+    # http://stackoverflow.com/a/808740)
+    last=${@:(-1)}
+    if ! [ $last -eq $last ] &>/dev/null; then
+	      echo "FAWK! Last argument (awk field) must be numeric." >&2
+	      echo -e "$USAGE" >&2;
+	      return
+    fi
+
+    if [ $# -gt 1 ]; then
+	      # Source:
+	      # http://www.cyberciti.biz/faq/linux-unix-bsd-apple-osx-bash-get-last-argument/5F
+	      rest=${@:1:$(( $# - 1 ))}
+    else
+	      rest='' # just to be sure
+    fi
+    awk $rest "{ print  \$$last }"
+} # fawk
+
+
+function mkdircd () {
+    mkdir -p "$@" &&
+    eval cd "\"\$$#\"";
+}
+
+function _cd {
+    # typing just `_cd` will take you $HOME ;)
+    if [ "$1" == "" ]; then
+	      pushd "$HOME" > /dev/null
+	      # use `_cd -` to visit previous directory
+    elif [ "$1" == "-" ]; then
+	      pushd "$OLDPWD" > /dev/null
+	      # use `_cd -n` to go n directories back in history
+    elif [[ "$1" =~ ^-[0-9]+$ ]]; then
+	      for i in `seq 1 ${1/-/}`; do
+	          popd > /dev/null
+	      done
+	      # use `_cd -- <path>` if your path begins with a dash
+    elif [ "$1" == "--" ]; then
+	      shift pushd -- "$@" > /dev/null
+	      # basic case: move to a dir and add it to history
+    else
+	      pushd "$@" > /dev/null
+    fi
+}
+
+# replace standard `cd` with enhanced version, ensure tab-completion works
+
+alias cd='_cd'
+complete -d cd
+
+function bash_reload () {
+    builtin exec bash
+}
+
+function imageloc () {
+    echo "https://www.google.com/maps/place/$(exiftool -ee -p '$gpslatitude, $gpslongitude' -c "%d?%d'%.2f"\" image.jpg 2> /dev/null | sed -e "s/ //g")"
+}
+
+function firefoxurl () {
+    URL=$(imageloc)
+    /usr/bin/firefox $URL
+}
+
+function update_timestamp () {
+    find . -type f -print0 -exec sh -c '
+        for file do
+	    touch "$file"
+        done
+    ' sh {} +
+}

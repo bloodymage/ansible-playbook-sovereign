@@ -1,0 +1,23 @@
+---
+# defaults file for clamav
+packages:
+  #- lha
+  #- rar
+  #- unrar
+  - arj
+  - bzip2
+  - cabextract
+  - clamav
+  - clamav-milter
+  - clamav-milter
+  - cpio
+  - file
+  - gzip
+  - lzop
+  - nomarch
+  - p7zip
+  - pax
+  - rpm
+  - unzip
+  - zip
+  - zoo

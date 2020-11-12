@@ -1,0 +1,59 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_os_family | lower }}.yml"
+        - "debian.yml"
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - hostname
+
+- name: Install packages
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - hostname
+    - install-packages
+
+# ==================================================================================================
+#
+# Task: "Set Hostname"
+#
+# Allows changing a hostname simply by updating the hosts IP address
+#
+# ==================================================================================================
+- name: "Print Variables"
+  debug:
+    msg:
+      - "Hostname: {{ inventory_hostname }}"
+    verbosity: 2
+  tags:
+    - hostname
+
+- name: "Set Hostname"
+  hostname:
+    name: "{{ inventory_hostname_short }}"
+  become: yes
+  when:
+    - inventory_hostname != "localhost"
+    - ansible_os_family != "Windows"
+    - ansible_network_os is not defined
+  tags:
+    - hostname
+
+- name: "RouterOS: Set Hostname"
+  routeros_command:
+    commands:
+      - /system identity print
+  when:
+    - ansible_network_os is defined
+    - ansible_network_os == 'routeros'
+  tags:
+    - hostname

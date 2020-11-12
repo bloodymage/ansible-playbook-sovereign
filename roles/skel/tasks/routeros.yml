@@ -1,0 +1,18 @@
+---
+# ======================================================================
+#
+# Update RouterOS
+#
+# ======================================================================
+- name: "{{ ansible_os_family }}: Print Variables"
+  debug:
+    msg:
+      - "Hostname: {{ inventory_hostname }}"
+    verbosity: 2
+  tags:
+    - basic_config
+
+- name: "RouterOS: Set Hostname"
+  routeros_command:
+    commands:
+      - /system identity print

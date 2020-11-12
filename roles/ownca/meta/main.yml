@@ -1,0 +1,18 @@
+---
+dependencies: []
+
+galaxy_info:
+  role_name: ownca
+  author: G Derber
+  description: Create a local Certificate Authority
+  min_ansible_version: 2.9
+  platforms:
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - ownca
+    - "certificate authority"

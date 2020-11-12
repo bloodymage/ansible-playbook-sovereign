@@ -1,0 +1,17 @@
+# ======================================================================
+#
+# Update RouterOS
+#
+# ======================================================================
+- name: "RouterOS: Set Hostname"
+  routeros_command:
+    commands:
+      - /system identity print
+  when:
+    - node_setup is defined
+    - node_setup
+
+# - name: Update RouterOS
+#   routeros_command:
+#     commands:
+#       - /system package update install

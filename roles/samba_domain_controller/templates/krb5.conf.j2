@@ -1,0 +1,23 @@
+[libdefaults]
+        default_realm = {{ ansible_domain | upper }}
+        dns_lookup_realm = false
+        dns_lookup_kdc = true
+{% if smart_card_login -%}
+  pkinit_anchors = FILE:{{ sovereign_component_ca_chain_file }}
+
+  [appdefaults]
+  pkinit_anchors = FILE:{{ sovereign_component_ca_chain_file }}
+
+  [realms]
+  {{ ansible_domain | upper }} = {
+  pkinit_require_eku = true
+  }
+
+  [kdc]
+  enable-pkinit = yes
+  pkinit_identity = FILE:/etc/ssl/certs/{{ ansible_fqdn }}.pem,/etc/ssl/private/{{ ansible_fqdn }}.key
+  pkinit_anchors = FILE:{{ sovereign_component_ca_chain_file }}
+  pkinit_principal_in_certificate = yes
+  pkinit_win2k = no
+  pkinit_win2k_require_binding = yes
+{% endif %}

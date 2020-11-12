@@ -1,0 +1,10 @@
+packages:
+  - apache2
+  - php
+  - php-mysql
+#  - git
+#  - libsemanage-python
+#  - libselinux-python
+
+#drupal_version: 
+

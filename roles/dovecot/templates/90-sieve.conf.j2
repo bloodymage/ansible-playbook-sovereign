@@ -1,0 +1,83 @@
+# {{ ansible_managed }}
+
+plugin {
+{% if sieve is defined %}
+  sieve = {{ sieve }}
+{% endif %}
+{% if sieve_default is defined %}
+  sieve_default = {{ sieve_default }}
+{% endif %}
+{% if sieve_default_name is defined %}
+  sieve_default_name = {{ sieve_default_name }}
+{% endif %}
+{% if sieve_global is defined %}
+  sieve_global = {{ sieve_global }}
+{% endif %}
+{% if sieve_discard is defined %}
+  sieve_discard = {{ sieve_discard }}
+{% endif %}
+{% for location in sieve_before %}
+  sieve_before{{ loop.index if not loop.first else "" }} = {{ location }}
+{% endfor %}
+{% for location in sieve_after %}
+  sieve_after{{ loop.index if not loop.first else "" }} = {{ location }}
+{% endfor %}
+{% if sieve_extensions is defined %}
+  sieve_extensions = {{ sieve_extensions }}
+{% endif %}
+{% if sieve_global_extensions is defined %}
+  sieve_global_extensions = {{ sieve_global_extensions }}
+{% endif %}
+{% if sieve_plugins is defined %}
+  sieve_plugins = {{ sieve_plugins }}
+
+  {% for mailbox in imapsieve_mailboxes -%}
+    imapsieve_mailbox{{ loop.index }}_name = {{ mailbox.name }}
+    {% if mailbox.from is defined %}
+      imapsieve_mailbox{{ loop.index }}_from = {{ mailbox.from }}
+    {% endif %}
+    imapsieve_mailbox{{ loop.index }}_causes = COPY
+    imapsieve_mailbox{{ loop.index }}_{{ mailbox.timing }} = file:{{ sieve_pipe_bin_dir }}/report-{{ mailbox.type }}.sieve
+
+{% endfor %}
+{% endif %}
+{% if recipient_delimiter is defined %}
+  recipient_delimiter = {{ recipient_delimiter }}
+{% endif %}
+{% if sieve_max_script_size is defined %}
+  sieve_max_script_size = {{ sieve_max_script_size }}
+{% endif %}
+{% if sieve_max_actions is defined %}
+  sieve_max_actions = {{ sieve_max_actions }}
+{% endif %}
+{% if sieve_max_redirects is defined %}
+  sieve_max_redirects = {{ sieve_max_redirects }}
+{% endif %}
+{% if sieve_quota_max_scripts is defined %}
+  sieve_quota_max_scripts = {{ sieve_quota_max_scripts }}
+{% endif %}
+{% if sieve_quota_max_storage is defined %}
+  sieve_quota_max_storage = {{ sieve_quota_max_storage }}
+{% endif %}
+{% if sieve_user_email is defined %}
+  sieve_user_email = {{ sieve_user_email }}
+{% endif %}
+{% if sieve_user_log is defined %}
+  sieve_user_log = {{ sieve_user_log }}
+{% endif %}
+{% if sieve_redirect_envelope_from is defined %}
+  sieve_redirect_envelope_from = {{ sieve_redirect_envelope_from }}
+{% endif %}
+{% if sieve_trace_dir is defined %}
+  sieve_trace_dir = {{ sieve_trace_dir }}
+{% endif %}
+{% if sieve_trace_level is defined %}
+  sieve_trace_level = {{ sieve_trace_level }}
+{% endif %}
+{% if sieve_trace_debug is defined %}
+  sieve_trace_debug = {{ sieve_trace_debug }}
+{% endif %}
+{% if sieve_trace_address is defined %}
+  sieve_trace_address = {{ sieve_trace_address }}
+{% endif %}
+}

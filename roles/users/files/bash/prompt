@@ -1,0 +1,370 @@
+#!/bin/bash
+
+#########
+#
+# Build the Command Prompt
+#
+#########
+
+function loadprompt () {
+    EXITSTATUS="$?"    # This Needs to be first
+    PS1=""
+
+    #Set Default Mode
+    if [ -z "$@" ]; then
+	      MODE=main
+    else
+	      MODE="$1"
+    fi
+
+    # set a fancy prompt (non-color, unless we know we "want" color)
+    case "$TERM" in
+	      xterm-color) color_prompt=yes;;
+    esac
+
+    # uncomment for a colored prompt, if the terminal 
+    # has the capability; turned
+    # off by default to not distract the user: 
+    # the focus in a terminal window
+    # should be on the output of commands, not on the prompt
+    force_color_prompt=yes
+
+    if [ -n "$force_color_prompt" ]; then
+	      if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+	          # We have color support; assume it's compliant with Ecma-48
+	          # (ISO/IEC-6429). (Lack of such support 
+	          # is extremely rare, and such
+	          # a case would tend to support setf rather than setaf.)
+	          color_prompt=yes
+	      else
+	          color_prompt=
+	      fi
+    fi
+
+    export PROMPT_COMMAND=__prompt_command_full # Func to gen PS1 after CMDs
+}
+
+
+function __prompt_command_full() {
+    history -a
+    #    EXITSTATUS=$?
+    PS1=""
+
+    if [ "$color_prompt" = yes ]; then
+	      define_colors
+    fi
+
+    local LOADTEXT=$(loadtext)
+    local USERTEXT=$(usertext)
+    local JC=$(job_color)
+
+    # Repositories
+    # git
+    #local BRANCH=$(__git_prompt)
+
+    # subversion
+    # currently disabled as I have nothing to check it with
+    # local SVNBRANCH=$(__svn_branch)
+
+    local BACKGROUND_JOBS=$(background_jobs)
+    local STOPPED_JOBS=$(stopped_jobs)
+    local DEBIAN_CHROOT=$(__debian_chroot)
+    if [[ -n ${BATTERY} ]]; then
+	      local BATTERY=$(bat_color)
+    else
+	      local BATTERY=""
+    fi
+    local FC=$(disk_color)
+    local SMILE=$(last_command)
+    local HOSTTEXT=$(host_color)
+    local SCREEN=$(__screen)
+
+    PS1="\n\
+${DEBIAN_CHROOT} \n\
+[ ${USERTEXT}${HOSTTEXT} ] \n\
+[ ${LOADTEXT}${BATTERY}${SMILE}${SCREEN}${BACKGROUND_JOBS}${STOPPED_JOBS}] \n\
+[ ${FC}${BRANCH}] \n\
+${JC}\\$ \[${DC}\]"
+
+    xterm_settings
+}
+
+
+function usertext () {
+    if [ "$color_prompt" = yes ]; then
+    	# Root different color
+	if [ $UID -eq 0 ]; then
+	    #root user color
+	    echo -ne "\[${RED}\]\u\[${DC}\]"
+	elif [[ -n ${SUDO_USER} && ${SUDO_USER} != ${USER} ]]; then 
+	    echo -ne "\[${BYELLOW}\]\u\[${DC}\]" # User is not login user.
+	else
+	    echo -ne "\[${GREEN}\]\u\[${DC}\]"
+	fi
+    else
+	echo -ne "\u"
+    fi
+}
+
+# Returns a color indicating system load.
+function loadtext() {
+
+    local LOADPER=$(loadper)
+
+    local LOADCOLOR=$(loadcolor)
+
+    if [ ${LOADPER} -gt ${HIGHUSE} ]; then
+	local SYMBOL='☢'
+    elif [ ${LOADPER} -gt ${MEDUSE} ]; then
+	local SYMBOL='⚠'
+    elif [ ${LOADPER} -gt ${LOWUSE} ]; then
+	local SYMBOL='⚙'
+    else
+	local SYMBOL='☃'
+    fi
+    if [ "${MODE}" = "full" ] || [ "${MODE}" = "date" ]; then
+	echo -ne "\[${LOADCOLOR}\]\A ${SYMBOL} \[${DC}\]"
+    else
+	echo -ne "\[${LOADCOLOR}\]${SYMBOL} \[${DC}\]"
+    fi
+}
+
+function background_jobs () {
+    local BKGJBS=$(jobs -r | wc -l | tr -d ' ')
+    if [ ${BKGJBS} -gt 2 ]; then
+	echo -ne "\[${RED}\]bg:${BKGJBS}\[${DC}\] "
+    elif [ ${BKGJBS} -gt 0 ]; then
+	echo -ne "\[${YELLOW}\]bg:${BKGJBS}\[${DC}\] "
+    fi
+}
+
+function stopped_jobs () {
+    local STPJBS=$(jobs -s | wc -l | tr -d ' ')
+    if [ ${STPJBS} -gt 2 ]; then
+	echo -ne "\[${RED}\]stp:${STPJBS}\[${DC}\] "
+    elif [ ${STPJBS} -gt 0 ]; then
+	echo -ne "\[${YELLOW}\]stp:${STPJBS}\[${DC}\] "
+    fi
+}
+
+# Returns a color according to running/suspended jobs. 
+function job_color() { 
+    if [ $(jobs -s | wc -l) -gt "0" ]; then 
+	echo -en "\[${BYELLOW}\]"
+    elif [ $(jobs -r | wc -l) -gt "0" ] ; then 
+	echo -en "\[${BCYAN}\]" 
+    elif [ $(jobs -r | wc -l) -gt "0" ] && [ $(jobs -s | wc -l) -gt "0" ]; then 
+	echo -en "\[${RED}\]"
+    else
+	if [ $UID -eq 0 ]; then 
+	    #root user color 
+	    echo -ne "\[${RED}\]"
+	elif [[ ${USER} != $(logname) ]]; then 
+	    echo -ne "\[${BYELLOW}\]" # User is not login user.
+	else
+	    echo -ne "\[${GREEN}\]"
+	fi
+    fi 
+}
+
+
+#Returns a color according to free disk space in $PWD. 
+function disk_color() { 
+    if [ ! -w "${PWD}" ] ; then 
+	echo -ne "\[${RED}\]\w \[${DC}\] " # No 'write' privilege in the current directory. 
+    elif [ -s "${PWD}" ] ; then 
+	local used=$(command df -P "$PWD" | awk 'END {print $5} {sub(/%/,"")}') 
+	if [ ${used} -gt ${ALERTUSE} ]; then 
+	    echo -ne "${ALERT}\w \[${DC}\] " # Disk almost full (>95%). 
+	elif [ ${used} -gt ${HIGHUSE} ]; then 
+	    echo -ne "\[${BRED}\]\w \[${DC}\] " # Free disk space almost gone. 
+	else echo -ne "\[${GREEN}\]\w \[${DC}\] " # Free disk space is ok. 
+	fi 
+    else 
+	echo -ne "\[${CYAN}\]\w \[${DC}\] " # Current directory is size '0' (like /proc, /sys etc). 
+    fi 
+}
+
+
+# Display the branch name of git repository 
+# Green -> clean 
+# purple -> untracked files 
+# red -> files to commit 
+function __git_prompt() {   
+    ### Add Git Status ### {{{
+    ## Inspired by http://www.terminally-incoherent.com/blog/2013/01/14/whats-in-your-bash-prompt/
+    if [[ $(command -v git) ]]; then
+	local GStat="$(git status --porcelain -b 2>/dev/null | tr '\n' ':')"
+
+	if [ "$GStat" ]; then
+	    ### Fetch Time Check ### {{{
+	    local LAST=$(stat -c %Y $(git rev-parse --git-dir 2>/dev/null)/FETCH_HEAD 2>/dev/null)
+	    if [ "${LAST}" ]; then
+		local TIME=$(echo $(date +"%s") - ${LAST} | bc)
+		## Check if more than 60 minutes since last
+		if [ "${TIME}" -gt "3600" ]; then
+		    git fetch 2>/dev/null
+		    GITSTATUSPROMPT= ' +'
+		    ## Refresh var
+		    local GStat="$(git status --porcelain -b 2>/dev/null | tr '\n' ':')"
+		fi
+	    fi
+	    ### End Fetch Check ### }}}
+	    
+	    ### Test For Changes ### {{{
+	    ## Change this to test for 'ahead' or 'behind'!
+	    local GChanges="$(echo ${GStat} | tr ':' '\n' | grep -v "^$" | grep -v "^\#\#" | wc -l | tr -d ' ')"
+	    if [ "$GChanges" == "0" ]; then
+		local GitCol=${MAGENTA}
+	    else
+		local GitCol=${CYAN}
+	    fi
+	    ### End Test Changes ### }}}
+	    
+	    ### Find Branch ### {{{
+	    local GBra="$(echo ${GStat} | tr ':' '\n' | grep "^##" | cut -c4- | grep -o "^[a-zA-Z/]\{1,\}[^\.]")"
+	    if [ "$GBra" ]; then
+		if [ "$GBra" == "master" ]; then
+		    local GBra="Master"			# Because why waste space
+		fi
+	    else
+		local GBra="ERROR"			# It could happen supposedly?
+	    fi
+	    ### End Branch ### }}}
+
+	    GITSTATUSPROMPT=" \[${GitCol}\][$GBra]\[${DC}\]"	# Add result to prompt
+	    
+	    ### Find Commit Status ### {{{
+	    ## Test Modified and Untracked for "0"
+	    #
+	    # local GDel="$(echo ${GStat} | tr ':' '\n' | grep -c "^[ MARC]D")"
+
+	    local GAhe="$(echo ${GStat} | tr ':' '\n' | grep "^##" | grep -o "ahead [0-9]\{1,\}" | grep -o "[0-9]\{1,\}")"
+	    if [ "$GAhe" ]; then
+		GITSTATUSPROMPT="\[${GREEN}\]↑\[${DC}\]${GAhe}"	# Ahead
+	    fi
+
+	    ## Needs a `git fetch`
+	    local GBeh="$(echo ${GStat} | tr ':' '\n' | grep "^##" | grep -o "behind [0-9]\{1,\}" | grep -o "[0-9]\{1,\}")"
+	    if [ "$GBeh" ]; then
+		GITSTATUSPROMPT+="\[${RED}\]↓\[${DC}\]${GBeh}"	# Behind
+	    fi
+	    
+	    local GMod="$(echo ${GStat} | tr ':' '\n' | grep -c "^[ MARC]M")"
+	    if [ "$GMod" -gt "0" ]; then
+		GITSTATUSPROMPT+="\[${MAGENTA}\]≠\[${DC}\]${GMod}"	# Modified
+	    fi
+
+	    local GUnt="$(echo ${GStat} | tr ':' '\n' | grep -c "^\?")"
+	    if [ "$GUnt" -gt "0" ]; then
+		GITSTATUSPROMPT+="\[${YELLOW}\]?\[${DC}\]${GUnt}"	# Untracked
+	    fi
+	    ### End Commit Status ### }}}
+	fi
+    else
+	MISSING_ITEMS+="git-prompt, "
+    fi
+    echo -ne "${GITSTATUSPROMPT} "
+    ### End Git Status ### }}}
+}
+
+
+last_command () {
+    if [ ${MODE} = full ]; then
+	      local CMDNUMB="\! "
+    else
+	      local CMDNUMB=""
+    fi
+
+    # Last Command Success
+    if [ ${EXITSTATUS} = 0 ]; then
+	#smiley
+	local FACE='☺'
+	if [ "$color_prompt" = yes ]; then
+            local SMILE="\[${GREEN}\]${FACE} ${CMDNUMB}\[${DC}\]"
+	else
+            local SMILE=":) ${CMDNUMB}"
+	fi
+    else
+	#frowney
+	local FACE='☹'
+	local EXITSTATUS="${EXITSTATUS} "
+	if [ "$color_prompt" = yes ]; then
+            local SMILE="\[${BRED}\]${FACE} ${EXITSTATUS}${CMDNUMB}\[${DC}\]"
+	else
+            local SMILE=":( ${EXITSTATUS}${CMDNUMB}"
+	fi
+    fi
+    echo -en "${SMILE}"
+}
+
+
+
+host_color () {
+    if [[ -z ${BOXNAME} ]]; then
+	local BOXTEXT="\h"
+    else
+	local BOXTEXT=${BOXNAME}
+    fi
+    # Only Display Host info if remote login
+    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
+	if [ "$color_prompt" = yes ]; then
+            local HOSTTEXT="@\[${HC}\]${BOXTEXT} \[${DC}\]"
+	else
+            local HOSTTEXT="@${BOXTEXT} "
+	fi
+    fi
+    echo -en $HOSTTEXT
+}
+
+
+function __svn_prompt () {
+echo -en "SVN"
+#REV=$(svn info 2>/dev/null | grep Revision | sed -e 's/Revision: //')
+    #[ "$REV" ] || return
+    #[ "$(svn st)" ] && DIRTY=' *'
+    
+    #subversion2
+    #parse_svn_branch() { 
+    #parse_svn_url | sed -e ’s#^’“$(parse_svn_repository_root)”‘##g’ | awk ‘{print “ (svn::”$1")“ }’ 
+    #}
+    #parse_svn_url() { 
+    #svn info 2>/dev/null | sed -ne ’s#^URL: ##p' 
+    #}
+    #parse_svn_repository_root() { 
+    #svn info 2>/dev/null | sed -ne ’s#^Repository Root: ##p' 
+    #
+}
+
+__screen () {
+# SRCEEN
+    if [[ $TERM =~ screen ]] ; then
+	local SCREEN="\[${BCYAN}\] (${WINDOW}) \[${DC}\] "
+    else
+	local SCREEN=""
+    fi
+    echo -ne ${SCREEN}
+}
+
+__debian_chroot () {
+    # set variable identifying the chroot you work in 
+    # (used in the prompt below)
+    if [ -z "${debian_chroot:-}" ] && [ -r /etc/debian_chroot ]; then
+	      local debian_chroot=$(cat /etc/debian_chroot)
+	      echo -ne "\[${DC}\][ ${debian_chroot:+($debian_chroot)} ]\n"
+    fi
+}
+
+function xterm_settings () {
+    # Options for xterm
+    # If this is an xterm set the title to user@host:dir
+    case "$TERM" in
+	      xterm*|rxvt*)
+	          PS1="\[\033]0;${debian_chroot:+($debian_chroot)}\u@\h: \w\a\]$PS1"
+	          ;;
+	      *)
+	          ;;
+    esac
+}
+
+loadprompt $@

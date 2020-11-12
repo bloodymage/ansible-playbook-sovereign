@@ -1,0 +1,18 @@
+---
+- include: debian_family.yml
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_network_os is undefined
+    - inventory_hostname != 'localhost'
+  tags:
+    - basic_config
+    - upgrade
+
+- include: routeros.yml
+  when:
+    - ansible_network_os is not undefined
+    - ansible_network_os == 'routeros'
+
+- include: windows.yml
+  when:
+    - ansible_os_family == 'Windows'

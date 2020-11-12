@@ -1,0 +1,107 @@
+# {{ ansible_managed }}
+<VirtualHost *:80>
+	ServerName {{ item.name }}
+	Redirect / https://{{ item.name }}/
+</VirtualHost>
+
+<VirtualHost *:443>
+	ServerName {{ item.name }}
+	ServerAdmin webmaster@{{ item.name }}
+
+	DocumentRoot /srv/www/{{ item.name }}
+
+	<Directory /srv/www/{{ item.name }}>
+		Options +FollowSymLinks
+		AllowOverride All
+		<IfVersion >= 2.3>
+			Require all granted
+		</IfVersion>
+		<IfVersion < 2.3>
+			         order allow,deny
+			         allow from all
+		           </IfVersion>
+
+RewriteEngine On
+RewriteRule ^/?wiki(/.*)?$ %{DOCUMENT_ROOT}/w/index.php [PT,L]
+RewriteRule ^/*$ %{DOCUMENT_ROOT}/w/index.php [PT,L]
+
+{% if mediawiki_kerberos_ad_sso -%} 
+  AuthType Kerberos
+  Krb5Keytab /etc/apache2/{{ item.name }}.keytab
+  KrbServiceName Any 
+  KrbLocalUserMapping On
+  KrbAuthRealms {{ ansible_domain | upper }}
+  AuthLDAPBindDN "cn={{ mediawiki_ldap_authenticator }},{{ mediawiki_ldap_userdn }}" 
+  AuthLDAPBindPassword "{{ mediawiki_ldap_password }}" 
+  AuthLDAPURL "ldap://dc.{{ ansible_domain }}/{{ mediawiki_ldap_userdn }}?sAMAccountName,mail,displayName?sub?(objectClass=*)" 
+  Require ldap-attribute attribute="value" 
+{% endif %} 
+
+</Directory>
+
+
+<Directory /srv/www/{{ item.name }}/config>
+	Options -FollowSymLinks
+	AllowOverride None
+  <IfModule mod_php7.c>
+    php_admin_flag engine off
+  </IfModule>
+  <IfModule mod_php5.c>
+    php_admin_flag engine off
+  </IfModule>
+</Directory>
+
+<Directory /srv/www/{{ item.name }}/w/images>
+	Options -FollowSymLinks
+	AllowOverride None
+  <IfModule mod_php7.c>
+    php_admin_flag engine off
+  </IfModule>
+  <IfModule mod_php5.c>
+    php_admin_flag engine off
+  </IfModule>
+</Directory>
+
+<Directory /srv/www/{{ item.name }}/w/upload>
+	Options -FollowSymLinks
+	AllowOverride None
+  <IfModule mod_php7.c>
+    php_admin_flag engine off
+  </IfModule>
+  <IfModule mod_php5.c>
+    php_admin_flag engine off
+  </IfModule>
+</Directory>
+
+<Directory /srv/www/{{ item.name }}/.well-known/acme-challenges>
+	Options -FollowSymLinks
+	AllowOverride None
+</Directory>
+
+SSLEngine on
+SSLCertificateFile "{{ item.ssl_certificate_file }}"
+SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
+
+#SSLCertificateChainFile /etc/apache2/ssl.crt/server-ca.crt
+SSLCACertificatePath /etc/ssl/certs/
+#SSLCACertificateFile 
+#SSLCARevocationPath /etc/apache2/ssl.crl/
+#SSLCARevocationFile /etc/apache2/ssl.crl/ca-bundle.crl
+#SSLVerifyClient require
+#SSLVerifyDepth  10
+#SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire
+
+<FilesMatch "\.(cgi|shtml|phtml|php)$">
+	SSLOptions +StdEnvVars
+</FilesMatch>
+<Directory /usr/lib/cgi-bin>
+	SSLOptions +StdEnvVars
+</Directory>
+
+#LogLevel info ssl:warn
+LogLevel debug
+
+ErrorLog ${APACHE_LOG_DIR}/{{ item.name }}/error.log
+CustomLog ${APACHE_LOG_DIR}/{{ item.name }}/access.log combined
+
+</VirtualHost>

@@ -1,0 +1,13 @@
+- hosts: dns_servers
+  roles:
+    - bloodymage.rebeldream.bind
+
+- hosts: all:!localhost
+  ignore_unreachable: yes
+  roles:
+    - bloodymage.rebeldream.dns_forwardzones
+
+- hosts: all:!localhost
+  ignore_unreachable: yes
+  roles:
+    - bloodymage.rebeldream.dns_reversezones

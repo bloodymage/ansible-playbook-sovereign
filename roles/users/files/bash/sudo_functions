@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Apt related commands
+alias aptpurge='sudo aptitude purge $(aptitude search ~c -F %p)'
+alias upgrade='sudo apt-get update && sudo apt-get upgrade'
+
+# Forgot Sudo
+alias please='sudo $(history -p !!)'

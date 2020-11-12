@@ -1,0 +1,48 @@
+# {{ ansible_managed }}
+
+# ==================================================================================================
+#
+# Global parameters
+#
+# ==================================================================================================
+[global]
+netbios name = {{ ansible_fqdn.split('.')[0] | upper }}
+realm = {{ ansible_domain | upper }}
+server role = active directory domain controller
+server services = s3fs, rpc, nbt, wrepl, ldap, cldap, kdc, drepl, winbindd, ntp_signd, kcc, dnsupdate
+workgroup = {{ ansible_domain.split('.')[0] }}
+idmap_ldb:use rfc2307 = yes
+
+# ==================================================================================================
+#
+# User Settings
+#
+# ==================================================================================================
+username map = /etc/samba/user.map
+
+# ==================================================================================================
+#
+# TLS Settings
+#
+# ==================================================================================================
+tls enabled  = yes
+tls keyfile  = /etc/ssl/private/{{ ansible_fqdn }}.key
+tls certfile = /etc/ssl/certs/{{ ansible_fqdn }}.pem
+tls cafile   = {{ soverign_component_ca_chain_file }}
+tls crlfile = /etc/ssl/crls/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}.crl
+
+{% if schema_update_allowed is defined -%}
+  dsdb:schema update allowed = {{ schema_update_allowed }}
+{% endif %}
+# ==================================================================================================
+#
+# Shares
+#
+# ==================================================================================================
+[netlogon]
+path = /var/lib/samba/sysvol/{{ ansible_domain }}/scripts
+read only = No
+
+[sysvol]
+path = /var/lib/samba/sysvol
+read only = No

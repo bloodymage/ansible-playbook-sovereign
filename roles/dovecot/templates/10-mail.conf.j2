@@ -1,0 +1,105 @@
+# {{ ansible_managed }}
+
+mail_location = {{ mail_location }}
+
+{% for namespace in dovecot_namespaces -%}
+  namespace {{ namespace.name }} {
+  inbox = {{ namespace.inbox | default('no') }}
+  {% if namespace.type is defined -%}
+    type = "{{ namespace.type }}"
+  {% endif %}
+  {% if namespace.separator is defined -%}
+    separator = "{{ namespace.separator }}"
+  {% endif %}
+  {% if namespace.prefix is defined -%}
+    prefix = "{{ namespace.prefix }}"
+  {% endif %}
+  {% if namespace.location is defined -%}
+    location = "{{ namespace.location }}"
+  {% endif %}
+  {% if namespace.hidden is defined -%}
+    hidden = {{ namespace.hidden }}
+  {% endif %}
+  {% if namespace.list is defined -%}
+    list = {{ namespace.list }}
+  {% endif %}
+  {% if namespace.subscriptions is defined -%}
+    subscriptions = {{ namespace.subscriptions }}
+  {% endif %}
+  }
+
+{% endfor %}
+
+{% if mail_shared_explicit_inbox is defined %}
+  mail_shared_explicit_inbox = {{ mail_shared_explicit_inbox }}
+{% endif %}
+
+mail_uid = {{ mail_user }}
+mail_gid = {{ mail_group }}
+mail_privileged_group = {{ mail_privileged_group }}
+{% if mail_access_groups is defined %}
+  mail_access_groups = {{ mail_access_groups }}
+{% endif %}
+{% if mail_full_filesystem_access is defined %}
+  mail_full_filesystem_access = {{ mail_full_filesystem_access }}
+{% endif %}
+#mail_attribute_dict =
+#mail_server_comment = ""
+#mail_server_admin = 
+#mmap_disable = no
+#dotlock_use_excl = yes
+#mail_fsync = optimized
+#lock_method = fcntl
+#mail_temp_dir = /tmp
+#first_valid_uid = 500
+#last_valid_uid = 0
+#first_valid_gid = 1
+#last_valid_gid = 0
+#mail_max_keyword_length = 50
+#valid_chroot_dirs = 
+#mail_chroot = 
+#auth_socket_path = /var/run/dovecot/auth-userdb
+#mail_plugin_dir = /usr/lib/dovecot/modules
+mail_plugins = {{ mail_plugins }}
+#mailbox_list_index = yes
+#mailbox_list_index_very_dirty_syncs = yes
+#mailbox_list_index_include_inbox = no
+#mail_cache_min_mail_count = 0
+#mailbox_idle_check_interval = 30 secs
+#mail_save_crlf = no
+#mail_prefetch_count = 0
+#mail_temp_scan_interval = 1w
+#mail_sort_max_read_count = 0
+
+{% for protocol in dovecot_mail_protocols %}
+  protocol {{ protocol.name }} {
+  {% if mail_vsize_bg_after_count is defined %}
+    mail_vsize_bg_after_count = {{ mail_vsize_bg_after_count }}
+  {% endif %}
+  }
+{% endfor %}
+
+#maildir_stat_dirs = no
+#maildir_copy_with_hardlinks = yes
+#maildir_very_dirty_syncs = no
+#maildir_broken_filename_sizes = no
+#maildir_empty_new = no
+#mbox_read_locks = fcntl
+#mbox_write_locks = fcntl dotlock
+#mbox_lock_timeout = 5 mins
+#mbox_dotlock_change_timeout = 2 mins
+#mbox_dirty_syncs = yes
+#mbox_very_dirty_syncs = no
+#mbox_lazy_writes = yes
+#mbox_min_index_size = 0
+#mbox_md5 = apop3d
+#mdbox_rotate_size = 10M
+#mdbox_rotate_interval = 0
+#mdbox_preallocate_space = no
+#mail_attachment_dir =
+#mail_attachment_min_size = 128k
+#mail_attachment_fs = sis posix
+{% if mail_attachment_hash is defined %}
+  mail_attachment_hash = {{ mail_attachment_hash }}
+{% endif %}
+#mail_attachment_detection_options =

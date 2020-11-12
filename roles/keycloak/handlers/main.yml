@@ -1,0 +1,15 @@
+---
+# handlers file for keycloak
+- name: enable keycloak
+  service:
+    name: "keycloak"
+    state: "{{ item }}"
+  loop:
+    - enabled
+    - started
+
+- name: restart keycloak
+  service:
+    name: "keycloak"
+    state: restarted
+  become: yes

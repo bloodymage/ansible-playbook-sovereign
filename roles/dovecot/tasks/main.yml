@@ -1,0 +1,164 @@
+---
+# tasks file for mail-server
+# ==================================================================================================
+#
+# Task: Install apps
+#
+# ==================================================================================================
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - dovecot
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  tags:
+    - dovecot
+    - install-packages
+
+# ==================================================================================================
+#
+# Configuration tasks
+#
+# ==================================================================================================
+- name: Install config files to /etc
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop:
+    - krb5.conf
+  when:
+    - use_krb5 is defined
+    - use_krb5
+  notify: restart dovecot
+  tags:
+    - dovecot
+    - krb5
+
+- name: Install config files to /etc/dovecot
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/dovecot/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop:
+    - dovecot.conf
+    - dovecot-oauth2.conf.ext
+    #- passwd.db
+  notify: restart dovecot
+  tags:
+    - dovecot
+
+- name: Install configuration files to /etc/dovecot/conf.d
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "/etc/dovecot/conf.d/{{ item }}"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop:
+    - 10-auth.conf
+    - 10-director.conf
+    - 10-logging.conf
+    - 10-mail.conf
+    - 10-master.conf
+    - 10-ssl.conf
+    - 10-tcpwrapper.conf
+    - 15-lda.conf
+    - 15-mailboxes.conf
+    - 20-imap.conf
+    - 20-lmtp.conf
+    - 20-managesieve.conf
+    - 90-acl.conf
+    - 90-plugin.conf
+    - 90-quota.conf
+    - 90-sieve-extprograms.conf
+    - 90-sieve.conf
+    - auth-checkpassword.conf.ext
+    - auth-deny.conf.ext
+    - auth-dict.conf.ext
+    - auth-ldap.conf.ext
+    - auth-master.conf.ext
+    - auth-oauth2.conf.ext
+    - auth-passwdfile.conf.ext
+    - auth-sql.conf.ext
+    - auth-static.conf.ext
+    - auth-system.conf.ext
+    - auth-vpopmail.conf.ext
+  notify: restart dovecot
+  tags:
+    - dovecot
+
+- name: Ensure Virtual Directory definitions exist
+  file:
+    path: "/etc/dovecot/virtual/{{ item.name }}"
+    state: directory
+  become: yes
+  loop: "{{ dovecot_virtual_mailboxes }}"
+  tags:
+    - dovecot
+
+- name: Install configuration files to /etc/dovecot/virtual
+  template:
+    src: "{{ role_path }}/templates/dovecot-virtual.j2"
+    dest: "/etc/dovecot/virtual/{{ item.name }}/dovecot-virtual"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop: "{{ dovecot_virtual_mailboxes }}"
+  tags:
+    - dovecot
+
+- name: Ensure Sieve Pipe Bin Dir exists
+  file:
+    path: "{{ sieve_pipe_bin_dir }}"
+    state: directory
+  become: yes
+  tags:
+    - dovecot
+    
+- name: Install IMAPSieve Spam Update Filters
+  template:
+    src: "{{ role_path }}/templates/report-sieve.j2"
+    dest: "{{ sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  loop: "{{ imapsieve_mailboxes }}"
+  tags:
+    - dovecot
+
+- name: Install IMAPSieve Spam Update Filters
+  template:
+    src: "{{ role_path }}/templates/sa-learn.j2"
+    dest: "{{ sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
+    owner: root
+    group: root
+    mode: 0755
+  become: yes
+  loop: "{{ imapsieve_mailboxes }}"
+  tags:
+    - dovecot

@@ -1,0 +1,147 @@
+---
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Find SSH host keys.
+  find:
+    path: "{{ ssh_config_dir }}"
+    pattern: ssh_host_*_key
+  register: private_keys
+  failed_when: "\"matched\" not in private_keys or private_keys.matched == 0"
+  become: yes
+
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Create local temporary directory.
+  tempfile:
+    suffix: ansible-ssh-host-signer
+    state: directory
+  changed_when: false
+  register: temporary_directory
+  delegate_to: localhost
+  run_once: true
+
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Fetch public keys.
+  fetch:
+    src: "{{ item.path }}.pub"
+    dest: "{{ temporary_directory.path }}/public_keys/"
+  with_items: "{{ private_keys.files }}"
+  changed_when: false
+
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Fetch existing certificates.
+  fetch:
+    src: "{{ item.path }}-cert.pub"
+    dest: "{{ temporary_directory.path }}/existing_certificates/"
+    fail_on_missing: false
+  with_items: "{{ private_keys.files }}"
+  changed_when: false
+
+# ======================================================================
+#
+# Sign SSH Keys
+#
+# TODO: Add serial number
+# TODO: Add expiration
+# TODO: Use expect module for password from ansible vault
+#       https://docs.ansible.com/ansible/latest/modules/expect_module.html
+#
+# ======================================================================
+- name: Sign SSH keys.
+  expect:
+    command: ssh-keygen -s "{{ ssh_ca_host_signer_key }}"
+             -I "{{ ssh_ca_host_signer_id }}"
+             -h -n "{{ ssh_ca_host_signer_hostnames }}"
+             "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote }}{{ item.path | quote }}.pub"
+    responses:
+      (?i)passphrase: "{{ ssh_ca_host_key_password }}"
+      # you don't want to show passwords in your logs
+  #no_log: true
+  with_items: "{{ private_keys.files }}"
+  changed_when: false
+  delegate_to: localhost
+
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Find certificates.
+  find:
+    path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote}}{{ ssh_config_dir }}/"
+    pattern: ssh_host_*_key-cert.pub
+  register: certificates
+  delegate_to: localhost
+
+# ======================================================================
+#
+# Tasks:
+# 
+#
+# ======================================================================
+- name: Compare certificates.
+  shell: diff <(ssh-keygen -L -f "{{ item.path | quote }}" |
+           tail -n +2) <(ssh-keygen -L -f "{{ temporary_directory.path | quote }}/existing_certificates/{{ inventory_hostname | quote }}/{{ ssh_config_dir }}/{{ item.path | basename | quote }}" | tail -n +2)
+  args:
+    executable: /bin/bash
+  with_items: "{{ certificates.files }}"
+  changed_when: false
+  failed_when: false
+  register: certificate_comparison
+  delegate_to: localhost
+
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Copy certificates back to server.
+  copy:
+    src: "{{ item.item.path }}"
+    dest: "{{ ssh_config_dir }}/"
+  with_items: "{{ certificate_comparison.results }}"
+  notify: restart ssh
+  become: yes
+  when:
+    - item.rc != 0
+
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Remove local temporary directory.
+  file:
+    name: "{{ temporary_directory.path }}"
+    state: absent
+  become: yes
+  changed_when: false
+  delegate_to: localhost
+  run_once: true

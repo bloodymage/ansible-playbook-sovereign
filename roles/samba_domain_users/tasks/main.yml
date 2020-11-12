@@ -1,0 +1,223 @@
+---
+- name: Get Samba Groups
+  command: "samba-tool group list"
+  register: existing_group_list
+  delegate_to: "{{ primary_domain_controller }}"
+  become: yes
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+- name: Print Existing Groups
+  debug:
+    var: existing_group_list.stdout_lines
+    verbosity: 1
+  tags:
+    - users
+    - domain-users
+
+- name: Get Samba Users
+  command: "samba-tool user list"
+  register: existing_user_list
+  delegate_to: "{{ primary_domain_controller }}"
+  become: yes
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+- name: Print Existing Groups
+  debug:
+    var: existing_user_list.stdout_lines
+    verbosity: 1
+  tags:
+    - users
+    - domain-users
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Add Samba Groups
+  shell: >
+    samba-tool group add "{{ item.groupname }}"
+    --gid-number {{ item.id_number }}
+    --nis-domain "{{ ansible_domain.split('.')[0] }}"
+    -U Administrator
+    --password {{ samba_administrator_password }}
+  become: yes
+  loop: "{{ domain_groups + domain_users }}"
+  when:
+    - item.groupname is defined
+    - item.id_number is defined
+    - inventory_hostname == primary_domain_controller
+    - item.groupname not in existing_group_list.stdout_lines
+    - item.mail_address is not defined
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+- name: Add Samba Groups
+  shell: >
+    samba-tool group add "{{ item.groupname }}"
+    --gid-number {{ item.id_number }}
+    --nis-domain "{{ ansible_domain.split('.')[0] }}"
+    --mail-address {{ item.mail_address }}
+    -U Administrator
+    --password {{ samba_administrator_password }}
+  become: yes
+  loop: "{{ domain_groups + domain_users }}"
+  when:
+    - item.groupname is defined
+    - item.id_number is defined
+    - inventory_hostname == primary_domain_controller
+    - item.groupname not in existing_group_list.stdout_lines
+    - item.mail_address is defined
+    - item.id_number is defined
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+- name: Add Samba Groups
+  shell: >
+    samba-tool group add "{{ item.groupname }}"
+    --mail-address {{ item.mail_address }}
+    -U Administrator
+    --password {{ samba_administrator_password }}
+  become: yes
+  loop: "{{ domain_groups + domain_users }}"
+  when:
+    - item.groupname is defined
+    - inventory_hostname == primary_domain_controller
+    - item.groupname not in existing_group_list.stdout_lines
+    - item.mail_address is defined
+    - item.id_number is not defined
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+- name: Add Samba Groups
+  shell: >
+    samba-tool group add "{{ item.groupname }}"
+    -U Administrator
+    --password {{ samba_administrator_password }}
+  become: yes
+  loop: "{{ domain_groups + domain_users }}"
+  when:
+    - item.groupname is defined
+    - inventory_hostname == primary_domain_controller
+    - item.groupname not in existing_group_list.stdout_lines
+    - item.mail_address is not defined
+    - item.id_number is not defined
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Add Samba Users
+  shell: >
+    samba-tool user create "{{ item.username }}" "{{ item.password }}"
+    --unix-home "/home/{{ ansible_domain.split('.')[0] }}/{{item.username }}"
+    --uid-number "{{ item.id_number }}"
+    --gid-number "{{ item.id_number }}"
+    --given-name "{{ item.given_name }}"
+    --surname "{{ item.surname }}"
+    --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
+    --nis-domain "{{ ansible_domain.split('.')[0] }}"
+    --mail-address "{{ item.username }}{{ samba_email_domain }}"
+    --username Administrator
+    --password {{ samba_administrator_password }}
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname != ""
+    - item.username not in existing_user_list.stdout_lines
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+- name: Add Samba Users
+  shell: >
+    samba-tool user create "{{ item.username }}" "{{ item.password }}"
+    --unix-home "/home/{{ ansible_domain.split('.')[0] }}/{{item.username }}"
+    --uid-number "{{ item.id_number }}"
+    --gid-number "{{ item.id_number }}"
+    --given-name "{{ item.given_name }}"
+    --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
+    --nis-domain "{{ ansible_domain.split('.')[0] }}"
+    --mail-address "{{ item.username }}{{ samba_email_domain }}"
+    --username Administrator
+    --password {{ samba_administrator_password }}
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname == ""
+    - item.username not in existing_user_list.stdout_lines
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+# ==================================================================================================
+#
+# Add users for other services:
+#   - email
+#
+# ==================================================================================================
+- name: Add Samba Users
+  shell: >
+    samba-tool user create "{{ item.username }}" "{{ item.password }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - inventory_hostname == primary_domain_controller
+    - item.username not in existing_user_list.stdout_lines
+  delegate_to: "{{ primary_domain_controller }}"
+  tags:
+    - users
+    - domain-users
+
+- name: Set expiry for Samba Users
+  shell: >
+    samba-tool user setexpiry "{{ item.account_expire }}" "{{ item.username }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.account_expire is defined
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+
+- name: "Generate user SPNs"
+  include: generate_spns.yml
+  loop: "{{ domain_users }}"
+  loop_control:
+    loop_var: user
+  when:
+    - user.spns is defined
+  tags:  
+    - users
+    - domain-users
+
+

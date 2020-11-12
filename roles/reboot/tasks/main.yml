@@ -1,0 +1,9 @@
+---
+- include: debian_family.yml
+  when:
+    - ansible_os_family == 'Debian'
+    - ansible_network_os is undefined
+
+- include: routeros.yml
+  when:
+    - ansible_network_os == 'routeros'

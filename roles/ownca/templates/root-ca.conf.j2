@@ -1,0 +1,112 @@
+# {{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }} Root CA
+
+[ default ]
+ca                      = {{ ansible_domain.split('.')[1] }}-root-ca            # CA name
+dir                     = /root/.pki              # Top dir
+base_url                = http://pki.{{ ansible_domain.split('.')[1] }}.{{ ansible_domain.split('.')[2] }}     # CA base URL
+aia_url                 = $base_url/$ca.cert.pem  # CA certificate URL
+crl_url                 = $base_url/$ca.crl       # CRL distribution point
+name_opt                = multiline,-esc_msb,utf8 # Display UTF-8 characters
+openssl_conf            = openssl_init            # Library config section
+
+# CA certificate request
+
+[ req ]
+default_bits            = 4096                  # RSA key size
+encrypt_key             = yes                   # Protect private key
+default_md              = sha512                # MD to use
+utf8                    = yes                   # Input is UTF-8
+string_mask             = utf8only              # Emit UTF-8 strings
+prompt                  = no                    # Don't prompt for DN
+distinguished_name      = ca_dn                 # DN section
+req_extensions          = ca_reqext             # Desired extensions
+
+[ ca_dn ]
+countryName             = "US"
+{{ ansible_domain.split('.')[2] }}anizationName        = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }}"
+{{ ansible_domain.split('.')[2] }}anizationalUnitName  = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }} Root CA"
+commonName              = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }} Root CA"
+
+[ ca_reqext ]
+keyUsage                = critical,keyCertSign,cRLSign
+basicConstraints        = critical,CA:true
+subjectKeyIdentifier    = hash
+
+# CA operational settings
+
+[ ca ]
+default_ca              = root_ca               # The default CA section
+
+[ root_ca ]
+certificate             = $dir/certs/$ca.crt        # The CA cert
+private_key             = $dir/private/$ca.key.pem  # CA private key
+new_certs_dir           = $dir/newcerts             # Certificate archive
+serial                  = $dir/db/$ca.cert.srl      # Serial number file
+crlnumber               = $dir/db/$ca.crl.srl       # CRL number file
+database                = $dir/db/$ca.db            # Index file
+unique_subject          = no                        # Require unique subject
+default_days            = 3650                      # How long to certify for
+default_md              = sha512                    # MD to use
+policy                  = match_pol                 # Default naming policy
+email_in_dn             = no                        # Add email to cert DN
+preserve                = no                    # Keep passed DN ordering
+name_opt                = $name_opt             # Subject DN display options
+cert_opt                = ca_default            # Certificate display options
+copy_extensions         = none                  # Copy extensions from CSR
+x509_extensions         = intermediate_ca_ext   # Default cert extensions
+default_crl_days        = 30                    # How long before next CRL
+crl_extensions          = crl_ext               # CRL extensions
+
+[ match_pol ]
+countryName             = match
+stateOrProvinceName     = optional
+localityName            = optional
+{{ ansible_domain.split('.')[2] }}anizationName        = match
+{{ ansible_domain.split('.')[2] }}anizationalUnitName  = optional
+commonName              = supplied
+
+[ any_pol ]
+domainComponent         = optional
+countryName             = optional
+stateOrProvinceName     = optional
+localityName            = optional
+{{ ansible_domain.split('.')[2] }}anizationName        = optional
+{{ ansible_domain.split('.')[2] }}anizationalUnitName  = optional
+commonName              = optional
+emailAddress            = optional
+
+# Extensions
+
+[ root_ca_ext ]
+keyUsage                = critical,keyCertSign,cRLSign
+basicConstraints        = critical,CA:true
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+
+[ intermediate_ca_ext ]
+keyUsage                = critical,keyCertSign,cRLSign
+basicConstraints        = critical,CA:true
+subjectKeyIdentifier    = hash
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+crlDistributionPoints   = @crl_info
+certificatePolicies     = {{ ansible_domain.split('.')[1] }}MediumAssurance,{{ ansible_domain.split('.')[1] }}MediumDevice
+
+[ crl_ext ]
+authorityKeyIdentifier  = keyid:always
+authorityInfoAccess     = @issuer_info
+
+[ issuer_info ]
+caIssuers;URI.0         = $aia_url
+
+[ crl_info ]
+URI.0                   = $crl_url
+
+# Policy OIDs
+
+[ openssl_init ]
+oid_section             = additional_oids
+
+[ additional_oids ]
+{{ ansible_domain.split('.')[1] }}MediumAssurance     = {{ Ansible_Domain.Split('.')[1] }} Medium Assurance, 1.3.6.1.4.1.0.1.7.8
+{{ ansible_domain.split('.')[1] }}MediumDevice        = {{ Ansible_Domain.Split('.')[1] }} Medium Device Assurance, 1.3.6.1.4.1.0.1.7.9

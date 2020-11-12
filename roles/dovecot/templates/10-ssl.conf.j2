@@ -1,0 +1,26 @@
+##
+## SSL settings
+##
+
+# SSL/TLS support: yes, no, required. <doc/wiki/SSL.txt>
+ssl = yes
+
+ssl_cert = </etc/ssl/certs/{{ ansible_fqdn }}.pem
+ssl_key = </etc/ssl/private/{{ ansible_fqdn }}.key
+#ssl_key_password =
+#ssl_ca = 
+#ssl_require_crl = yes
+ssl_client_ca_dir = /etc/ssl/certs
+ssl_client_ca_file = {{ soverign_component_ca_chain_file }}
+#ssl_verify_client_cert = no
+#ssl_cert_username_field = commonName
+ssl_dh = </usr/share/dovecot/dh.pem
+#ssl_min_protocol = TLSv1
+# DH
+#ssl_cipher_list = ALL:!kRSA:!SRP:!kDHd:!DSS:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK:!RC4:!ADH:!LOW@STRENGTH
+# To disable non-EC DH, use:
+#ssl_cipher_list = ALL:!DH:!kRSA:!SRP:!kDHd:!DSS:!aNULL:!eNULL:!EXPORT:!DES:!3DES:!MD5:!PSK:!RC4:!ADH:!LOW@STRENGTH
+#ssl_curve_list =
+#ssl_prefer_server_ciphers = no
+#ssl_crypto_device =
+#ssl_options =

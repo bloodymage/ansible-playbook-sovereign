@@ -1,0 +1,19 @@
+{{ansible_managed|comment}}
+
+127.0.0.1    localhost
+
+# The following lines are desirable for IPv6 capable hosts
+::1     ip6-localhost ip6-loopback
+fe00::0 ip6-localnet
+ff00::0 ip6-mcastprefix
+ff02::1 ip6-allnodes
+ff02::2 ip6-allrouters
+ff02::3 ip6-allhosts
+
+# IPv4 Address
+{{ ansible_host }}    {{ inventory_hostname }} {{ inventory_hostname_short }}
+
+#{% if ansible_default_ipv6.address is defined -%}
+##IPv6 Address
+{{ ansible_default_ipv6.address }} {{ inventory_hostname }} {{ inventory_hostname_short }}
+#{% endif %}

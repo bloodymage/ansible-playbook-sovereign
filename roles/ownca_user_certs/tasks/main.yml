@@ -1,0 +1,478 @@
+---
+# This playbook contains common plays that will be run on all nodes.
+#
+# References:
+# - https://tools.ietf.org/html/draft-moskowitz-eddsa-pki-00
+# - https://pki-tutorial.readthedocs.io/en/latest/expert/index.html
+#
+# CAs:
+# - Root:
+#   - Network:
+#     - Identity:
+#     - Encryption:
+#     - Component:
+#     - Code Signing:
+#   - Network:
+#     - Identity:
+#     - Encryption:
+#     - Component:
+#     - Code Signing:
+#   ...
+#
+# ======================================================================
+- name: "Source distribution variables"
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family | lower }}_family.yml"
+  tags:
+    - ownca-user-certs
+    - pretask
+
+- name: "Install required applications"
+  package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+  tags:
+    - ownca-user-certs
+    - install-packages
+
+# ==================================================================================================
+#
+# Create SSL Private Key and CRS Directories
+#
+# Creates the following Directories:
+#   - /etc/ssl/private
+#   - /etc/ssl/csr
+#
+# ==================================================================================================
+- name: "Create SSL Private Key Directories"
+  file:
+    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private'
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: '0700'
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.username is defined
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: "Create SSL CSR Key Directories"
+  file:
+    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr'
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: '0700'
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.username is defined
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: "Create SSL Cert Directories"
+  file:
+    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs'
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: '0755'
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.username is defined
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: "Create SSL PKCS#12 Key Directories"
+  file:
+    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/pkcs12'
+    state: directory
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: '0700'
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.username is defined
+  tags:
+    - ownca-user-certs
+
+# ==================================================================================================
+#
+# Create User Private Key
+#
+# ==================================================================================================
+- name: Generate User Private Key
+  openssl_privatekey:
+    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key'
+    type: '{{ ca_type }}'
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    cipher: auto
+    size: 2048
+    mode: '0600'
+    force: no
+    passphrase: "{{ item.password }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.username is defined
+  tags:
+    - ownca-user-certs
+
+# ==================================================================================================
+#
+# Create Network CA Certificate
+#
+# Notes: Doesn't work with the msUPN OID.
+#
+# ==================================================================================================
+- name: Generate User Authentication CSR
+  community.crypto.openssl_csr:
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: "0644"
+    country_name: "{{ loc_country_code }}"
+    state_or_province_name: "{{ loc_st }}"
+    locality_name: "{{ loc_city }}"
+    organization_name: "{{ ca_org_name }}"
+    organizational_unit_name: "{{ samba_domain }}"
+    common_name: "{{ item.given_name }} {{ item.surname }}"
+    email_address: "{{ item.username}}@{{ ansible_domain }}"
+    key_usage: "{{ authentication_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ authentication_extended_key_usage }}"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki//private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.username }}@{{ ansible_domain }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname is defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Authentication CSR
+  community.crypto.openssl_csr:
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: "0644"
+    country_name: "{{ loc_country_code }}"
+    state_or_province_name: "{{ loc_st }}"
+    locality_name: "{{ loc_cit1y }}"
+    organization_name: "{{ ca_org_name }}"
+    organizational_unit_name: "{{ samba_domain }}"
+    common_name: "{{ item.given_name }}"
+    email_address: "{{ item.username}}@{{ ansible_domain }}"
+    key_usage: "{{ authentication_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ authentication_extended_key_usage }}"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.username }}@{{ ansible_domain }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname is not defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Identeficitation CSR
+  community.crypto.openssl_csr:
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: "0644"
+    country_name: "{{ loc_country_code }}"
+    state_or_province_name: "{{ loc_st }}"
+    locality_name: "{{ loc_city }}"
+    organization_name: "{{ ca_org_name }}"
+    organizational_unit_name: "{{ samba_domain }}"
+    common_name: "{{ item.given_name }} {{ item.surname }}"
+    email_address: "{{ item.username }}@{{ samba_email_domain }}"
+    key_usage: "{{ identification_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ identification_extended_key_usage }}"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname is defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Identeficitation CSR
+  community.crypto.openssl_csr:
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: "0644"
+    country_name: "{{ loc_country_code }}"
+    state_or_province_name: "{{ loc_st }}"
+    locality_name: "{{ loc_city }}"
+    organization_name: "{{ ca_org_name }}"
+    organizational_unit_name: "{{ samba_domain }}"
+    common_name: "{{ item.given_name }}"
+    email_address: "{{ item.username }}@{{ samba_email_domain }}"
+    key_usage: "{{ identification_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ identification_extended_key_usage }}"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname is not defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Encryption CSR
+  community.crypto.openssl_csr:
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: "0644"
+    country_name: "{{ loc_country_code }}"
+    state_or_province_name: "{{ loc_st }}"
+    locality_name: "{{ loc_city }}"
+    organization_name: "{{ ca_org_name }}"
+    organizational_unit_name: "{{ samba_domain }}"
+    common_name: "{{ item.given_name }} {{ item.surname }}"
+    email_address: "{{ item.username }}@{{ samba_email_domain }}"
+    key_usage: "{{ encryption_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ encryption_extended_key_usage }}"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname is defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Encryption CSR
+  community.crypto.openssl_csr:
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
+    owner: "{{ item.username }}"
+    group: "{{ item.username }}_g"
+    mode: "0644"
+    country_name: "{{ loc_country_code }}"
+    state_or_province_name: "{{ loc_st }}"
+    locality_name: "{{ loc_city }}"
+    organization_name: "{{ ca_org_name }}"
+    organizational_unit_name: "{{ samba_domain }}"
+    common_name: "{{ item.given_name }}"
+    email_address: "{{ item.username }}@{{ samba_email_domain }}"
+    key_usage: "{{ encryption_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ encryption_extended_key_usage }}"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+    - item.surname is not defined
+  tags:
+    - ownca-user-certs
+
+# ==================================================================================================
+#
+# Create User Certificates
+#
+# ==================================================================================================
+- name: Fetch Authentication CSRs.
+  fetch:
+    src: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
+    dest: "{{ ca_directory }}/users/csr/"
+    flat: yes
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Fetch Identification CSRs.
+  fetch:
+    src: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
+    dest: "{{ ca_directory }}/users/csr/"
+    flat: yes
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Fetch Encryption CSRs.
+  fetch:
+    src: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
+    dest: "{{ ca_directory }}/users/csr/"
+    flat: yes
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Authentication Certificates
+  community.crypto.x509_certificate:
+    path: "{{ ca_directory }}/users/certs/{{ item.username }}_authentication.crt"
+    csr_path: "{{ ca_directory }}/users/csr/{{ item.username }}_authentication.csr"
+    ownca_path: "{{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    ownca_privatekey_path: "{{ ca_directory }}/private/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.key"
+    ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
+    provider: ownca
+  become: no
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  delegate_to: localhost
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Identfication Certificates
+  community.crypto.x509_certificate:
+    path: "{{ ca_directory }}/users/certs/{{ item.username }}_identification.crt"
+    csr_path: "{{ ca_directory }}/users/csr/{{ item.username }}_identification.csr"
+    ownca_path: "{{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    ownca_privatekey_path: "{{ ca_directory }}/private/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.key"
+    ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
+    provider: ownca
+  become: no
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  delegate_to: localhost
+  tags:
+    - ownca-user-certs
+
+- name: Generate User Encryption Certificates
+  community.crypto.x509_certificate:
+    path: "{{ ca_directory }}/users/certs/{{ item.username }}_encryption.crt"
+    csr_path: "{{ ca_directory }}/users/csr/{{ item.username }}_encryption.csr"
+    ownca_path: "{{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    ownca_privatekey_path: "{{ ca_directory }}/private/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.key"
+    ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
+    provider: ownca
+  become: no
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  delegate_to: localhost
+  tags:
+    - ownca-user-certs
+
+- name: Copy User Authentication Certificates to workstation.
+  copy:
+    src: "{{ ca_directory }}/users/certs/{{ item.username }}_authentication.crt"
+    dest: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_authentication.crt"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Copy User Identification Certificates to workstation.
+  copy:
+    src: "{{ ca_directory }}/users/certs/{{ item.username }}_identification.crt"
+    dest: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_identification.crt"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Copy User Encryption Certificates to workstation.
+  copy:
+    src: "{{ ca_directory }}/users/certs/{{ item.username }}_encryption.crt"
+    dest: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_encryption.crt"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate PKCS#12 Authentication file
+  community.crypto.openssl_pkcs12:
+    action: export
+    friendly_name: "{{ item.given_name }} {{ item.surname }} (Authentication)"
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/pkcs12/{{ item.username }}_authentication.p12"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    certificate_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_authentication.crt"
+    other_certificates: "/etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    state: present
+    mode: "0600"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate PKCS#12 Identification file
+  community.crypto.openssl_pkcs12:
+    action: export
+    friendly_name: "{{ item.given_name }} {{ item.surname }} (Authentication)"
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pkipkcs12/{{ item.username }}_identification.p12"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    certificate_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_identification.crt"
+    other_certificates: "/etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    state: present
+    mode: "0600"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs
+
+- name: Generate PKCS#12 Encryption file
+  community.crypto.openssl_pkcs12:
+    action: export
+    friendly_name: "{{ item.given_name }} {{ item.surname }} (Authentication)"
+    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/pkcs12/{{ item.username }}_encryption.p12"
+    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    privatekey_passphrase: "{{ item.password }}"
+    certificate_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_encryption.crt"
+    other_certificates: "/etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    state: present
+    mode: "0600"
+  become: yes
+  loop: "{{ domain_users }}"
+  when:
+    - item.given_name is defined
+  tags:
+    - ownca-user-certs

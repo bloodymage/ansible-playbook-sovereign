@@ -1,0 +1,42 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - default.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - global-packages
+
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  tags:
+    - global-packages
+    - install-packages
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "{{ ansible_os_family }}: Install Emacsclient.desktop"
+  copy:
+    src: "{{ role_path }}/files/emacsclient.desktop"
+    dest: "/usr/share/applications/emacsclient.desktop"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  tags:
+    - global-packages
+    - install-packages

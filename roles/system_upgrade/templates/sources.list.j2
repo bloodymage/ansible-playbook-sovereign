@@ -1,0 +1,32 @@
+# {{ ansible_managed }}
+
+deb {{ deb_repo_url }} {{ system_update_distribution_release }} {{ deb_repos }}
+
+{% if deb_src -%}
+  deb-src {{ deb_repo_url }} {{ system_update_distribution_release }} {{ deb_repos }}
+{% endif %}
+
+{% if debian_security_updates_repo_url is defined %}
+  deb {{ debian_security_updates_repo_url }} {{ system_update_distribution_release }}/updates {{ deb_repos }}
+{% if deb_src -%}
+  deb-src {{ debian_security_updates_repo_url }} {{ system_update_distribution_release }}/updates {{ deb_repos }}
+{% endif %}
+{% endif %}
+{% if ubuntu_updates_repo_url is defined %}
+  deb {{ ubuntu_updates_repo_url }} {{ system_update_distribution_release }}-updates {{ deb_repos }}
+{% if deb_src -%}
+  deb-src {{ ubuntu_updates_repo_url }} {{ system_update_distribution_release }}-updates {{ deb_repos }}
+{% endif %}
+{% endif %}
+{% if ubuntu_updates_repo_url is defined %}
+  deb {{ ubuntu_backports_repo_url }} {{ system_update_distribution_release }}-backports {{ deb_repos }}
+{% if deb_src -%}
+  deb-src {{ ubuntu_backports_repo_url }} {{ system_update_distribution_release }}-backports {{ deb_repos }}
+{% endif %}
+{% endif %}
+{% if ubuntu_security_updates_repo_url is defined %}
+  deb {{ ubuntu_security_updates_repo_url }} {{ system_update_distribution_release }}-security {{ deb_repos }}
+{% if deb_src -%}
+  deb-src {{ ubuntu_security_updates_repo_url }} {{ system_update_distribution_release }}-security {{ deb_repos }}
+{% endif %}
+{% endif %}

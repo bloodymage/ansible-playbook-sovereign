@@ -1,0 +1,6 @@
+group filter=git-crypt diff=git-crypt
+passwd filter=git-crypt diff=git-crypt
+shadow filter=git-crypt diff=git-crypt
+pam.d/passwd !filter=git-crypt !diff=git-crypt
+cron.daily/passwd !filter=git-crypt !diff=git-crypt
+iproute2/group !filter=git-crypt !diff=git-crypt

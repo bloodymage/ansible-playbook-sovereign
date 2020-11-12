@@ -1,0 +1,4 @@
+---
+- include: "{{ ansible_os_family | lower }}_family.yml"
+  when:
+    - ansible_network_os is undefined

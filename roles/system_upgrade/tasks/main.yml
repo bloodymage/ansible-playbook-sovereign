@@ -1,0 +1,24 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_lsb.id | lower }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - system-upgrade
+
+- include: debian_family.yml
+  when:
+    - ansible_network_os is not defined
+    - ansible_os_family != "Windows"
+  tags:
+    - system-upgrade

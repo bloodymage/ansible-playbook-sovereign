@@ -1,0 +1,21 @@
+common_packages:
+  - acl
+  - attr
+  - samba
+  - samba-dsdb-modules
+  - samba-vfs-modules
+  - winbind
+  - libpam-winbind
+  - libnss-winbind
+  - libpam-krb5
+  - krb5-config
+  - krb5-user
+
+domain_controller_packages:
+  - dnsutils
+  - unison
+  - rsync
+
+primary_domain_controller: "{{ groups['samba_domain_controllers'][0] }}"
+
+schema_update_allowed: no

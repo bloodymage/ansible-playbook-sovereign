@@ -1,0 +1,28 @@
+- hosts: samba_domain_controllers
+  roles:
+    - bloodymage.rebeldream.ownca_crl
+    - bloodymage.rebeldream.samba_domain_controller
+    - bloodymage.rebeldream.samba_domain_users
+
+#- hosts: freeipa_controllers
+
+- hosts: openldap_servers
+  roles:
+    - bloodymage.rebeldream.openldap
+
+- hosts: sssd
+  roles:
+    - bloodymage.rebeldream.ownca_crl
+    - bloodymage.rebeldream.sssd
+
+- hosts: keycloak_servers
+  roles:
+    - bloodymage.rebeldream.keycloak
+
+# - hosts: samba_dotfiles
+#   roles:
+#     - bloodymage.rebeldream.dotfiles
+
+- hosts: ownca_user_hosts
+  roles:
+    - bloodymage.rebeldream.ownca_user_certs

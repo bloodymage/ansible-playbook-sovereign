@@ -1,0 +1,51 @@
+---
+- name: start smbd
+  service:
+    name: smbd
+    state: started
+  become: yes
+
+- name: restart smbd
+  service:
+    name: smbd
+    state: restarted
+  become: yes
+
+- name: start nmbd
+  service:
+    name: nmbd
+    state: started
+  become: yes
+
+- name: restart nmbd
+  service:
+    name: rmbd
+    state: restarted
+  become: yes
+
+- name: start winbind
+  service:
+    name: winbind
+    state: started
+  become: yes
+
+- name: restart winbind
+  service:
+    name: winbind
+    state: restarted
+  become: yes
+
+- name: start samba-domain-member
+  service:
+    name: "{{ item }}"
+    state: started
+  loop: "{{ samba_services }}"
+  become: yes
+
+- name: restart samba-domain-member
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop: "{{ samba_services }}"
+  become: yes
+

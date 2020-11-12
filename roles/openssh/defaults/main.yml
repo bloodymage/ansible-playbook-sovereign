@@ -1,0 +1,68 @@
+---
+packages:
+  - expect
+  - python3-pexpect
+ 
+# ======================================================================
+#
+# Files and Directories
+#
+# ======================================================================
+ssh_config_dir: "/etc/ssh"
+
+ssh_config_files:
+  - name: sshd_config
+    mode: "0600"
+    validate: "/usr/sbin/sshd -t -f %s"
+  - name: ssh_config
+  - name: known_hosts
+
+ssh_authorized_keys: "authorized_keys"
+ssh_authorized_principals: "%u"
+
+# Certificat Authority
+ssh_ca_domain_list: "{{ sovereign_domain_list }}"
+ssh_ca_domain: "{{ sovereign_domain }}"
+ssh_ca_key_directory: "~/.ssh/ca"
+ssh_ca_qdn: "{{ ansible_domain }}"
+
+# Host CA
+ssh_ca_host_keyfile: "{{ ssh_ca_domain }}_host_key"
+ssh_ca_host_pubfile: "{{ ssh_ca_domain }}_host_key.pub"
+ssh_ca_host_certificate: "{{ ssh_config_dir }}/ca/{{ ssh_ca_host_pubfile }}"
+ssh_ca_host_signer_key: "{{ ssh_ca_key_directory }}/{{ ssh_ca_host_keyfile }}"
+ssh_ca_host_key_type: "ed25519"
+ssh_ca_host_key_comment: "{{ ssh_ca_domain }} Host CA"
+ssh_ca_host_signer_id: "{{ ssh_ca_domain }}"
+ssh_ca_host_signer_hostnames: "{{ ansible_fqdn }},{{ ansible_hostname }}"
+
+# User CA
+ssh_ca_user_keyfile: "{{ ssh_ca_domain }}_user_key"
+ssh_ca_user_pubfile: "{{ ssh_ca_domain }}_user_key.pub"
+ssh_trusted_user_ca_key: "{{ ssh_config_dir }}/ca/{{ ssh_ca_user_pubfile }}"
+ssh_ca_user_signer_key: "{{ ssh_ca_key_directory }}/{{ ssh_ca_user_keyfile }}"
+ssh_ca_user_key_type: "ed25519"
+ssh_ca_user_key_comment: "{{ ssh_ca_domain }} User CA"
+ssh_ca_user_signer_id: "{{ ssh_ca_domain }}"
+ssh_ca_user_signer_hostnames: "{{ ansible_fqdn }},{{ ansible_hostname }}"
+
+# SSHD_Config options
+ssh_port: "22"
+ssh_addrfamily: "any"
+ssh_listen_ipv4: "0.0.0.0"
+ssh_listen_ipv6: "::"
+ssh_host_key: "{{ ssh_config_dir }}/ssh_host_ed25519_key"
+ssh_host_certificate: "{{ ssh_config_dir }}/ssh_host_ed25519_key-cert.pub"
+
+
+ssh_password_authentication: "yes"
+ssh_permit_empty_passwords: "no"
+ssh_challenge_response_auth: "no"
+ssh_permit_root_login: "no"
+ssh_use_pam: "yes"
+ssh_x11_forwarding: "no"
+ssh_print_motd: "no"
+ssh_use_dns: "no"
+
+#ssh_kerberos_authentication: "no"
+#ssh_kerberos_or_local_password: "yes"

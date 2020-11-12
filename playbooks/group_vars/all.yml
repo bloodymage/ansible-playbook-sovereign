@@ -1,0 +1,15 @@
+---
+sovereign_domain_list: "{{ ansible_domain.split('.')[-2:] }}"
+sovereign_org_name: "{{ ansible_domain.split('.')[1] }}"
+sovereign_org_unit_name: "{{ ansible_domain.split('.')[0] }}"
+sovereign_domain: "{{ sovereign_domain_list | join('_') }}"
+
+sovereign_root_domain: "example.com"
+
+sovereign_component_ca_file: "/etc/ssl/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.pem"
+sovereign_component_ca_chain_file: "/etc/ssl/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca-chain.pem"
+
+sovereign_realm_managed_identities: no
+sovereign_primary_domain_controller: "{{ groups['samba_domain_controllers'][0] | default([]) }}"
+
+sovereign_raspberrypi_distribution_release: buster

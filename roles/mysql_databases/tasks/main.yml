@@ -1,0 +1,19 @@
+---
+# tasks file for mariadb-databases
+- name: Create Database
+  mysql_db:
+    name: "{{ item.db_name }}"
+    state: present
+  loop: "{{ mariadb_databases }}"
+
+- name: Ensure MySQL users are present.
+  mysql_user:
+    name: "{{ item.name }}"
+    host: "{{ item.host | default('localhost') }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.priv | default('*.*:USAGE') }}"
+    state: "{{ item.state | default('present') }}"
+    append_privs: "{{ item.append_privs | default('no') }}"
+    encrypted: "{{ item.encrypted | default('no') }}"
+  with_items: "{{ mysql_users }}"
+  no_log: true

@@ -1,0 +1,27 @@
+; ==================================================================================================
+;
+; BIND data file for {{ zone }}
+;
+; {{ ansible_managed }}
+;
+; ==================================================================================================
+$TTL	{{ zone_ttl }}
+@	IN	SOA	{{ zone_soa }}. {{ zone_admin }}. (
+{{ zone_serial_number.ljust(20) }}  ; Serial
+{{ zone_refresh.ljust(20) }}  ; Refresh
+{{ zone_retry.ljust(20) }}  ; Retry
+{{ zone_expire.ljust(20) }}  ; Expire
+{{ zone_negative_cache_ttl.ljust(20) }}  ; Negative Cache TTL
+)  
+;
+{% for ns in zone_dnsservers -%}
+  {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'NS'.ljust(6) }}{{ ns.name }}.{{ zone }}.
+{% endfor %}
+
+
+{% for ns in zone_dnsservers -%}
+  {{ ns.name }}.{{ zone }}.      IN A      {{ ns.address_ipv4 }}
+{% endfor %}
+{% if zone_address_ipv4 is defined -%}
+  {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'A'.ljust(6) }}{{ zone_address_ipv4 }}
+{% endif %}

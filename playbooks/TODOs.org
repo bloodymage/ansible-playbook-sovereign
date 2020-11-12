@@ -1,0 +1,261 @@
+* Ansible Configuration
+** Host Based Packages
+*** DNS Servers
+**** dnsutils 
+**** dnssec-tools
+*** Workstations
+**** fortunes
+**** fortunes-off
+**** funny-manpages
+**** [[https://github.com/ltworf/funny-manpages][Github: funny-manpages]]
+**** cowsay
+**** cowsay-off
+**** [[https://github.com/paulkaefer/cowsay-files][Github: Cowsay files]]
+**** sl
+**** [[https://www.tecmint.com/20-funny-commands-of-linux-or-linux-is-fun-in-terminal/][Funny Commands linux terminal]]
+** Usernames
+*** Current
+**** Apple
+**** Apricot
+**** Avacado
+**** Banana
+**** Blackberry
+**** Bloodorange
+**** Blueberry
+**** Bonbon
+**** Cake
+**** Caramel
+**** Crab apple
+**** Currant
+**** Cheesecake
+**** Cherry
+**** Chocolate
+**** Coconut
+**** cookie
+**** Cranberry
+**** Canteloupe
+**** Custardpie
+**** Date
+**** Dragonfruit
+**** elderberry
+**** Fig
+**** Fruitcake
+**** Fudge
+**** Gelato
+**** grape
+**** grapefruit
+**** honeydew
+**** icecream
+**** Jellybean
+**** Kitkat
+**** kiwi
+**** lemon
+**** Lemondrop
+**** lime
+**** Liquorice
+**** mango
+**** melon
+**** Mint
+**** nectarine
+**** orange
+**** peach
+**** pear
+**** pecan
+**** plum
+**** Plantain
+**** Popsicle
+**** raisin
+**** raspberry
+**** tangerine
+**** kumquat
+**** Mandarine
+**** mulberry
+**** Strawberry
+**** Walnut
+**** Watermelon     
+**** Pineapple 
+**** pomegranate
+*** Planned Usernames
+
+
+**** Prelene
+**** Sherbert
+**** 
+
+** Tasks
+*** TODO Global Initial Setup [%] [/]
+**** TODO Ansible Controller
+***** TODO Ensure python installed
+***** TODO Update Ansible using PIP
+***** DONE Create SSH CA keys
+     CLOSED: [2019-07-12 Fri 01:11]
+     :LOGBOOK:
+     - State "DONE"       from "TODO"       [2019-07-12 Fri 01:11]
+     :END:
+***** TODO Create SSL CA [%] [/]
+****** TODO Root CA
+****** TODO Olympus CA
+******* TODO Host CA
+******* TODO Identity CA
+******* TODO Encryption CA
+******* TODO Code Signing CA
+****** TODO SWG CA
+******* TODO Host CA
+**** TODO DNS Servers [%] [/]
+***** DONE Create Basic Config
+      CLOSED: [2020-08-05 Wed 18:08]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-08-05 Wed 18:08]
+      :END:
+***** DONE Create Zone Files
+      CLOSED: [2020-08-05 Wed 18:08]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-08-05 Wed 18:08]
+      :END:
+***** DONE Configure Dynamic DNS Updates for Zones
+      CLOSED: [2020-08-05 Wed 18:08]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-08-05 Wed 18:08]
+      :END:
+***** DONE Create Reverse Zone Files
+      CLOSED: [2020-08-05 Wed 18:09]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-08-05 Wed 18:09]
+      :END:
+***** TODO Configure Dynamic DNS Updates for Reverse Zones
+***** TODO Create Riiconnect Zone
+***** TODO Create Blackhole Zone
+**** TODO All [%] [/]
+***** TODO Install common packages
+***** TODO Setup SSH [100%] [3/3]
+****** DONE Update sshd_config
+      CLOSED: [2020-04-19 Sun 14:39]
+      :LOGBOOK:
+      - State "DONE"       from "OWN"        [2020-04-19 Sun 14:39]
+      :END:
+****** DONE Update ssh_config
+      CLOSED: [2020-04-19 Sun 14:39]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-04-19 Sun 14:39]
+      :END:
+****** DONE Sign Host Key [100%] [4/4]
+      CLOSED: [2020-04-19 Sun 14:40]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-04-19 Sun 14:40]
+      :END:
+****** DONE Create temp folder
+       CLOSED: [2019-07-12 Fri 01:12]
+       :LOGBOOK:
+       - State "DONE"       from "TODO"       [2019-07-12 Fri 01:12]
+       :END:
+****** DONE Import Key
+       CLOSED: [2019-07-12 Fri 01:12]
+       :LOGBOOK:
+       - State "DONE"       from "TODO"       [2019-07-12 Fri 01:12]
+       :END:
+****** DONE Sign Key
+       CLOSED: [2019-07-12 Fri 01:12]
+       :LOGBOOK:
+       - State "DONE"       from "TODO"       [2019-07-12 Fri 01:12]
+       :END:
+****** DONE Export Key
+       CLOSED: [2020-04-19 Sun 14:40]
+       :LOGBOOK:
+       - State "DONE"       from "TODO"       [2020-04-19 Sun 14:40]
+       :END:
+****** DONE Clear Temp Folder
+       CLOSED: [2019-07-12 Fri 01:12]
+       :LOGBOOK:
+       - State "DONE"       from "TODO"       [2019-07-12 Fri 01:12]
+       :END:
+***** TODO Create Host Users
+****** TODO Create User SSH Key
+***** TODO Sign key
+***** TODO Export Key
+***** TODO Clear Temp Folder
+***** TODO Setup Dotfiles
+***** TODO Remove 'Pi' User
+***** TODO Reboot Systems
+**** TODO Samba [%] [/]
+***** DONE Create Samba ADDCs
+      CLOSED: [2020-08-05 Wed 18:17]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-08-05 Wed 18:17]
+      :END:
+***** DONE Create Sync
+      CLOSED: [2020-08-05 Wed 18:17]
+      :LOGBOOK:
+      - State "DONE"       from "TODO"       [2020-08-05 Wed 18:17]
+      :END:
+***** TODO Create Samba File Server
+***** TODO Create Samba users
+****** TODO Create User GPG key
+******* TODO Create tmp folder
+******* TODO Import gpg auth keys
+******* TODO Sign key
+******* TODO Export Key
+******* TODO Clear Temp Folder
+****** DONE Setup Dotfiles
+       CLOSED: [2020-08-24 Mon 14:06]
+       :LOGBOOK:
+       - State "DONE"       from "TODO"       [2020-08-24 Mon 14:06]
+       :END:
+**** TODO Database Servers
+**** TODO Webservers
+***** TODO Mediawiki Installer
+***** TODO Drupal Installer
+***** TODO LAM Installer
+***** TODO PhpMyAdmin Installer
+***** TODO Generic Site installer
+***** TODO Letsencrypt Certs for sites
+**** TODO Email Servers
+**** TODO MythTV
+***** TODO MythTV Backend
+***** TODO MythTV Frontend
+***** TODO Mythnetvision
+***** TODO MythGame
+**** TODO Game System
+***** TODO RetroPi
+***** TODO Install Games
+
+**** TODO Home Assistant
+**** TODO Packages
+***** TODO Emacs
+***** TODO KeepassXC
+***** TODO MythTV
+***** TODO AntimicroX
+**** TODO Owntracks
+**** TODO OpenVPN (Wireguard ?)
+***** TODO Samba
+*** TODO Ongoing
+**** TODO Recurring System updates
+   * TODO Recurring DNS Updates
+** References
+*** Ansible
+**** [[https://blog.newrelic.com/engineering/ansible-best-practices-guide][Ansible Best Practices Guide]]
+*** Vault
+**** [[https://devops.stackexchange.com/questions/3282/where-to-put-ansible-vault-password][Stackexchange: Where to put ansible vault password]]
+**** [[https://devops.stackexchange.com/questions/709/what-are-best-practices-for-using-ansible-vault-on-public-cis-and-source-contro][Stackexchange: Best Practices for using ansible vault]]
+**** [[https://docs.ansible.com/ansible/latest/user_guide/vault.html][Ansible Docs: Vault]]
+**** [[https://gist.github.com/xoyabc/4ab27d181808affa6450ee481e0ff9b2][Gist: Ansible Vault example]]
+*** Certificate Authority
+**** [[https://tikalk.com/posts/2016/10/30/Running-Your-Own-Ansible-Driven-CA][Running your  own ansible driven CA]]
+**** [[https://blog.confirm.ch/adding-a-new-trusted-certificate-authority/][Adding a new trusted certificate authority]]
+**** [[https://www.github.com/debops/ansible-pki][Github: DebOps Ansible PKI]]
+*** Samba
+**** [[https://fy.blackhats.net.au/blog/html/2018/04/18/making_samba_4_the_default_ldap_server.html][Making Samba 4 the default LDAP server]]
+*** Yubikey
+**** [[https://askubuntu.com/questions/599825/yubikey-two-factor-authentication-full-disk-encryption-via-luks/599826#599826][Yubikey Two-Factor Authentication Full Disk Encryption Via Luks]]
+**** [[https://www.chrisiaanconover.com/blog/yubikeyconfig/][Configure Yubikey for Maximum Usefulness]]
+**** [[http://sysmic.org.dotclear/index.php?post/2010/03/24/Convert-keys-between-GnuPG%2C-OpenSsh-and-OpenSSL][Convert Keys between GnuPG, OpenSSH, and OpenSSL]] 
+**** [[https://www.github.com/mludvig/yubikey-ldap][Github: mludvig Yubikey-ldap]]
+**** [[https://fy.blackhats.net.au/blog/html/2018/02/27/smartcards_and_you_how_to_make_them_work_on_fedora_rhel.html][Smartcards adn you, how to make them work on Fedora]]
+*** Mikrotik
+**** [[https://www.mikrotik.com/wiki/Drop_port_scanners][Drop Port Scanners]]
+**** TODO FreeRadius
+**** TODO NFS
+**** TODO SSSD
+**** TODO MQTT
+**** TODO Grub
+**** TODO Gitlab
+**** TODO InfluxDB

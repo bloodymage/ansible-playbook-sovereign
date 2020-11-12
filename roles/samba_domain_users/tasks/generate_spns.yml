@@ -1,0 +1,45 @@
+- name: Add SPN for Samba Users
+  shell: >
+    samba-tool spn add "{{ item.spn }}/{{ item.host }}" "{{ user.username }}"
+  become: yes
+  loop: "{{ user.spns }}"
+  when:
+    - item.spn is defined
+    - item.host is defined
+  delegate_to: "{{ primary_domain_controller }}"
+  ignore_errors: yes
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+    - samba-spn
+
+- name: Create Keytab for Samba Users
+  shell: >
+    samba-tool domain exportkeytab --principal "{{ item.spn }}/{{ item.host }}" "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"
+  become: yes
+  loop: "{{ user.spns }}"
+  when:
+    - item.spn is defined
+    - item.host is defined
+  delegate_to: "{{ primary_domain_controller }}"
+  run_once: yes
+  tags:
+    - users
+    - domain-users
+    - samba-spn
+
+- name: "Fetch keytab"
+  fetch:
+    src: "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"
+    dest: "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"
+    flat: yes
+  become: yes
+  loop: "{{ user.spns }}"
+  when:
+    - item.spn is defined
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - users
+    - domain-users
+    - samba-spn

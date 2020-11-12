@@ -1,0 +1,21 @@
+samba_packages:
+  - winbind
+  - libpam-winbind
+  - libnss-winbind
+  - libpam-krb5
+  - krb5-config
+  - krb5-user
+
+schema_update_allowed: no
+
+samba_log_level: 1
+
+winbind_enum_users: no
+winbind_enum_groups: no
+winbind_refresh_tickets: yes
+
+samba_security: user
+
+samba_services:
+    - winbind
+

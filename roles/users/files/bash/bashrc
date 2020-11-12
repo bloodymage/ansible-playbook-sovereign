@@ -1,0 +1,66 @@
+#!/bin/bash
+# =============================================================== #
+#
+# PERSONAL $HOME/.bashrc FILE
+#
+# Last modified: Tue Mar 26 2016
+#
+# Code from:
+#
+# http://tldp.org/LDP/abs/html/sample-bashrc.html
+# By Emmanuel Rouat [no-email]
+#
+# Others...
+#
+# =============================================================== #
+
+# If not running interactively, don't do anything
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+#-------------------------------------------------------------
+# Some settings
+#-------------------------------------------------------------
+
+
+#ulimit -S -c 0 # Don't want coredumps. 
+#set -o notify 
+#set -o noclobber 
+#set -o ignoreeof 
+
+# don't put duplicate lines or lines starting with space in the history.
+# See bash(1) for more options
+HISTCONTROL=ignoreboth
+
+if [[ "${FORBIDEN_HIST}" != "true" ]]; then
+    # for setting history length see HISTSIZE and HISTFILESIZE in bash(1)
+    HISTSIZE=2000
+    HISTFILESIZE=4000
+
+    # Format History
+    HISTTIMEFORMAT='%F %T '
+fi
+
+# Ignore certain commands
+# ?:??   Ignore 1 and 2 character commands
+HISTIGNORE='?:??:history:list:exit:top:clear:pwd:fals[eu]:true:reboot'
+
+# make less more friendly for non-text input files, see lesspipe(1)
+[[ -x /usr/bin/lesspipe ]] && eval "$(SHELL=/bin/sh lesspipe)"
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+  if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+  elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+  fi
+fi
+
+if command -v beet 2&> /dev/null; then
+    eval "$(beet completion)"
+fi

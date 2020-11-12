@@ -1,0 +1,38 @@
+---
+- name: Source specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family | lower }}_family.yml"
+  tags:
+    - skel
+    - pretask
+
+# This playbook contains common plays that will be run on all debian family of nodes.
+- name: Install minimum packages for ansible
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+
+# ==================================================================================================
+#
+# Task:
+#
+#
+# ==================================================================================================
+- name: "Create config files"
+  template:
+    src: "{{ item }}.j2"
+    dest: /etc/{{ item }}
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  loop:
+    - profile
+    - screenrc
+  when:
+    - inventory_hostname != 'localhost'
+  tags:
+    - basic_config

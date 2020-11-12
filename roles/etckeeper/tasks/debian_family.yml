@@ -1,0 +1,35 @@
+---
+# ======================================================================
+#
+# Role: etckeeper
+#
+# Configures etckeeper
+#
+# TODO: check if passwd, group, and shadow properly encrypted in
+#       git repository.  If not, clean up git repository.
+#
+# ======================================================================
+
+# ======================================================================
+#
+# Task: "Ensure git crypt installed"
+#
+# Installs a hostfile that replaces the '127.0.0.# hostname' with the
+# hosts actual IP address and adds the fqdn
+#
+# ======================================================================
+- name: Ensure git crypt installed
+  apt:
+    name: "git-crypt"
+
+- name: Ensure git crypt configured
+  template:
+    src: "{{ role_path }}/templates/gitattributes.j2"
+    dest: /etc/.gitattributes
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install Ubuntu Apps
+  apt:
+    name: "etckeeper"

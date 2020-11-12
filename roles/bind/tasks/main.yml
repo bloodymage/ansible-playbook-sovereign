@@ -1,0 +1,239 @@
+---
+# ==================================================================================================
+#
+# OS Specific Setup
+#
+#
+# ==================================================================================================
+- name: Source specific variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}.yml"
+    - "{{ ansible_os_family | lower }}_family.yml"
+  tags:
+    - bind
+    - pretask
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Install Bind"
+  package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+  when:
+    - bind_dnssec_secret is defined
+  tags:
+    - bind
+    - bind-install
+    - install-packages
+
+# ==================================================================================================
+#
+# Generate DNSSEC keys
+#
+# tasks/dnssec-keygen.yml
+# Generate DNSSEC key, inspired by Michele Salerno (@mikysal78)
+#
+# ==================================================================================================
+# - name: DNSSEC keygen | Ensure keys directory is present
+#   file:
+#     path: "{{ bind_dnssec_key_dir }}"
+#     state: directory
+#     owner: "{{ bind_owner }}"
+#     group: "{{ bind_group }}"
+#     mode: '0750'
+#   tags:
+#     - bind
+#     - bind-dnssec
+
+# - name: DNSSEC keygen | Create key file for each zone (This may take a long time)
+#     shell: >-
+#         dnssec-keygen -a HMAC-MD5 -b 512 -n HOST "{{ item.name }}"
+#     args:
+#       chdir: "{{ bind_dnssec_key_dir }}"
+#     creates:
+#       - "K{{ item.name }}.+[0-9][0-9][0-9].+[0-9][0-9][0-9][0-9][0-9].key"
+#       - "K{{ item.name }}.+[0-9][0-9][0-9].+[0-9][0-9][0-9][0-9][0-9].private"
+#     loop:
+#       - "{{ bind_zone_domains }}"
+#     tags:
+#       - bind
+#       - bind-dnssec
+
+# - name: DNSSEC keygen | Ensure proper permissions on DNSSEC keys
+#   file:
+#     path: "{{ item }}"
+#     mode: '0640'
+#     owner: "{{ bind_owner }}"
+#     group: "{{ bind_group }}"
+#   with_fileglob:
+#     - "{{ bind_dnssec_key_dir }}/K*.{key,private}"
+#   tags:
+#     - bind
+#     - bind-dnssec
+
+# - name: DNSSEC keygen | Gather keys from key files
+#   shell: >-
+#       set -o nounset -o pipefail -o errexit &&
+#       grep 'Key:' "{{ bind_dnssec_key_dir }}/K{{ item.name }}".*.private | cut -d ' ' -f 2
+#   args:
+#     executable: /bin/bash
+#   with_items:
+#     - "{{ bind_zone_domains }}"
+#   register:
+#     bind_dnssec_keys
+#   tags:
+#     - bind
+#     - bind-dnssec
+
+# - name: DNSSEC keygen | Show keys (debug)
+#   debug:
+#     var: bind_dnssec_keys
+# - name: "Create DDNS Key files"
+#   template:
+#     src: "{{ role_path }}/templates/ddns_key.j2"
+#     dest: "{{ bind_conf_dir }}/ddns.key"
+#     owner: root
+#     group: root
+#     mode: "0644"
+#   become: yes
+#   tags:
+#     - bind
+#     - bind-dnssec
+
+
+# ==================================================================================================
+#
+# Install Configuration files
+#
+# ==================================================================================================
+- name: "Install Bind Config Files"
+  template:
+    src: "{{ role_path }}/templates/{{ item }}.j2"
+    dest: "{{ bind_conf_dir }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop:
+    - named.conf
+    - named.conf.options
+    - named.conf.default-zones
+    - named.conf.local
+  when:
+    - bind_dnssec_secret is defined
+    - bind_zones is defined
+  notify: restart bind
+  tags:
+    - bind
+    - bind-config
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Install Dynamic DNS Keys"
+  template:
+    src: "{{ role_path }}/templates/ddns_key.j2"
+    dest: "{{ bind_conf_dir }}/{{ item }}.key"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  when:
+    - bind_dnssec_secret is defined
+  loop:
+    - ansible
+  notify: restart bind
+  tags:
+    - bind
+    - bind-config
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Ensure Zone Directory Exists
+  file:
+    dest: "{{ bind_zone_dir }}"
+    state: directory
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "0755"
+  become: yes
+  when:
+    - bind_dnssec_secret is defined
+  tags:
+    - bind
+    - bind-zones
+
+# ==================================================================================================
+#
+# Install Zone Files
+#
+# ==================================================================================================
+- name: Download Root Zone file
+  get_url:
+    url: http://www.internic.net/domain/root.zone
+    dest: "{{ bind_cache_dir }}/db.root"
+    owner: bind
+    group: bind
+    mode: "0644"
+  become: yes
+  when:
+    - bind_dnssec_secret is defined
+  tags:
+    - bind
+    - bind-zones
+
+- name: "Installing Forward Zone files"
+  template:
+    src: "{{ role_path }}/templates/forwardzone.j2"
+    dest: "{{ bind_zone_dir }}/db.{{ zone }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "0644"
+  become: yes
+  when:
+    - zone is defined
+  notify: restart bind
+  tags:
+    - bind
+    - bind-zones
+
+- name: "Installing Reverse Zone files"
+  template:
+    src: "{{ role_path }}/templates/reversezone.j2"
+    dest: "{{ bind_zone_dir }}/db.{{ reverse_zone }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "0644"
+  become: yes
+  when:
+    - reverse_zone is defined
+  notify: restart bind
+  tags:
+    - bind
+    - bind-zones
+
+- name: "Ensure Bind can write to bind directories"
+  file:
+    path: "{{ item }}"
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: "0775"
+    state: directory
+  become: yes
+  loop:
+    - "{{ bind_zone_dir }}"
+    - "{{ bind_cache_dir }}"
+  tags:
+    - bind
+    - bind-zones

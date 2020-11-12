@@ -1,0 +1,84 @@
+#!/bin/bash
+
+# Add an "alert" alias for long running commands.  Use like so:
+#   sleep 10; alert
+alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
+
+if [[ -e "/usr/bin/trash" ]]; then
+    alias rm='trash'
+else
+    alias rm='rm -i'
+fi
+alias cp='cp -i'
+alias mv='mv -i'
+
+#
+alias ..='cd ..' #go to parent dir 
+alias ...='cd ../..' #go to grandparent dir 
+alias .3='cd ../../..'
+alias .4='cd ../../../..'
+alias .5='cd ../../../../..'
+alias -- -='cd -' #go to previous dir
+
+#
+# enable color support of ls and also add handy aliases
+if [[ -x /usr/bin/dircolors ]]; then
+    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
+    alias ls='ls --color=auto'
+    #alias dir='dir --color=auto'
+    #alias vdir='vdir --color=auto'
+
+    alias grep='grep --color=auto'
+    alias fgrep='fgrep --color=auto'
+    alias egrep='egrep --color=auto'
+fi
+
+# some more ls aliases
+alias ll='ls -AlFh'
+alias la='ls -A'
+alias l='ls -CF'
+
+alias l.='ls -d .*' #list hidden files 
+alias ll2='ls -lhrt' #extra info compared to "l" 
+alias lld='ls -lUd */' #list directories
+alias list='ls -AlFh'
+
+#
+alias du='du -ksch' # Makes a more readable output and sort
+alias df='df -kh'
+alias dfx4='df -kh -t ext4'
+
+#
+alias h='history'
+alias j='jobs -l'
+#alias which='type -a'
+
+# Pretty-print of some PATH variables: 
+alias path='echo -e ${PATH//:/\\n}' 
+alias libpath='echo -e ${LD_LIBRARY_PATH//:/\\n}'
+
+alias namemaker="shuf -n 2 /usr/share/dict/words | tr -dc 'A-Za-z0-9'"
+
+#set -o nounset # These two options are useful for debugging.
+#set -o xtrace
+alias debug="set -o nounset; set -o xtrace"
+
+alias scratch='history -d $((HISTCMD-2)) && history -d $((HISTCMD-1))'
+
+alias die='kill -9 $$'
+
+alias star_wars='telnet towel.blinkenlights.nl'
+
+#alias ______up='ping -i 30 -a 192.168.0.139'
+
+alias dpbx='dbus-launch dropbox start -i'
+
+# Pushd aliases
+alias pd='pushd' 
+alias pd2='pushd +2'
+alias pd3='pushd +3' 
+alias pd4='pushd +4'
+
+alias fat='aptitude search ~i | grep -v "i A" | cut -d " " -f 4'
+
+alias sshkey="ssh-keygen -t ed25519"

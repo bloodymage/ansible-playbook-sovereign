@@ -1,0 +1,30 @@
+#!/bin/bash
+
+function batteryvariables () {
+    # Batter Power for Laptop
+    BAT_PERCENTAGE=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0| grep -E percentage| awk {'print $2'}|cut -d% -f1)
+    BAT_STATE=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0| grep -E state | awk {'print $2'})
+    BAT_FULL=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep -E to\ full| awk {'print $4 $5'})
+    BAT_EMPTY=$(upower -i /org/freedesktop/UPower/devices/battery_BAT0 | grep -E to\ empty| awk {'print $4 $5'})
+}
+
+function batteryinfo () {
+    batteryvariables
+    if [ ${BAT_PERCENTAGE} -lt 5 ]; then 
+	BC=${ALERT} # Battery almost dead (<5%). 
+    elif [ ${BAT_PERCENTAGE} -lt 20 ]; then 
+	BC=${YELLOW} # Battery almost gone
+    else 
+	    BC=${GREEN} # Battery is ok. 
+    fi
+    echo -ne "${BC}${BAT_PERCENTAGE}% ${BAT_STATE} ${BAT_FULL}${BAT_EMPTY}${DC} "
+}
+
+function bat_color () {
+    batteryvariables
+    if [ "$BAT_PERCENTAGE" -lt 100 ]; then
+	echo -ne "${BC}${BAT_PERCENTAGE}% ${BAT_STATE} ${BAT_FULL}${BAT_EMPTY}${SDC} "
+    else
+	echo -ne ""
+    fi
+}

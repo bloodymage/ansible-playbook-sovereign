@@ -1,0 +1,89 @@
+---
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - openssh
+
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - openssh
+        - install-packages
+
+# ==================================================================================================
+#
+# Tasks:
+#  
+#
+# ==================================================================================================
+- name: Create Required Directories for Cert authorization.
+  file:
+    name: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  loop:
+    - "/etc/ssh/ca"
+    - "/etc/ssh/auth_principals"
+  tags:
+    - openssh
+
+- name: Install Host CA Certificate on Hosts
+  copy:
+    src: "{{ ssh_ca_key_directory }}/{{ ssh_ca_host_pubfile }}"
+    dest: "{{ ssh_ca_host_certificate }}"
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: restart ssh
+  tags:
+    - openssh
+
+- name: Install User CA Certificate on Hosts
+  copy:
+    src: "{{ ssh_ca_key_directory }}/{{ ssh_ca_user_pubfile }}"
+    dest: "{{ ssh_trusted_user_ca_key }}"
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: restart ssh
+
+- name: "Install Configuration files"
+  template:
+    src: "{{ item.name }}.j2"
+    dest: "{{ ssh_config_dir }}/{{ item.name }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode | default('0644')}}"
+    validate: "{{ item.validate | default(none)}}"
+    backup: yes
+  become: yes
+  loop: "{{ ssh_config_files }}"
+  notify: restart ssh

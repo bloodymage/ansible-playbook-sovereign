@@ -1,0 +1,42 @@
+# {{ ansible_managed }}
+
+{% for site in ddclient_sites -%}
+  {% if site.daemon is defined -%}
+    daemon={{ site.daemon }}
+  {% endif -%}
+
+  {% if site.mail is defined -%}
+    mail={{ site.mail }}
+  {% endif -%}
+
+  {% if site.mail_failure is defined -%}
+    mail-failure={{ site.mail_failure }}
+  {% endif -%}
+
+  {% if site.ssl is defined -%}
+    ssl={{ site.ssl }}
+  {% endif -%}
+
+  {% if site.protocol is defined -%}
+    protocol={{ site.protocol }}
+  {% endif -%}
+
+  {% if site.usev6 is defined -%}
+    usev6={{ site.usev6 }}
+  {% endif -%}
+
+  {% if site.if_skip is defined -%}
+    if-skip={{ site.if_skip }}
+  {% endif -%}
+
+  {% if site.login is defined -%}
+    login={{ site. login }}
+  {% endif -%}
+
+  {% if site.password is defined -%}
+    password='{{ site.password }}'
+  {% endif -%}
+
+  {{ site.name }}
+
+{% endfor %}

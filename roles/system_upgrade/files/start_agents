@@ -1,0 +1,108 @@
+#!/bin/bash
+
+BLUE="[34;01m"
+CYAN="[36;01m"
+CYANN="[36m"
+GREEN="[32;01m"
+RED="[31;01m"
+PURP="[35;01m"
+OFF="[0m"
+
+function getgpgkey () {
+    local keyVal
+    keyVal=$(gpg -K |
+          awk '/sec/{if (length($2) > 0) print $2}' |
+          sed 's|.*/0x||' )
+    echo -ne ${keyVal}
+}
+
+function getsshkey () {
+    local sshKeys
+    local Keys
+
+    cd ${HOME}/.ssh/ &&
+        sshKeys=$(ls *.pub |
+                      cut -d. -f1 |
+                      cut -d- -f1 |
+                      cut -d_ -f2 |
+                      sort -u) &&
+        cd ${HOME}
+
+    for key in ${sshKeys}
+    do
+        if [[ "${key}" != "gpg" ]]; then
+            if [[ -f ${HOME}/.ssh/id_${key} ]]; then
+                if [[ -z ${Keys} ]]; then
+                    Keys="id_${key}"
+                else
+                    Keys="${Keys} id_${key}"
+                fi
+                [[ "${key}" == "dsa" ]] &&
+                    echo "Warning: you are still using dsa keys."
+            fi
+        fi
+    done
+    echo -ne ${Keys}
+
+}
+
+function gnome_agents () {
+    eval $(gnome-keyring-daemon --start)
+    export SSH_AUTH_SOCK
+}
+
+function start_gpg_agent () {
+    local keyVal
+    if command -v keychain > /dev/null 2>&1; then
+        # ID GPG Keys
+        keyVal=$(getgpgkey) &&
+            [[ -n ${keyVal} ]] &&
+            if [[ ! ${TERM} =~ screen ]]; then
+                eval "$(keychain --clear --systemd --eval --agents gpg ${keyVal})"
+            else
+                eval "$(keychain --eval --agents gpg ${keyVal})"
+            fi
+        export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
+        gpgconf --launch gpg-agent
+
+        export GPG_TTY=$(tty)
+        gpg-connect-agent updatestartuptty /bye >/dev/null
+    fi
+}
+
+function start_ssh_agent () {
+    local keyVal
+    local sshKeys
+    if command -v keychain > /dev/null 2>&1; then
+        # ID SSH Keys
+        keyVal=$(getgpgkey) &&
+            sshKeys=$(getsshkey) &&
+            [[ -n ${sshKeys} ]] &&
+            if [[ ! ${TERM} =~ screen ]]; then
+                eval "$(keychain --clear --systemd --eval --agents gpg ${keyVal})"
+                eval "$(keychain --clear --eval --agents ssh ${sshKeys})"
+            else
+                eval "$(keychain --eval --agents gpg ${keyVal})"
+                eval "$(keychain --eval --agents ssh ${sshKeys})"
+            fi
+    fi
+}
+
+function keychain_agents () {
+    if [[ -f ~/.ssh/id_rsa.pub ]] || [[ -f ~/.ssh/id_ed25519.pub ]]; then
+        start_ssh_agent
+    else
+        start_gpg_agent
+    fi
+
+}
+
+function start_agents () {
+    if [[ -n "$DESKTOP_SESSION" ]]; then
+        keychain_agents
+    else
+        keychain_agents
+    fi
+}
+
+start_agents

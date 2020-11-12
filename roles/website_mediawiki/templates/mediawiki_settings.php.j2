@@ -1,0 +1,234 @@
+<?php
+
+# {{ ansible_managed }}
+
+{% if mediawiki_enable_debugging %}
+  # Enable Debugging
+  error_reporting( -1 );
+  ini_set( "display_errors", 1 );
+  $wgShowExceptionDetails = true;
+  $wgShowDBErrorBacktrace = true;
+  $wgShowSQLErrors = true;
+
+  $wgDebugLogFile = "/var/log/apache2/{{ item.name }}/debug-{$wgDBname}.log";
+
+  $wgDBerrorLog = '/var/log/apache2/{{ item.name }}/database-error.log';
+  $wgRateLimitLog = '/var/log/apache2/{{ item.name }}/ratelimit.log';
+  $wgDebugLogGroups = array(
+    'resourceloader' => '/var/log/apache2/{{ item.name }}/resourceloader.log',
+    'exception' => '/var/log/apache2/{{ item.name }}/exception.log',
+    'error' => '/var/log/apache2/{{ item.name }}/error.log',
+
+  {% if mediawiki_debug_modules %}
+    {% for module in mediawiki_debug_modules %}
+      '{{ module.name }}' => '/var/log/apache2/{{ item.name }}/{{ module.name }}.log',
+    {% endfor %}
+  {% endif %}
+  );
+
+{% endif %}
+
+# Protect against web entry
+if ( !defined( 'MEDIAWIKI' ) ) {
+	exit;
+}
+
+{## Uncomment this to disable output compression #}
+{# $wgDisableOutputCompression = true; #}
+
+$wgSitename = "{{ item.full_name }}";
+$wgMetaNamespace = "{{ item.namespace }}";
+
+{# ==============================================================================
+#
+## The URL base path to the directory containing the wiki;
+## defaults for all runtime URL paths are based off of this.
+## For more information on customizing the URLs
+## (like /w/index.php/Page_title to /wiki/Page_title) please see:
+## https://www.mediawiki.org/wiki/Manual:Short_URL
+# ============================================================================== #}
+$wgScriptPath = "/w";
+{## The protocol and server name to use in fully-qualified URLs #}
+$wgServer = "https://{{ item.name }}";
+
+ {## The URL path to the logo. #}
+ $wgLogo = "$wgResourceBasePath/resources/assets/wiki.png";
+
+$actions = array( 'edit', 'watch', 'unwatch', 'delete','revert', 'rollback', 'protect', 'unprotect', 'markpatrolled', 'render', 'submit', 'history', 'purge', 'info' );
+foreach ( $actions as $action ) {
+	$wgActionPaths[$action] = "/wiki/$action/$1";
+}
+
+$wgActionPaths['view'] = "/wiki/$1";
+$wgArticlePath = $wgActionPaths['view'];
+
+{## The URL path to static resources (images, scripts, etc.) #}
+$wgResourceBasePath = $wgScriptPath;
+
+## UPO means: this is also a user preference option
+
+$wgEnableEmail = true;
+$wgEnableUserEmail = true; # UPO
+
+$wgEmergencyContact = "{{ item.contact }}";
+$wgPasswordSender = "{{ item.contact }}";
+
+$wgEnotifUserTalk = false; # UPO
+$wgEnotifWatchlist = false; # UPO
+$wgEmailAuthentication = true;
+
+{## Database settings #}
+$wgDBtype = "mysql";
+$wgDBserver = "{{ item.db_server }}";
+$wgDBname = "{{ item.db_name }}";
+$wgDBuser = "{{ item.db_user }}";
+$wgDBpassword = "{{ item.db_password }}";
+$wgDBprefix = "{{ item.db_prefix }}";
+$wgSharedDB = "{{ item.shared_db }}";
+$wgSharedPrefix = "{{ item.shared_prefix }}";
+$wgSecretKey = "{{ item.secret_key }}";
+
+{# MySQL table options to use during installation or update #}
+$wgDBTableOptions = "ENGINE=InnoDB, DEFAULT CHARSET=utf8";
+
+$wgSharedTables[] = 'ipblocks';
+$wgSharedTables[] = 'user_groups';
+$wgSharedTables[] = 'interwiki';
+
+{# Experimental charset support for MySQL 5.0. #}
+$wgDBmysql5 = false;
+
+{# Cookies #}
+$wgCookieDomain = "{{ mediawiki_cookie_domain }}";
+# Changing this will log out all existing sessions.
+$wgAuthenticationTokenVersion = "1";
+
+{# Site upgrade key. Must be set to a string (default provided) to turn on the #}
+{# web installer while LocalSettings.php is in place #}
+$wgUpgradeKey = "{{ item.upgrade_key }}";
+
+{# Shared memory settings #}
+$wgMainCacheType = CACHE_NONE;
+$wgMemCachedServers = [];
+
+## To enable image uploads, make sure the 'images' directory
+## is writable, then set this to true:
+$wgEnableUploads = true;
+$wgUseImageMagick = true;
+$wgImageMagickConvertCommand = "/usr/bin/convert";
+
+# InstantCommons allows wiki to use images from https://commons.wikimedia.org
+$wgUseInstantCommons = false;
+
+## If you use ImageMagick (or any other shell command) on a
+## Linux server, this will need to be set to the name of an
+## available UTF-8 locale
+$wgShellLocale = "en_US.utf8";
+
+## Set $wgCacheDirectory to a writable directory on the web server
+## to make your wiki go slightly faster. The directory should not
+## be publically accessible from the web.
+#$wgCacheDirectory = "$IP/cache";
+
+# Site language code, should be one of the list in ./languages/data/Names.php
+$wgLanguageCode = "en";
+
+## For attaching licensing metadata to pages, and displaying an
+## appropriate copyright notice / icon. GNU Free Documentation
+## License and Creative Commons licenses are supported so far.
+$wgRightsPage = ""; # Set to the title of a wiki page that describes your license/copyright
+$wgRightsUrl = "";
+$wgRightsText = "";
+$wgRightsIcon = "";
+
+# Path to the GNU diff3 utility. Used for conflict resolution.
+$wgDiff3 = "/usr/bin/diff3";
+
+# The following permissions were set based on your choice in the installer
+$wgGroupPermissions['*']['createaccount'] = false;
+$wgGroupPermissions['*']['edit'] = false;
+$wgGroupPermissions['sysop']['interwiki'] = true;
+
+$wgDefaultSkin = "{{ mediawiki_default_skin | lower }}";
+
+{% for skin in mediawiki_skins_defaults %}
+  wfLoadSkin( '{{ skin }}' );
+{% endfor %}
+
+{% for extension in mediawiki_extensions_defaults -%}
+  wfLoadExtension( '{{ extension.name }}' );
+{% endfor %}
+
+{% for extension in mediawiki_extensions -%}
+  wfLoadExtension( '{{ extension.name }}' );
+{% endfor %}
+
+{% if mediawiki_ldap_config %}
+  // Safe IP or not (for bypassing external login via AD)
+  $safeIPs = array('127.0.0.1','localhost');
+  $ipsVars = array('HTTP_X_FORWARDED_FOR','HTTP_X_REAL_IP','REMOTE_ADDR');
+  foreach ($ipsVars as $ipsVar) {
+    if (isset($_SERVER[$ipsVar]) && mb_strlen($_SERVER[$ipsVar]) > 3 ) { $wikiRequestIP = $_SERVER[$ipsVar]; break; }
+  }
+  $wikiRequestSafe = (isset($wikiRequestIP) && ( in_array($wikiRequestIP,$safeIPs) ));
+
+  // Create Wiki-Group 'engineering' from default user group
+  $wgGroupPermissions['engineering'] = $wgGroupPermissions['user'];
+
+  // Private Wiki. External LDAP login. Default NS requires login.
+  $wgEmailConfirmToEdit = false;
+  $wgGroupPermissions['*']['edit'] = false;
+  $wgGroupPermissions['*']['read'] = false;
+  $wgGroupPermissions['*']['createaccount'] = false;
+  $wgGroupPermissions['sysop']['createaccount'] = false;
+  $wgGroupPermissions['*']['autocreateaccount'] = true;
+  $wgBlockDisablesLogin = true;
+
+  $ldapConfig = false;
+  $ldapJsonFile = "$IP/ldap.json";
+  if (is_file($ldapJsonFile) && is_dir("$IP/extensions/LDAPProvider")) {
+    $testJson = @json_decode(file_get_contents($ldapJsonFile),true);
+  if (is_array($testJson)) {
+    $ldapConfig = true;
+  } else {
+  error_log("Found invalid JSON in file: $IP/ldap.json");
+  }
+  }
+
+  if ( $ldapConfig ) {
+
+  {% for extension in mediawiki_extensions_ldap %}
+    wfLoadExtension( '{{ extension.name }}' );
+  {% endfor %}
+
+    $LDAPProviderDomainConfigs = $ldapJsonFile;
+    $wgPluggableAuth_ButtonLabel = "Log In";
+    if ($wikiRequestSafe) { $LDAPAuthentication2AllowLocalLogin = true; }
+  }
+  {% if mediawiki_kerberos_ad_sso %}
+    wfLoadExtension( 'Auth_remoteuser' );
+    $wgAuthRemoteuserUserName = getenv( 'LOGON_USER' );
+    $wgAuthRemoteuserUserNameReplaceFilter = [
+    '@{{ ansible_domain | upper }}$' => ''
+    ];
+    {% endif %}
+{% endif %}
+
+// Extension Settings
+{% for extension in mediawiki_extensions %}
+  // {{ extension.name }}
+  {% if extension.settings is defined %}
+    {% for setting in extension.settings %}
+      {{ setting }}
+    {% endfor %}
+  {% endif %}
+{% endfor %}
+
+// Enable API access
+$wgEnableAPI=true;
+
+$wgFileExtensions = array_merge( $wgFileExtensions,
+    array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
+            'tiff', 'odt', 'odg', 'ods', 'odp','png', 'svg'
+            )
+);

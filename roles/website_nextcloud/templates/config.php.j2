@@ -1,0 +1,22 @@
+<?php
+$CONFIG = array (
+  'instanceid' => '{{ item.instanceid }}',
+  'passwordsalt' => '{{ item.passwordsalt }}',
+  'secret' => '{{ item.secret }}',
+  'trusted_domains' => 
+  array (
+    0 => '{{ item.name }}',
+  ),
+  'datadirectory' => '{{ nextcloud_data_directory }}',
+  'dbtype' => 'mysql',
+  'version' => '20.0.0.9',
+  'overwrite.cli.url' => 'https://{{ item.name }}',
+  'dbname' => '{{ item.db_name }}',
+  'dbhost' => '{{ item.db_server }}',
+  'dbport' => '',
+  'dbtableprefix' => 'oc_',
+  'mysql.utf8mb4' => true,
+  'dbuser' => '{{ item.db_user }}',
+  'dbpassword' => '{{ item.db_password }}',
+  'installed' => true,
+);

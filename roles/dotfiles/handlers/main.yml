@@ -1,0 +1,22 @@
+---
+# handlers file for linux-users
+# ==================================================================================================
+#
+# Enable emacs user systemd service
+#
+# TODO: Fixme
+#
+# Error: cannot connect to bus
+#
+# ==================================================================================================
+- name: enable emacs
+  systemd:
+    name: emacs.service
+    enabled: yes
+    scope: user
+  become: yes
+  become_user: "{{ item.username }}"
+  become_method: machinectl
+  loop: "{{ users }}"
+  tags:
+    - dotfiles
