@@ -1,10 +1,10 @@
 ---
 - hosts: mariadb_servers
   roles:
-    - bloodymage.rebeldream.mariadb
+    - bloodymage.sovereign.mariadb
 
 - hosts: mysql_compatable_servers
-    - bloodymage.rebeldream.mysql_databases
+    - bloodymage.sovereign.mysql_databases
 
 # - hosts: influxdb
 

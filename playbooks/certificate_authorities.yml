@@ -1,4 +1,4 @@
 - hosts: certificate_authorities
   roles:
-    - bloodymage.rebeldream.sshca
-    - bloodymage.rebeldream.ownca
+    - bloodymage.sovereign.sshca
+    - bloodymage.sovereign.ownca

@@ -1,18 +1,18 @@
 # - hosts: web_servers
 #   roles:
-#     - bloodymage.rebeldream.fail2ban
-#     - bloodymage.rebeldream.redis
+#     - bloodymage.sovereign.fail2ban
+#     - bloodymage.sovereign.redis
 
 - hosts: apache_servers
   roles:
-    - bloodymage.rebeldream.apache
+    - bloodymage.sovereign.apache
 
 - hosts: nginx_servers
   roles:
-    - bloodymage.rebeldream.nginx
+    - bloodymage.sovereign.nginx
 
 - hosts: web_servers
   roles:
-    - bloodymage.rebeldream.website_mediawiki
-    - bloodymage.rebeldream.website_nextcloud
-    - bloodymage.rebeldream.acmeca_host_certs
+    - bloodymage.sovereign.website_mediawiki
+    - bloodymage.sovereign.website_nextcloud
+    - bloodymage.sovereign.acmeca_host_certs
