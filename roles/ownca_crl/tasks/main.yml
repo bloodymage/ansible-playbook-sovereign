@@ -10,6 +10,9 @@
 #   - /etc/ssl/certs   mode: 0755
 #
 # ==================================================================================================
+- name: Get IP geolocation data
+  community.general.ipinfoio_facts:
+
 - name: "Create SSL CRL Directory"
   file:
     path: "/etc/ssl/crls"

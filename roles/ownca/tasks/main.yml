@@ -34,6 +34,9 @@
     - ownca-all
     - install-packages
 
+- name: Get IP geolocation data
+  community.general.ipinfoio_facts:
+
 # ==================================================================================================
 #
 # Tasks: Create Directories
@@ -209,11 +212,11 @@
     privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
     common_name: "{{ item.common_name }}"
-    country_name: "{{ item.country_name | default(omit) }}"
+    country_name: "{{ sovereign_country_name | default(country) }}"
     email_address: "{{ item.email_address | default(omit) }}"
     organization_name: "{{ item.organization_name | default(sovereign_org_name | title ) }}"
-    organizational_unit_name: "{{ item.organizational_unit_name | default(item.common_name) }}"
-    state_or_province_name: "{{ item.state_or_province_name | default(omit) }}"
+    organizational_unit_name: "{{ item.organizational_unit_name | default(sovereign_org_unit_name) | title }}"
+    state_or_province_name: "{{ sovereign_region_name | default(region) }}"
     key_usage: "{{ item.keyusage }}"
     key_usage_critical: "{{ item.keyusage_critical | default('no')}}"
     basic_constraints: "{{ item.basic_constraints }}"

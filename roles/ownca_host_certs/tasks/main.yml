@@ -27,6 +27,9 @@
     - install-packages
     - ownca-all
 
+- name: Get IP geolocation data
+  community.general.ipinfoio_facts:
+
 # ==================================================================================================
 #
 # Create SSL Private Key and CRS Directories
@@ -84,8 +87,8 @@
 - name: Print CSR Variables
   debug:
     msg:
-      - "country_name: {{ ownca_country_code | default(none) }}"
-      - "state_or_province_name: {{ loc_st | default(none) }}"
+      - "country_name: {{ sovereign_country_code | default(country) }}"
+      - "state_or_province_name: {{ sovereign_region_name | default(region) }}"
       - "locality_name: {{ loc_city | default(none) }}"
       - "organization_name: {{ sovereign_org_name | title }}"
       - "organizational_unit_name: {{ sovereign_org_unit_name | title }}"
@@ -107,8 +110,8 @@
     mode: "0644"
     owner: root
     group: root
-    country_name: "{{ ownca_country_code }}"
-    state_or_province_name: "{{ loc_st | default(none) }}"
+    country_name: "{{ ownca_country_code | default(country) }}"
+    state_or_province_name: "{{ sovereign_region | default(region) }}"
     locality_name: "{{ loc_city | default(none) }}"
     organization_name: "{{ sovereign_org_name | title }}"
     organizational_unit_name: "{{ sovereign_org_unit_name | title }}"

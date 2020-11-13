@@ -31,7 +31,6 @@ acmeca_directory: "{{ letsencrypt_production_directory }}"
 acmeca_directory_url: "{{ letsencrypt_production_url }}"
 acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_production_directory }}"
 
-acmeca_country_code: "US"
 acmeca_domains: "{{ inventory_hostname }}"
 acmeca_challenge_type: "http-01"
 
