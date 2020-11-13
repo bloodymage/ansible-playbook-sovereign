@@ -1,5 +1,35 @@
 ---
 # roles/bind/defaults/main.yml
+packages:
+  - python3-netaddr
+  - bind9
+  - bind9utils
+
+bind_service: bind9
+
+# Directory with run-time stuff
+bind_dir: "/var/lib/bind"
+bind_conf_dir: "/etc/bind"
+bind_key_dir: "{{ bind_conf_dir }}/keys"
+auth_file: "auth_transfer.conf"
+bind_auth_file: "{{ bind_conf_dir }}/{{ auth_file }}"
+
+# Main config file
+bind_config: "{{ bind_conf_dir }}/named.conf"
+
+bind_default_zone_files: "{{ bind_conf_dir }}/named.conf.default-zones"
+bind_options_file: "{{ bind_conf_dir }}/named.conf.options"
+
+bind_owner: root
+bind_group: bind
+
+bind_bindkeys_file: "/etc/named.iscdlv.key"
+bind_pid_file: "/run/named/named.pid"
+bind_session_keyfile: "/run/named/session.key"
+
+# Custom location for zone files
+bind_zone_dir: "{{ bind_dir }}"
+bind_cache_dir: "/var/cache/bind"
 
 # defaults file for ansible-bind
 # Define acls for defining ip addresses or networks allowed to query bind
@@ -54,7 +84,7 @@ zone_refresh: "604800"
 zone_retry: "86400"
 zone_expire: "2419200"
 zone_negative_cache_ttl: "604800"
-zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01"
 
 bind_log: "data/named.run"
 
@@ -64,14 +94,11 @@ bind_zone_domains:
     networks:
       - "10.0.2"
 
-# List of acls.
-bind_acls: []
-
 # Key binding for slaves
 bind_dns_keys: []
 #  - name: master_key
 #    algorithm: hmac-sha256
-#    secret: "azertyAZERTY123456"
+#    secret: "password"
 
 # List of IPv4 address of the network interface(s) to listen on. Set to "any"
 # to listen on all interfaces
@@ -107,12 +134,6 @@ bind_statistics_port: 8053
 bind_statistics_host: 127.0.0.1
 bind_statistics_allow:
   - "127.0.0.1"
-
-bind_extra_include_files: []
-
-# DNSSEC configuration
-bind_dnssec_enable: true
-bind_dnssec_validation: true
 
 bind_extra_include_files: []
 

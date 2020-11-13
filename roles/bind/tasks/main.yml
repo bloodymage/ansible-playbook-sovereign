@@ -5,32 +5,98 @@
 #
 #
 # ==================================================================================================
-- name: Source specific variables
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_distribution }}.yml"
-    - "{{ ansible_os_family | lower }}_family.yml"
-  tags:
-    - bind
-    - pretask
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - bind
 
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - bind
+        - install-packages
 # ==================================================================================================
 #
-#
+# Set Variables
 #
 # ==================================================================================================
-- name: "Install Bind"
-  package:
-    pkg: "{{ packages }}"
-    state: present
-  become: yes
-  register: result
+- name: Query DNS
+  ansible.builtin.set_fact:
+    __zone_soa: "{{ lookup('community.general.dig', zone + '/SOA') }}"
   when:
-    - bind_dnssec_secret is defined
+    - zone is defined
   tags:
     - bind
-    - bind-install
-    - install-packages
+
+- name: Print Zone Serial Number
+  debug:
+    msg:
+      - "{{ __zone_soa.split(' ')[2] }}"
+    verbosity: 1
+  when:
+    - __zone_soa is defined
+  tags:
+    - bind
+
+- name: Print Zone SOA
+  debug:
+    msg:
+      - "{{ __zone_soa }}"
+    verbosity: 4
+  when:
+    - __zone_soa is defined
+  tags:
+    - bind
+
+- name: Get Current Serial Number
+  ansible.builtin.set_fact:
+    __zone_current_serial_number: "{{ __zone_soa.split(' ')[2] }}"
+  when:
+    - __zone_soa is defined
+  tags:
+    - bind
+
+- name: Set new Serial Number
+  ansible.builtin.set_fact:
+    zone_serial_number: "{{ __zone_current_serial_number + 1 }}"
+  when:
+    - __zone_current_serial_number is defined
+    - __zone_current_serial_number >= zone_serial_number
+  tags:
+    - bind
+
+- name: Check new serial number
+  ansible.builtin.debug:
+    msg:
+      - "Current Serial Number: {{ __zone_current_serial_number }}"
+      - "New Serial Number:     {{ zone_serial_number }}"
+  when:
+    - __zone_current_serial_number is defined
+  tags:
+    - bind
 
 # ==================================================================================================
 #
