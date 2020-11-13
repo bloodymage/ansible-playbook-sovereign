@@ -2,8 +2,6 @@
 # defaults file for sssd
 packages:
   - adcli
-  - krb5-pkinit
-  - krb5-user
   - libnss-sss
   - libnss3-tools
   - libpam-sss
@@ -13,7 +11,5 @@ packages:
   - samba-common-bin
   - sssd
   - sssd-tools
-
-krb5_realm: "{{ ansible_domain | upper }}"
 
 sssd_pam_pwd_expiration_warning: 10

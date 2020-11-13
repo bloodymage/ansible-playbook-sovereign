@@ -1,0 +1,112 @@
+---
+# handlers file for sovereign_handlers
+- name: Update System CA Certificates
+  command: "update-ca-certificates"
+  become: yes
+  listen: "restart all"
+
+- name: Restart Apache
+  service:
+    name: apache2
+    state: restarted
+  listen: "restart all"
+  when:
+    - inventory_hostname in groups['apache_servers'] | default([])
+
+- name: Restart Bind9
+  service:
+    name: bind9
+    state: restarted
+  listen: "restart all"
+  when:
+    - inventory_hostname in groups['dns_servers'] | default([])
+
+- name: Restart Dovecot
+  service:
+    name: dovecot
+    state: restarted
+  listen: "restart all"
+  when:
+    - inventory_hostname in groups['dovecot_servers'] | default([])
+
+- name: Restart Mosquitto
+  service:
+    name: mosquitto
+    state: restarted
+  listen: "restart all"
+  when:
+    - inventory_hostname in groups['mosquitto_servers'] | default([])
+
+- name: Restart MySQL
+  service:
+    name: mysql
+    state: restarted
+  listen: "restart all"
+  when:
+    - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
+
+- name: Restart Postfix
+  service:
+    name: postfix
+    state: restarted
+  listen: "restart all"
+  when:
+    - inventory_hostname in groups['postfix_servers'] | default([])
+
+- name: Restart Samba Domain Controller
+  service:
+    name: samba-ad-dc
+    state: restarted
+  listen: "restart all"
+  when:
+    - inventory_hostname in groups['samba_domain_controllers'] | default([])
+  tags:
+    - ownca-host-certs
+
+- name: Restart SMBD Server
+  service:
+    name: smbd
+    state: restarted
+  listen:
+    - "restart all"
+    - "restart samba file server"
+
+- name: Restart NMBD Server
+  service:
+    name: nmbd
+    state: restarted
+  listen:
+    - "restart all"
+    - "restart samba file server"
+
+- name: Restart Winbind Server
+  service:
+    name: winbindd
+    state: restarted
+  listen:
+    - "restart all"
+    - "restart samba file server"
+
+- name: Reload Apache
+  service:
+    name: apache2
+    state: reloaded
+  listen: "reload all"
+  when:
+    - inventory_hostname in groups['apache_servers']
+
+- name: start sssd
+  service:
+    name: sssd
+    state: started
+  become: yes
+  when:
+    - inventory_hostname in groups['apache_servers']
+
+- name: restart sssd
+  service:
+    name: sssd
+    state: restarted
+  become: yes
+  when:
+    - inventory_hostname in groups['apache_servers']

@@ -35,27 +35,9 @@
 # Configuration tasks
 #
 # ==================================================================================================
-- name: Install config files to /etc
-  template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
-    dest: "/etc/{{ item }}"
-    owner: root
-    group: root
-    mode: 0644
-  become: yes
-  loop:
-    - krb5.conf
-  when:
-    - use_krb5 is defined
-    - use_krb5
-  notify: restart dovecot
-  tags:
-    - dovecot
-    - krb5
-
 - name: Install config files to /etc/dovecot
   template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
+    src: "{{ item }}.j2"
     dest: "/etc/dovecot/{{ item }}"
     owner: root
     group: root
@@ -71,7 +53,7 @@
 
 - name: Install configuration files to /etc/dovecot/conf.d
   template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
+    src: "{{ item }}.j2"
     dest: "/etc/dovecot/conf.d/{{ item }}"
     owner: root
     group: root
@@ -121,7 +103,7 @@
 
 - name: Install configuration files to /etc/dovecot/virtual
   template:
-    src: "{{ role_path }}/templates/dovecot-virtual.j2"
+    src: "dovecot-virtual.j2"
     dest: "/etc/dovecot/virtual/{{ item.name }}/dovecot-virtual"
     owner: root
     group: root
@@ -141,7 +123,7 @@
     
 - name: Install IMAPSieve Spam Update Filters
   template:
-    src: "{{ role_path }}/templates/report-sieve.j2"
+    src: "report-sieve.j2"
     dest: "{{ sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
     owner: root
     group: root
@@ -153,7 +135,7 @@
 
 - name: Install IMAPSieve Spam Update Filters
   template:
-    src: "{{ role_path }}/templates/sa-learn.j2"
+    src: "sa-learn.j2"
     dest: "{{ sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
     owner: root
     group: root
