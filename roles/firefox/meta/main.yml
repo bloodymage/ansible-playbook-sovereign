@@ -1,5 +1,5 @@
 galaxy_info:
-  author: your name
+  author: G Derber
   description: your role description
   company: your company (optional)
 
@@ -47,6 +47,5 @@ galaxy_info:
     # NOTE: A tag is limited to a single word comprised of alphanumeric characters.
     #       Maximum 20 tags per role.
 
-dependencies: []
-  # List your role dependencies here, one per line. Be sure to remove the '[]' above,
-  # if you add dependencies to this list.
+dependencies:
+  - role: bloodymage.sovereign.sovereign_handlers
