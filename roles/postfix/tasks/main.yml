@@ -1,47 +1,48 @@
 ---
 # tasks file for mail-server
-- name: Source specific variables
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_distribution }}.yml"
-    - "{{ ansible_os_family | lower }}_family.yml"
-  tags:
-    - bind
-    - pretask
+- name: "Prepare Host"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - postfix
 
-- name: "Install Common Apps"
-  package:
-    name: "{{ packages }}"
-    state: present
-  become: yes
-  tags:
-    - install-packages
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - postfix
+        - install-packages
 
 - name: Install config files
   template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
+    src: "{{ item }}.j2"
     dest: "/etc/{{ item }}"
     owner: root
     group: root
     mode: 0644
   become: yes
   loop:
-    - krb5.conf
     - mailname
-
-- name: Install Aliases
-  template:
-    src: "aliases.j2"
-    dest: "/etc/aliases"
-    owner: root
-    group: root
-    mode: 0644
-  become: yes
-  notify: update aliases
+    - aliases
 
 - name: "Install configuration files (Perms=644)"
   template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
+    src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
     owner: root
     group: root
@@ -56,20 +57,15 @@
   tags:
     - postfix
 
-- name: "Install configuration files (Perms=644)"
+- name: "Install ldap user and group map files"
   template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
-    dest: "/etc/postfix/{{ item }}"
+    src: "ldap_maps.j2"
+    dest: "/etc/postfix/{{ item }}.cf"
     owner: root
     group: root
     mode: 0644
   become: yes
-  loop:
-    - ad_sender_login_maps.cf
-    - ad_virtual_group_maps.cf
-    - ad_virtual_mailbox_maps.cf
-    - ad_virtual_user_aliases_maps.cf
-    - ad_virtual_user_maps.cf
+  loop: "{{ postfix_ldap_maps }}"
   when:
     - inventory_hostname in groups['samba_domain_members']
     - mail_user_password is defined
@@ -79,7 +75,7 @@
 
 - name: "Install Configuration files (postmap update required)"
   template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
+    src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
     owner: root
     group: root
@@ -101,7 +97,7 @@
 
 - name: Create configuration files (Perms=600)
   template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
+    src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
     owner: root
     group: root
