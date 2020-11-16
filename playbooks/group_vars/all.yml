@@ -4,7 +4,9 @@ sovereign_org_name: "{{ ansible_domain.split('.')[1] }}"
 sovereign_org_unit_name: "{{ ansible_domain.split('.')[0] }}"
 sovereign_domain: "{{ sovereign_domain_list | join('_') }}"
 
-sovereign_root_domain: "example.com"
+sovereign_realm: "{{ ansible_domain | upper }}"
+
+sovereign_root_domain: "{{ ansible_domain.split('.')[1] }}.{{ ansible_domain.split('.')[2] }}"
 
 sovereign_component_ca_file: "/etc/ssl/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca.pem"
 sovereign_component_ca_chain_file: "/etc/ssl/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-component-ca-chain.pem"
@@ -12,4 +14,82 @@ sovereign_component_ca_chain_file: "/etc/ssl/certs/{{ sovereign_org_name }}-{{ s
 sovereign_realm_managed_identities: no
 sovereign_primary_domain_controller: "{{ groups['samba_domain_controllers'][0] | default([]) }}"
 
+sovereign_smart_card_login: no
+
 sovereign_raspberrypi_distribution_release: buster
+
+
+
+ownca_root_password: "password"
+ownca_intermediate_password: "password"
+ownca_component_password: "password"
+ownca_identity_password: "password"
+ownca_codesign_password: "password"
+
+ownca_certificate_authorities:
+  - name: "root"
+    common_name: "{{ sovereign_org_name | title }} {{ 'root' | title }} CA"
+    password: "{{ ownca_root_password }}"
+    keyusage:
+      - "keyCertSign"
+      - "cRLSign"
+    keyusage_critical: yes
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: yes
+    authority_key_identifier: "keyid:always"
+    ownca: "root"
+    ownca_privatekey_passphrase: "{{ ownca_root_password }}"
+    provider: "selfsigned"
+  - name: "{{ ownca_intermediate_ca }}"
+    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title }} CA"
+    password: "{{ ownca_intermediate_password }}"
+    ownca: "root"
+    ownca_privatekey_passphrase: "{{ ownca_root_password }}"
+    provider: "ownca"
+    keyusage:
+    - keyCertSign
+    - cRLSign
+    keyusage_critical: yes
+    basic_constraints:
+      - 'CA:TRUE'
+  - name: "{{ ownca_intermediate_ca }}-component"
+    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title}} Component CA"
+    password: "{{ ownca_component_password }}"
+    ownca: "{{ ownca_intermediate_ca }}"
+    ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
+    provider: "ownca"
+    keyusage:
+    - keyCertSign
+    - cRLSign
+    keyusage_critical: yes
+    basic_constraints:
+      - 'CA:TRUE'
+  - name: "{{ ownca_intermediate_ca }}-identity"
+    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title }} Identity CA"
+    password: "{{ ownca_identity_password }}"
+    ownca: "{{ ownca_intermediate_ca }}"
+    ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
+    provider: "ownca"
+    keyusage:
+    - keyCertSign
+    - cRLSign
+    keyusage_critical: yes
+    basic_constraints:
+      - 'CA:TRUE'
+  - name: "{{ ownca_intermediate_ca }}-codesign"
+    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title }} Codesign CA"
+    password: "{{ ownca_codesign_password }}"
+    ownca: "{{ ownca_intermediate_ca }}"
+    ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
+    provider: "ownca"
+    keyusage:
+    - keyCertSign
+    - cRLSign
+    keyusage_critical: yes
+    basic_constraints:
+      - 'CA:TRUE'
+
+ownca_revoked_certificates: []
+
+samba_administrator_password: "password"

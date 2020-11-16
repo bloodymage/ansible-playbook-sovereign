@@ -22,7 +22,6 @@ dovecot_mail_protocols:
 sieve: "file:~/sieve;active=~/.dovecot.sieve"
 sieve_before:
   - "/var/mail/vmail/sieve-before"
-  #- "ldap:/etc/sieve-ldap.conf;name=ldap-domain"
 
 sieve_after:
   - "/var/mail/vmail/sieve-after"

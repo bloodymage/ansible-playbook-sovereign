@@ -1,4 +1,225 @@
 ---
-- include: "{{ ansible_os_family | lower }}_family.yml"
+- name: "Ensure we have a password for the Samba Administrator account"
+  ansible.builtin.set_fact:
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/domain_users/administrator_password"
+  when:
+    - samba_administrator_password == "password"
+  tags:
+    - domain-users
+
+# ======================================================================
+#
+# Ensure samba is not currently running on the host system.
+#
+# Steps:
+#   1. Identify the processes
+#
+#
+#
+# Ref: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
+# ======================================================================
+- name: Get running processes
+  shell: >
+    ps -ef |
+    grep -v grep |
+    egrep 'samba|smbd|nmbd|winbindd' |
+    awk '{print $2}'
+  register: running_processes
+  become: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+- name: Kill running processes
+  shell: "kill {{ item }}"
+  loop: "{{ running_processes.stdout_lines }}"
+  become: yes
+  ignore_errors: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+- name: Wait for all processes to be killed
+  wait_for:
+    path: "/proc/{{ item }}/status"
+    state: absent
+  loop: "{{ running_processes.stdout_lines }}"
+  ignore_errors: yes
+  register: killed_processes
+  become: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+- name: Force kill stuck processes
+  shell: "kill -9 {{ item }}"
+  loop: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
+  become: yes
+  ignore_errors: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+# ======================================================================
+#
+# Ensure config file does not already exists
+#
+# ======================================================================
+- name: Identify config file if it exists
+  shell: >
+    smbd -b |
+    grep 'CONFIGFILE' |
+    cut -d: -f2 |
+    tr -s "[:blank:]"
+  register: config_file
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+- name: Print Variables
+  debug:
+    var: config_file
+    verbosity: 2
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+- name: Remove config file
+  file:
+    path: "{{ config_file }}"
+    state: absent
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+# ==================================================================================================
+#
+# Ensure Samba databases do not exists
+#
+# ==================================================================================================
+#- name: Identify samba database directories
+#  shell: "smbd -b | egrep 'LOCKDIR|STATEDIR|CACHEDIR|PR0IVATE_DIR'|cut -d: -f2| sed -e 's/^[[:space:]]*//'"
+#  register: database_directories
+
+# - name: Identify samba database files
+#   find:
+#     path: "{{ item }}"
+#     pattern: "*.tdb, *.ldb"
+#   loop:
+#     - "/var/run/samba"
+#     - "/var/lib/samba"
+#     - "/var/cache/samba"
+#     - "/var/lib/samba/private"
+#   become: yes
+#   register: find_logs
+
+# - name: List tdb files
+#   debug:
+#     var: "{{ item.path }}"
+#     verbosity: 1
+#   loop: "{{ find_logs.files }}"
+
+# - name: Remove database files
+#   file:
+#     path: "{{ item.path }}"
+#     state: absent
+#   loop: "{{ find_logs.files }}"
+
+- name: Remove database files
+  shell:
+    cmd: "rm *.tdb *.ldb"
+    chdir: "{{ item }}"
+  loop:
+    - "/var/run/samba"
+    - "/var/lib/samba"
+    - "/var/cache/samba"
+    - "/var/lib/samba/private"
+  become: yes
+  ignore_errors: yes
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+# ==================================================================================================
+#
+# As a precaution, we remove the krb5.conf file
+#
+# ==================================================================================================
+- name: Remove krb5.conf
+  file:
+    path: "/etc/krb5.conf"
+    state: absent
+  when:
+    - samba_create_domain is defined
+    - samba_create_domain 
+    - inventory_hostname in groups['samba_domain_controllers'] or inventory_hostname in groups['samba_file_servers']
+
+# ======================================================================
+#
+# Install Samba Packages
+#
+# ======================================================================
+- name: Install Samba Packages
+  apt:
+    name: "{{ common_packages }}"
+    state: present
   when:
     - ansible_network_os is undefined
+  tags:
+    - install-packages
+    - samba
+    - samba-domain-controllers
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install Samba Domain Controller Packages
+  apt:
+    name: "{{ domain_controller_packages }}"
+    state: present
+  become: yes
+  when:
+    - ansible_network_os is undefined
+  tags:
+    - install-packages
+    - samba
+    - samba-domain-controllersd
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- include: primary_domain_controller.yml
+  when:
+    - primary_domain_controller is defined
+    - inventory_hostname == primary_domain_controller
+  tags:
+    - samba
+    - samba-domain-controllers
+
+# ======================================================================
+#
+#
+#
+# ======================================================================
+- include: domain_controllers.yml
+  when:
+    - ansible_network_os is undefined
+    - primary_domain_controller is defined
+    - inventory_hostname in groups['samba_domain_controllers']
+  tags:
+    - samba
+    - samba-domain-controllers

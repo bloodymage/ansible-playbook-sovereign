@@ -2,9 +2,6 @@
 ownca_domain_list: "{{ sovereign_domain_list }}"
 ownca_domain: "{{ sovereign_domain }}"
 
-# Location Information
-ownca_country_code: US
-
 # Files and Directories
 ownca_directory: "~/.pki"
 ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities" 
@@ -34,73 +31,5 @@ ownca_issuing_authorities:
   - identity
   - codesign
 
-ownca_certificate_authorities:
-  - name: "root"
-    common_name: "{{ sovereign_org_name | title }} {{ 'root' | title }} CA"
-    password: "{{ ownca_root_password }}"
-    country_name: "{{ ownca_country_code }}"
-    keyusage:
-      - "keyCertSign"
-      - "cRLSign"
-    keyusage_critical: yes
-    basic_constraints:
-      - 'CA:TRUE'
-    basic_constraints_critical: yes
-    authority_key_identifier: "keyid:always"
-    ownca: "root"
-    ownca_privatekey_passphrase: "{{ ownca_root_password }}"
-    provider: "selfsigned"
-  - name: "{{ ownca_intermediate_ca }}"
-    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title }} CA"
-    country_name: "{{ ownca_country_code }}"
-    password: "{{ ownca_intermediate_password }}"
-    ownca: "root"
-    ownca_privatekey_passphrase: "{{ ownca_root_password }}"
-    provider: "ownca"
-    keyusage:
-    - keyCertSign
-    - cRLSign
-    keyusage_critical: yes
-    basic_constraints:
-      - 'CA:TRUE'
-  - name: "{{ ownca_intermediate_ca }}-component"
-    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title}} Component CA"
-    country_name: "{{ ownca_country_code }}"
-    password: "{{ ownca_component_password }}"
-    ownca: "{{ ownca_intermediate_ca }}"
-    ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
-    provider: "ownca"
-    keyusage:
-    - keyCertSign
-    - cRLSign
-    keyusage_critical: yes
-    basic_constraints:
-      - 'CA:TRUE'
-  - name: "{{ ownca_intermediate_ca }}-identity"
-    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title }} Identity CA"
-    country_name: "{{ ownca_country_code }}"
-    password: "{{ ownca_identity_password }}"
-    ownca: "{{ ownca_intermediate_ca }}"
-    ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
-    provider: "ownca"
-    keyusage:
-    - keyCertSign
-    - cRLSign
-    keyusage_critical: yes
-    basic_constraints:
-      - 'CA:TRUE'
-  - name: "{{ ownca_intermediate_ca }}-codesign"
-    common_name: "{{ sovereign_org_name | title }} {{ ownca_intermediate_ca | title }} Codesign CA"
-    country_name: "{{ ownca_country_code }}"
-    password: "{{ ownca_codesign_password }}"
-    ownca: "{{ ownca_intermediate_ca }}"
-    ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
-    provider: "ownca"
-    keyusage:
-    - keyCertSign
-    - cRLSign
-    keyusage_critical: yes
-    basic_constraints:
-      - 'CA:TRUE'
 
 ownca_revoked_certificates: []

@@ -1,4 +1,14 @@
 ---
+- name: "Ensure we have a password for the Samba Administrator account"
+  ansible.builtin.set_fact:
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/domain_users/administrator_password"
+  when:
+    - samba_administrator_password == "password"
+  tags:
+    - domain-users
+
 - name: Get Samba Groups
   command: "samba-tool group list"
   register: existing_group_list

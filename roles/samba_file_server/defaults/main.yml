@@ -2,9 +2,6 @@ samba_packages:
   - winbind
   - libpam-winbind
   - libnss-winbind
-  - libpam-krb5
-  - krb5-config
-  - krb5-user
 
 schema_update_allowed: no
 

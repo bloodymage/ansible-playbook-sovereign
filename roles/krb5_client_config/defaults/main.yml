@@ -1,2 +1,7 @@
 ---
 # defaults file for krb5_client_config
+packages:
+  - krb5-pkinit
+  - krb5-user
+  - libpam-krb5
+  - krb5-config

@@ -1,4 +1,4 @@
-# Ansible Collection - bloodymage.rebeldream
+# Ansible Collection - bloodymage.soverign
 
 - [Description](#description)
 - [Installation](#installation)
@@ -23,10 +23,23 @@ Some smaller goals that I have for this project is minimizing the variables I ha
 
 ## Usage
 
+Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
+For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com
+
+'''ansible-playbook bloodymage/sovereign/playbooks/site.yml'''
+
+This will create your site.
+
+Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, otherwise it will use internal certificate authority certs.
+
 ### Roles
-#### [ACME CA Certs](roles/acme-ca-certs/README.md)
+#### [ACME CA Certs](roles/acmeca-host-certs/README.md)
+#### [Dovecot](roles/dovecot/README.md)
+#### [OWNCA](roles/ownca/README.md)
 
 ### Variables
+#### Global Variables
+#### Role variables are defined in each role's README.md
 #### Passwords
 
 By default, if a password is defined as 'password' a password will be generated using password_store, and the generated password will be used.  To view the passwords in the password store type:
@@ -48,6 +61,7 @@ Passwords that can be defined:
 #### Sovereign
 - Website: [https://github.com/sovereign/sovereign]
 
+
 ### Sources
 #### Ansible Documentation
 #### Ansible Examples
@@ -57,6 +71,3 @@ Passwords that can be defined:
 ## Contributing
 
 ## License
-
-
-
