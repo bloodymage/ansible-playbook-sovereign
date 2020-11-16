@@ -24,9 +24,9 @@ Some smaller goals that I have for this project is minimizing the variables I ha
 ## Usage
 
 Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
-For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com
+For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See (docs/INVENTORY.md) for more information.
 
-```ansible-playbook bloodymage/sovereign/playbooks/site.yml```
+```ansible-playbook bloodymage/rebeldream/playbooks/site.yml```
 
 This will create your site.
 
@@ -58,7 +58,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [OWNCA CRL](roles/ownca_crl/README.md)
 #### [OWNCA Host Certificates](roles/ownca_host_certs/README.md)
 #### [OWNCA User Certificates](roles/ownca_user_certs/README.md)
-#### [Password-Store](roles/password_stor/README.md)
+#### [Password-Store](roles/password_store/README.md)
 #### [Postfix](roles/postfix/README.md)
 #### [Reboot](roles/reboot/README.md)
 #### [Samba Domain Controller](roles/samba_domain_controller/README.md)
