@@ -15,4 +15,6 @@
   roles:
     - bloodymage.sovereign.website_mediawiki
     - bloodymage.sovereign.website_nextcloud
+    - bloodymage.sovereign.drush
+    - bloodymage.sovereign.website_drupal
     - bloodymage.sovereign.acmeca_host_certs

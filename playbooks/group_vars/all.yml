@@ -18,6 +18,8 @@ sovereign_smart_card_login: no
 
 sovereign_raspberrypi_distribution_release: buster
 
+
+
 ownca_root_password: "password"
 ownca_intermediate_password: "password"
 ownca_component_password: "password"
@@ -89,3 +91,5 @@ ownca_certificate_authorities:
       - 'CA:TRUE'
 
 ownca_revoked_certificates: []
+
+samba_administrator_password: "password"
