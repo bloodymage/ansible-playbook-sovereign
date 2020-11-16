@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - sovereign_handlers
+    - rebeldream_handlers

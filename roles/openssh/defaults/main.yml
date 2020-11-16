@@ -21,8 +21,8 @@ ssh_authorized_keys: "authorized_keys"
 ssh_authorized_principals: "%u"
 
 # Certificat Authority
-ssh_ca_domain_list: "{{ sovereign_domain_list }}"
-ssh_ca_domain: "{{ sovereign_domain }}"
+ssh_ca_domain_list: "{{ rebeldream_domain_list }}"
+ssh_ca_domain: "{{ rebeldream_domain }}"
 ssh_ca_key_directory: "~/.ssh/ca"
 ssh_ca_qdn: "{{ ansible_domain }}"
 

@@ -36,6 +36,8 @@
 
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
+  tags:
+    - ownca
 
 # ==================================================================================================
 #
@@ -82,7 +84,7 @@
   debug:
     msg:
       - "{{ ownca_certificate_authorities }}"
-      - "{{ sovereign_org_unit_name }}"
+      - "{{ rebeldream_org_unit_name }}"
     verbosity: 2
   delegate_to: localhost
   tags:
@@ -92,7 +94,7 @@
 - name: Create database
   copy:
     src: "/dev/null"
-    dest: "{{ ownca_ca_directory }}/db/{{ sovereign_org_name }}-{{ item.name }}-ca.db"
+    dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ item.name }}-ca.db"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: '0600'
@@ -106,7 +108,7 @@
 - name: Create a serial file
   template:
     src: "{{ role_path }}/templates/serial.j2"
-    dest: "{{ ownca_ca_directory }}/db/{{ sovereign_org_name }}-{{ item.name }}-ca.cert.srl"
+    dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ item.name }}-ca.cert.srl"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0600"
@@ -120,7 +122,7 @@
 - name: Create crl serial file
   template:
     src: "{{ role_path }}/templates/serial.j2"
-    dest: "{{ ownca_ca_directory }}/db/{{ sovereign_org_name }}-{{ item.name }}-ca.crl.srl"
+    dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ item.name }}-ca.crl.srl"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0600"
@@ -138,9 +140,10 @@
 # ==================================================================================================
 - name: "Ensure we have a password for the Root CA"
   ansible.builtin.set_fact:
-    ownca_root_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    ownca_root_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
-    password_store_id: "{{ sovereign_org_name }}_common/ownca/ownca_root_password"
+    password_store_id: "{{ rebeldream_org_name }}_common/ownca/ownca_root_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_root_password == "password"
   tags:
@@ -148,9 +151,10 @@
 
 - name: "Ensure we have a password for the Intermediate CA"
   ansible.builtin.set_fact:
-    ownca_intermediate_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    ownca_intermediate_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
     password_store_id: "{{ ansible_domain }}/ownca/ownca_intermediate_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_intermediate_password == "password"
   tags:
@@ -158,9 +162,10 @@
 
 - name: "Ensure we have a password for the Component Issuing CA"
   ansible.builtin.set_fact:
-    ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
     password_store_id: "{{ ansible_domain }}/ownca/ownca_component_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_component_password == "password"
   tags:
@@ -168,9 +173,10 @@
 
 - name: "Ensure we have a password for the Identity Issuing CA"
   ansible.builtin.set_fact:
-    ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
     password_store_id: "{{ ansible_domain }}/ownca/ownca_identity_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_identity_password == "password"
   tags:
@@ -178,9 +184,10 @@
 
 - name: "Ensure we have a password for the Code Sign Issuing CA"
   ansible.builtin.set_fact:
-    ownca_codesign_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    ownca_codesign_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
     password_store_id: "{{ ansible_domain }}/ownca/ownca_codesign_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_codesign_password == "password"
   tags:
@@ -193,7 +200,7 @@
 # ==================================================================================================
 - name: Generate CA Private Key
   openssl_privatekey:
-    path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     passphrase: "{{ item.password }}"
     type: "{{ ownca_type }}"
     cipher: "auto"
@@ -208,15 +215,15 @@
 
 - name: Generate Certificate Authority Certificate Signing Request (CSR)
   openssl_csr:
-    path: "{{ ownca_ca_directory }}/csr/{{ sovereign_org_name }}-{{ item.name }}-ca.csr"
-    privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
+    privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
     common_name: "{{ item.common_name }}"
-    country_name: "{{ sovereign_country_name | default(country) }}"
+    country_name: "{{ rebeldream_country_name | default(country) }}"
     email_address: "{{ item.email_address | default(omit) }}"
-    organization_name: "{{ item.organization_name | default(sovereign_org_name | title ) }}"
-    organizational_unit_name: "{{ item.organizational_unit_name | default(sovereign_org_unit_name) | title }}"
-    state_or_province_name: "{{ sovereign_region_name | default(region) }}"
+    organization_name: "{{ item.organization_name | default(rebeldream_org_name | title ) }}"
+    organizational_unit_name: "{{ item.organizational_unit_name | default(rebeldream_org_unit_name) | title }}"
+    state_or_province_name: "{{ rebeldream_region_name | default(region) }}"
     key_usage: "{{ item.keyusage }}"
     key_usage_critical: "{{ item.keyusage_critical | default('no')}}"
     basic_constraints: "{{ item.basic_constraints }}"
@@ -232,10 +239,10 @@
 
 - name: Generate Selfsigned Certificate
   openssl_certificate:
-    path: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ item.name }}-ca.crt"
-    privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
+    privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
-    csr_path: "{{ ownca_ca_directory }}/csr/{{ sovereign_org_name }}-{{ item.name }}-ca.csr"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
     provider: "{{ item.provider }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
@@ -249,10 +256,10 @@
 
 - name: Generate OwnCA Signed Certificate
   openssl_certificate:
-    path: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ item.name }}-ca.crt"
-    csr_path: "{{ ownca_ca_directory }}/csr/{{ sovereign_org_name }}-{{ item.name }}-ca.csr"
-    ownca_path: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ item.ownca }}-ca.crt"
-    ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ sovereign_org_name }}-{{ item.ownca }}-ca.key"
+    path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
+    ownca_path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.crt"
+    ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.key"
     ownca_privatekey_passphrase: "{{ item.ownca_privatekey_passphrase }}"
     provider: "{{ item.provider }}"
     owner: "{{ ansible_user }}"
@@ -272,11 +279,11 @@
 # ==================================================================================================
 - name: Find root certificate
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-{{ item }}-ca.crt') }}"
+    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item }}-ca.crt') }}"
     intermediate_certificates:
-      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
     root_certificates:
-      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-root-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca.crt"
   loop: "{{ ownca_issuing_authorities }}"
   register: parent_cert_authorities
   tags:
@@ -345,9 +352,9 @@
 
 - name: Find root certificate
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca.crt') }}"
+    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt') }}"
     root_certificates:
-      - "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-root-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca.crt"
   register: root_cert_authorities
   tags:
     - ownca
@@ -384,7 +391,7 @@
 
 - name: Write complete chain to disk
   copy:
-    dest: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-{{ item.item }}-ca-chain.crt"
+    dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item.item }}-ca-chain.crt"
     content: "{{ ''.join(item.complete_chain) }}"
   loop: "{{ parent_cert_authorities.results }}"
   when:
@@ -396,7 +403,7 @@
 
 - name: Write root chain (intermediates and root) to disk
   copy:
-    dest: "{{ ownca_ca_directory }}/certs/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}-ca-chain.crt"
+    dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
     content: "{{ ''.join(root_cert_authorities.complete_chain) }}"
   when:
     - root_cert_authorities.complete_chain is defined
