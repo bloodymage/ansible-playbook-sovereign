@@ -1,7 +1,7 @@
 - hosts: internal_network
   roles:
     - bloodymage.sovereign.krb5_client_config
-    
+
 - hosts: samba_domain_controllers
   roles:
     - bloodymage.sovereign.ownca_crl
