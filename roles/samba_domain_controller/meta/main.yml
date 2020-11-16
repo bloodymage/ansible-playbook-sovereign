@@ -49,4 +49,4 @@ galaxy_info:
 
 dependencies:
   - role: bloodymage.rebeldream.krb5_client_config
-  - role: bloodymage.rebeldream.rebeldream_handlers
+  - role: bloodymage.rebeldream.collection_handlers

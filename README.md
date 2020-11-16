@@ -65,7 +65,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [Samba Domain Users](roles/samba_domain_users/README.md)
 #### [Samba File Server](roles/samba_file_server/README.md)
 #### [Shutdown](roles/shutdown/README.md)
-#### [Sovereign handlers](roles/rebeldream_handlers/README.md)
+#### [Sovereign handlers](roles/collection_handlers/README.md)
 #### [SSHCA](roles/sshca/README.md)
 #### [SSHCA Host Certificates](roles/sshca_host_certs/README.md)
 #### [SSHCA User Certificates](roles/sshca_user_certs/README.md)

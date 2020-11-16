@@ -2,4 +2,4 @@
 - hosts: localhost
   remote_user: root
   roles:
-    - rebeldream_handlers
+    - collection_handlers

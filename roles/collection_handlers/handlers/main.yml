@@ -1,5 +1,5 @@
 ---
-# handlers file for rebeldream_handlers
+# handlers file for collection_handlers
 - name: Update System CA Certificates
   command: "update-ca-certificates"
   become: yes
