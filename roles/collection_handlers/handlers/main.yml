@@ -10,6 +10,7 @@
     name: apache2
     state: restarted
   listen: "restart all"
+  become: yes
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
 
@@ -18,6 +19,7 @@
     name: bind9
     state: restarted
   listen: "restart all"
+  become: yes
   when:
     - inventory_hostname in groups['dns_servers'] | default([])
 
@@ -26,6 +28,7 @@
     name: dovecot
     state: restarted
   listen: "restart all"
+  become: yes
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
 
@@ -34,6 +37,7 @@
     name: mosquitto
     state: restarted
   listen: "restart all"
+  become: yes
   when:
     - inventory_hostname in groups['mosquitto_servers'] | default([])
 
@@ -42,6 +46,7 @@
     name: mysql
     state: restarted
   listen: "restart all"
+  become: yes
   when:
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
 
@@ -50,6 +55,7 @@
     name: postfix
     state: restarted
   listen: "restart all"
+  become: yes
   when:
     - inventory_hostname in groups['postfix_servers'] | default([])
 
@@ -58,10 +64,9 @@
     name: samba-ad-dc
     state: restarted
   listen: "restart all"
+  become: yes
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
-  tags:
-    - ownca-host-certs
 
 - name: Restart SMBD Server
   service:
@@ -70,6 +75,9 @@
   listen:
     - "restart all"
     - "restart samba file server"
+  become: yes
+  when:
+    - inventory_hostname in groups['samba_file_servers']
 
 - name: Restart NMBD Server
   service:
@@ -78,14 +86,28 @@
   listen:
     - "restart all"
     - "restart samba file server"
+  become: yes
+  when:
+    - inventory_hostname in groups['samba_file_servers']
+
+- name: Restart SSH Server
+  service:
+    name: ssh
+    state: restarted
+  listen:
+    - "restart all"
+  become: yes
 
 - name: Restart Winbind Server
   service:
-    name: winbindd
+    name: winbind
     state: restarted
   listen:
     - "restart all"
     - "restart samba file server"
+  become: yes
+  when:
+    - inventory_hostname in groups['samba_file_servers']
 
 - name: Reload Apache
   service:

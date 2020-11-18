@@ -84,72 +84,62 @@ ChallengeResponseAuthentication {{ ssh_challenge_response_auth }}
 #KerberosTicketCleanup yes
 #KerberosGetAFSToken no
 
-# GSSAPI options
-{% if ssh_gssapi_authentication is defined -%}
-  GSSAPIAuthentication {{ ssh_gssapi_authentication }}
-{% endif %}
-{% if ssh_gssapi_cleanup_credentials is defined -%}
-  GSSAPICleanupCredentials {{ ssh_gssapi_cleanup_credentials }}
-{% endif %}
-{% if ssh_gssapi_key_exchange is defined -%}
-  GSSAPIKeyExchange {{ ssh_gssapi_key_exchange }}
-{% endif %}
-{% if ssh_gssapi_store_credentials_on_rekey is defined -%}
-  GSSAPIStoreCredentialsOnRekey {{ ssh_gssapi_store_credentials_on_rekey }}
-{% endif %}
-{% if ssh_gssapi_strict_accept_or_check is defined -%}
-  GSSAPIStrictAcceptorCheck {{ ssh_gssapi_strict_accept_or_check }}
-{% endif %}
+{# GSSAPI options #}
+GSSAPIAuthentication {{ ssh_gssapi_authentication }}
+GSSAPICleanupCredentials {{ ssh_gssapi_cleanup_credentials }}
+GSSAPIKeyExchange {{ ssh_gssapi_key_exchange }}
+GSSAPIStoreCredentialsOnRekey {{ ssh_gssapi_store_credentials_on_rekey }}
+{# GSSAPIStrictAcceptorCheck {{ ssh_gssapi_strict_accept_or_check }}  #}
 
-{# =================================================================================================
-#
-# Set this to 'yes' to enable PAM authentication, account processing,
-# and session processing. If this is enabled, PAM authentication will
-# be allowed through the ChallengeResponseAuthentication and
-# PasswordAuthentication.  Depending on your PAM configuration,
-# PAM authentication via ChallengeResponseAuthentication may bypass
-# the setting of "PermitRootLogin without-password".
-# If you just want the PAM account and session checks to run without
-# PAM authentication, then enable this but set PasswordAuthentication
-# and ChallengeResponseAuthentication to 'no'.
-#
-# ================================================================================================== #}
-UsePAM {{ ssh_use_pam }}
+{# ================================================================================================= 
+# 
+# Set this to 'yes' to enable PAM authentication, account processing, 
+# and session processing. If this is enabled, PAM authentication will 
+# be allowed through the ChallengeResponseAuthentication and 
+# PasswordAuthentication.  Depending on your PAM configuration, 
+# PAM authentication via ChallengeResponseAuthentication may bypass 
+# the setting of "PermitRootLogin without-password". 
+# If you just want the PAM account and session checks to run without 
+# PAM authentication, then enable this but set PasswordAuthentication 
+# and ChallengeResponseAuthentication to 'no'. 
+# 
+# ================================================================================================== #} 
+UsePAM {{ ssh_use_pam }} 
 
-#AllowAgentForwarding yes
-#AllowTcpForwarding yes
-#GatewayPorts no
-X11Forwarding {{ ssh_x11_forwarding }}
-#X11DisplayOffset 10
-#X11UseLocalhost yes
-#PermitTTY yes
-PrintMotd {{ ssh_print_motd }}
-#PrintLastLog yes
-#TCPKeepAlive yes
-#UseLogin no
-#PermitUserEnvironment no
-#Compression delayed
-#ClientAliveInterval 0
-#ClientAliveCountMax 3
-#UseDNS {{ ssh_use_dns }}
-#PidFile /var/run/sshd.pid
-#MaxStartups 10:30:100
-#PermitTunnel no
-#ChrootDirectory none
+#AllowAgentForwarding yes 
+#AllowTcpForwarding yes 
+#GatewayPorts no 
+X11Forwarding {{ ssh_x11_forwarding }} 
+#X11DisplayOffset 10 
+#X11UseLocalhost yes 
+#PermitTTY yes 
+PrintMotd {{ ssh_print_motd }} 
+#PrintLastLog yes 
+#TCPKeepAlive yes 
+#UseLogin no 
+#PermitUserEnvironment no 
+#Compression delayed 
+#ClientAliveInterval 0 
+#ClientAliveCountMax 3 
+#UseDNS {{ ssh_use_dns }} 
+#PidFile /var/run/sshd.pid 
+#MaxStartups 10:30:100 
+#PermitTunnel no 
+#ChrootDirectory none 
 #VersionAddendum none
 
-# no default banner path
-#Banner none
+{# no default banner path #}
+{#Banner none #}
 
-# Allow client to pass locale environment variables
+{# Allow client to pass locale environment variables #}
 AcceptEnv LANG LC_*
 
-# override default of no subsystems
+{# override default of no subsystems #}
 Subsystem	sftp	/usr/lib/openssh/sftp-server
 
-# Example of overriding settings on a per-user basis
-#Match User anoncvs
-#	X11Forwarding no
-#	AllowTcpForwarding no
-#	PermitTTY no
-#	ForceCommand cvs server
+{# Example of overriding settings on a per-user basis #}
+{# #Match User anoncvs #}
+{# #	X11Forwarding no #}
+{# #	AllowTcpForwarding no #}
+{# #	PermitTTY no #}
+{# #	ForceCommand cvs server #}

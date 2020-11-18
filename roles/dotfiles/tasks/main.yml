@@ -217,6 +217,19 @@
     - dotfiles
     - install-spacemacs
 
+- name: "Remove .screenrc for users"
+  file:
+    path: "{{ item.unix_home }}/.screenrc"
+    state: absent
+  loop: "{{ users }}"
+  become: yes
+  when:
+    - users is defined
+    - item.unix_home is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - dotfiles
+
 # ==================================================================================================
 #
 #

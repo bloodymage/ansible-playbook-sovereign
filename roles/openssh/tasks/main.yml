@@ -74,6 +74,8 @@
     mode: '0644'
   become: yes
   notify: restart ssh
+  tags:
+    - openssh
 
 - name: "Install Configuration files"
   template:
@@ -87,3 +89,5 @@
   become: yes
   loop: "{{ ssh_config_files }}"
   notify: restart ssh
+  tags:
+    - openssh

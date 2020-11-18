@@ -1,2 +1,3 @@
 ---
 # defaults file for mariadb-databases
+mysql_administrator: "root"
