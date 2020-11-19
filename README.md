@@ -42,6 +42,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [Dovecot](roles/dovecot/README.md)
 #### [Etckeeper](roles/etckeeper/README.md)
 #### [Freeradius](roles/freeradius/README.md)
+#### [Gitlab](roles/gitlab/README.md)
 #### [Global Packages](roles/global_packages/README.md)
 #### [Hostname](roles/hostname/README.md)
 #### [Hosts](roles/hosts/README.md)
@@ -121,6 +122,8 @@ Sovereign is a set of ansible playbooks to build and maintain your own private s
 #### [Ansible Examples](https://github.com/ansible/ansible-examples)
 #### [Geerlinguy](https://ansible.jeffgeerling.com/)
 
+
 ## Contributing
 
 ## License
+MIT

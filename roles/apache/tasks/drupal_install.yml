@@ -1,5 +1,0 @@
-- name: "Install Drupal site for {{ host.name }}"
-  unarchive:
-    src: https://www.drupal.org/download-latest/tar.gz
-    dest: "/srv/www/{{ host.name }}/"
-  remote_src: yes
