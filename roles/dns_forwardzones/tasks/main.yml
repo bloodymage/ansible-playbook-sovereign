@@ -5,15 +5,17 @@
     name: "{{ item }}"
     state: present
   become: yes
-  loop:
-    - python3-dnspython
+  loop: "{{ packages }}"
   when:
     - ansible_os_family is defined
     - ansible_os_family == "Debian"
     - ansible_network_os is undefined
     - inventory_hostname != 'localhost'
   tags:
+    - dns_forwardzones
     - dns-forwardzones
+    - dns_forwardzones_debug
+    - dns-forwardzones-debug
     - install-packages
     - dns-update
 
@@ -33,7 +35,10 @@
   remote_user: root
   delegate_to: "{{ item.address_ipv4 }}"
   tags:
+    - dns_forwardzones
     - dns-forwardzones
+    - dns_forwardzones_debug
+    - dns-forwardzones-debug
     - dns-update
 
 # tasks file for dns-update
@@ -55,7 +60,10 @@
   remote_user: root
   delegate_to: "{{ item.address_ipv4 }}"
   tags:
+    - dns_forwardzones
     - dns-forwardzones
+    - dns_forwardzones_debug
+    - dns-forwardzones-debug
     - dns-update
 
 - name: "Add or modify host CNAME records"
@@ -76,7 +84,10 @@
   remote_user: root
   delegate_to: "{{ item[0].address_ipv4 }}"
   tags:
+    - dns_forwardzones
     - dns-forwardzones
+    - dns_forwardzones_debug
+    - dns-forwardzones-debug
     - dns-update
 
 # - name: "Add or modify MX records"
@@ -96,3 +107,8 @@
 #     - bind_mx_record is defined
 #   remote_user: root
 #   delegate_to: "{{ item.address_ipv4 }}"
+#   tags:
+#     - dns_forwardzones
+#     - dns-forwardzones
+#     - dns_forwardzones_debug
+#     - dns-forwardzones-debug

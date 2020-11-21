@@ -1,6 +1,6 @@
 ---
-ownca_domain_list: "{{ sovereign_domain_list }}"
-ownca_domain: "{{ sovereign_domain_list | join('_') }}"
+ownca_domain_list: "{{ rebeldream_domain_list }}"
+ownca_domain: "{{ rebeldream_domain_list | join('_') }}"
 
 # Files and Directories
 ownca_directory: "~/.pki/certificate_authorities"
@@ -16,7 +16,7 @@ crl_distribution_point: "https://{{ pki_url }}"
 ownca_type: RSA
 ownca_sn: 8
 
-ownca_intermediate_ca: "{{ sovereign_org_unit_name | lower }}"
+ownca_intermediate_ca: "{{ rebeldream_org_unit_name | lower }}"
 
 
 ownca_revoked_certificates: []

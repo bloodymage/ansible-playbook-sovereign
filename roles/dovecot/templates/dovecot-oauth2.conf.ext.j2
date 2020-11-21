@@ -1,6 +1,6 @@
-tokeninfo_url = https://auth.{{ ansible_domain }}/auth/realms/{{ sovereign_org_unit_name | lower }}/protocol/openid-connect/userinfo?access_token=
-introspection_url = https://client_id:client_secret@auth.{{ ansible_domain }}/auth/realms/{{ sovereign_org_unit_name | lower }}/protocol/openid-connect/token/introspect
+tokeninfo_url = https://auth.{{ ansible_domain }}/auth/realms/{{ rebeldream_org_unit_name | lower }}/protocol/openid-connect/userinfo?access_token=
+introspection_url = https://client_id:client_secret@auth.{{ ansible_domain }}/auth/realms/{{ rebeldream_org_unit_name | lower }}/protocol/openid-connect/token/introspect
 introspection_mode = post
 debug = yes
 rawlog_dir = /tmp/oauth2
-tls_ca_cert_file = {{ sovereign_component_ca_chain_file }}
+tls_ca_cert_file = {{ rebeldream_component_ca_chain_file }}

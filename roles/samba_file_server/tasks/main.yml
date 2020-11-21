@@ -1,5 +1,35 @@
 ---
 # tasks file for samba-domain-member
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - samba_file_server
+        - samba-file-server
+
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - samba_file_server
+        - samba-file-server
+        - install-packages
+
 # ==================================================================================================
 #
 # Ensure samba is not currently running on the host system.
@@ -21,8 +51,8 @@
     - samba_create_domain is defined
     - samba_create_domain
   tags:
-    - samba
-    - samba-domain-members
+    - samba_file_server
+    - samba-file-server
 
 - name: Kill running processes
   shell: "kill {{ item }}"
@@ -33,6 +63,8 @@
     - samba_create_domain is defined
     - samba_create_domain 
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -48,6 +80,8 @@
     - samba_create_domain is defined
     - samba_create_domain 
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -60,6 +94,8 @@
     - samba_create_domain is defined
     - samba_create_domain 
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -79,6 +115,8 @@
     - samba_create_domain is defined
     - samba_create_domain
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -90,6 +128,8 @@
     - samba_create_domain is defined
     - samba_create_domain
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -101,6 +141,8 @@
     - samba_create_domain is defined
     - samba_create_domain 
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -152,6 +194,8 @@
     - samba_create_domain is defined
     - samba_create_domain 
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -166,41 +210,18 @@
     state: absent
   when:
     - samba_create_domain is defined
-    - samba_create_domain 
+    - samba_create_domain
+  notify: "Update krb5"
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
-
-
-- include: "{{ ansible_os_family | lower }}_family.yml"
-  when:
-    - ansible_network_os is undefined
-  tags:
-    - samba
-    - samba-domain-members
-
-# ==================================================================================================
-#
-# Install Configuration files
-#
-# ==================================================================================================
-- name: Install krb5.conf configuration file
-  template:
-    src: "{{ role_path }}/templates/krb5.conf.j2"
-    dest: /etc/krb5.conf
-    owner: root
-    group: root
-    mode: 0644
-  become: yes
-  tags:
-    - samba
-    - samba-domain-members
-    - krb5
 
 # Create Config File
 - name: Install smb.conf configuration file
   template:
-    src: "{{ role_path }}/templates/smb.conf.j2"
+    src: "smb.conf.j2"
     dest: /etc/samba/smb.conf
     owner: root
     group: root
@@ -208,13 +229,15 @@
   become: yes
   notify: restart samba-domain-member
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
 # Create Config File
 - name: Install user.map
   template:
-    src: "{{ role_path }}/templates/user.map.j2"
+    src: "user.map.j2"
     dest: /etc/samba/user.map
     owner: root
     group: root
@@ -222,6 +245,8 @@
   become: yes
   notify: restart samba-domain-member
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
 
@@ -240,6 +265,8 @@
     - samba_create_domain
     # - domain_joined is false
   tags:
+    - samba_file_server
+    - samba-file-server
     - samba
     - samba-domain-members
   notify: start samba-domain-member

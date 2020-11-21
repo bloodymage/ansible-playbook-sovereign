@@ -3,22 +3,29 @@
     default_realm = {{ ansible_domain | upper }}
     dns_lookup_realm = false
     dns_lookup_kdc = true
-{% if sovereign_smart_card_login -%}
-  pkinit_anchors = FILE:{{ sovereign_component_ca_chain_file }}
 
-  [appdefaults]
-  pkinit_anchors = FILE:{{ sovereign_component_ca_chain_file }}
-
-  [realms]
-  {{ ansible_domain | upper }} = {
+[realms]
+{{ ansible_domain | upper }} = {
+{% if rebeldream_smart_card_login %}
   pkinit_require_eku = true
-  }
-
-  [kdc]
   enable-pkinit = yes
   pkinit_identity = FILE:/etc/ssl/certs/{{ ansible_fqdn }}.pem,/etc/ssl/private/{{ ansible_fqdn }}.key
-  pkinit_anchors = FILE:{{ sovereign_component_ca_chain_file }}
+  pkinit_anchors = FILE:{{ rebeldream_component_ca_chain_file }}
   pkinit_principal_in_certificate = yes
   pkinit_win2k = no
   pkinit_win2k_require_binding = yes
 {% endif %}
+{% if groups['samba_file_servers'] is defined %}
+{% if inventory_hostname in groups['samba_file_servers'] %}
+  auth_to_local = RULE:[2:{{ rebeldream_org_unit_name | upper }}\$1]
+{% endif %}
+{% endif %}
+  #auth_to_local = DEFAULT
+  }
+
+[domain_realm]
+  {{ ansible_domain }} = {{ ansible_domain | upper }}
+  .{{ ansible_domain }} = {{ ansible_domain | upper }}
+
+
+

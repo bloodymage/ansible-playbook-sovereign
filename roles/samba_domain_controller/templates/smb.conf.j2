@@ -28,8 +28,8 @@ username map = /etc/samba/user.map
 tls enabled  = yes
 tls keyfile  = /etc/ssl/private/{{ ansible_fqdn }}.key
 tls certfile = /etc/ssl/certs/{{ ansible_fqdn }}.pem
-tls cafile   = {{ soverign_component_ca_chain_file }}
-tls crlfile = /etc/ssl/crls/{{ sovereign_org_name }}-{{ sovereign_org_unit_name }}.crl
+tls cafile   = {{ rebeldream_component_ca_chain_file }}
+tls crlfile = /etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}.crl
 
 {% if schema_update_allowed is defined -%}
   dsdb:schema update allowed = {{ schema_update_allowed }}

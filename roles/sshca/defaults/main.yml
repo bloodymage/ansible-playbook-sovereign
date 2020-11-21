@@ -12,8 +12,8 @@ ssh_authorized_keys: "authorized_keys"
 ssh_authorized_principals: "%u"
 
 # Certificat Authority
-sshca_domain_list: "{{ sovereign_domain_list }}"
-sshca_domain: "{{ sovereign_domain }}"
+sshca_domain_list: "{{ rebeldream_domain_list }}"
+sshca_domain: "{{ rebeldream_domain }}"
 sshca_key_directory: "~/.ssh/ca"
 
 # Host CA

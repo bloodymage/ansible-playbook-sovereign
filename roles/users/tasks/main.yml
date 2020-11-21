@@ -15,6 +15,9 @@
   become: no
   tags:
     - users
+    - users_debug
+    - users-debug
+    - install-packages
 
 - name: "Install packages"
   package:
@@ -22,11 +25,13 @@
     state: present
   tags:
     - users
+    - users_debug
+    - users-debug
     - install-packages
 
 # ==================================================================================================
 #
-# Create groups
+# Create users and groups
 #
 # ==================================================================================================
 - name: Create groups
@@ -40,14 +45,9 @@
   become: yes
   tags:
     - users
+    - users_debug
+    - users-debug
 
-# ==================================================================================================
-#
-# Create login users (Password Enabled)
-#
-# ...
-#
-# ==================================================================================================
 - name: Create login users (Password Enabled)
   user:
     name: "{{ item['username'] }}"
@@ -68,14 +68,9 @@
     - item.password is defined
   tags:
     - users
+    - users_debug
+    - users-debug
 
-# ==================================================================================================
-#
-# Create login users (Password Enabled)
-#
-# ...
-#
-# ==================================================================================================
 - name: Create login users (Password Disabled)
   user:
     name: "{{ item.username }}"
@@ -95,10 +90,12 @@
     - item.id_number is defined
   tags:
     - users
+    - users_debug
+    - users-debug
 
 # ==================================================================================================
 #
-# Create SSH Keys for Users
+# User SSH configuration
 #
 # ==================================================================================================
 - name: Create User SSH Keys
@@ -114,15 +111,12 @@
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
   tags:
     - users
+    - users_debug
+    - users-debug
 
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
 - name: Create SSH Principals file for users
   template:
-    src: "{{ role_path }}/templates/ssh_principals.j2"
+    src: "ssh_principals.j2"
     dest: "/etc/ssh/auth_principals/{{ item.username }}"
     owner: root
     group: root
@@ -134,24 +128,8 @@
   become: yes
   tags:
     - users
-
-# ==================================================================================================
-#
-# Enable sudo
-#
-# ...
-#
-# ==================================================================================================
-- name: Setup Master Sudoers file
-  template:
-    src: "{{ role_path }}/templates/sudoers.j2"
-    dest: "/etc/sudoers"
-    owner: root
-    group: root
-    validate: /usr/sbin/visudo -csf %s
-  become: yes
-  tags:
-    - users
+    - users_debug
+    - users-debug
 
 # ==================================================================================================
 #
@@ -162,7 +140,7 @@
 # ==================================================================================================
 - name: Setup Sudoers file for user
   template:
-    src: "{{ role_path }}/templates/user_sudoers.j2"
+    src: "user_sudoers.j2"
     dest: "/etc/sudoers.d/{{ item.username }}"
     owner: root
     group: root
@@ -172,53 +150,54 @@
   when:
     - item.sudoers is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
 # ==================================================================================================
 #
-# Create login users (Password Enabled)
+# Delete no longer defined users
 #
 # ...
 #
 # ==================================================================================================
 # - name: Determine existing users
-#   shell: 'grep users /etc/group | cut -d: -f4 | tr "," "\n"'
+#   shell: 'grep ansiblemanaged /etc/group | cut -d: -f4 | tr "," "\n"'
 #   changed_when: false
 #   register: existing_users
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
-# # ==================================================================================================
-# #
-# # Create login users (Password Enabled)
-# #
-# # ...
-# #
-# # ==================================================================================================
 # - name: Determine removed users
 #   set_fact:
 #     removed_users: "{{ existing_users.stdout_lines | difference(users) }}"
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
-# # ==================================================================================================
-# #
-# # Create login users (Password Enabled)
-# #
-# # ...
-# #
-# # ==================================================================================================
 # - name: Delete removed user accounts
 #   user:
 #     name: "{{ item }}"
 #     state: absent
 #   with_items: "{{ removed_users }}"
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
 # - name: Remove sudoers for remove accounts
 #   file:
 #     name: "/etc/sudoers.d/{{ item }}"
 #     state: absent
 #   with_items: "{{ removed_users }}"
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
 # ==================================================================================================
 #
@@ -230,3 +209,15 @@
 #     src: "/home/{{ item.username }}/.ssh/id_ed25519.pub"
 #     dest: "~/gitolite-admin/keydir/{{ inventory_hostname }}/{{ item.usename }}.pub"
 #   loop: "{{ users }}"
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
+
+# - name: Add public ssh keys of users
+#   authorized_key:
+#     user: "{{ item }}"
+#     exclusive: yes
+#     key: https://github.com/{{ item }}.keys
+#     state: present
+#   with_items: "{{ developers }}"

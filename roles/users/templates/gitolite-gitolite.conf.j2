@@ -1,7 +1,0 @@
-repo gitolite-admin
-    RW+     =  {{ gitolite_users }}
-    RW+ VREF/NAME/ = admin hoid ltully root
-    - VREF/NAME/keydir/ = @all
-    - VREF/NAME/conf/gitolite.conf = @all
-
-include "actual.conf"

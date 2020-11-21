@@ -21,8 +21,8 @@ ssh_authorized_keys: "authorized_keys"
 ssh_authorized_principals: "%u"
 
 # Certificat Authority
-ssh_ca_domain_list: "{{ sovereign_domain_list }}"
-ssh_ca_domain: "{{ sovereign_domain }}"
+ssh_ca_domain_list: "{{ rebeldream_domain_list }}"
+ssh_ca_domain: "{{ rebeldream_domain }}"
 ssh_ca_key_directory: "~/.ssh/ca"
 ssh_ca_qdn: "{{ ansible_domain }}"
 
@@ -66,3 +66,10 @@ ssh_use_dns: "no"
 
 #ssh_kerberos_authentication: "no"
 #ssh_kerberos_or_local_password: "yes"
+
+# GSSAPI options
+ssh_gssapi_authentication: "no"
+ssh_gssapi_cleanup_credentials: "no"
+ssh_gssapi_key_exchange: "no"
+ssh_gssapi_store_credentials_on_rekey: "no"
+#ssh_gssapi_strict_accept_or_check:

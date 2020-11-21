@@ -1,0 +1,6 @@
+Name: Ccreds credential caching - password saving
+Default: yes
+Priority: 512
+Auth-Type: Additional
+Auth:
+	optional			pam_ccreds.so minimum_uid=1000 action=store

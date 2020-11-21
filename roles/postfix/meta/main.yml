@@ -48,5 +48,5 @@ galaxy_info:
     #       Maximum 20 tags per role.
 
 dependencies:
-  - role: bloodymage.sovereign.krb5_client_config
-  - role: bloodymage.sovereign.sovereign_handlers
+  - role: bloodymage.rebeldream.krb5_client_config
+  - role: bloodymage.rebeldream.collection_handlers

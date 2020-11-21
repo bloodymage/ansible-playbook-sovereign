@@ -57,7 +57,7 @@
   ansible.builtin.set_fact:
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
   vars:
-    password_store_id: "{{ sovereign_org_name }}_common/sshca/sshca_host_key_password"
+    password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
   when:
     - sshca_host_key_password == "password"
   tags:
@@ -67,7 +67,7 @@
   ansible.builtin.set_fact:
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
   vars:
-    password_store_id: "{{ sovereign_org_name }}_common/sshca/sshca_user_key_password"
+    password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_user_key_password"
   when:
     - sshca_user_key_password == "password"
   tags:

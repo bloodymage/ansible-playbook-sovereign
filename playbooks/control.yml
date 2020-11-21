@@ -1,4 +1,4 @@
 - hosts: localhost
   roles:
-    - bloodymage.sovereign.gnupg
-    - bloodymage.sovereign.password_store
+    - bloodymage.rebeldream.gnupg
+    - bloodymage.rebeldream.password_store

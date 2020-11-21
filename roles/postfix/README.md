@@ -40,7 +40,7 @@ An optional section for the role authors to include contact information, or a we
 References
 ----------
 - https://sealedabstract.com/code/nsa-proof-your-e-mail-in-2-hours/
-- https://github.com/sovereign/sovereign
+- https://github.com/rebeldream/rebeldream
 - https://mailinabox.email
 - https://samhobbs.co.uk/raspberry-pi-email-server
 - https://docs.iredmail.org/active.directory.html

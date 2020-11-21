@@ -1,20 +1,4 @@
 # {{ ansible_managed }}
-{#
-# ==================================================================================================
-#
-# DotConfig
-#
-# GPG Configuration
-#
-# Authors:
-#   Ben O'Hara <bohara@gmail.com>
-#   dotphiles : https://github.com/dotphiles/dotphiles
-#
-#   Geoff S Derber
-#
-# Riseup...
-#
-# ================================================================================================== #}
 
 {% if item.gpg_keys is defined %}
   default-key {{ item.gpg_keys[0].keyid }}
@@ -40,17 +24,11 @@ with-keygrip
 
 verify-options show-uid-validity
 
-{# =================================================================================================
-#
-# Try to use the GnuPG-Agent. With this option, GnuPG first tries to connect to the agent before it
-# asks for a passphrase.
-#
-# ================================================================================================== #}
-{% if dotfiles_gpg_use_agent %}
+{% if dotfiles_gpg_use_agent -%}
   use-agent
 {% endif %}
 
-{% if dotfiles_gpg_no_greeting %}
+{% if dotfiles_gpg_no_greeting -%}
   no-greeting
 {% endif %}
 
@@ -64,12 +42,9 @@ verify-options show-uid-validity
 # communicate with to receive keys from, send keys to, and search for keys on
 #
 # ================================================================================================== #}
-keyserver {{ dotfiles_gpg_keyserver }}
-keyserver hkp://keys.gnupg.net
-#keyserver http://http-keys.gnupg.net
-#keyserver mailto:pgp-public-keys@keys.nl.pgp.net
-#keyserver ldap://pgp.surfnet.nl:11370
-#keyserver ldap://keyserver.pgp.com
+{% for keyserver in dotfiles_gpg_keyserver -%}
+  keyserver {{ keyserver }}
+{% endfor %}
 
 {# Provide a certificate store to override the system default #}
 {# Get this from https://sks-keyservers.net/sks-keyservers.netCA.pem #}

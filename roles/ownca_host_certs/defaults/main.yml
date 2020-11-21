@@ -3,8 +3,8 @@ packages:
   - python3-cryptography
 
 # Certificat Authority
-ownca_domain_list: "{{ sovereign_domain_list }}"
-ownca_domain: "{{ sovereign_domain_list | join('_') }}"
+ownca_domain_list: "{{ rebeldream_domain_list }}"
+ownca_domain: "{{ rebeldream_domain_list | join('_') }}"
 
 # Location Information
 ownca_country_code: US

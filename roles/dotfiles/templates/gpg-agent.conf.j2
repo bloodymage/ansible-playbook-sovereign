@@ -1,64 +1,15 @@
-### gpg-agent.conf --- 
-## 
-## Filename: gpg-agent.conf
-## Description: 
-## Author: Geoff S Derber
-## Maintainer: 
-## Created: Sat Feb 16 16:14:20 2019 (-0500)
-## Version: 
-## Package-Requires: ()
-## Last-Updated: Sat Feb 16 16:14:30 2019 (-0500)
-##           By: Geoff S Derber
-##     Update #: 1
-## URL: 
-## Doc URL: 
-## Keywords: 
-## Compatibility: 
-## 
-######################################################################
-## 
-### Commentary: 
-## 
-## 
-## 
-######################################################################
-## 
-### Change Log:
-## 
-## 
-######################################################################
-## 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or (at
-## your option) any later version.
-## 
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-## General Public License for more details.
-## 
-## You should have received a copy of the GNU General Public License
-## along with GNU Emacs.  If not, see <https://www.gnu.org/licenses/>.
-## 
-######################################################################
-## 
-### Code:
+# {{ ansible_managed }}
 
-pinentry-program {{ pineentry_program }}
+pinentry-program {{ dotfiles_gpg_pineentry_program }}
 
-#keep-tty
-#keep-display
 allow-loopback-pinentry
 allow-emacs-pinentry
 
-default-cache-ttl 60480000
-max-cache-ttl 60480000
+default-cache-ttl {{ dotfiles_gpg_default_cache_ttl }}
+max-cache-ttl {{ dotfiles_gpg_default_max_cache_ttl }}
+default-cache-ttl-ssh {{ dotfiles_gpg_default_cache_ttl_ssh }}
+max-cache-ttl-ssh {{ dotfiles_gpg_default_max_cache_ttl_ssh }}
 
-default-cache-ttl-ssh 60480000
-max-cache-ttl-ssh 60480000
-
-enable-ssh-support
-
-######################################################################
-### gpg-agent.conf ends here
+{% if dotfiles_gpg_enable_ssh_support -%}
+  enable-ssh-support
+{% endif %}

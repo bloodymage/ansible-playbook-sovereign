@@ -22,6 +22,8 @@
   become: no
   tags:
     - apache
+    - apache_debug
+    - apache-debug
 
 - name: "Install packages"
   package:
@@ -30,6 +32,8 @@
   become: yes
   tags:
     - apache
+    - apache_debug
+    - apache-debug
     - install-packages
 
 - name: http service state
@@ -40,6 +44,8 @@
   become: yes
   tags:
     - apache
+    - apache_debug
+    - apache-debug
 
 - name: "Enable Apache modules"
   community.general.apache2_module:
@@ -50,6 +56,8 @@
   notify: reload apache
   tags:
     - apache
+    - apache_debug
+    - apache-debug
 
 # ======================================================================
 #
@@ -67,7 +75,9 @@
     msg: "{{ hosts }}"
     verbosity: 2
   tags:
-    - apache
+    - never
+    - apache_debug
+    - apache-debug
 
 - name: Create file directories for each site
   file:
@@ -84,7 +94,8 @@
     - item.name is defined
   tags:
     - apache
-    - websites
+    - apache_debug
+    - apache-debug
 
 # ======================================================================
 #
@@ -108,6 +119,8 @@
     - item.enabled
   tags:
     - apache
+    - apache_debug
+    - apache-debug
     - websites
 
 - name: Create log directories for each site
@@ -126,4 +139,6 @@
     - item.enabled
   tags:
     - apache
+    - apache_debug
+    - apache-debug
     - websites
