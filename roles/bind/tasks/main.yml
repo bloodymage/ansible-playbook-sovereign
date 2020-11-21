@@ -29,6 +29,8 @@
       become: no
       tags:
         - bind
+        - bind_debug
+        - bind-debug
 
     - name: "Install packages"
       package:
@@ -37,6 +39,8 @@
       become: yes
       tags:
         - bind
+        - bind_debug
+        - bind-debug
         - install-packages
 # ==================================================================================================
 #
@@ -50,6 +54,8 @@
     - zone is defined
   tags:
     - bind
+    - bind_debug
+    - bind-debug
 
 - name: Print Zone Serial Number
   debug:
@@ -59,7 +65,9 @@
   when:
     - __zone_soa is defined
   tags:
-    - bind
+    - never
+    - bind_debug
+    - bind-debug
 
 - name: Print Zone SOA
   debug:
@@ -69,7 +77,9 @@
   when:
     - __zone_soa is defined
   tags:
-    - bind
+    - never
+    - bind_debug
+    - bind-debug
 
 - name: Get Current Serial Number
   ansible.builtin.set_fact:
@@ -78,6 +88,8 @@
     - __zone_soa is defined
   tags:
     - bind
+    - bind_debug
+    - bind-debug
 
 - name: Set new Serial Number
   ansible.builtin.set_fact:
@@ -87,6 +99,8 @@
     - __zone_current_serial_number >= zone_serial_number
   tags:
     - bind
+    - bind_debug
+    - bind-debug
 
 - name: Check new serial number
   ansible.builtin.debug:
@@ -96,7 +110,9 @@
   when:
     - __zone_current_serial_number is defined
   tags:
-    - bind
+    - never
+    - bind_debug
+    - bind-debug
 
 # ==================================================================================================
 #
@@ -197,6 +213,8 @@
   notify: restart bind
   tags:
     - bind
+    - bind_debug
+    - bind-debug
     - bind-config
 
 # ==================================================================================================
@@ -219,6 +237,8 @@
   notify: restart bind
   tags:
     - bind
+    - bind_debug
+    - bind-debug
     - bind-config
 
 # ==================================================================================================
@@ -238,6 +258,8 @@
     - bind_dnssec_secret is defined
   tags:
     - bind
+    - bind_debug
+    - bind-debug
     - bind-zones
 
 # ==================================================================================================
@@ -257,6 +279,8 @@
     - bind_dnssec_secret is defined
   tags:
     - bind
+    - bind_debug
+    - bind-debug
     - bind-zones
 
 - name: "Installing Forward Zone files"
@@ -272,6 +296,8 @@
   notify: restart bind
   tags:
     - bind
+    - bind_debug
+    - bind-debug
     - bind-zones
 
 - name: "Installing Reverse Zone files"
@@ -287,6 +313,8 @@
   notify: restart bind
   tags:
     - bind
+    - bind_debug
+    - bind-debug
     - bind-zones
 
 - name: "Ensure Bind can write to bind directories"
@@ -302,4 +330,6 @@
     - "{{ bind_cache_dir }}"
   tags:
     - bind
+    - bind_debug
+    - bind-debug
     - bind-zones

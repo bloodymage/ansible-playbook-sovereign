@@ -15,14 +15,20 @@
         - "vars"
   become: no
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
 
 - name: "Install packages"
   package:
     name: "{{ packages }}"
     state: present
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
     - install-packages
 
 - name: Determine whether to force private key regeneration
@@ -60,7 +66,11 @@
     - "{{ acmeca_keys_dir }}"
     - "{{ acmeca_live_dir }}"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
 
 - name: "Generate Let's Encrypt Account private key"
   community.crypto.openssl_privatekey:
@@ -74,7 +84,10 @@
     force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
   become: yes
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
 
 - name: Make sure account exists and has given contacts. We agree to TOS.
   community.crypto.acme_account:
@@ -87,7 +100,10 @@
       - mailto:{{ acmeca_account_email }}
     validate_certs: yes
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
 
 - name: "Create Certificate Directories"
   file:
@@ -98,7 +114,11 @@
     mode: "0755"
   loop: "{{ hosts }}"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
 
 - name: "Generate Let's Encrypt Certificate private key"
   community.crypto.openssl_privatekey:
@@ -115,8 +135,10 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
-    - acmeca-private
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
 
 - name: "Generate Let's Encrypt CSR"
   community.crypto.openssl_csr:
@@ -136,7 +158,11 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
 
 - name: "Begin Let's Encrypt challenges"
   community.crypto.acme_certificate:
@@ -158,7 +184,10 @@
     - item.certificate == "acme"
   register: acme_challenge
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
     - acme-challenge
 
 - name: Print acme_challenge
@@ -170,7 +199,10 @@
   loop: "{{ acme_challenge.results }}"
   become: no
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
     - acme-challenge
 
 - name: "Create .well-known/acme-challenge directory"
@@ -185,7 +217,10 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
     - acme-challenge
 
 - name: "Implement http-01 challenge files"
@@ -203,7 +238,10 @@
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
     - acme-challenge
 
 - name: "Complete Let's Encrypt challenges"
@@ -228,7 +266,11 @@
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'] is defined
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
     - acme-challenge
 
 - name: Setup live link directories
@@ -243,7 +285,11 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
 
 - name: Create live link certs
   file:
@@ -257,7 +303,11 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
 
 - name: Setup Live Link chain
   file:
@@ -271,7 +321,11 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
 
 - name: Setup Live Link fullchain
   file:
@@ -285,7 +339,11 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
 
 - name: Setup live link privkey
   file:
@@ -299,4 +357,8 @@
   when:
     - item.certificate == "acme"
   tags:
-    - acmeca
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+
