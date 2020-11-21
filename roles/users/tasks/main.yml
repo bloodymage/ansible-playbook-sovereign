@@ -213,3 +213,11 @@
 #     - users
 #     - users_debug
 #     - users-debug
+
+# - name: Add public ssh keys of users
+#   authorized_key:
+#     user: "{{ item }}"
+#     exclusive: yes
+#     key: https://github.com/{{ item }}.keys
+#     state: present
+#   with_items: "{{ developers }}"
