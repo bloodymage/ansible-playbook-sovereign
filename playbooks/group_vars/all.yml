@@ -1,30 +1,38 @@
 ---
-rebeldream_domain_list: "{{ ansible_domain.split('.')[-2:] }}"
+# Organization Info
 rebeldream_org_name: "{{ ansible_domain.split('.')[1] }}"
 rebeldream_org_unit_name: "{{ ansible_domain.split('.')[0] }}"
+
+# Domain Information
+rebeldream_domain_list: "{{ ansible_domain.split('.')[-2:] }}"
 rebeldream_domain: "{{ rebeldream_domain_list | join('_') }}"
-
 rebeldream_realm: "{{ ansible_domain | upper }}"
-
 rebeldream_root_domain: "{{ ansible_domain.split('.')[1] }}.{{ ansible_domain.split('.')[2] }}"
 
+# Cert Authoritiy Files
 rebeldream_component_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
 rebeldream_component_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
+rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
 
+# Decisions
 rebeldream_realm_managed_identities: no
-rebeldream_primary_domain_controller: "{{ groups['samba_domain_controllers'][0] | default([]) }}"
-
+rebeldream_realm_identity_management_system: ""
 rebeldream_smart_card_login: no
-
-rebeldream_raspberrypi_distribution_release: buster
 rebeldream_overwrite_password: no
 
+# Host Identitification
+rebeldream_primary_domain_controller: "{{ groups['samba_domain_controllers'][0] | default([]) }}"
+
+# Passwords
 ownca_root_password: "password"
 ownca_intermediate_password: "password"
 ownca_component_password: "password"
 ownca_identity_password: "password"
 ownca_codesign_password: "password"
+samba_administrator_password: "password"
 
+# Certificate Authority Configuration:
 ownca_certificate_authorities:
   - name: "root"
     common_name: "{{ rebeldream_org_name | title }} {{ 'root' | title }} CA"
@@ -91,4 +99,5 @@ ownca_certificate_authorities:
 
 ownca_revoked_certificates: []
 
-samba_administrator_password: "password"
+# Misc
+rebeldream_raspberrypi_distribution_release: buster

@@ -16,7 +16,8 @@ whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
 excludesfile = ~/.gitignore # Creates a global git ignore
 
 [github]
-user = gderber
+user = {{ item.github_user | rebeldream_github_user }}
+oauth-token {{ item.oauth_token | rebeldream_github_oauth_token }}
 
 [branch "master"]
 remote = origin

@@ -116,7 +116,6 @@ Sovereign is a set of ansible playbooks to build and maintain your own private s
 - VPN
 - and more. 
 
-
 ### Sources
 #### [Ansible Documentation](https://docs.ansible.com/ansible/latest/index.html)
 #### [Ansible Examples](https://github.com/ansible/ansible-examples)
