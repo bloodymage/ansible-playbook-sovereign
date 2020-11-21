@@ -1,2 +1,18 @@
 ---
 # defaults file for users
+packages: []
+
+users:
+  - username: pi
+    name: 'Pi'
+    groups:
+     - users
+     - ansiblemanaged
+    id_number: 1000
+    unix_home: /home/pi
+    password: "password"
+    ssh_key_password: "password"
+    ssh_access_cert:
+      - principal
+    ssh_cert:
+      - None

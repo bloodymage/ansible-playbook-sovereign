@@ -1,2 +1,21 @@
 ---
 # tasks file for sudo
+# ==================================================================================================
+#
+# Enable sudo
+#
+# ...
+#
+# ==================================================================================================
+- name: Setup Master Sudoers file
+  template:
+    src: "sudoers.j2"
+    dest: "/etc/sudoers"
+    owner: root
+    group: root
+    validate: /usr/sbin/visudo -csf %s
+  become: yes
+  tags:
+    - users
+    - users_debug
+    - users-debug
