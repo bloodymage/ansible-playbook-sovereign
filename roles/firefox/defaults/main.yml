@@ -1,5 +1,0 @@
----
-# defaults file for firefox
-packages:
-  - firefox
-  - libgssapi-krb5-2
