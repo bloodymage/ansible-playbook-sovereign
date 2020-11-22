@@ -1,7 +1,0 @@
-dn: olcOverlay={{ item.name }},olcDatabase={1}{{ item.database_type }},cn=config
-objectClass: {{ item.object_class }}
-{% if item.details is defined %}
-  {% for attribute in item.attributes %}
-    {{ attribute.class }}
-  {% endfor %}
-{% endif %}
