@@ -10,7 +10,16 @@
 - [License](#license)
 
 ## Description
-This collection is a set of ansible playbooks that you can use to build and maintain your own personal network servers.  There are three goals I have with this project.
+This collection is a set of ansible playbooks that you can use to build and maintain your own personal self-hosted services.  
+Initial services are:
+1. Email (Postfix and Dovecot)
+2. Address Book and Calendars (Nextcloud)
+3. Cloud Storage (Nextcloud)
+4. File server (Samba)
+
+For access to these services, a focus on centralized user management with a goal of single sign on across all services.  Eventually I will add smart card capabilities to minimize password requirements. 
+
+There are three reasons I had with creating this with this project.
 1. I wanted to learn how to use Ansible
 2. I wanted to better control my data.
 3. I wanted a way to quickly and easily rebuild my network if absolutely necessary.
