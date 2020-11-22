@@ -1,6 +1,0 @@
-Name: PAM shield: block IPs trying password guessing
-Default: yes
-Priority: 128
-Auth-Type: Primary
-Auth:
-	optional pam_shield.so

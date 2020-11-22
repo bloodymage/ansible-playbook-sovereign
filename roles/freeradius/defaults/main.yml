@@ -1,7 +1,0 @@
----
-# defaults file for freeradius
-packages:
-  - freeradius
-  - freeradius-utils
-
-krb5_realm: "{{ ansible_domain | upper }}"
