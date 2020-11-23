@@ -3,11 +3,14 @@
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/domain_users/administrator_password"
+    password_store_id: "{{ ansible_domain }}/domain_users/administrator/password"
   when:
     - samba_administrator_password == "password"
   tags:
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Get Samba Groups
   command: "samba-tool group list"
@@ -16,16 +19,18 @@
   become: yes
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Print Existing Groups
   debug:
     var: existing_group_list.stdout_lines
     verbosity: 1
   tags:
-    - users
-    - domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Get Samba Users
   command: "samba-tool user list"
@@ -34,16 +39,18 @@
   become: yes
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Print Existing Groups
   debug:
     var: existing_user_list.stdout_lines
     verbosity: 1
   tags:
-    - users
-    - domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 # ==================================================================================================
 #
@@ -68,8 +75,10 @@
   delegate_to: "{{ primary_domain_controller }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Add Samba Groups
   shell: >
@@ -91,8 +100,10 @@
   delegate_to: "{{ primary_domain_controller }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Add Samba Groups
   shell: >
@@ -111,8 +122,10 @@
   delegate_to: "{{ primary_domain_controller }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Add Samba Groups
   shell: >
@@ -130,8 +143,10 @@
   delegate_to: "{{ primary_domain_controller }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 # ==================================================================================================
 #
@@ -160,8 +175,10 @@
   delegate_to: "{{ primary_domain_controller }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Add Samba Users
   shell: >
@@ -184,8 +201,10 @@
   delegate_to: "{{ primary_domain_controller }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 # ==================================================================================================
 #
@@ -203,8 +222,10 @@
     - item.username not in existing_user_list.stdout_lines
   delegate_to: "{{ primary_domain_controller }}"
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Set expiry for Samba Users
   shell: >
@@ -216,8 +237,10 @@
   delegate_to: "{{ primary_domain_controller }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: "Generate user SPNs"
   include: generate_spns.yml
@@ -227,7 +250,7 @@
   when:
     - user.spns is defined
   tags:  
-    - users
-    - domain-users
-
-
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug

@@ -4,5 +4,8 @@
   timezone:
     name: "America/New_York"
   notify: restart ntp
-
+  tags:
+    - ntp
+    - ntp_debug
+    - ntp-debug
 

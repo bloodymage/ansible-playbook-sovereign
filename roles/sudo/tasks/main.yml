@@ -16,6 +16,6 @@
     validate: /usr/sbin/visudo -csf %s
   become: yes
   tags:
-    - users
-    - users_debug
-    - users-debug
+    - sudo
+    - sudo_debug
+    - sudo-debug

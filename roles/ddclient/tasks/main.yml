@@ -7,19 +7,44 @@
 # Installs a set of common apps for all systems on the network
 #
 # ======================================================================
-- name: Install ddclient apps
-  package:
-    name: "{{ packages }}"
-    state: present
-  become: yes
-  notify: restart ddclient
-  tags:
-    - ddclient
-    - packages
-    - install-packages
-    - ddclient-packages
-    - ddclient-install-packages
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - ddclient
+        - ddclient_debug
+        - ddclient-debug
+        - install-packages
 
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - ddclient
+        - ddclient_debug
+        - ddclient-debug
+        - install-packages
+
+# ==================================================================================================
+#
+# Configure ddclient
+#
+# ==================================================================================================
 - name: Install ddclient.conf
   template:
     src: ddclient.j2
@@ -33,5 +58,5 @@
     - ddclient_sites is defined
   tags:
     - ddclient
-    - config
-    - ddclient-config
+    - ddclient_debug
+    - ddclient-debug

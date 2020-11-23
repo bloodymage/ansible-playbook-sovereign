@@ -14,8 +14,12 @@
         - "vars"
   become: no
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
+    - install-packages
 
 - name: "Install packages"
   package:
@@ -23,12 +27,20 @@
     state: present
   become: yes
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - install-packages
     - ownca-all
 
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
 
 # ==================================================================================================
 #
@@ -50,7 +62,10 @@
   become: yes
   loop: "{{ ownca_host_certs_directories }}"
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 # ==================================================================================================
@@ -68,7 +83,10 @@
   when:
     - ownca_component_password == "password"
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
 
 - name: Generate Host Private Key
   openssl_privatekey:
@@ -81,7 +99,10 @@
     force: no
   become: yes
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Print CSR Variables
@@ -101,8 +122,8 @@
   become: no
   tags:
     - never
-    - debug
-    - debug-ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
 
 - name: Generate Host CSR
   community.crypto.openssl_csr:
@@ -124,7 +145,10 @@
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
   become: yes
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 # ==================================================================================================
@@ -140,7 +164,10 @@
     flat: yes
   become: yes
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Generate Host Certificate
@@ -154,7 +181,10 @@
   become: no
   delegate_to: localhost
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Create Complete Chain Bundles
@@ -169,7 +199,10 @@
   become: no
   delegate_to: localhost
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-bundles
     - ownca-all
 
@@ -184,7 +217,10 @@
   when:
     - parent_cert_authorities.chain is defined
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-bundles
     - ownca-all
 
@@ -197,7 +233,10 @@
     - parent_cert_authorities is defined
   delegate_to: localhost
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-bundles
     - ownca-all
 
@@ -210,7 +249,10 @@
     - parent_cert_authorities.complete_chain is defined
   delegate_to: localhost
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-bundles
     - ownca-all
 
@@ -230,7 +272,10 @@
     - "{{ inventory_hostname }}-chain"
   notify: restart all
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Copy domain controllers' certificate back to server.
@@ -243,7 +288,10 @@
     - rebeldream_realm_managed_identities
   notify: restart all
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Copy domain controllers' certificate chain back to server.
@@ -256,7 +304,10 @@
     - rebeldream_realm_managed_identities
   notify: restart all
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Copy CA Certificates to server.
@@ -280,7 +331,10 @@
   become: yes
   notify: restart all
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Convert CA Certs to DER
@@ -294,7 +348,10 @@
   delegate_to: localhost
   run_once: yes
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all
 
 - name: Copy CA Certificates Samba File Server.
@@ -320,5 +377,8 @@
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
   tags:
+    - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
     - ownca-all

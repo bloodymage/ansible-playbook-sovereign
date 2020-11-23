@@ -1,18 +1,67 @@
 ---
-- include: debian_family.yml
+# This playbook contains common plays that will be run on all debian family of nodes.
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - hosts
+        - hosts_debug
+        - hosts-debug
+        - install-packages
+
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - hosts
+        - hosts_debug
+        - hosts-debug
+        - install-packages
+
+# ==================================================================================================
+#
+# Task: "Set proper hosts file"
+#
+# Installs a hostfile that replaces the '127.0.0.# hostname' with the
+# hosts actual IP address and adds the fqdn
+#
+# ==================================================================================================
+- name: "Print Hostname Variables"
+  debug:
+    msg:
+      - "Hostname: {{ inventory_hostname }}"
+    verbosity: 1
+  tags:
+    - never
+    - hosts_debug
+    - hosts-debug
+
+- name: "{{ ansible_os_family }}: Set proper hosts file"
+  template:
+    src: "hosts.j2"
+    dest: /etc/hosts
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
   when:
-    - ansible_os_family == 'Debian'
-    - ansible_network_os is undefined
     - inventory_hostname != 'localhost'
   tags:
-    - basic_config
-    - upgrade
-
-- include: routeros.yml
-  when:
-    - ansible_network_os is not undefined
-    - ansible_network_os == 'routeros'
-
-- include: windows.yml
-  when:
-    - ansible_os_family == 'Windows'
+    - hosts
+    - hosts_debug
+    - hosts-debug

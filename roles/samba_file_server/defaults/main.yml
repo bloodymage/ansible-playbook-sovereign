@@ -1,4 +1,4 @@
-samba_packages:
+packages:
   - winbind
   - libpam-winbind
   - libnss-winbind
@@ -16,3 +16,5 @@ samba_security: user
 samba_services:
     - winbind
 
+__samba_recreate_realm: no
+__samba_joined_as_domain_member: no

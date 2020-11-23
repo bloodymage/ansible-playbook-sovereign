@@ -11,13 +11,40 @@
 - name: Check if MySQL is already installed.
   stat: path=/etc/init.d/mysql
   register: mysql_installed
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
 
-- name: "{{ ansible_os_family }}: Install MariaDB Apps"
-  apt:
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+    - install-packages
+
+- name: "Install packages"
+  package:
     name: "{{ packages }}"
     state: present
   become: yes
   tags:
+    - mariadb
+    - mariadb
+    - mariadb_debug
     - install-packages
 
 # Because Ubuntu starts MySQL as part of the install process, we need to stop
@@ -27,6 +54,10 @@
     name: "{{ mysql_daemon }}"
     state: stopped
   when: not mysql_installed.stat.exists
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
 
 - name: Delete innodb log files created by apt package after initial install.
   file:
@@ -36,6 +67,10 @@
     - ib_logfile0
     - ib_logfile1
   when: not mysql_installed.stat.exists
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
 
 # - name: Ensure MySQL Root user password is set
 #   mysql_user:
@@ -48,9 +83,17 @@
     name: ''
     host_all: yes
     state: absent
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
 
 - name: Add Debian Upgrade User
   mysql_user:
     name: debian-sys-maint
     password: "{{ mysql_debian_sys_maint_user_password }}"
     state: present
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug

@@ -15,6 +15,8 @@
   become: no
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - websites
     - install-packages
 
@@ -25,18 +27,22 @@
   become: yes
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - websites
     - install-packages
 
-# - name: "Enable Apache Modules"
-#   community.general.apache2_module:
-#     state: present
-#     name: "{{ item }}"
-#   loop: "{{ mediawiki_apache_modules}}"
-#   notify: reload apache
-#   tags:
-#     - mediawiki
-#     - websites
+- name: "Enable Apache Modules"
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  loop: "{{ mediawiki_apache_modules}}"
+  notify: reload apache
+  tags:
+    - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
+    - websites
 
 - name: "Install Mediawiki Site"
   git:
@@ -57,6 +63,8 @@
     - item.enabled 
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-install
     - websites
 
@@ -76,6 +84,8 @@
     - item.enabled 
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-install
     - websites
 
@@ -88,6 +98,8 @@
     - hosts is defined
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-install
     - websites
   
@@ -106,6 +118,8 @@
     - item.enabled 
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-install
     - websites
 
@@ -118,6 +132,8 @@
     - hosts is defined
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-install
     - websites
 
@@ -136,6 +152,8 @@
     - item.enabled 
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-install
     - websites
 
@@ -156,6 +174,8 @@
     - mediawiki_ldap_config
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-config
     - websites
 
@@ -176,6 +196,8 @@
   tags:
     - mediawiki
     - mediawiki-config
+    - mediawiki_debug
+    - mediawiki-debug
     - websites
 
 - name: "Update Mediawiki Database"
@@ -193,6 +215,8 @@
   loop: "{{ hosts }}"
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-config
     - websites
 
@@ -211,5 +235,7 @@
   notify: reload apache
   tags:
     - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
     - mediawiki-config
     - websites

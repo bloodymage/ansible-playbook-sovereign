@@ -1,4 +1,4 @@
-common_packages:
+packages:
   - acl
   - attr
   - samba
@@ -10,11 +10,10 @@ common_packages:
   - libpam-krb5
   - krb5-config
   - krb5-user
-
-domain_controller_packages:
   - dnsutils
   - unison
   - rsync
 
-primary_domain_controller: "{{ groups['samba_domain_controllers'][0] }}"
 samba_domain_password_expiration: 90
+
+__samba_recreate_realm: no

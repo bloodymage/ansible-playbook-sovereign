@@ -1,10 +1,45 @@
 ---
-# ======================================================================
+# ==================================================================================================
 #
 # Tasks:
 #  
 #
-# ======================================================================
+# ==================================================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - sshca_host_certs
+        - sshca-host-certs
+        - sshca_host_certs_debug
+        - sshca-host-certs-debug
+        - install-packages
+
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - sshca_host_certs
+        - sshca-host-certs
+        - sshca_host_certs_debug
+        - sshca-host-certs-debug
+        - install-packages
+
 # ======================================================================
 #
 # Tasks:
@@ -18,13 +53,12 @@
   register: private_keys
   failed_when: "\"matched\" not in private_keys or private_keys.matched == 0"
   become: yes
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
-# ======================================================================
-#
-# Tasks:
-#  
-#
-# ======================================================================
 - name: Create local temporary directory.
   tempfile:
     suffix: ansible-ssh-host-signer
@@ -33,6 +67,11 @@
   register: temporary_directory
   delegate_to: localhost
   run_once: true
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
 # ======================================================================
 #
@@ -46,6 +85,11 @@
     dest: "{{ temporary_directory.path }}/public_keys/"
   with_items: "{{ private_keys.files }}"
   changed_when: false
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
 # ======================================================================
 #
@@ -60,6 +104,11 @@
     fail_on_missing: false
   with_items: "{{ private_keys.files }}"
   changed_when: false
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
 # ======================================================================
 #
@@ -84,6 +133,11 @@
   with_items: "{{ private_keys.files }}"
   changed_when: false
   delegate_to: localhost
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
 # ======================================================================
 #
@@ -97,6 +151,11 @@
     pattern: ssh_host_*_key-cert.pub
   register: certificates
   delegate_to: localhost
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
 # ======================================================================
 #
@@ -114,6 +173,11 @@
   failed_when: false
   register: certificate_comparison
   delegate_to: localhost
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
 # ======================================================================
 #
@@ -130,6 +194,11 @@
   become: yes
   when:
     - item.rc != 0
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
 
 # ======================================================================
 #
@@ -145,3 +214,8 @@
   changed_when: false
   delegate_to: localhost
   run_once: true
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug

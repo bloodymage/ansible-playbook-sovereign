@@ -5,6 +5,11 @@
     name: "{{ item.db_name }}"
     state: present
   loop: "{{ mariadb_databases }}"
+  tags:
+    - mysql_databases
+    - mysql-databases
+    - mysql_databases_debug
+    - mysql-databases-debug
 
 - name: Ensure MySQL users are present.
   mysql_user:
@@ -17,3 +22,8 @@
     encrypted: "{{ item.encrypted | default('no') }}"
   with_items: "{{ mysql_users }}"
   no_log: true
+  tags:
+    - mysql_databases
+    - mysql-databases
+    - mysql_databases_debug
+    - mysql-databases-debug

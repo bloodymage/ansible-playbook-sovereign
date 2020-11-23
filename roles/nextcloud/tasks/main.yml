@@ -16,6 +16,9 @@
   become: no
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - install-packages
 
 - name: "Install packages"
   package:
@@ -24,6 +27,8 @@
   become: yes
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
     - install-packages
 
@@ -41,6 +46,8 @@
   loop: "{{ nextcloud_source_url }}"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
     - download-sources
 
@@ -63,6 +70,8 @@
     - item.enabled 
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Install Apache site.conf
@@ -83,22 +92,26 @@
   notify: reload apache
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 # - name: "Enable Apache modules"
-#   community.general.apache2_module:
-#     state: present
-#     name: "{{ item }}"
-#   loop:
-#     - rewrite
-#     - headers
-#     - env
-#     - dir
-#     - mime
-#   notify: reload apache
-#   tags:
-#     - nextcloud
-#     - websites
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  loop:
+    - rewrite
+    - headers
+    - env
+    - dir
+    - mime
+  notify: reload apache
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
 
 - name: Determine New Data Directory
   set_fact:
@@ -113,6 +126,8 @@
     - item.enabled
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Create Data Directory
@@ -131,6 +146,8 @@
     - item.enabled
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Check If Data Directory in default location
@@ -146,6 +163,8 @@
     - item.enabled
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Print dir_stat
@@ -159,8 +178,9 @@
   when:
     - item.stat is defined
   tags:
-    - nextcloud
-    - websites
+    - never
+    - nextcloud_debug
+    - nextcloud-debug
 
 - name: Move Data Directory
   copy:
@@ -178,6 +198,8 @@
     - item.stat.exists
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Delete old Data directory
@@ -192,6 +214,8 @@
   notify: restart apache2
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Update php.ini
@@ -211,6 +235,8 @@
     - item.enabled
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Install Nextcloud
@@ -226,6 +252,8 @@
     - item.content == "nextcloud"
   tags:
     - never
+    - nextcloud_debug
+    - nextcloud-debug
     - nextcloud
     - websites
 
@@ -246,6 +274,8 @@
     - item.enabled
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: "Install Nextcloud apps"
@@ -259,4 +289,6 @@
     - host.content == "nextcloud"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
