@@ -10,9 +10,9 @@
 
 #- hosts: freeipa_controllers
 
-- hosts: openldap_servers
-  roles:
-    - bloodymage.rebeldream.openldap
+# - hosts: openldap_servers
+#   roles:
+#     - bloodymage.rebeldream.openldap
 
 - hosts: sssd
   roles:
