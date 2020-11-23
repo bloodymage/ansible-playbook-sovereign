@@ -1,5 +1,26 @@
 ---
 # tasks file for samba-domain-member
+- name: Determine whether to force domain recreation
+  ansible.builtin.set_fact:
+    __samba_recreate_realm: yes
+  become: no
+  tags:
+    - never
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: Determine if host is already joined as a domain member
+  ansible.builtin.set_fact:
+    __samba_joined_as_domain_member: yes
+  become: no
+  tags:
+    - samba_file_server
+    - samba-file-server
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
+
 - name: "Pre-tasks"
   block:
     - name: Include OS-specific variables.
@@ -19,6 +40,10 @@
       tags:
         - samba_file_server
         - samba-file-server
+        - samba_file_server_debug
+        - samba-file-server-debug
+        - recreate-realm
+        - recreate-realm-debug
 
     - name: "Install packages"
       package:
@@ -28,7 +53,11 @@
       tags:
         - samba_file_server
         - samba-file-server
+        - samba_file_server_debug
+        - samba-file-server-debug
         - install-packages
+        - recreate-realm
+        - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -53,6 +82,10 @@
   tags:
     - samba_file_server
     - samba-file-server
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Kill running processes
   shell: "kill {{ item }}"
@@ -65,8 +98,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Wait for all processes to be killed
   wait_for:
@@ -82,8 +117,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Force kill stuck processes
   shell: "kill -9 {{ item }}"
@@ -96,8 +133,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -117,8 +156,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Print Variables
   debug:
@@ -128,10 +169,9 @@
     - samba_create_domain is defined
     - samba_create_domain
   tags:
-    - samba_file_server
-    - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm-debug
 
 - name: Remove config file
   file:
@@ -143,8 +183,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -196,8 +238,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -215,8 +259,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # Create Config File
 - name: Install smb.conf configuration file
@@ -231,8 +277,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # Create Config File
 - name: Install user.map
@@ -247,8 +295,10 @@
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -260,13 +310,14 @@
 - name: Join Domain
   shell: "net ads join -U administrator -w {{ samba_administrator_password }}"
   become: yes
+  notify: start samba-domain-member
   when:
-    - samba_create_domain is defined
-    - samba_create_domain
-    # - domain_joined is false
+    - __samba_recreate_realm
+    - not __samba_joined_as_domain_member
   tags:
     - samba_file_server
     - samba-file-server
-    - samba
-    - samba-domain-members
-  notify: start samba-domain-member
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
