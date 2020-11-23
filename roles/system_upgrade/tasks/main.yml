@@ -14,11 +14,111 @@
         - "vars"
   become: no
   tags:
+    - system_upgrade
     - system-upgrade
+    - system_upgrade_debug
+    - system-upgrade-debug
 
-- include: debian_family.yml
+# ==================================================================================================
+#
+# Task: Ensure Rasbian Raspberry Pi Repo is Current
+#
+#
+#
+# ==================================================================================================
+- name: "Ensure Raspbian Raspberry Pi Repo is current"
+  template:
+    src: "{{ role_path }}/templates/raspi.list.j2"
+    dest: /etc/apt/sources.list.d/raspi.list
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
   when:
-    - ansible_network_os is not defined
-    - ansible_os_family != "Windows"
+    - ansible_lsb.id is defined and ansible_lsb.id == "Raspbian"
   tags:
+    - system_upgrade
     - system-upgrade
+    - system_upgrade_debug
+    - system-upgrade-debug
+
+- name: "Ensure sources.list is current"
+  template:
+    src: "sources.list.j2"
+    dest: /etc/apt/sources.list
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  tags:
+    - system_upgrade
+    - system-upgrade
+    - system_upgrade_debug
+    - system-upgrade-debug
+
+# ==================================================================================================
+#
+# Task: Update all packages (Safe upgrade)
+#
+# Updates all packages that do not require removal of other packages to complete the upgrade
+# process.  We do this first, to minimize the impact of the full upgrade done next.
+#
+# ==================================================================================================
+- name: "Update all packages (Safe upgrade)"
+  apt:
+    update_cache: yes
+    upgrade: safe
+    cache_valid_time: 86400 #One day
+  become: yes
+  tags:
+    - system_upgrade
+    - system-upgrade
+    - system_upgrade_debug
+    - system-upgrade-debug
+
+- name: "Update all packages (Full upgrade)"
+  apt:
+    update_cache: yes
+    upgrade: full
+    cache_valid_time: 86400 #One day
+  become: yes
+  tags:
+    - system_upgrade
+    - system-upgrade
+    - system_upgrade_debug
+    - system-upgrade-debug
+
+# ==================================================================================================
+#
+# Task:
+#
+#
+#
+# ==================================================================================================
+- name: "Remove useless packages from the cache"
+  apt:
+    autoclean: yes
+  become: yes
+  tags:
+    - system_upgrade
+    - system-upgrade
+    - system_upgrade_debug
+    - system-upgrade-debug
+
+- name: "Remove dependencies that are no longer required"
+  apt:
+    autoremove: yes
+  become: yes
+  tags:
+    - system_upgrade
+    - system-upgrade
+    - system_upgrade_debug
+    - system-upgrade-debug
+
+# - name: Reboot Hosts One at a time
+#   include: "reboot_debian_hosts.yaml"
+#   loop: "{{ hosts }}"
+#   loop_control:
+#     loop_var: host
+#   tags:
+#     - system-upgrade

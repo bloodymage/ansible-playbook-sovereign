@@ -21,7 +21,10 @@
   become: no
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
+    - install-packages
 
 - name: "Install packages"
   package:
@@ -31,6 +34,8 @@
   register: result
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
     - install-packages
 
@@ -38,6 +43,8 @@
   community.general.ipinfoio_facts:
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
 
 # ==================================================================================================
 #
@@ -65,6 +72,8 @@
   tags:
     - ownca
     - ownca-all
+    - ownca_debug
+    - ownca-debug
 
 # ==================================================================================================
 #
@@ -89,6 +98,8 @@
   delegate_to: localhost
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 - name: Create database
@@ -103,6 +114,8 @@
   delegate_to: localhost
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 - name: Create a serial file
@@ -117,6 +130,8 @@
   delegate_to: localhost
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 - name: Create crl serial file
@@ -131,6 +146,8 @@
   delegate_to: localhost
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 # ==================================================================================================
@@ -148,6 +165,8 @@
     - ownca_root_password == "password"
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
 
 - name: "Ensure we have a password for the Intermediate CA"
   ansible.builtin.set_fact:
@@ -159,6 +178,8 @@
     - ownca_intermediate_password == "password"
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
 
 - name: "Ensure we have a password for the Component Issuing CA"
   ansible.builtin.set_fact:
@@ -170,6 +191,8 @@
     - ownca_component_password == "password"
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
 
 - name: "Ensure we have a password for the Identity Issuing CA"
   ansible.builtin.set_fact:
@@ -181,6 +204,8 @@
     - ownca_identity_password == "password"
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
 
 - name: "Ensure we have a password for the Code Sign Issuing CA"
   ansible.builtin.set_fact:
@@ -192,6 +217,8 @@
     - ownca_codesign_password == "password"
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
 
 # ==================================================================================================
 #
@@ -211,6 +238,8 @@
   delegate_to: localhost
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 - name: Generate Certificate Authority Certificate Signing Request (CSR)
@@ -235,6 +264,8 @@
   delegate_to: localhost
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 - name: Generate Selfsigned Certificate
@@ -252,6 +283,8 @@
     - item.provider == "selfsigned"
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 - name: Generate OwnCA Signed Certificate
@@ -270,6 +303,8 @@
     - item.provider == "ownca"
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-all
 
 # ==================================================================================================
@@ -288,6 +323,8 @@
   register: parent_cert_authorities
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-bundles
     - ownca-all
 
@@ -304,9 +341,9 @@
   when:
     - item.chain is defined
   tags:
-    - ownca
-    - ownca-bundles
-    - ownca-all
+    - never
+    - ownca_debug
+    - ownca-debug
 
 - name: Print Cert Authorities Results (Item)
   debug:
@@ -319,9 +356,9 @@
     - parent_cert_authorities.results is defined
   delegate_to: localhost
   tags:
-    - ownca
-    - ownca-bundles
-    - ownca-all
+    - never
+    - ownca_debug
+    - ownca-debug
 
 - name: Print Cert Authorities Results
   debug:
@@ -333,9 +370,9 @@
     - parent_cert_authorities.results is defined
   delegate_to: localhost
   tags:
-    - ownca
-    - ownca-bundles
-    - ownca-all
+    - never
+    - ownca_debug
+    - ownca-debug
 
 - name: Print Cert Authorities (Full)
   debug:
@@ -346,9 +383,9 @@
     - parent_cert_authorities is defined
   delegate_to: localhost
   tags:
-    - ownca
-    - ownca-bundles
-    - ownca-all
+    - never
+    - ownca_debug
+    - ownca-debug
 
 - name: Find root certificate
   community.crypto.certificate_complete_chain:
@@ -358,6 +395,8 @@
   register: root_cert_authorities
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-bundles
     - ownca-all
 
@@ -372,9 +411,9 @@
   when:
     - parent_cert_authorities.chain is defined
   tags:
-    - ownca
-    - ownca-bundles
-    - ownca-all
+    - never
+    - ownca_debug
+    - ownca-debug
 
 - name: Print Cert Authorities (Full)
   debug:
@@ -385,9 +424,9 @@
     - parent_cert_authorities is defined
   delegate_to: localhost
   tags:
-    - ownca
-    - ownca-bundles
-    - ownca-all
+    - never
+    - ownca_debug
+    - ownca-debug
 
 - name: Write complete chain to disk
   copy:
@@ -398,6 +437,8 @@
     - item.complete_chain is defined
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-bundles
     - ownca-all
 
@@ -409,5 +450,7 @@
     - root_cert_authorities.complete_chain is defined
   tags:
     - ownca
+    - ownca_debug
+    - ownca-debug
     - ownca-bundles
     - ownca-all

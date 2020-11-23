@@ -1,26 +1,36 @@
 ---
-- name: Include OS-specific variables.
-  include_vars: "{{ lookup('first_found', params) }}"
-  vars:
-    params:
-      files:
-        - "{{ ansible_distribution | lower }}.yml"
-        - "{{ ansible_os_family | lower }}.yml"
-        - "debian.yml"
-      paths:
-        - "vars"
-  become: no
-  tags:
-    - hostname
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - hostname
+        - hostname_debug
+        - hostname-debug
+        - install-packages
 
-- name: Install packages
-  package:
-    name: "{{ packages }}"
-    state: present
-  become: yes
-  tags:
-    - hostname
-    - install-packages
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - hostname
+        - hostname_debug
+        - hostname-debug
+        - install-packages
 
 # ==================================================================================================
 #
@@ -35,7 +45,9 @@
       - "Hostname: {{ inventory_hostname }}"
     verbosity: 2
   tags:
-    - hostname
+    - never
+    - hostname_debug
+    - hostname-debug
 
 - name: "Set Hostname"
   hostname:

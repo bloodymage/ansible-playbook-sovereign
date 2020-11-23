@@ -22,6 +22,8 @@
   tags:
     - krb5-client-config
     - krb5_client_config
+    - krb5-client-config-debug
+    - krb5_client_config_debug
 
 - name: "Install packages"
   package:
@@ -31,6 +33,8 @@
   tags:
     - krb5-client-config
     - krb5_client_config
+    - krb5-client-config-debug
+    - krb5_client_config_debug
 
 - name: "Update /etc/krb5.conf"
   template:
@@ -44,3 +48,5 @@
   tags:
     - krb5-client-config
     - krb5_client_config
+    - krb5-client-config-debug
+    - krb5_client_config_debug

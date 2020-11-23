@@ -10,8 +10,49 @@
 #   - /etc/ssl/certs   mode: 0755
 #
 # ==================================================================================================
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - ownca_crl
+    - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
+    - ownca-all
+    - install-packages
+
+- name: "Install packages"
+  package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+  tags:
+    - ownca_crl
+    - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
+    - ownca-all
+    - install-packages
+
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
+  tags:
+    - ownca_crl
+    - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
 
 - name: "Create SSL CRL Directory"
   file:
@@ -22,7 +63,10 @@
     mode: "0755"
   become: yes
   tags:
+    - ownca_crl
     - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
 
 # ==================================================================================================
 #
@@ -43,7 +87,10 @@
   delegate_to: localhost
   run_once: true
   tags:
+    - ownca_crl
     - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
 
 - name: Copy CA Certificates to server.
   copy:
@@ -52,4 +99,7 @@
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   tags:
+    - ownca_crl
     - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug

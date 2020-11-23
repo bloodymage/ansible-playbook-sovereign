@@ -4,6 +4,8 @@
   register: existing_apps
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Install Nextcloud Apps
@@ -18,6 +20,8 @@
     - item.content == "nextcloud"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Enable Nextcloud Apps
@@ -31,6 +35,8 @@
     - item.content == "nextcloud"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Determine disabled apps
@@ -38,6 +44,8 @@
     disabled_apps: "{{ existing_apps.stdout_lines | difference(nextcloud_apps) }}"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Determine removed apps
@@ -45,6 +53,8 @@
     removed_apps: "{{ disabled_apps | difference(nextcloud_default_apps) }}"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Print Disabled Apps
@@ -53,7 +63,9 @@
     verbosity: 1
   become: no
   tags:
-    - nextcloud
+    - never
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Print Remove Apps
@@ -62,7 +74,9 @@
     verbosity: 1
   become: no
   tags:
-    - nextcloud
+    - never
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Disable Nextcloud Apps
@@ -76,6 +90,8 @@
     - item.content == "nextcloud"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites
 
 - name: Remove Nextcloud Apps
@@ -88,4 +104,6 @@
     - item.content == "nextcloud"
   tags:
     - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
     - websites

@@ -23,6 +23,9 @@
       become: no
       tags:
         - sshca
+        - sshca_debug
+        - sshca-debug
+        - install-packages
 
     - name: "Install packages"
       package:
@@ -31,6 +34,8 @@
       become: yes
       tags:
         - sshca
+        - sshca_debug
+        - sshca-debug
         - install-packages
 
 # ==================================================================================================
@@ -45,8 +50,9 @@
     state: directory
     mode: '0700'
   tags:
-    - cert-auth
     - sshca
+    - sshca_debug
+    - sshca-debug
 
 # ==================================================================================================
 #
@@ -62,6 +68,8 @@
     - sshca_host_key_password == "password"
   tags:
     - sshca
+    - sshca_debug
+    - sshca-debug
 
 - name: "Ensure we have a password for the User CA Key"
   ansible.builtin.set_fact:
@@ -72,6 +80,8 @@
     - sshca_user_key_password == "password"
   tags:
     - sshca
+    - sshca_debug
+    - sshca-debug
 
 # ==================================================================================================
 #
@@ -101,8 +111,9 @@
   args:
     creates: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
   tags:
-    - cert-auth
     - sshca
+    - sshca_debug
+    - sshca-debug
 
 # ==================================================================================================
 #
@@ -118,5 +129,6 @@
   args:
     creates: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
   tags:
-    - cert-auth
     - sshca
+    - sshca_debug
+    - sshca-debug

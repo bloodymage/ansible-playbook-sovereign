@@ -18,6 +18,8 @@
       become: no
       tags:
         - postfix
+        - postfix_debug
+        - postfix-debug
 
     - name: "Install packages"
       package:
@@ -26,6 +28,8 @@
       become: yes
       tags:
         - postfix
+        - postfix_debug
+        - postfix-debug
         - install-packages
 
 - name: Install config files
@@ -39,6 +43,11 @@
   loop:
     - mailname
     - aliases
+  tags:
+    - postfix
+    - postfix_debug
+    - postfix-debug
+
 
 - name: "Install configuration files (Perms=644)"
   template:
@@ -56,6 +65,8 @@
   notify: restart postfix
   tags:
     - postfix
+    - postfix_debug
+    - postfix-debug
 
 - name: "Install ldap user and group map files"
   template:
@@ -72,6 +83,8 @@
   notify: restart postfix
   tags:
     - postfix
+    - postfix_debug
+    - postfix-debug
 
 - name: "Install Configuration files (postmap update required)"
   template:
@@ -94,6 +107,8 @@
   notify: map {{ item }}
   tags:
     - postfix
+    - postfix_debug
+    - postfix-debug
 
 - name: Create configuration files (Perms=600)
   template:
@@ -108,3 +123,5 @@
   notify: restart postfix
   tags:
     - postfix
+    - postfix_debug
+    - postfix-debug

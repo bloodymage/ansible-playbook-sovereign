@@ -31,6 +31,7 @@
         - bind
         - bind_debug
         - bind-debug
+        - install-packages
 
     - name: "Install packages"
       package:
@@ -42,6 +43,7 @@
         - bind_debug
         - bind-debug
         - install-packages
+
 # ==================================================================================================
 #
 # Set Variables

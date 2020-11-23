@@ -20,7 +20,10 @@
         - "vars"
   become: no
   tags:
-    - dovecot
+    - sssd
+    - sssd_debug
+    - sssd-debug
+    - install-packages
 
 - name: "Install packages"
   package:
@@ -29,6 +32,8 @@
   become: yes
   tags:
     - sssd
+    - sssd_debug
+    - sssd-debug
     - install-packages
   notify: restart sssd
 
@@ -121,3 +126,5 @@
   notify: restart sssd
   tags:
     - sssd
+    - sssd_debug
+    - sssd-debug

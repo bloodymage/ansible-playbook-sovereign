@@ -1,6 +1,3 @@
 ---
-debian_gitcrypt:
-  - git-crypt
-
-debian_etckeeper:
+packages:
   - etckeeper

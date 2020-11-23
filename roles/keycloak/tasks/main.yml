@@ -16,6 +16,9 @@
   become: no
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
+    - install-packages
 
 - name: "Install packages"
   package:
@@ -24,6 +27,8 @@
   become: yes
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
     - install-packages
 
 # ==================================================================================================
@@ -41,6 +46,8 @@
   become: no
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
     - download-sources
 
 - name: "Create Keycloak Directory"
@@ -53,6 +60,8 @@
   become: yes
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
 
 - name: Extract Sources
   unarchive:
@@ -66,6 +75,8 @@
   become: yes
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
 
 - name: "Ensure we have a password for the keycloak administrator user"
   ansible.builtin.set_fact:
@@ -76,6 +87,8 @@
     - keycloak_admin_password == "password"
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
 
 - name: "Ensure we have a password for the keycloak keystore"
   ansible.builtin.set_fact:
@@ -86,6 +99,8 @@
     - keycloak_keystore_password == "password"
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
 
 - name: "Install Service File"
   template:
@@ -98,6 +113,8 @@
   notify: enable keycloak
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
 
 - name: "Install Keycloak configuration file"
   template:
@@ -110,6 +127,8 @@
   notify: restart keycloak
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug
 
 - name: "Create admin user"
   command:
@@ -145,3 +164,5 @@
   notify: restart keycloak
   tags:
     - keycloak
+    - keycloak_debug
+    - keycloak-debug

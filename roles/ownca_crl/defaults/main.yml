@@ -1,4 +1,7 @@
 ---
+packages:
+  - python3-cryptography
+
 ownca_domain_list: "{{ rebeldream_domain_list }}"
 ownca_domain: "{{ rebeldream_domain_list | join('_') }}"
 

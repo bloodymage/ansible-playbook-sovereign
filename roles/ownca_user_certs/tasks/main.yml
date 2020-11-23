@@ -20,23 +20,40 @@
 #   ...
 #
 # ======================================================================
-- name: "Source distribution variables"
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_distribution }}.yml"
-    - "{{ ansible_os_family | lower }}_family.yml"
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
   tags:
+    - ownca_user_certs
     - ownca-user-certs
-    - pretask
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
+    - ownca-all
+    - install-packages
 
-- name: "Install required applications"
+- name: "Install packages"
   package:
     pkg: "{{ packages }}"
     state: present
   become: yes
   register: result
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
+    - ownca-all
     - install-packages
 
 # ==================================================================================================
@@ -61,7 +78,10 @@
     - item.username is defined
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: "Create SSL CSR Key Directories"
   file:
@@ -76,7 +96,10 @@
     - item.username is defined
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: "Create SSL Cert Directories"
   file:
@@ -91,7 +114,10 @@
     - item.username is defined
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: "Create SSL PKCS#12 Key Directories"
   file:
@@ -106,7 +132,10 @@
     - item.given_name is defined
     - item.username is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 # ==================================================================================================
 #
@@ -130,7 +159,10 @@
     - item.given_name is defined
     - item.username is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 # ==================================================================================================
 #
@@ -164,7 +196,10 @@
     - item.given_name is defined
     - item.surname is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Authentication CSR
   community.crypto.openssl_csr:
@@ -191,7 +226,10 @@
     - item.given_name is defined
     - item.surname is not defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Identeficitation CSR
   community.crypto.openssl_csr:
@@ -218,7 +256,10 @@
     - item.given_name is defined
     - item.surname is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Identeficitation CSR
   community.crypto.openssl_csr:
@@ -245,7 +286,10 @@
     - item.given_name is defined
     - item.surname is not defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
@@ -272,7 +316,10 @@
     - item.given_name is defined
     - item.surname is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
@@ -299,7 +346,10 @@
     - item.given_name is defined
     - item.surname is not defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 # ==================================================================================================
 #
@@ -316,7 +366,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Fetch Identification CSRs.
   fetch:
@@ -328,7 +381,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Fetch Encryption CSRs.
   fetch:
@@ -340,7 +396,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Authentication Certificates
   community.crypto.x509_certificate:
@@ -356,7 +415,10 @@
     - item.given_name is defined
   delegate_to: localhost
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Identfication Certificates
   community.crypto.x509_certificate:
@@ -372,7 +434,10 @@
     - item.given_name is defined
   delegate_to: localhost
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate User Encryption Certificates
   community.crypto.x509_certificate:
@@ -388,7 +453,10 @@
     - item.given_name is defined
   delegate_to: localhost
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Copy User Authentication Certificates to workstation.
   copy:
@@ -399,7 +467,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Copy User Identification Certificates to workstation.
   copy:
@@ -410,7 +481,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Copy User Encryption Certificates to workstation.
   copy:
@@ -421,7 +495,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate PKCS#12 Authentication file
   community.crypto.openssl_pkcs12:
@@ -439,7 +516,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate PKCS#12 Identification file
   community.crypto.openssl_pkcs12:
@@ -457,7 +537,10 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: Generate PKCS#12 Encryption file
   community.crypto.openssl_pkcs12:
@@ -475,4 +558,7 @@
   when:
     - item.given_name is defined
   tags:
+    - ownca_user_certs
     - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug

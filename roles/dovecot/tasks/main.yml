@@ -21,6 +21,9 @@
   become: no
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
+    - install-packages
 
 - name: "Install packages"
   package:
@@ -28,6 +31,8 @@
     state: present
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
     - install-packages
 
 # ==================================================================================================
@@ -50,6 +55,8 @@
   notify: restart dovecot
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
 
 - name: Install configuration files to /etc/dovecot/conf.d
   template:
@@ -91,6 +98,9 @@
   notify: restart dovecot
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
 
 - name: Ensure Virtual Directory definitions exist
   file:
@@ -100,6 +110,9 @@
   loop: "{{ dovecot_virtual_mailboxes }}"
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
 
 - name: Install configuration files to /etc/dovecot/virtual
   template:
@@ -112,6 +125,9 @@
   loop: "{{ dovecot_virtual_mailboxes }}"
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
 
 - name: Ensure Sieve Pipe Bin Dir exists
   file:
@@ -120,6 +136,9 @@
   become: yes
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
     
 - name: Install IMAPSieve Spam Update Filters
   template:
@@ -132,6 +151,9 @@
   loop: "{{ imapsieve_mailboxes }}"
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
 
 - name: Install IMAPSieve Spam Update Filters
   template:
@@ -144,3 +166,6 @@
   loop: "{{ imapsieve_mailboxes }}"
   tags:
     - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
