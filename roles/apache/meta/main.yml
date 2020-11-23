@@ -10,17 +10,18 @@ galaxy_info:
   min_ansible_version: 2.10
 
   platforms:
-  - name: Rasbian
-    versions:
-      - 10
-  - name: Debian
-    versions:
-      - 10
-  - name: Ubuntu
-    versions:
-      - 18.04
+    - name: Rasbian
+      versions:
+        - 10
+    - name: Debian
+      versions:
+        - 10
+    - name: Ubuntu
+      versions:
+        - 18.04
 
   galaxy_tags:
+    - bloodymage
     - webservers
     - apache
 

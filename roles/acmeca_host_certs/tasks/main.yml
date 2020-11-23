@@ -1,7 +1,7 @@
 ---
 # tasks file for acmeca_host_certs
 - name: Include OS-specific variables.
-  include_vars: "{{ lookup('first_found', params) }}"
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
       files:
@@ -21,7 +21,7 @@
     - acmeca-host-certs-debug
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   tags:
@@ -32,14 +32,14 @@
     - install-packages
 
 - name: Determine whether to force private key regeneration
-  set_fact:
+  ansible.builtin.set_fact:
     acme_certificate_INTERNAL_force_regenerate_private_key: yes
   tags:
     - never
     - issue-tls-certs-newkey
 
 - name: Determine whether to use production or staging configuration
-  set_fact:
+  ansible.builtin.set_fact:
     acmeca_directory: "{{ letsencrypt_staging_directory }}"
     acmeca_directory_url: "{{ letsencrypt_staging_url }}"
     acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_staging_directory }}"
@@ -53,7 +53,7 @@
 #
 # ==================================================================================================
 - name: "Create required directories"
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     owner: root
@@ -106,7 +106,7 @@
     - acmeca-host-certs-debug
 
 - name: "Create Certificate Directories"
-  file:
+  ansible.builtin.file:
     path: "{{ acmeca_archive_dir }}/{{ item.name }}"
     state: directory
     owner: root
@@ -191,7 +191,7 @@
     - acme-challenge
 
 - name: Print acme_challenge
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ acmeca_directory_url }}"
       - "{{ item }}"
@@ -199,14 +199,13 @@
   loop: "{{ acme_challenge.results }}"
   become: no
   tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
+    - never
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
     - acme-challenge
 
 - name: "Create .well-known/acme-challenge directory"
-  file:
+  ansible.builtin.file:
     path: /srv/www/{{ item.name }}/.well-known/acme-challenge
     state: directory
     owner: www-data
@@ -224,7 +223,7 @@
     - acme-challenge
 
 - name: "Implement http-01 challenge files"
-  copy:
+  ansible.builtin.copy:
     content: "{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource_value'] }}"
     dest: "/srv/www/{{ item.name }}/{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource'] }}"
     owner: www-data
@@ -274,7 +273,7 @@
     - acme-challenge
 
 - name: Setup live link directories
-  file:
+  ansible.builtin.file:
     path: "{{ acmeca_live_dir }}/{{ item.name }}"
     state: directory
     owner: root
@@ -292,7 +291,7 @@
 
 
 - name: Create live link certs
-  file:
+  ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem" 
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/cert.pem"
     state: link
@@ -308,9 +307,8 @@
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
 
-
 - name: Setup Live Link chain
-  file:
+  ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem" 
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/chain.pem"
     state: link
@@ -326,9 +324,8 @@
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
 
-
 - name: Setup Live Link fullchain
-  file:
+  ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem" 
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/fullchain.pem"
     state: link
@@ -344,9 +341,8 @@
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
 
-
 - name: Setup live link privkey
-  file:
+  ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/privkey.pem" 
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/privkey.pem"
     state: link
@@ -361,4 +357,3 @@
     - acmeca-host-certs
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
-
