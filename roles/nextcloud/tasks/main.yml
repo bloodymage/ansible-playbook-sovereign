@@ -96,7 +96,7 @@
     - nextcloud-debug
     - websites
 
-# - name: "Enable Apache modules"
+- name: "Enable Apache modules"
   community.general.apache2_module:
     state: present
     name: "{{ item }}"

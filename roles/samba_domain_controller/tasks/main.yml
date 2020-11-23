@@ -827,7 +827,6 @@
     - __samba_recreate_realm
     - inventory_hostname != primary_domain_controller
   tags:
-  tags:
     - samba_domain_controllers
     - samba-domain-controllers
     - samba_domain_controllers_debug
