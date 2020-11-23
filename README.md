@@ -108,8 +108,6 @@ By default, if a password is defined as 'password' a password will be generated 
 - ownca_codesign_password
 - samba_administrator_password
 
-
-
 ## Features and Advantages
 ...
 
@@ -125,13 +123,19 @@ Sovereign is a set of ansible playbooks to build and maintain your own private s
 - VPN
 - and more. 
 
-### Sources
-#### [Ansible Documentation](https://docs.ansible.com/ansible/latest/index.html)
-#### [Ansible Examples](https://github.com/ansible/ansible-examples)
-#### [Geerlinguy](https://ansible.jeffgeerling.com/)
-
+### References
+- [Ansible Documentation](https://docs.ansible.com/ansible/latest/index.html)
+- [Ansible Examples](https://github.com/ansible/ansible-examples)
+- [Geerlinguy](https://ansible.jeffgeerling.com/)
+- [Awesome Self-Hosted](https://github.com/awesome-selfhosted/awesome-selfhosted)
+- [Reddit: Selfhosted](https://www.reddit.com/r/selfhosted/)
 
 ## Contributing
+[How to Contribute](CONTRIBUTING.md)
 
 ## License
-MIT
+[MIT](LICENSE.md)
+
+## Author Information
+G Derber 
+gd.github@bloodymage.org
