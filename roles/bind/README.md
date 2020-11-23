@@ -25,7 +25,7 @@ Installation
 Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
 
 ### Dependencies
-  - role: bloodymage.rebeldream.collection_handlers
+  ```- role: bloodymage.rebeldream.collection_handlers```
 
 A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
 
@@ -50,12 +50,12 @@ Features and Advantages
 
 Similar Projects
 ----------------
-  [Bertvv: Bind Role](https://github.com/bertvv/ansible-role-bind)
-  [Netzwirt: Bind Role](https://github.com/netzwirt/ansible-bind)
+- [Bertvv: Bind Role](https://github.com/bertvv/ansible-role-bind)
+- [Netzwirt: Bind Role](https://github.com/netzwirt/ansible-bind)
 
 References
 ----------
-  [Samba Wiki: Setting up an BIND DNS Server](https://wiki.samba.org/index.php/Setting_up_a_BIND_DNS_Server)
+- [Samba Wiki: Setting up an BIND DNS Server](https://wiki.samba.org/index.php/Setting_up_a_BIND_DNS_Server)
 
 Contributing
 ------------
@@ -63,7 +63,7 @@ Contributing
 
 License
 -------
-[MIT](MIT.md)
+[MIT](LICENSE.md)
 
 Author Information
 ------------------
