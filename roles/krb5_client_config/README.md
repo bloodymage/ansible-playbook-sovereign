@@ -1,17 +1,17 @@
 Ansible Role: Bloodymage.rebeldream.krb5_client_config
 ===============
 
-  [Description](#description)
-  [Installation](#installation)
-  [Requirements](#requirements)
-  [Usage](#usage)
-  [Role Variables](#role-variables)
-  [Features and Advantages](#features-and-advantages)
-  [Similar Projects](#similar-projects)
-  [References](#references)
-  [Contributing](#contributing)
-  [License](#license)
-  [Author Information](#author-information)
+- [Description](#description)
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Usage](#usage)
+- [Role Variables](#role-variables)
+- [Features and Advantages](#features-and-advantages)
+- [Similar Projects](#similar-projects)
+- [References](#references)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author Information](#author-information)
 
 Description
 -----------
