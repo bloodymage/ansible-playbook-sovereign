@@ -1,17 +1,17 @@
 Ansible Role: Bloodymage.rebeldream.dns_forwardzones
 ===============
 
-  [Description](#description)
-  [Installation](#installation)
-  [Requirements](#requirements)
-  [Usage](#usage)
-  [Role Variables](#role-variables)
-  [Features and Advantages](#features-and-advantages)
-  [Similar Projects](#similar-projects)
-  [References](#references)
-  [Contributing](#contributing)
-  [License](#license)
-  [Author Information](#author-information)
+- [Description](#description)
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Usage](#usage)
+- [Role Variables](#role-variables)
+- [Features and Advantages](#features-and-advantages)
+- [Similar Projects](#similar-projects)
+- [References](#references)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author Information](#author-information)
 
 Description
 -----------
