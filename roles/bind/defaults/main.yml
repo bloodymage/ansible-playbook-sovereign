@@ -79,12 +79,17 @@ bind_zones_dir: /etc/bind/zones
 bind_dnssec_enable: "yes"
 bind_dnssec_validation: "no"
 
-zone_ttl: "604800"
-zone_refresh: "604800"
-zone_retry: "86400"
-zone_expire: "2419200"
-zone_negative_cache_ttl: "604800"
-zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01"
+# SOA information
+bind_zone_time_to_refresh: "1D"
+bind_zone_time_to_retry: "1H"
+bind_zone_time_to_expire: "1W"
+bind_zone_minimum_ttl: "1D"
+bind_zone_ttl: "604800"
+bind_zone_refresh: "604800"
+Bind_zone_retry: "86400"
+bind_zone_expire: "2419200"
+bind_zone_negative_cache_ttl: "604800"
+bind_zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01"
 
 bind_log: "data/named.run"
 
@@ -136,13 +141,6 @@ bind_statistics_allow:
   - "127.0.0.1"
 
 bind_extra_include_files: []
-
-# SOA information
-bind_zone_ttl: "1W"
-bind_zone_time_to_refresh: "1D"
-bind_zone_time_to_retry: "1H"
-bind_zone_time_to_expire: "1W"
-bind_zone_minimum_ttl: "1D"
 
 # File mode for master zone files (needs to be something like 0660 for dynamic updates)
 bind_zone_file_mode: "0640"

@@ -2,37 +2,6 @@
 packages:
   - python3-cryptography
 
-ownca_domain_list: "{{ rebeldream_domain_list }}"
-ownca_domain: "{{ rebeldream_domain }}"
-
-# Files and Directories
-ownca_directory: "~/.pki"
-ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities" 
-ownca_hosts_directory: "{{ ownca_directory }}/hosts"
-ownca_format: 'pem'
-ownca_etc: "/etc/ssl"
-
-# URLs
-ownca_pki_url: "pki.{{ ansible_domain }}"
-ownca_ocsp_url: "ocsp.{{ ansible_domain }}"
-ownca_crl_distribution_point: "https://{{ pki_url }}"
-
-# Key Specific
-ownca_type: RSA
-ownca_sn: 8
-
 ownca_intermediate_ca: "{{ rebeldream_org_unit_name | lower }}"
-
-ownca_root_password: "password"
-ownca_intermediate_password: "password"
-ownca_component_password: "password"
-ownca_identity_password: "password"
-ownca_codesign_password: "password"
-
-ownca_issuing_authorities:
-  - component
-  - identity
-  - codesign
-
 
 ownca_revoked_certificates: []

@@ -14,7 +14,3 @@ packages:
   - rsync
   - screen
   - trash-cli
-
-
-pip_packages:
-  - cryptography

@@ -4,48 +4,24 @@
 # Files and Directories
 #
 # ======================================================================
-
-# Certificat Authority
-ca_domain_list: "{{ ansible_domain.split('.')[-2:] }}"
-ca_org_name: "{{ ca_domain_list | join(' ') }}"
-ca_root_name: "{{ ansible_domain.split('.')[2] }}"
-ca_org_unit_name: "{{ ansible_domain.split('.')[1] }}"
-samba_domain: "{{ ansible_domain.split('.')[0] }}"
-ca_domain: "{{ ca_domain_list | join('_') }}"
-ca_format: 'pem'
-ca_type: RSA
-ca_sn: 8
-
-ca_directory: ~/.pki/
-
-# Ordinarily, certificates must have this oid as an enhanced key usage in order for Windows to allow them to be used as a login credential
-scardLogin: "msSmartcardLogin"
-# Used in a smart card login certificate's subject alternative name
-#msupn: "msUPN"
-msupn: "1.3.6.1.4.1.311.20.2.3"
-# Ordinarily, certificates must have this oid as an enhanced key usage in order for Windows to allow them to be used to identify a domain controller
-msKDC: "1.3.6.1.5.2.3.5"
-# Identifies the AD GUID
-msADGUID: "1.3.6.1.4.1.311.25.1"
-
-authentication_key_usage:
+ownca_user_certs_authentication_key_usage:
   - "nonRepudiation"
   - "digitalSignature"
   - "keyEncipherment"
 
-authentication_extended_key_usage:
+ownca_user_certs_authentication_extended_key_usage:
   - "clientAuth"
   - "msSmartcardLogin"
 
-identification_key_usage:
+ownca_user_certs_identification_key_usage:
   - "digitalSignature"
 
-identification_extended_key_usage:
+ownca_user_certs_identification_extended_key_usage:
   - "emailProtection"
   - "clientAuth"
 
-encryption_key_usage:
+ownca_user_certs_encryption_key_usage:
   - "keyEncipherment"
 
-encryption_extended_key_usage:
+ownca_user_certs_encryption_extended_key_usage:
   - "emailProtection"

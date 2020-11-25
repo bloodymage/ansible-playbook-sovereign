@@ -3,67 +3,64 @@
 packages:
   - postfix
 
-mail_user: vmail
-
-alias_database: "hash:/etc/aliases"
-alias_maps:
+postfix_alias_database: "hash:/etc/aliases"
+postfix_alias_maps:
   - "hash:/etc/aliases"
-append_dot_mydomain: "no"
-biff: "no"
-canonical_maps: "hash:/etc/postfix/canonical"
-default_destination_concurrency_limit: 5
-delay_warning_time: "4h"
-disable_vrfy_command: "yes"
-dovecot_destination_recipient_limit: 1
-home_mailbox: "Maildir/"
-inet_interfaces: "all"
-inet_protocols: "all"
-local_recipient_maps: "$virtual_mailbox_maps"
-mailbox_size_limit: 0
-mailbox_transport: "lmtp:unix:private/dovecot-lmtp"
-milter_connect_macros: "j {daemon_name} v {if_name} _"
-milter_default_action: "accept"
-mydestination:
+postfix_append_dot_mydomain: "no"
+postfix_biff: "no"
+postfix_canonical_maps: "hash:/etc/postfix/canonical"
+postfix_default_destination_concurrency_limit: 5
+postfix_delay_warning_time: "4h"
+postfix_disable_vrfy_command: "yes"
+postfix_dovecot_destination_recipient_limit: 1
+postfix_home_mailbox: "Maildir/"
+postfix_inet_interfaces: "all"
+postfix_inet_protocols: "all"
+postfix_local_recipient_maps: "$virtual_mailbox_maps"
+postfix_mailbox_size_limit: 0
+postfix_mailbox_transport: "lmtp:unix:private/dovecot-lmtp"
+postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
+postfix_milter_default_action: "accept"
+postfix_mydestination:
   - "$myhostname"
   - "localhost.{{ ansible_domain }}"
   - "localhost"
-non_smtpd_milters: "$smtpd_milters"
-postscreen_access_list: "permit_mynetworks"
-postscreen_dnsbl_action: "enforce"
-postscreen_dnsbl_sites:
+postfix_non_smtpd_milters: "$smtpd_milters"
+postfix_postscreen_access_list: "permit_mynetworks"
+postfix_postscreen_dnsbl_action: "enforce"
+postfix_postscreen_dnsbl_sites:
   - "zen.spamhaus.org"
   - "b.barracudacentral.org"
   - "bl.spamcop.net"
-postscreen_greet_action: "enforce"
-readme_directory: "no"
-recipient_delimiter: "."
-relay_destination_concurrency_limit: 1
-sender_dependent_relayhost_maps: "hash:/etc/postfix/sender_relay"
-smtp_sasl_auth_enable: "yes"
-smtp_sasl_password_maps: "hash:/etc/postfix/sasl_passwd"
-smtp_sasl_security_options: "noanonymous"
-smtp_sender_dependent_authentication: "yes"
-smtp_tls_note_starttls_offer: "yes"
-smtp_tls_security_level: "may"
+postfix_postscreen_greet_action: "enforce"
+postfix_readme_directory: "no"
+postfix_relay_destination_concurrency_limit: 1
+postfix_sender_dependent_relayhost_maps: "hash:/etc/postfix/sender_relay"
+postfix_smtp_sasl_auth_enable: "yes"
+postfix_smtp_sasl_password_maps: "hash:/etc/postfix/sasl_passwd"
+postfix_smtp_sasl_security_options: "noanonymous"
+postfix_smtp_sender_dependent_authentication: "yes"
+postfix_smtp_tls_note_starttls_offer: "yes"
+postfix_smtp_tls_security_level: "may"
 smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
-smtp_tls_wrappermode: "no"
-smtpd_banner: "$myhostname ESMTP"
-smtpd_client_restrictions:
+postfix_smtp_tls_wrappermode: "no"
+postfix_smtpd_banner: "$myhostname ESMTP"
+postfix_smtpd_client_restrictions:
   - "permit_mynetworks"
   - "permit_sasl_authenticated"
   - "permit_tls_clientcerts"
   - "reject"
-smtpd_helo_restrictions:
+postfix_smtpd_helo_restrictions:
   - "permit_mynetworks"
   - "permit_sasl_authenticated"
   - "reject_invalid_helo_hostname"
   - "reject_non_fqdn_helo_hostname"
   - "reject_unknown_helo_hostname"
   - "check_helo_access hash:/etc/postfix/helo_access"
-smtpd_helo_required: "yes"
-smtpd_milters:
+postfix_smtpd_helo_required: "yes"
+postfix_smtpd_milters:
   - "unix:/spamass/spamass.sock"
-smtpd_recipient_restrictions:
+postfix_smtpd_recipient_restrictions:
   - "permit_sasl_authenticated"
   - "permit_mynetworks"
   - "permit_auth_destination"
@@ -74,36 +71,36 @@ smtpd_recipient_restrictions:
   - "reject_unauth_destination"
   - "reject_invalid_hostname"
   - "reject_non_fqdn_sender"
-smtpd_relay_restrictions:
+postfix_smtpd_relay_restrictions:
   - "permit_auth_destination"
   - "permit_mynetworks"
   - "permit_sasl_authenticated"
   - "reject_unauth_destination"
-smtpd_sasl_auth_enable: "yes"
-smtpd_sasl_authenticated_header: "yes"
-smtpd_sasl_local_domain: "$myhostname"
-smtpd_sasl_path: "private/auth"
-smtpd_sasl_security_options: "noanonymous"
-smtpd_sasl_tls_security_options: "$smtpd_sasl_security_options"
-smtpd_sasl_type: "dovecot"
-smtpd_sender_login_maps:
+postfix_smtpd_sasl_auth_enable: "yes"
+postfix_smtpd_sasl_authenticated_header: "yes"
+postfix_smtpd_sasl_local_domain: "$myhostname"
+postfix_smtpd_sasl_path: "private/auth"
+postfix_smtpd_sasl_security_options: "noanonymous"
+postfix_smtpd_sasl_tls_security_options: "$smtpd_sasl_security_options"
+postfix_smtpd_sasl_type: "dovecot"
+postfix_smtpd_sender_login_maps:
   - "$virtual_mailbox_maps"
-smtpd_sender_restrictions:
+postfix_smtpd_sender_restrictions:
   - "permit_sasl_authenticated"
   - "permit_mynetworks"
   - "reject_unknown_sender_domain"
   - "reject_sender_login_mismatch"
-smtpd_tls_CAfile: "/etc/ssl/cert/example-cert.pem"
-smtpd_tls_ask_ccert: "yes"
-smtpd_tls_auth_only: "yes"
-smtpd_tls_cert_file:  "/etc/ssl/certs/{{ ansible_fqdn }}.pem"
-smtpd_tls_ciphers: "high"
-smtpd_tls_key_file:  "/etc/ssl/private/{{ ansible_fqdn }}.key"
-smtpd_tls_loglevel: 1
-smtpd_tls_received_header: "yes"
-smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
-smtpd_tls_session_cache_timeout: "3600s"
-smtpd_use_tls: "yes"
+postfix_smtpd_tls_CAfile: "/etc/ssl/cert/example-cert.pem"
+postfix_smtpd_tls_ask_ccert: "yes"
+postfix_smtpd_tls_auth_only: "yes"
+postfix_smtpd_tls_cert_file:  "/etc/ssl/certs/{{ ansible_fqdn }}.pem"
+postfix_smtpd_tls_ciphers: "high"
+postfix_smtpd_tls_key_file:  "/etc/ssl/private/{{ ansible_fqdn }}.key"
+postfix_smtpd_tls_loglevel: 1
+postfix_smtpd_tls_received_header: "yes"
+postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
+postfix_smtpd_tls_session_cache_timeout: "3600s"
+postfix_smtpd_use_tls: "yes"
 
 tls_random_source: "dev:/dev/urandom"
 transport_maps: "hash:/etc/postfix/transport"

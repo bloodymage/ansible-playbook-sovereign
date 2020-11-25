@@ -2,11 +2,11 @@
 # defaults file for website_mediawiki
 mediawiki_version: REL1_34
 mediawiki_lts_version: REL1_31
-lua_version: 5.1
+mediawiki_lua_version: 5.1
 
 packages:
   - composer
-  - "lua{{ lua_version }}"
+  - "lua{{ mediawiki_lua_version }}"
   - libapache2-mod-auth-kerb
 
 mediawiki_apache_ldap_modules:
@@ -20,7 +20,6 @@ mediawiki_apache_modules: "{{ mediawiki_apache_ldap_modules + mediawiki_apache_k
 
 mediawiki_enable_debugging: no
 mediawiki_debug_modules: []
-
 mediawiki_extensions_defaults:
   - name: 'Cite'
   - name: 'CiteThisPage'
@@ -64,6 +63,8 @@ mediawiki_skins_defaults:
   - Vector
 
 mediawiki_cookie_domain: "{{ ansible_domain }}"
+mediawiki_db_name: "my_wiki"
+mediawiki_db_user: "wikiuser"
 
 mediawiki_default_skin: Timeless
 mediawiki_skins: []

@@ -20,17 +20,21 @@ rebeldream_realm_managed_identities: no
 rebeldream_realm_identity_management_system: ""
 rebeldream_smart_card_login: no
 rebeldream_overwrite_password: no
+rebeldream_use_source_code_repos: no
 
 # Host Identitification
-rebeldream_primary_domain_controller: "{{ groups['samba_domain_controllers'][0] | default([]) }}"
+#rebeldream_primary_domain_controller: "{{ groups['samba_domain_controllers'][0] | default([]) }}"
 
 # Passwords
+mediawiki_db_password: "password"
 ownca_root_password: "password"
 ownca_intermediate_password: "password"
 ownca_component_password: "password"
 ownca_identity_password: "password"
 ownca_codesign_password: "password"
 samba_administrator_password: "password"
+sshca_host_key_password: "password"
+sshca_user_key_password: "password"
 
 # Certificate Authority Configuration:
 ownca_certificate_authorities:
@@ -98,6 +102,74 @@ ownca_certificate_authorities:
       - 'CA:TRUE'
 
 ownca_revoked_certificates: []
+ownca_directory: "~/.pki"
+ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities" 
+ownca_format: 'pem'
+ownca_etc: "/etc/ssl"
+# OIDs
+mskdc_oid: "1.3.6.1.5.2.3.5"
+msadguid_oid: "1.3.6.1.4.1.311.25.1"
+scardlogin_oid: "1.3.6.1.4.1.311.20.2.2" 
+msupn_oid: "1.3.6.1.4.1.311.20.2.3"
+# Ordinarily, certificates must have this oid as an enhanced key usage in order for Windows to allow them to be used as a login credential
+scardLogin: "msSmartcardLogin"
+# Used in a smart card login certificate's subject alternative name
+#msupn: "msUPN"
+msupn: "1.3.6.1.4.1.311.20.2.3"
+# Ordinarily, certificates must have this oid as an enhanced key usage in order for Windows to allow them to be used to identify a domain controller
+msKDC: "1.3.6.1.5.2.3.5"
+# Identifies the AD GUID
+msADGUID: "1.3.6.1.4.1.311.25.1"
+
+ownca_pki_url: "pki.{{ ansible_domain }}"
+ownca_ocsp_url: "ocsp.{{ ansible_domain }}"
+ownca_crl_distribution_point: "https://{{ pki_url }}"
+ownca_privatekey_type: "RSA"
+
+ownca_issuing_authorities:
+  - component
+  - identity
+  - codesign
 
 # Misc
 rebeldream_raspberrypi_distribution_release: buster
+
+# Users
+user_mythtv_id_number: 500
+user_minidlna_id_number: 501
+user_git_id_number: 502
+user_homeassistant_id_number: 503
+user_vmail_id_number:  504
+user_odoo_id_number: 505
+
+# Mail Servers
+mail_location: "mbox:~/mail:INBOX=/var/mail/%u"
+mail_uid: "{{ user_vmail_id_number }}"
+mail_gid: "{{ user_vmail_id_number }}"
+mail_privileged_group:  mail
+mail_recipient_delimiter: "+"
+mail_user: vmail
+
+# MySQL / MariaDB
+mysql_administrator: "root"
+mysql_datadir: /var/lib/mysql
+
+# SSH
+ssh_config_dir: "/etc/ssh"
+sshca_cert_directory: "{{ ssh_config_dir }}/ca"
+sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
+
+sshca_host_keyfile: "{{ sshca_domain }}_host_key"
+sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"
+sshca_hostca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_host_pubfile }}"
+sshca_user_keyfile: "{{ sshca_domain }}_user_key"
+sshca_user_pubfile: "{{ sshca_domain }}_user_key.pub"
+sshca_userca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_user_pubfile }}"
+
+sshca_host_certificate_file: "{{ ssh_config_dir }}/ssh_host_ed25519_key-cert.pub"
+sshca_user_certificate_file: "{{ ssh_config_dir }}/ssh_user_ed25519_key-cert.pub"
+sshca_authorized_keys: "authorized_keys"
+sshca_authorized_principals: "%u"
+sshca_domain_list: "{{ rebeldream_domain_list }}"
+sshca_domain: "{{ rebeldream_domain }}"
+sshca_key_directory: "~/.ssh/ca"

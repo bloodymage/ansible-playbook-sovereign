@@ -101,15 +101,20 @@
 #     path: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
 #     type: "{{ sshca_host_key_type }}"
 #     comment: "{{ sshca_host_key_comment }}"
+#     new_passphrase: "{{ sshca_host_key_password }}"
+#   tags:
+#     - sshca
+#     - sshca_debug
+#     - sshca-debug
 
 - name: Generate Host CA keys
-  no_log: true
   command: ssh-keygen -t "{{ sshca_host_key_type }}"
              -f "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
              -C "{{ sshca_host_key_comment }}"
              -N "{{ sshca_host_key_password }}"
   args:
     creates: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
+  #no_log: true
   tags:
     - sshca
     - sshca_debug
@@ -121,13 +126,13 @@
 #
 # ==================================================================================================
 - name: Generate User CA key
-  no_log: true
   command: ssh-keygen -t "{{ sshca_user_key_type }}"
              -f "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
              -C "{{ sshca_user_key_comment }}"
              -N "{{ sshca_user_key_password }}"
   args:
     creates: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
+  no_log: true
   tags:
     - sshca
     - sshca_debug

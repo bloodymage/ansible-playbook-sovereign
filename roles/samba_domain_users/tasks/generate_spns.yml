@@ -6,13 +6,16 @@
   when:
     - item.spn is defined
     - item.host is defined
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   ignore_errors: yes
   run_once: yes
   tags:
-    - users
-    - domain-users
-    - samba-spn
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Create Keytab for Samba Users
   shell: >
@@ -22,12 +25,15 @@
   when:
     - item.spn is defined
     - item.host is defined
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
-    - users
-    - domain-users
-    - samba-spn
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: "Fetch keytab"
   fetch:
@@ -40,6 +46,9 @@
     - item.spn is defined
     - inventory_hostname == primary_domain_controller
   tags:
-    - users
-    - domain-users
-    - samba-spn
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug

@@ -1,4 +1,4 @@
 ---
-# defaults file for dns-update
+# defaults file for dns_forwardzones
 packages:
   - python3-dnspython

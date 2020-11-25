@@ -1,5 +1,6 @@
 # {{ansible_managed|comment}}
 
-deb https://archive.raspberrypi.org/debian/ {{ raspberrypi_distribution_release }} main ui
-# Uncomment line below then 'apt-get update' to enable 'apt-get source'
-#deb-src https://archive.raspberrypi.org/debian/ {{ raspberrypi_distribution_release }} main ui
+deb https://archive.raspberrypi.org/debian/ {{ rebeldream_raspberrypi_distribution_release }} main ui
+{% if rebeldream_use_source_code_repos %}
+deb-src https://archive.raspberrypi.org/debian/ {{ rebeldream_raspberrypi_distribution_release }} main ui
+{% endif %}

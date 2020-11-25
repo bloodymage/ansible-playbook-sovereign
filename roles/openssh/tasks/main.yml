@@ -53,8 +53,8 @@
     mode: "0755"
   become: yes
   loop:
-    - "/etc/ssh/ca"
-    - "/etc/ssh/auth_principals"
+    - "{{ sshca_cert_directory }}"
+    - "{{ sshca_authorized_principals_dir }}"
   tags:
     - openssh
     - openssh_debug
@@ -62,8 +62,8 @@
 
 - name: Install Host CA Certificate on Hosts
   copy:
-    src: "{{ ssh_ca_key_directory }}/{{ ssh_ca_host_pubfile }}"
-    dest: "{{ ssh_ca_host_certificate }}"
+    src: "{{ sshca_key_directory }}/{{ sshca_host_pubfile }}"
+    dest: "{{ sshca_hostca_certificate }}"
     owner: root
     group: root
     mode: '0644'
@@ -76,8 +76,8 @@
 
 - name: Install User CA Certificate on Hosts
   copy:
-    src: "{{ ssh_ca_key_directory }}/{{ ssh_ca_user_pubfile }}"
-    dest: "{{ ssh_trusted_user_ca_key }}"
+    src: "{{ sshca_key_directory }}/{{ sshca_user_pubfile }}"
+    dest: "{{ sshca_userca_certificate }}"
     owner: root
     group: root
     mode: '0644'
@@ -98,7 +98,7 @@
     validate: "{{ item.validate | default(none)}}"
     backup: yes
   become: yes
-  loop: "{{ ssh_config_files }}"
+  loop: "{{ openssh_config_files }}"
   notify: restart ssh
   tags:
     - openssh
