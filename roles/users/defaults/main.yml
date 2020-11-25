@@ -6,13 +6,106 @@ users:
   - username: pi
     name: 'Pi'
     groups:
-     - users
-     - ansiblemanaged
+      - users
+      - ansiblemanaged
     id_number: 1000
     unix_home: /home/pi
     password: "password"
     ssh_key_password: "password"
     ssh_access_cert:
-      - principal
+      - principal_name
     ssh_cert:
       - None
+
+user_groups: []
+
+user_mythtv:
+  username: mythtv
+  groups: []
+  id_number: "{{ user_mythtv_id_number }}"
+  unix_home: /home/mythtv
+  ssh_access_cert:
+    - mythtv
+  ssh_cert:
+    - None
+
+user_minidlna:
+  username: minidlna
+  name: MiniDLNA Server
+  groups: []
+  id_number: "{{ user_minidlna_id_number }}"
+  #unix_home: /srv/minidlna
+  unix_home: /var/lib/minidlna
+  shell: /usr/sbin/nologin
+
+user_git:
+  username: git
+  groups: []
+  uid_number: "{{ user_git_id_number }}"
+  unix_home: /srv/git
+
+user_homeassistant:
+  username: homeassistant
+  name: "Home Assistant"
+  groups: []
+  id_number: "{{ user_homeassistant_id_number }}"
+  unix_home: /home/homeassistant
+  ssh_access_cert:
+    - root-everywhere
+    - homeassistant
+  ssh_cert:
+    - None
+
+user_odoo:
+  username: odoo
+  groups:
+    - users
+  id_number: 504
+  unix_home: /home/odoo
+  ssh_access_cert:
+    - root-everywhere
+
+user_vmail:
+  username: vmail
+  groups: []
+  id_number: "{{ user_vmail_id_number }}"
+  unix_home: "/var/mail/vmail"
+  ssh_access_cert: []
+  ssh_cert:
+    - None
+
+user_root: "{{ __user_root }}"
+
+user_mythtv_group:
+  name: mythtv
+  gid: "{{ user_mythtv_id_number }}"
+
+user_minidlna_group:
+  name: minidlna
+  gid: "{{ user_minidlna_id_number }}"
+
+user_git_group:
+  name: git
+  gid: "{{ user_git_id_number }}"
+
+user_homeassistant_group:
+  name: homeassistant
+  gid: "{{ user_homeassistant_id_number }}"
+
+user_vmail_group:
+  name: vmail
+  gid: "{{ user_vmail_id_number }}"
+
+__user_groups:
+  - name: ansiblemanaged
+    system: yes
+  - name: users
+    system: yes
+  - name: wheel
+    system: yes
+
+__user_root:
+  username: root
+  unix_home: /root
+  ssh_access_cert:
+    - root-everywhere

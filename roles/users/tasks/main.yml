@@ -34,38 +34,370 @@
 # Create users and groups
 #
 # ==================================================================================================
+- name: "Get Users' password from password-store"
+  ansible.builtin.set_fact:
+    username: "{{ item.username }}"
+    id_number: "{{ item.id_number }}"
+    password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
+  loop: "{{ users }}"
+  no_log: yes
+  become: no
+  delegate_to: localhost
+  register: user_password_list
+  when:
+    - users is defined
+    - item.id_number is defined
+    - (item.id_number == 1000) or (item.id_number == 1001)
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Check Ansible Facts Password (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.ansible_facts.username }}"
+      - "{{ item.ansible_facts.id_number }}"
+      - "{{ item.ansible_facts.password }}"
+    verbosity: 1
+  loop: "{{ user_password_list.results }}"
+  become: no
+  when:
+    - item.ansible_facts.password is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check Ansible Facts (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.ansible_facts }}"
+    verbosity: 2
+  loop: "{{ user_password_list.results }}"
+  become: no
+  when:
+    - item.ansible_facts is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check user_password_list.results 'item'  was set (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }}"
+    verbosity: 3
+  loop: "{{ user_password_list.results }}"
+  become: no
+  when:
+    - user_password_list.results is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check user_password_list.results (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ user_password_list.results }}"
+    verbosity: 4
+  become: no
+  when:
+    - user_password_list.results is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check user_password_list (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ user_password_list }}"
+    verbosity: 4
+  become: no
+  when:
+    - user_password_list is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Get Users' SSH password from password-store"
+  ansible.builtin.set_fact:
+    username: "{{ item.username }}"
+    ssh_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
+  loop: "{{ users }}"
+  no_log: yes
+  become: no
+  delegate_to: localhost
+  register: user_ssh_password_list
+  when:
+    - users is defined
+    - item.ssh_cert is defined
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Check Ansible Facts SSH key password (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.ansible_facts.username }}"
+      - "{{ item.ansible_facts.ssh_key_password }}"
+    verbosity: 1
+  loop: "{{ user_ssh_password_list.results }}"
+  become: no
+  when:
+    - item.ansible_facts.ssh_key_password is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check Ansible Facts (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.ansible_facts }}"
+    verbosity: 2
+  loop: "{{ user_ssh_password_list.results }}"
+  become: no
+  when:
+    - item.ansible_facts is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check user_ssh_password_list.results 'item'  was set (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }}"
+    verbosity: 3
+  loop: "{{ user_ssh_password_list.results }}"
+  become: no
+  when:
+    - user_ssh_password_list.results is defined
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "Username:                        {{ item.username }}"
+      - "Password List Fact Username:     {{ user_password_list.results[index].ansible_facts.username | default(none) }}"
+      - "SSH Password List Fact Username: {{ user_ssh_password_list.results[index].ansible_facts.username | default(none) }}"
+      - "Password:                        {{ user_password_list.results[index].ansible_facts.password | default(none) }}"
+      - "SSH Key Password:                {{ user_ssh_password_list.results[index].ansible_facts.ssh_key_password | default(none) }}"
+    verbosity: 1
+  loop: "{{ users }}"
+  loop_control:
+    index_var: index
+  become: yes
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }}"
+      - "{{ user_password_list.results[index] }}"
+      - "{{ user_ssh_password_list.results[index] }}"
+    verbosity: 1
+  loop: "{{ users }}"
+  loop_control:
+    index_var: index
+  become: no
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have user groups required by host role"
+  ansible.builtin.set_fact:
+    user_groups: "{{ user_groups + [ user_mythtv_group ] }}"
+  when:
+    - inventory_hostname in groups ['mythtv']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have user groups required by host role"
+  ansible.builtin.set_fact:
+    user_groups: "{{ user_groups + [ user_minidlna_group ] }}"
+  when:
+    - inventory_hostname in groups ['minidlna_servers']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have user groups required by host role"
+  ansible.builtin.set_fact:
+    user_groups: "{{ user_groups + [ user_git_group ] }}"
+  when:
+    - inventory_hostname in groups ['git_servers']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have user groups required by host role"
+  ansible.builtin.set_fact:
+    user_groups: "{{ user_groups + [ user_homeassistant_group ] }}"
+  when:
+    - inventory_hostname in groups ['homeassistant']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have users required by host role"
+  ansible.builtin.set_fact:
+    users: "{{ users | union([ user_mythtv ]) }}"
+  when:
+    - inventory_hostname in groups ['mythtv']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have users required by host role"
+  ansible.builtin.set_fact:
+    users: "{{ users | union([ user_minidlna ]) }}"
+  when:
+    - inventory_hostname in groups ['minidlna_servers']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have users required by host role"
+  ansible.builtin.set_fact:
+    users: "{{ users | union([ user_git ]) }}"
+  when:
+    - inventory_hostname in groups ['git_servers']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have users required by host role"
+  ansible.builtin.set_fact:
+    users: "{{ users | union([ user_homeassistant ]) }}"
+  when:
+    - inventory_hostname in groups ['homeassistant']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: "Ensure we have users required by host role"
+  ansible.builtin.set_fact:
+    users: "{{ users | union([ user_vmail ]) }}"
+  when:
+    - inventory_hostname in groups ['mail_servers']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
 - name: Create groups
   group:
     name: "{{ item.name }}"
     state: present
     system: "{{ item.system | default('no') }}"
-  loop: "{{ user_groups }}"
-  when:
-    - user_groups is defined
+  loop: "{{ user_groups + __user_groups }}"
   become: yes
   tags:
     - users
     - users_debug
     - users-debug
 
+- name: Print login users
+  ansible.builtin.debug:
+    msg:
+      - "Name:         {{ item['username'] }}"
+      - "Password:     {{ user_password_list.results[index].ansible_facts.password | password_hash('sha512') | default(none) }}"
+      - "Groups:       {{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"        # Empty by default, here we give it some groups
+      - "Shell:        {{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
+      - "Comment:      {{ item['name'] | default(none) }}"
+      - "Home:         {{ item['unix_home'] | default('/nonexistent') }}"
+      - "Uid:          {{ item['id_number'] | default(none) }}"
+    verbosity: 1
+  loop: "{{ users }}"
+  loop_control:
+    index_var: index
+  become: no
+  when:
+    - user_password_list.results[index].ansible_facts.password is defined
+    - item.username != "root"
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
+- name: Print login users
+  ansible.builtin.debug:
+    msg:
+      - "Name:         {{ item['username'] }}"
+      #- "Groups:       {{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"        # Empty by default, here we give it some groups
+      - "Shell:        {{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
+      - "Comment:      {{ item['name'] | default(none) }}"
+      - "Home:         {{ item['unix_home'] | default('/nonexistent') }}"
+      - "Uid:          {{ item['id_number'] | default(none) }}"
+    verbosity: 1
+  loop: "{{ users }}"
+  loop_control:
+    index_var: index
+  become: no
+  when:
+    - user_password_list.results[index].ansible_facts.password is not defined
+    - item.username != "root"
+  tags:
+    - never
+    - users_debug
+    - users-debug
+
 - name: Create login users (Password Enabled)
   user:
     name: "{{ item['username'] }}"
-    password: "{{ item['password'] | password_hash('sha512') }}"
-    groups: "{{ item['groups'] }}"        # Empty by default, here we give it some groups
+    password: "{{ user_password_list.results[index].ansible_facts.password | password_hash('sha512') }}"
+    groups: "{{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"        # Empty by default, here we give it some groups
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
     system: no                         # Defaults to no
     create_home: yes                   # Defaults to yes
-    comment: "{{ item['name'] }}"
-    home: "{{ item['unix_home'] }}"
-    uid:  "{{ item['id_number'] }}"
+    comment: "{{ item['name'] | default(omit) }}"
+    home: "{{ item['unix_home'] | default('/nonexistent') }}"
+    uid:  "{{ item['id_number'] | default(omit) }}"
     update_password: always
     move_home: yes
-  with_items: "{{ users }}"
+  loop: "{{ users }}"
+  loop_control:
+    index_var: index
   become: yes
   when:
-    - item.password is defined
+    - users is defined
+    - user_password_list.results[index].ansible_facts.password is defined
   tags:
     - users
     - users_debug
@@ -74,7 +406,7 @@
 - name: Create login users (Password Disabled)
   user:
     name: "{{ item.username }}"
-    groups: "{{ item.groups }}"        # Empty by default, here we give it some groups
+    groups: "{{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
     system: no                         # Defaults to no
@@ -82,12 +414,15 @@
     comment: "{{ item['name'] | default(none) }}"
     home: "{{ item['unix_home'] | default('/nonexistent') }}"
     move_home: yes
-    uid:  "{{ item['id_number'] }}"
+    uid:  "{{ item['id_number'] | default(omit) }}"
   loop: "{{ users }}"
+  loop_control:
+    index_var: index
   become: yes
   when:
-    - item.password is undefined
-    - item.id_number is defined
+    - users is defined
+    - user_password_list.results[index].ansible_facts.password is not defined
+    - item.username != "root"
   tags:
     - users
     - users_debug
@@ -95,7 +430,7 @@
 
 # ==================================================================================================
 #
-# User SSH configuration
+# Post configuration
 #
 # ==================================================================================================
 - name: Create User SSH Keys
@@ -103,11 +438,14 @@
     name: "{{ item['username'] }}"
     generate_ssh_key: yes
     ssh_key_type: "{{ item.ssh_keytype | default('ed25519') }}"
-    ssh_key_passphrase: "{{ item['ssh_key_password'] }}"
+    ssh_key_passphrase: "{{ user_ssh_password_list.results[index].ansible_facts.ssh_key_password }}"
   loop: "{{ users }}"
+  loop_control:
+    index_var: index
   become: yes
   when:
-    - item.ssh_key_password is defined
+    - item.ssh_cert is defined
+    - user_password_list.results[index].ansible_facts.ssh_key_password is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
   tags:
     - users

@@ -31,8 +31,8 @@ include "/etc/bind/rndc.key";
 
 {% endfor %}
 
-{% if secondary_bind_zones is defined -%}
-  {% for localzone in secondary_bind_zones -%}
+{% if bind_secondary_zones is defined -%}
+  {% for localzone in bind_secondary_zones -%}
     zone "{{ localzone.name }}" {
     type slave;
     notify no;

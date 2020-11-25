@@ -16,8 +16,12 @@
   tags:
     - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
     - ownca_host_certs_debug
     - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
     - ownca-all
     - install-packages
 
@@ -29,32 +33,42 @@
   tags:
     - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
     - ownca_host_certs_debug
     - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
     - install-packages
     - ownca-all
 
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
+  become: yes
   tags:
     - ownca_host_certs
     - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
     - ownca_host_certs_debug
     - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
+    - ownca-all
 
 # ==================================================================================================
 #
 # Create SSL Private Key and CRS Directories
 #
 # Creates the following Directories:
-#   - /etc/ssl/private mode: 0700
-#   - /etc/ssl/csr     mode: 0700
-#   - /etc/ssl/certs   mode: 0755
+#   - {{ ownca_etc }}/private mode: 0700
+#   - {{ ownca_etc }}/csr     mode: 0700
+#   - {{ ownca_etc }}/certs   mode: 0755
 #
 # ==================================================================================================
 - name: "Create SSL Directories"
   file:
-    path: '{{ etc }}/{{ item.name }}'
+    path: '{{ ownca_etc }}/{{ item.name }}'
     state: directory
     owner: root
     group: root
@@ -90,8 +104,8 @@
 
 - name: Generate Host Private Key
   openssl_privatekey:
-    path: '/etc/ssl/private/{{ inventory_hostname }}.key'
-    type: '{{ ca_type }}'
+    path: '{{ ownca_etc }}/private/{{ inventory_hostname }}.key'
+    type: '{{ ownca_privatekey_type }}'
     size: 4096
     owner: root
     group: root
@@ -116,7 +130,7 @@
       - "common_name: {{ inventory_hostname }}"
       - "key_usage: {{ ownca_host_certs_key_usage }}"
       - "extended_key_usage: {{ ownca_host_certs_extended_key_usage }}"
-      - "privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key"
+      - "privatekey_path: {{ ownca_etc }}/private/{{ inventory_hostname }}.key"
       - "subject_alt_name: {{ ownca_host_certs_subject_alt_name }}"
     verbosity: 1
   become: no
@@ -127,7 +141,7 @@
 
 - name: Generate Host CSR
   community.crypto.openssl_csr:
-    path: "/etc/ssl/csr/{{ inventory_hostname }}.csr"
+    path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
     mode: "0644"
     owner: root
     group: root
@@ -141,7 +155,7 @@
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_host_certs_extended_key_usage }}"
     extended_key_usage_critical: yes
-    privatekey_path: "/etc/ssl/private/{{ inventory_hostname }}.key"
+    privatekey_path: "{{ ownca_etc }}/private/{{ inventory_hostname }}.key"
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
   become: yes
   tags:
@@ -159,7 +173,7 @@
 # ==================================================================================================
 - name: Fetch CSRs.
   fetch:
-    src: "/etc/ssl/csr/{{ inventory_hostname }}.csr"
+    src: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
     dest: "{{ ownca_hosts_directory }}/csr/"
     flat: yes
   become: yes

@@ -27,6 +27,6 @@
 #   roles:
 #     - bloodymage.rebeldream.dotfiles
 
-- hosts: ownca_user_hosts
+- hosts: samba_ownca_user_hosts
   roles:
     - bloodymage.rebeldream.ownca_user_certs

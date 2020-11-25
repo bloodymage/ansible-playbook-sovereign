@@ -20,6 +20,19 @@
     - websites
     - install-packages
 
+- name: "Ensure we have a password for the Host CA Key"
+  ansible.builtin.set_fact:
+    sshca_host_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/services/mysql/wikiuser"
+  when:
+    - mediawiki_db_password == "password"
+  tags:
+    - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
+    - websites
+
 - name: "Install packages"
   package:
     name: "{{ packages }}"
@@ -181,7 +194,7 @@
 
 - name: "Update LocalSettings.php"
   template:
-    src: "{{ role_path }}/templates/mediawiki_settings.php.j2"
+    src: "mediawiki_settings.php.j2"
     dest: "/srv/www/{{ item.name }}/w/LocalSettings.php"
     owner: www-data
     group: www-data

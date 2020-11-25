@@ -1,4 +1,133 @@
 ---
+- name: Determine whether to force domain recreation
+  ansible.builtin.set_fact:
+    __samba_recreate_realm: yes
+  become: no
+  tags:
+    - never
+    - recreate-realm
+
+- name: Set Samba Schema Master For Realm Recreation
+  ansible.builtin.set_fact:
+    __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
+  become: no
+  when:
+    - __samba_recreate_realm
+  tags:
+    - never
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: Set Samba Schema Master For Realm Recreation
+  command:
+    cmd: "samba-tool fsmo show"
+  register: __samba_schema_master_role
+  run_once: yes
+  become: yes
+  when:
+    - not __samba_recreate_realm
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: Print Variables
+  debug:
+    msg:
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] }}"
+    verbosity: 1
+  become: no
+  when:
+    - __samba_schema_master_role is defined
+  tags:
+    - never
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: Print Variables
+  debug:
+    msg:
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[0] }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[1] }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[2] }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3] }}"
+    verbosity: 2
+  become: no
+  when:
+    - __samba_schema_master_role is defined
+  tags:
+    - never
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: Print Variables
+  debug:
+    var: __samba_schema_master_role.stdout_lines[0]
+    verbosity: 3
+  become: no
+  when:
+    - __samba_schema_master_role is defined
+  tags:
+    - never
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: Print Variables
+  debug:
+    var: __samba_schema_master_role.stdout_lines
+    verbosity: 4
+  become: no
+  when:
+    - __samba_schema_master_role is defined
+  tags:
+    - never
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: Print Variables
+  debug:
+    var: __samba_schema_master_role
+    verbosity: 4
+  become: no
+  when:
+    - __samba_schema_master_role is defined
+  tags:
+    - never
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: Set Samba Schema Master For Realm Recreation
+  ansible.builtin.set_fact:
+    __samba_schema_master_list:
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] | lower }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] | lower }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
+      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
+  become: no
+  when:
+    - not __samba_recreate_realm
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: Set Samba Schema Master For Realm Recreation
+  ansible.builtin.set_fact:
+    __samba_schema_master: "{{ __samba_schema_master_list | join('.') }}"
+  become: no
+  when:
+    - not __samba_recreate_realm
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
@@ -11,11 +140,13 @@
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Get Samba Groups
   command: "samba-tool group list"
   register: existing_group_list
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   become: yes
   run_once: yes
   tags:
@@ -23,6 +154,8 @@
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Print Existing Groups
   debug:
@@ -31,11 +164,12 @@
   tags:
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm-debug
 
 - name: Get Samba Users
   command: "samba-tool user list"
   register: existing_user_list
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   become: yes
   run_once: yes
   tags:
@@ -43,6 +177,8 @@
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Print Existing Groups
   debug:
@@ -51,6 +187,7 @@
   tags:
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -72,13 +209,15 @@
     - inventory_hostname == primary_domain_controller
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is not defined
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Add Samba Groups
   shell: >
@@ -97,13 +236,15 @@
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is defined
     - item.id_number is defined
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Add Samba Groups
   shell: >
@@ -119,13 +260,15 @@
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is defined
     - item.id_number is not defined
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Add Samba Groups
   shell: >
@@ -140,13 +283,15 @@
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is not defined
     - item.id_number is not defined
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -172,13 +317,15 @@
     - item.given_name is defined
     - item.surname != ""
     - item.username not in existing_user_list.stdout_lines
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Add Samba Users
   shell: >
@@ -198,13 +345,15 @@
     - item.given_name is defined
     - item.surname == ""
     - item.username not in existing_user_list.stdout_lines
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 # ==================================================================================================
 #
@@ -220,12 +369,14 @@
   when:
     - inventory_hostname == primary_domain_controller
     - item.username not in existing_user_list.stdout_lines
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: Set expiry for Samba Users
   shell: >
@@ -234,13 +385,15 @@
   loop: "{{ domain_users }}"
   when:
     - item.account_expire is defined
-  delegate_to: "{{ primary_domain_controller }}"
+  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
 
 - name: "Generate user SPNs"
   include: generate_spns.yml
@@ -254,3 +407,5 @@
     - samba-domain-users
     - samba_domain_users_debug
     - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug

@@ -2,24 +2,7 @@
 packages:
   - openssh-client
 
-# ==================================================================================================
-#
-# Files and Directories
-#
-# ==================================================================================================
-ssh_config_dir: "/etc/ssh"
-ssh_authorized_keys: "authorized_keys"
-ssh_authorized_principals: "%u"
-
-# Certificat Authority
-sshca_domain_list: "{{ rebeldream_domain_list }}"
-sshca_domain: "{{ rebeldream_domain }}"
-sshca_key_directory: "~/.ssh/ca"
-
 # Host CA
-sshca_host_keyfile: "{{ sshca_domain }}_host_key"
-sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"
-sshca_host_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_host_pubfile }}"
 sshca_host_signer_key: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
 sshca_host_key_type: "ed25519"
 sshca_host_key_comment: "{{ sshca_domain }} Host CA"
@@ -27,9 +10,6 @@ sshca_host_signer_id: "{{ sshca_domain }}"
 sshca_host_signer_hostnames: "{{ ansible_fqdn }},{{ ansible_hostname }}"
 
 # User CA
-sshca_user_keyfile: "{{ sshca_domain }}_user_key"
-sshca_user_pubfile: "{{ sshca_domain }}_user_key.pub"
-ssh_trusted_user_ca_key: "{{ ssh_config_dir }}/ca/{{ sshca_user_pubfile }}"
 sshca_user_signer_key: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
 sshca_user_key_type: "ed25519"
 sshca_user_key_comment: "{{ sshca_domain }} User CA"

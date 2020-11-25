@@ -1,34 +1,30 @@
 ---
 # defaults file for mail-server
-# packages:
-#   - dovecot-core
-#   - dovecot-imapd
-#   - dovecot-lmtpd
-#   - dovecot-managesieved
-#   - dovecot-sieve
+dovecot_packages:
+  - dovecot-core
+  - dovecot-imapd
+  - dovecot-lmtpd
+  - dovecot-managesieved
+  - dovecot-sieve
+
 packages: "{{ dovecot_packages }}"
 
 dovecot_auth_mechanisms:
   - plain
   - login
 
-mail_location: "mbox:~/mail:INBOX=/var/mail/%u"
-mail_uid: 5000
-mail_gid: 5000
-mail_privileged_group:  mail
-mail_plugins: "acl virtual"
+dovecot_mail_plugins: "acl virtual"
 dovecot_mail_protocols:
   - name: "!indexer-worker"
-sieve: "file:~/sieve;active=~/.dovecot.sieve"
-sieve_before:
+dovecot_sieve: "file:~/sieve;active=~/.dovecot.sieve"
+dovecot_sieve_before:
   - "/var/mail/vmail/sieve-before"
 
-sieve_after:
+dovecot_sieve_after:
   - "/var/mail/vmail/sieve-after"
-recipient_delimiter: "+"
 
 dovecot_imap_protocols:
   - name: imap
     mail_plugins: "$mail_plugins"
 
-sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
+dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"

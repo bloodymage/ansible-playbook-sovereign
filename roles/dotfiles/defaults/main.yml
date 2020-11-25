@@ -1,17 +1,5 @@
 ---
-# defaults file for linux-users
-emacs_layers:
-  - drbr
-  - drbr-ansible
-  - drbr-apache
-  - drbr-common
-  - drbr-emms
-  - drbr-git
-  - drbr-gui
-  - drbr-mediawiki
-  - drbr-org-mode
-  - drbr-passwordstore
-
+# defaults file for dotfiles
 dotfiles_gpg_pineentry_program: "/usr/bin/pinentry"
 dotfiles_gpg_pinentry_mode: "loopback"
 dotfiles_gpg_enable_ssh_support: yes
@@ -23,11 +11,10 @@ dotfiles_gpg_default_max_cache_ttl_ssh: 60480000
 dotfiles_gpg_keyserver:
   - "hkps://pool.sks-keyservers.net"
   - "hkp://keys.gnupg.net"
-
-#keyserver http://http-keys.gnupg.net
-#keyserver mailto:pgp-public-keys@keys.nl.pgp.net
-#keyserver ldap://pgp.surfnet.nl:11370
-#keyserver ldap://keyserver.pgp.com
+  #- http://http-keys.gnupg.net
+  #- mailto:pgp-public-keys@keys.nl.pgp.net
+  #- ldap://pgp.surfnet.nl:11370
+  #- ldap://keyserver.pgp.com
 
 dotfiles_gpg_no_greeting: yes
 dotfiles_gpg_use_agent: yes

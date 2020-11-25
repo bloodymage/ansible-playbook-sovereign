@@ -9,6 +9,9 @@
 #    a. ownca for internal ssl certificates
 #    b. sshca to make SSH logon easier
 # 3. Base configuration for all nodes
+#    a. Ensure hosts / hostname are properly set
+#    b. Ensure packages are up to date
+#    c. Ensure TLS/SSH certificates are properly configured
 # 4. Configure DNS
 # 5. Configure Realm Identity management
 # 6. Configure file servers

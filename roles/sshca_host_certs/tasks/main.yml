@@ -40,12 +40,26 @@
         - sshca-host-certs-debug
         - install-packages
 
-# ======================================================================
+# ==================================================================================================
 #
 # Tasks:
 #  
 #
-# ======================================================================
+# ==================================================================================================
+- name: "Ensure we have a password for the Host CA Key"
+  ansible.builtin.set_fact:
+    sshca_host_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
+  become: no
+  when:
+    - sshca_host_key_password == "password"
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
+
 - name: Find SSH host keys.
   find:
     path: "{{ ssh_config_dir }}"
@@ -73,12 +87,6 @@
     - sshca_host_certs_debug
     - sshca-host-certs-debug
 
-# ======================================================================
-#
-# Tasks:
-#  
-#
-# ======================================================================
 - name: Fetch public keys.
   fetch:
     src: "{{ item.path }}.pub"
@@ -91,12 +99,6 @@
     - sshca_host_certs_debug
     - sshca-host-certs-debug
 
-# ======================================================================
-#
-# Tasks:
-#  
-#
-# ======================================================================
 - name: Fetch existing certificates.
   fetch:
     src: "{{ item.path }}-cert.pub"
@@ -110,7 +112,7 @@
     - sshca_host_certs_debug
     - sshca-host-certs-debug
 
-# ======================================================================
+# ==================================================================================================
 #
 # Sign SSH Keys
 #
@@ -119,18 +121,18 @@
 # TODO: Use expect module for password from ansible vault
 #       https://docs.ansible.com/ansible/latest/modules/expect_module.html
 #
-# ======================================================================
+# ==================================================================================================
 - name: Sign SSH keys.
   expect:
-    command: ssh-keygen -s "{{ ssh_ca_host_signer_key }}"
-             -I "{{ ssh_ca_host_signer_id }}"
-             -h -n "{{ ssh_ca_host_signer_hostnames }}"
+    command: ssh-keygen -s "{{ sshca_host_signer_key }}"
+             -I "{{ sshca_host_signer_id }}"
+             -h -n "{{ sshca_host_signer_hostnames }}"
              "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote }}{{ item.path | quote }}.pub"
     responses:
-      (?i)passphrase: "{{ ssh_ca_host_key_password }}"
-      # you don't want to show passwords in your logs
-  #no_log: true
-  with_items: "{{ private_keys.files }}"
+      (?i)passphrase: "{{ sshca_host_key_password }}"
+  become: no
+  no_log: yes
+  loop: "{{ private_keys.files }}"
   changed_when: false
   delegate_to: localhost
   tags:
@@ -139,12 +141,12 @@
     - sshca_host_certs_debug
     - sshca-host-certs-debug
 
-# ======================================================================
+# ==================================================================================================
 #
 # Tasks:
 #  
 #
-# ======================================================================
+# ==================================================================================================
 - name: Find certificates.
   find:
     path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote}}{{ ssh_config_dir }}/"
@@ -179,12 +181,12 @@
     - sshca_host_certs_debug
     - sshca-host-certs-debug
 
-# ======================================================================
+# ==================================================================================================
 #
 # Tasks:
 #  
 #
-# ======================================================================
+# ==================================================================================================
 - name: Copy certificates back to server.
   copy:
     src: "{{ item.item.path }}"
@@ -200,12 +202,12 @@
     - sshca_host_certs_debug
     - sshca-host-certs-debug
 
-# ======================================================================
+# ==================================================================================================
 #
 # Tasks:
 #  
 #
-# ======================================================================
+# ==================================================================================================
 - name: Remove local temporary directory.
   file:
     name: "{{ temporary_directory.path }}"

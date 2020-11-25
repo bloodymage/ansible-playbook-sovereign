@@ -5,4 +5,4 @@
 - hosts: postfix_servers
   roles:
     - bloodymage.rebeldream.postfix
-    - bloodymage.rebeldream.spamassassin
+    #- bloodymage.rebeldream.spamassassin

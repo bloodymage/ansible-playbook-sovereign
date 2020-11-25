@@ -1,63 +1,11 @@
 ---
-# ======================================================================
-#
-# Files and Directories
-#
-# ======================================================================
-ssh_config_dir: "/etc/ssh"
-ssh_authorized_keys: "authorized_keys"
-ssh_authorized_principals: "%u"
+# packages:
 
-# Certificat Authority
-ssh_ca_domain_list: "{{ rebeldream_domain_list }}"
-ssh_ca_domain: "{{ rebeldream_domain }}"
-ssh_ca_key_directory: "~/.ssh/ca"
-
-# Host CA
-ssh_ca_host_keyfile: "{{ ssh_ca_domain }}_host_key"
-ssh_ca_host_pubfile: "{{ ssh_ca_domain }}_host_key.pub"
-ssh_ca_host_certificate: "{{ ssh_config_dir }}/ca/{{ ssh_ca_host_pubfile }}"
-ssh_ca_host_signer_key: "{{ ssh_ca_key_directory }}/{{ ssh_ca_host_keyfile }}"
-ssh_ca_host_key_type: "ed25519"
-ssh_ca_host_key_comment: "{{ ssh_ca_domain }} Host CA"
-ssh_ca_host_signer_id: "{{ ssh_ca_domain }}"
-ssh_ca_host_signer_hostnames: "{{ ansible_fqdn }},{{ ansible_hostname }}"
-
-# User CA
-ssh_ca_user_keyfile: "{{ ssh_ca_domain }}_user_key"
-ssh_ca_user_pubfile: "{{ ssh_ca_domain }}_user_key.pub"
-ssh_trusted_user_ca_key: "{{ ssh_config_dir }}/ca/{{ ssh_ca_user_pubfile }}"
-ssh_ca_user_signer_key: "{{ ssh_ca_key_directory }}/{{ ssh_ca_user_keyfile }}"
-ssh_ca_user_key_type: "ed25519"
-ssh_ca_user_key_comment: "{{ ssh_ca_domain }} User CA"
-ssh_ca_user_signer_id: "{{ ssh_ca_domain }}"
-ssh_ca_user_signer_hostnames: "{{ ansible_fqdn }},{{ ansible_hostname }}"
-
-# SSHD_Config options
-ssh_port: "22"
-ssh_addrfamily: "any"
-# Fixme: This should not be global
-ssh_listen_ip4: "{{ ansible_default_ipv4['network'] }}"
-ssh_listen_ip6: "::"
-ssh_host_key: "{{ ssh_config_dir }}/ssh_host_ed25519_key"
-ssh_host_certificate: "{{ ssh_config_dir }}/ssh_host_ed25519_key-cert.pub"
-
-ssh_host_based_auth: "yes"
-ssh_ignore_user_known_hosts: "yes"
-ssh_ignore_rhosts: "yes"
-ssh_password_authentication: "yes"
-ssh_permit_empty_passwords: "no"
-ssh_challenge_response_auth: "no"
-ssh_permit_root_login: "prohibit-password"
-#ssh_kerberos_auth: ""
-#ssh_kerberos_or_local: ""
-#ssh_kerberos_ticket_cleanup: ""
-#ssh_kerberos_afs_token: ""
-ssh_gss_api_authentication: "no"
-#ssh_gss_api_cleanup_passwd: "no"
-#ssh_gss_api_strict_accept_or_check: "no"
-#ssh_gss_api_key_exchange: "no"
-ssh_usepam: "yes"
-ssh_x11_forwarding: "no"
-ssh_print_motd: "no"
-ssh_usedns: "no"
+sshca_host_keyfile: "{{ sshca_domain }}_host_key"
+sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"
+sshca_host_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_host_pubfile }}"
+sshca_host_signer_key: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
+sshca_host_key_type: "ed25519"
+sshca_host_key_comment: "{{ sshca_domain }} Host CA"
+sshca_host_signer_id: "{{ sshca_domain }}"
+sshca_host_signer_hostnames: "{{ ansible_fqdn }},{{ ansible_hostname }}"

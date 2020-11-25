@@ -1,6 +1,6 @@
 ---
 # defaults file for nextcloud
-packages_base:
+__packages_base:
   - apache2
   - php-gd
   - php-mysql
@@ -13,16 +13,16 @@ packages_base:
   - php-xml
   - php-zip
 
-packages_ldap:
+__packages_ldap:
   - php-ldap
 
-packages_gnupg:
+__packages_gnupg:
   - php-gnupg
 
-packages_redis:
+__packages_redis:
   - php-redis
 
-packages: "{{ packages_base + packages_ldap + packages_gnupg + packages_redis }}"
+packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __packages_redis }}"
 
 # Required:
 # PHP (7.2, 7.3 or 7.4)
