@@ -206,7 +206,7 @@
   when:
     - item.groupname is defined
     - item.id_number is defined
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is not defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -232,7 +232,7 @@
   when:
     - item.groupname is defined
     - item.id_number is defined
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is defined
     - item.id_number is defined
@@ -256,7 +256,7 @@
   loop: "{{ domain_groups + domain_users }}"
   when:
     - item.groupname is defined
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is defined
     - item.id_number is not defined
@@ -279,7 +279,7 @@
   loop: "{{ domain_groups + domain_users }}"
   when:
     - item.groupname is defined
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
     - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is not defined
     - item.id_number is not defined
@@ -367,7 +367,7 @@
   become: yes
   loop: "{{ domain_users }}"
   when:
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
     - item.username not in existing_user_list.stdout_lines
   delegate_to: "{{ __samba_schema_master }}"
   tags:

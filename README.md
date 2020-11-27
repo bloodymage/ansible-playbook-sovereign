@@ -45,13 +45,12 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [ACME CA Certs](roles/acmeca_host_certs/README.md)
 #### [Apache](roles/apache/README.md)
 #### [Bind](roles/bind/README.md)
+#### [Collection Handlers](roles/collection_handlers/README.md)
 #### [DNS Forward Zones](roles/dns_forwardzones/README.md)
 #### [DNS Reverse Zones](roles/dns_reversezones/README.md)
 #### [Dotfiles](roles/dotfiles/README.md)
 #### [Dovecot](roles/dovecot/README.md)
 #### [Etckeeper](roles/etckeeper/README.md)
-#### [Freeradius](roles/freeradius/README.md)
-#### [Gitlab](roles/gitlab/README.md)
 #### [Global Packages](roles/global_packages/README.md)
 #### [Hostname](roles/hostname/README.md)
 #### [Hosts](roles/hosts/README.md)
@@ -59,10 +58,8 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [KRB5 Client Config](roles/krb5_client_config/README.md)
 #### [MariaDB](roles/mariadb/README.md)
 #### [MySQL Databases](roles/mysql_databases/README.md)
-#### [Nginq](roles/nginx/README.md)
+#### [Nextcloud](roles/nextcloud/README.md)
 #### [NTP](roles/ntp/README.md)
-#### [OpenDKIM](roles/opendkim/README.md)
-#### [OpenLDAP](roles/openldap/README.md)
 #### [OpenSSH](roles/openssh/README.md)
 #### [OWNCA](roles/ownca/README.md)
 #### [OWNCA CRL](roles/ownca_crl/README.md)
@@ -75,7 +72,6 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [Samba Domain Users](roles/samba_domain_users/README.md)
 #### [Samba File Server](roles/samba_file_server/README.md)
 #### [Shutdown](roles/shutdown/README.md)
-#### [Sovereign handlers](roles/collection_handlers/README.md)
 #### [SSHCA](roles/sshca/README.md)
 #### [SSHCA Host Certificates](roles/sshca_host_certs/README.md)
 #### [SSHCA User Certificates](roles/sshca_user_certs/README.md)
@@ -84,7 +80,6 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [System Upgrade](roles/system_upgrade/README.md)
 #### [Users](roles/users/README.md)
 #### Websites
-##### [Drupal](roles/website_drupal/README.md)
 ##### [Mediawiki](roles/website_mediawiki/README.md)
 ##### [Nextcloud](roles/nextcloud/README.md)
 
@@ -97,8 +92,11 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### Role variables are defined in each role's README.md
 #### Passwords
 
-By default, if a password is defined as 'password' a password will be generated using password_store, and the generated password will be used.  To view the passwords in the password store type:
-"pass ..."  If you wish to manually generate your passwords, the following passwords can be defined in your vault:
+Passwords are managed through the use of [Password Store](https://password-store.org).
+To view the passwords in the password store type:
+"pass ..."  
+
+If you wish to manually generate your passwords, the following passwords can be defined in your vault:
 - keycloak_admin_password
 - keycloak_keystore_password
 - ownca_root_password
@@ -108,8 +106,29 @@ By default, if a password is defined as 'password' a password will be generated 
 - ownca_codesign_password
 - samba_administrator_password
 
+For more information see: [Password Storage](#password-storage)
+
 ## Features and Advantages
-...
+
+### Identity Management
+
+This collection can use a Samba domain for identity management.  This way you can have one password for all services:
+- Login
+- Email
+- Nextcloud (Calendars, Cloud Storage)
+- File Servers
+
+Planned modifications will be single sign on, through use of Kerberos and Keycloak.  This partially works now, email single sign on in linux for clients that support GSSAPI currently works.  Keycloak and nextcloud can be configured (through their web interface) to use single sign on as well.  The tweaks that are necessary involve windows email clients (Thunderbird works, Outlook does not) and configuring keycloak and nextcloud through their CLI via ansbile.
+
+### Password Storage
+  By default, all passwords default variables are set to "password."  When a password is encountered that is set to "password," a password will be generated using password_store, and the generated password will be used.  This creates the following advantages:
+  1. You do not need to generate your passwords yourself.
+  2. You can create backups, and distribute the passwords via git/gpg (Add specific user gpg keys to any folder you wish to grant access. )
+  
+Not yet implemented advantages:
+  3. If you believe multiple passwords may be compromised, you can easily force a regeneration of all passwords.  Plan is to add a tags for password regeneration.  Currently, you can use the password store itself to modify the password(s).
+  
+### 
 
 ### Similar Projects
 #### [Sovereign](https://github.com/sovereign/sovereign)

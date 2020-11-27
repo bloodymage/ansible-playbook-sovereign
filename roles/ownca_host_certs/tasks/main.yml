@@ -299,7 +299,7 @@
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
-    - rebeldream_realm_managed_identities
+    - rebeldream_realm_identity_management_system != ""
   notify: restart all
   tags:
     - ownca_host_certs
@@ -315,7 +315,7 @@
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
-    - rebeldream_realm_managed_identities
+    - rebeldream_realm_identity_management_system != ""
   notify: restart all
   tags:
     - ownca_host_certs
@@ -336,12 +336,6 @@
     - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
-    - "{{ rebeldream_org_name }}-swg-ca-chain.crt"
-    - "{{ rebeldream_org_name }}-swg-component-ca-chain.crt"
-    - "{{ rebeldream_org_name }}-swg-identity-ca-chain.crt"
-    - "{{ rebeldream_org_name }}-swg-ca.crt"
-    - "{{ rebeldream_org_name }}-swg-component-ca.crt"
-    - "{{ rebeldream_org_name }}-swg-identity-ca.crt"
   become: yes
   notify: restart all
   tags:
@@ -350,6 +344,18 @@
     - ownca_host_certs_debug
     - ownca-host-certs-debug
     - ownca-all
+
+- name: Copy CRLs to server.
+  copy:
+    src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+    dest: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+  loop: "{{ ownca_certificate_authorities }}"
+  become: yes
+  tags:
+    - ownca_crl
+    - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
 
 - name: Convert CA Certs to DER
   command: "openssl x509 -in {{ item }}.crt -inform PEM -out {{ item }}.der -outform DER"
@@ -373,7 +379,7 @@
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
     dest: "/srv/samba/pki/"
   loop:
-    - "{{ rebeldream_org_name }}"
+    - "{{ rebeldream_org_name }}-root-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"

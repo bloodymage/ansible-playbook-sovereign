@@ -35,6 +35,28 @@
     - dovecot-debug
     - install-packages
 
+- name: "Update 'dovecot_password_databases' ldap"
+  ansible.builtin.set_fact:
+    dovecot_auth_mechanisims: "{{ dovecot_password_databases + ['ldap'] }}"
+  when:
+    - rebeldream_realm_identity_management_system == "samba"
+  tags:
+    - dovecot
+    - dovecot_debug
+    - dovecot-debug
+    - install-packages
+
+- name: "Update 'dovecot_auth_mechanisms' oauth"
+  ansible.builtin.set_fact:
+    dovecot_auth_mechanisims: "{{ ['gssapi'] + dovecot_auth_mechanisims + ['xoauth2'] }}"
+  when:
+    - rebeldream_realm_identity_management_system == "samba"
+  tags:
+    - dovecot
+    - dovecot_debug
+    - dovecot-debug
+    - install-packages
+
 # ==================================================================================================
 #
 # Configuration tasks
@@ -100,7 +122,6 @@
     - dovecot
     - dovecot_debug
     - dovecot-debug
-
 
 - name: Ensure Virtual Directory definitions exist
   file:
@@ -168,4 +189,3 @@
     - dovecot
     - dovecot_debug
     - dovecot-debug
-

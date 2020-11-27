@@ -4,7 +4,6 @@
 
 - hosts: samba_domain_controllers
   roles:
-    - bloodymage.rebeldream.ownca_crl
     - bloodymage.rebeldream.samba_domain_controller
     - bloodymage.rebeldream.samba_domain_users
 
@@ -16,7 +15,6 @@
 
 - hosts: sssd
   roles:
-    - bloodymage.rebeldream.ownca_crl
     - bloodymage.rebeldream.sssd
 
 - hosts: keycloak_servers
