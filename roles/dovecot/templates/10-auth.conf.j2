@@ -18,18 +18,19 @@ auth_mechanisms =
   {{ " " }}{{ mechanism }}
 {%- endfor %}
 
-
 #!include auth-deny.conf.ext
 #!include auth-master.conf.ext
 
 !include auth-system.conf.ext
-{% if "xoauth2" in dovecot_auth_mechanisms %}
+{% if "xoauth2" in dovecot_auth_mechanisms -%}
   !include auth-oauth2.conf.ext
 {% endif %}
-{% if "sql" in dovecot_auth_mechanisms %}
+{% if "sql" in dovecot_password_databases -%}
   !include auth-sql.conf.ext
 {% endif %}
-#!include auth-ldap.conf.ext
+{% if "ldap" in dovecot_password_databases -%}
+  !include auth-ldap.conf.ext
+{% endif %}
 #!include auth-passwdfile.conf.ext
 #!include auth-checkpassword.conf.ext
 #!include auth-vpopmail.conf.ext

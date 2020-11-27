@@ -1,17 +1,17 @@
 ---
 # defaults file for mail-server
-dovecot_packages:
+packages:
   - dovecot-core
   - dovecot-imapd
   - dovecot-lmtpd
   - dovecot-managesieved
   - dovecot-sieve
 
-packages: "{{ dovecot_packages }}"
-
 dovecot_auth_mechanisms:
   - plain
   - login
+
+dovecot_password_databases: []
 
 dovecot_mail_plugins: "acl virtual"
 dovecot_mail_protocols:

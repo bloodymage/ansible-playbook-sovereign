@@ -1,6 +1,5 @@
 ---
 # Decisions
-rebeldream_realm_managed_identities: no
 rebeldream_realm_identity_management_system: ""
 rebeldream_smart_card_login: no
 rebeldream_overwrite_password: no
@@ -25,9 +24,6 @@ rebeldream_component_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebel
 rebeldream_component_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
 rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
 rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
-
-# Host Identitification
-#rebeldream_primary_domain_controller: "{{ groups['samba_domain_controllers'][0] | default([]) }}"
 
 # Passwords
 mediawiki_db_password: "password"
@@ -56,8 +52,8 @@ ownca_certificate_authorities:
     ownca: "root"
     ownca_privatekey_passphrase: "{{ ownca_root_password }}"
     provider: "selfsigned"
-  - name: "{{ ownca_intermediate_ca }}"
-    common_name: "{{ rebeldream_org_name | title }} {{ ownca_intermediate_ca | title }} CA"
+  - name: "{{ rebeldream_org_unit_name }}"
+    common_name: "{{ rebeldream_org_name | title }} {{ rebeldream_org_unit_name | title }} CA"
     password: "{{ ownca_intermediate_password }}"
     ownca: "root"
     ownca_privatekey_passphrase: "{{ ownca_root_password }}"
@@ -68,10 +64,10 @@ ownca_certificate_authorities:
     keyusage_critical: yes
     basic_constraints:
       - 'CA:TRUE'
-  - name: "{{ ownca_intermediate_ca }}-component"
-    common_name: "{{ rebeldream_org_name | title }} {{ ownca_intermediate_ca | title}} Component CA"
+  - name: "{{ rebeldream_org_unit_name }}-component"
+    common_name: "{{ rebeldream_org_name | title }} {{ rebeldream_org_unit_name | title}} Component CA"
     password: "{{ ownca_component_password }}"
-    ownca: "{{ ownca_intermediate_ca }}"
+    ownca: "{{ rebeldream_org_unit_name }}"
     ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
     provider: "ownca"
     keyusage:
@@ -80,10 +76,10 @@ ownca_certificate_authorities:
     keyusage_critical: yes
     basic_constraints:
       - 'CA:TRUE'
-  - name: "{{ ownca_intermediate_ca }}-identity"
-    common_name: "{{ rebeldream_org_name | title }} {{ ownca_intermediate_ca | title }} Identity CA"
+  - name: "{{ rebeldream_org_unit_name }}-identity"
+    common_name: "{{ rebeldream_org_name | title }} {{ rebeldream_org_unit_name | title }} Identity CA"
     password: "{{ ownca_identity_password }}"
-    ownca: "{{ ownca_intermediate_ca }}"
+    ownca: "{{ rebeldream_org_unit_name }}"
     ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
     provider: "ownca"
     keyusage:
@@ -92,10 +88,10 @@ ownca_certificate_authorities:
     keyusage_critical: yes
     basic_constraints:
       - 'CA:TRUE'
-  - name: "{{ ownca_intermediate_ca }}-codesign"
-    common_name: "{{ rebeldream_org_name | title }} {{ ownca_intermediate_ca | title }} Codesign CA"
+  - name: "{{ rebeldream_org_unit_name }}-codesign"
+    common_name: "{{ rebeldream_org_name | title }} {{ rebeldream_org_unit_name | title }} Codesign CA"
     password: "{{ ownca_codesign_password }}"
-    ownca: "{{ ownca_intermediate_ca }}"
+    ownca: "{{ rebeldream_org_unit_name }}"
     ownca_privatekey_passphrase: "{{ ownca_intermediate_password }}"
     provider: "ownca"
     keyusage:

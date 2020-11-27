@@ -299,7 +299,7 @@
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
-    - rebeldream_realm_managed_identities
+    - rebeldream_realm_identity_management_system != ""
   notify: restart all
   tags:
     - ownca_host_certs
@@ -315,7 +315,7 @@
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
-    - rebeldream_realm_managed_identities
+    - rebeldream_realm_identity_management_system != ""
   notify: restart all
   tags:
     - ownca_host_certs
