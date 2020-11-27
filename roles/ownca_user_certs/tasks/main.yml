@@ -558,7 +558,7 @@
   community.crypto.openssl_pkcs12:
     action: export
     friendly_name: "{{ item.given_name }} {{ item.surname }} (Authentication)"
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pkipkcs12/{{ item.username }}_identification.p12"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/pkcs12/{{ item.username }}_identification.p12"
     privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
     certificate_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_identification.crt"
