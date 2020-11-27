@@ -75,8 +75,8 @@
 # ==================================================================================================
 - name: Generate a CRL
   community.crypto.x509_crl:
-    path: "{{ ownca_directory }}/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-    privatekey_path: "{{ ownca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+    privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
     issuer:
       CN: "{{ item.common_name }}"
@@ -86,18 +86,6 @@
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   run_once: true
-  tags:
-    - ownca_crl
-    - ownca-crl
-    - ownca_crl_debug
-    - ownca-crl-debug
-
-- name: Copy CA Certificates to server.
-  copy:
-    src: "{{ ownca_directory }}/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-    dest: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-  loop: "{{ ownca_certificate_authorities }}"
-  become: yes
   tags:
     - ownca_crl
     - ownca-crl

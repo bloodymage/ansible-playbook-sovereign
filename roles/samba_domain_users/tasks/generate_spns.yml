@@ -44,7 +44,7 @@
   loop: "{{ user.spns }}"
   when:
     - item.spn is defined
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
   tags:
     - samba_domain_users
     - samba-domain-users

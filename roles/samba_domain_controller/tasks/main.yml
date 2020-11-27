@@ -531,7 +531,7 @@
 #   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
 #   register: success
 #   become: yes
-#   when: inventory_hostname == primary_domain_controller
+#   when: inventory_hostname == __samba_schema_master
 #   ignore_errors: yes
 
 #- debug:
@@ -651,7 +651,7 @@
 #   become: yes
 #   loop:
 #     - "samba-tool domain settings account_machine_join_quota 0"
-#   when: inventory_hostname == primary_domain_controller
+#   when: inventory_hostname == __samba_schema_master
 #   ignore_errors: yes
 
 - name: "Disable Guest Account"
@@ -773,14 +773,14 @@
 #     pattern: idmap.ldb
 #     recurse: yes
 #   register: idmap_file
-#   when: inventory_hostname == primary_domain_controller
+#   when: inventory_hostname == __samba_schema_master
 
 - name: Backup idmap.ldb
   shell: "tdbbackup -s .bak /var/lib/samba/private/idmap.ldb"
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -797,7 +797,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname == primary_domain_controller
+    - inventory_hostname == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -813,7 +813,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname != primary_domain_controller
+    - inventory_hostname != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -827,7 +827,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname != primary_domain_controller
+    - inventory_hostname != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -867,7 +867,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname != primary_domain_controller
+    - inventory_hostname != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -935,7 +935,7 @@
   shell: "samba-tool drs showrepl"
   become: yes
   when:
-    - inventory_hostname != primary_domain_controller
+    - inventory_hostname != __samba_schema_master
   notify: restart bind
   tags:
     - samba_domain_controllers
@@ -950,7 +950,7 @@
   register: shares
   become: yes
   when:
-    - inventory_hostname != primary_domain_controller
+    - inventory_hostname != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -963,7 +963,7 @@
 #   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
 #   register: success
 #   become: yes
-#   when: inventory_hostname != primary_domain_controller
+#   when: inventory_hostname != __samba_schema_master
 #   ignore_errors: yes
 
 #- debug:

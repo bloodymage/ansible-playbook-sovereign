@@ -56,6 +56,28 @@
     - ownca-all
     - install-packages
 
+- name: Get IP geolocation data
+  community.general.ipinfoio_facts:
+  tags:
+    - ownca_user_certs
+    - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
+
+- name: "Ensure we have a password for the Identity Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_identity_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  when:
+    - ownca_identity_password == "password"
+  tags:
+    - ownca_user_certs
+    - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
+
 # ==================================================================================================
 #
 # Create SSL Private Key and CRS Directories
@@ -67,10 +89,10 @@
 # ==================================================================================================
 - name: "Create SSL Private Key Directories"
   file:
-    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private'
+    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private'
     state: directory
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: '0700'
   become: yes
   loop: "{{ domain_users }}"
@@ -85,10 +107,10 @@
 
 - name: "Create SSL CSR Key Directories"
   file:
-    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr'
+    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr'
     state: directory
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: '0700'
   become: yes
   loop: "{{ domain_users }}"
@@ -103,10 +125,10 @@
 
 - name: "Create SSL Cert Directories"
   file:
-    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs'
+    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs'
     state: directory
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: '0755'
   become: yes
   loop: "{{ domain_users }}"
@@ -121,10 +143,10 @@
 
 - name: "Create SSL PKCS#12 Key Directories"
   file:
-    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/pkcs12'
+    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/pkcs12'
     state: directory
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: '0700'
   become: yes
   loop: "{{ domain_users }}"
@@ -144,10 +166,10 @@
 # ==================================================================================================
 - name: Generate User Private Key
   openssl_privatekey:
-    path: '/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key'
-    type: '{{ ca_type }}'
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key'
+    type: '{{ ownca_privatekey_type }}'
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     cipher: auto
     size: 2048
     mode: '0600'
@@ -173,21 +195,21 @@
 # ==================================================================================================
 - name: Generate User Authentication CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0644"
-    country_name: "{{ loc_country_code }}"
-    state_or_province_name: "{{ loc_st }}"
-    locality_name: "{{ loc_city }}"
-    organization_name: "{{ ca_org_name }}"
-    organizational_unit_name: "{{ samba_domain }}"
+    country_name: "{{ rebeldream_country }}"
+    state_or_province_name: "{{ rebeldream_region }}"
+    locality_name: "{{ rebeldream_city }}"
+    organization_name: "{{ rebeldream_org_name }}"
+    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.given_name }} {{ item.surname }}"
     email_address: "{{ item.username}}@{{ ansible_domain }}"
-    key_usage: "{{ authentication_key_usage }}"
+    key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
     key_usage_critical: yes
-    extended_key_usage: "{{ authentication_extended_key_usage }}"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki//private/{{ item.username }}.key"
+    extended_key_usage: "{{ ownca_user_certs_authentication_extended_key_usage }}"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki//private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
     subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.username }}@{{ ansible_domain }}"
   become: yes
@@ -203,21 +225,21 @@
 
 - name: Generate User Authentication CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0644"
-    country_name: "{{ loc_country_code }}"
-    state_or_province_name: "{{ loc_st }}"
-    locality_name: "{{ loc_cit1y }}"
-    organization_name: "{{ ca_org_name }}"
-    organizational_unit_name: "{{ samba_domain }}"
+    country_name: "{{ rebeldream_country }}"
+    state_or_province_name: "{{ rebeldream_region }}"
+    locality_name: "{{ rebeldream_city }}"
+    organization_name: "{{ rebeldream_org_name }}"
+    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.given_name }}"
     email_address: "{{ item.username}}@{{ ansible_domain }}"
-    key_usage: "{{ authentication_key_usage }}"
+    key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
     key_usage_critical: yes
-    extended_key_usage: "{{ authentication_extended_key_usage }}"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    extended_key_usage: "{{ ownca_user_certs_authentication_extended_key_usage }}"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
     subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.username }}@{{ ansible_domain }}"
   become: yes
@@ -233,21 +255,21 @@
 
 - name: Generate User Identeficitation CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0644"
-    country_name: "{{ loc_country_code }}"
-    state_or_province_name: "{{ loc_st }}"
-    locality_name: "{{ loc_city }}"
-    organization_name: "{{ ca_org_name }}"
-    organizational_unit_name: "{{ samba_domain }}"
+    country_name: "{{ rebeldream_country }}"
+    state_or_province_name: "{{ rebeldream_region }}"
+    locality_name: "{{ rebeldream_city }}"
+    organization_name: "{{ rebeldream_org_name }}"
+    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.given_name }} {{ item.surname }}"
     email_address: "{{ item.username }}@{{ samba_email_domain }}"
-    key_usage: "{{ identification_key_usage }}"
+    key_usage: "{{ ownca_user_certs_identification_key_usage }}"
     key_usage_critical: yes
-    extended_key_usage: "{{ identification_extended_key_usage }}"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    extended_key_usage: "{{ ownca_user_certs_identification_extended_key_usage }}"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
     subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
   become: yes
@@ -263,21 +285,21 @@
 
 - name: Generate User Identeficitation CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0644"
-    country_name: "{{ loc_country_code }}"
-    state_or_province_name: "{{ loc_st }}"
-    locality_name: "{{ loc_city }}"
-    organization_name: "{{ ca_org_name }}"
-    organizational_unit_name: "{{ samba_domain }}"
+    country_name: "{{ rebeldream_country }}"
+    state_or_province_name: "{{ rebeldream_region }}"
+    locality_name: "{{ rebeldream_city }}"
+    organization_name: "{{ rebeldream_org_name }}"
+    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.given_name }}"
     email_address: "{{ item.username }}@{{ samba_email_domain }}"
-    key_usage: "{{ identification_key_usage }}"
+    key_usage: "{{ ownca_user_certs_identification_key_usage }}"
     key_usage_critical: yes
-    extended_key_usage: "{{ identification_extended_key_usage }}"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    extended_key_usage: "{{ ownca_user_certs_identification_extended_key_usage }}"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
     subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
   become: yes
@@ -293,21 +315,21 @@
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0644"
-    country_name: "{{ loc_country_code }}"
-    state_or_province_name: "{{ loc_st }}"
-    locality_name: "{{ loc_city }}"
-    organization_name: "{{ ca_org_name }}"
-    organizational_unit_name: "{{ samba_domain }}"
+    country_name: "{{ rebeldream_country }}"
+    state_or_province_name: "{{ rebeldream_region }}"
+    locality_name: "{{ rebeldream_city }}"
+    organization_name: "{{ rebeldream_org_name }}"
+    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.given_name }} {{ item.surname }}"
     email_address: "{{ item.username }}@{{ samba_email_domain }}"
-    key_usage: "{{ encryption_key_usage }}"
+    key_usage: "{{ ownca_user_certs_encryption_key_usage }}"
     key_usage_critical: yes
-    extended_key_usage: "{{ encryption_extended_key_usage }}"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    extended_key_usage: "{{ ownca_user_certs_encryption_extended_key_usage }}"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
     subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
   become: yes
@@ -323,21 +345,21 @@
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0644"
-    country_name: "{{ loc_country_code }}"
-    state_or_province_name: "{{ loc_st }}"
-    locality_name: "{{ loc_city }}"
-    organization_name: "{{ ca_org_name }}"
-    organizational_unit_name: "{{ samba_domain }}"
+    country_name: "{{ rebeldream_country }}"
+    state_or_province_name: "{{ rebeldream_region }}"
+    locality_name: "{{ rebeldream_city }}"
+    organization_name: "{{ rebeldream_org_name }}"
+    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.given_name }}"
     email_address: "{{ item.username }}@{{ samba_email_domain }}"
-    key_usage: "{{ encryption_key_usage }}"
+    key_usage: "{{ ownca_user_certs_encryption_key_usage }}"
     key_usage_critical: yes
-    extended_key_usage: "{{ encryption_extended_key_usage }}"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    extended_key_usage: "{{ ownca_user_certs_encryption_extended_key_usage }}"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
     subject_alt_name: "email:{{ item.username }}@{{ samba_email_domain }}"
   become: yes
@@ -358,8 +380,8 @@
 # ==================================================================================================
 - name: Fetch Authentication CSRs.
   fetch:
-    src: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
-    dest: "{{ ca_directory }}/users/csr/"
+    src: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_authentication.csr"
+    dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
   become: yes
   loop: "{{ domain_users }}"
@@ -373,8 +395,8 @@
 
 - name: Fetch Identification CSRs.
   fetch:
-    src: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
-    dest: "{{ ca_directory }}/users/csr/"
+    src: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_identification.csr"
+    dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
   become: yes
   loop: "{{ domain_users }}"
@@ -388,8 +410,8 @@
 
 - name: Fetch Encryption CSRs.
   fetch:
-    src: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
-    dest: "{{ ca_directory }}/users/csr/"
+    src: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/csr/{{ item.username }}_encryption.csr"
+    dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
   become: yes
   loop: "{{ domain_users }}"
@@ -403,10 +425,10 @@
 
 - name: Generate User Authentication Certificates
   community.crypto.x509_certificate:
-    path: "{{ ca_directory }}/users/certs/{{ item.username }}_authentication.crt"
-    csr_path: "{{ ca_directory }}/users/csr/{{ item.username }}_authentication.csr"
-    ownca_path: "{{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
-    ownca_privatekey_path: "{{ ca_directory }}/private/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.key"
+    path: "{{ ownca_directory }}/users/certs/{{ item.username }}_authentication.crt"
+    csr_path: "{{ ownca_directory }}/users/csr/{{ item.username }}_authentication.csr"
+    ownca_path: "{{ ownca_directory }}/certificate_authorities/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
+    ownca_privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.key"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -422,10 +444,10 @@
 
 - name: Generate User Identfication Certificates
   community.crypto.x509_certificate:
-    path: "{{ ca_directory }}/users/certs/{{ item.username }}_identification.crt"
-    csr_path: "{{ ca_directory }}/users/csr/{{ item.username }}_identification.csr"
-    ownca_path: "{{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
-    ownca_privatekey_path: "{{ ca_directory }}/private/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.key"
+    path: "{{ ownca_directory }}/users/certs/{{ item.username }}_identification.crt"
+    csr_path: "{{ ownca_directory }}/users/csr/{{ item.username }}_identification.csr"
+    ownca_path: "{{ ownca_directory }}/certificate_authorities/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
+    ownca_privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.key"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -441,10 +463,10 @@
 
 - name: Generate User Encryption Certificates
   community.crypto.x509_certificate:
-    path: "{{ ca_directory }}/users/certs/{{ item.username }}_encryption.crt"
-    csr_path: "{{ ca_directory }}/users/csr/{{ item.username }}_encryption.csr"
-    ownca_path: "{{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
-    ownca_privatekey_path: "{{ ca_directory }}/private/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.key"
+    path: "{{ ownca_directory }}/users/certs/{{ item.username }}_encryption.crt"
+    csr_path: "{{ ownca_directory }}/users/csr/{{ item.username }}_encryption.csr"
+    ownca_path: "{{ ownca_directory }}/certificate_authorities/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
+    ownca_privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.key"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -460,8 +482,11 @@
 
 - name: Copy User Authentication Certificates to workstation.
   copy:
-    src: "{{ ca_directory }}/users/certs/{{ item.username }}_authentication.crt"
-    dest: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_authentication.crt"
+    src: "{{ ownca_directory }}/users/certs/{{ item.username }}_authentication.crt"
+    dest: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_authentication.crt"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
+    mode: "0644"
   become: yes
   loop: "{{ domain_users }}"
   when:
@@ -474,8 +499,11 @@
 
 - name: Copy User Identification Certificates to workstation.
   copy:
-    src: "{{ ca_directory }}/users/certs/{{ item.username }}_identification.crt"
-    dest: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_identification.crt"
+    src: "{{ ownca_directory }}/users/certs/{{ item.username }}_identification.crt"
+    dest: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_identification.crt"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
+    mode: "0644"
   become: yes
   loop: "{{ domain_users }}"
   when:
@@ -488,8 +516,11 @@
 
 - name: Copy User Encryption Certificates to workstation.
   copy:
-    src: "{{ ca_directory }}/users/certs/{{ item.username }}_encryption.crt"
-    dest: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_encryption.crt"
+    src: "{{ ownca_directory }}/users/certs/{{ item.username }}_encryption.crt"
+    dest: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_encryption.crt"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
+    mode: "0644"
   become: yes
   loop: "{{ domain_users }}"
   when:
@@ -504,12 +535,14 @@
   community.crypto.openssl_pkcs12:
     action: export
     friendly_name: "{{ item.given_name }} {{ item.surname }} (Authentication)"
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/pkcs12/{{ item.username }}_authentication.p12"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/pkcs12/{{ item.username }}_authentication.p12"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
-    certificate_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_authentication.crt"
-    other_certificates: "/etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    certificate_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_authentication.crt"
+    other_certificates: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
     state: present
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0600"
   become: yes
   loop: "{{ domain_users }}"
@@ -525,12 +558,14 @@
   community.crypto.openssl_pkcs12:
     action: export
     friendly_name: "{{ item.given_name }} {{ item.surname }} (Authentication)"
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pkipkcs12/{{ item.username }}_identification.p12"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pkipkcs12/{{ item.username }}_identification.p12"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
-    certificate_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_identification.crt"
-    other_certificates: "/etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    certificate_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_identification.crt"
+    other_certificates: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
     state: present
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0600"
   become: yes
   loop: "{{ domain_users }}"
@@ -546,12 +581,14 @@
   community.crypto.openssl_pkcs12:
     action: export
     friendly_name: "{{ item.given_name }} {{ item.surname }} (Authentication)"
-    path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/pkcs12/{{ item.username }}_encryption.p12"
-    privatekey_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
+    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/pkcs12/{{ item.username }}_encryption.p12"
+    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/private/{{ item.username }}.key"
     privatekey_passphrase: "{{ item.password }}"
-    certificate_path: "/home/{{ samba_domain | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_encryption.crt"
-    other_certificates: "/etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ samba_domain }}-identity-ca.crt"
+    certificate_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/certs/{{ item.username }}_encryption.crt"
+    other_certificates: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
     state: present
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
     mode: "0600"
   become: yes
   loop: "{{ domain_users }}"

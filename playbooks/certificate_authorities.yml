@@ -2,3 +2,4 @@
   roles:
     - bloodymage.rebeldream.sshca
     - bloodymage.rebeldream.ownca
+    - bloodymage.rebeldream.ownca_crl
