@@ -118,7 +118,7 @@ This collection can use a Samba domain for identity management.  This way you ca
 - Nextcloud (Calendars, Cloud Storage)
 - File Servers
 
-Planned modifications will be single sign on, through use of Kerberos and Keycloak.
+Planned modifications will be single sign on, through use of Kerberos and Keycloak.  This partially works now, email single sign on in linux for clients that support GSSAPI currently works.  Keycloak and nextcloud can be configured (through their web interface) to use single sign on as well.  The tweaks that are necessary involve windows email clients (Thunderbird works, Outlook does not) and configuring keycloak and nextcloud through their CLI via ansbile.
 
 ### Password Storage
   By default, all passwords default variables are set to "password."  When a password is encountered that is set to "password," a password will be generated using password_store, and the generated password will be used.  This creates the following advantages:
