@@ -348,7 +348,7 @@
 - name: Copy CRLs to server.
   copy:
     src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-    dest: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+    dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   tags:

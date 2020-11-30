@@ -13,7 +13,7 @@
 
 {% for protocol in dovecot_imap_protocols %}
   protocol {{ protocol.name }} {
-  mail_plugins = {{ mail_plugins }}
+  mail_plugins = {{ dovecot_mail_plugins }}
   #mail_max_userip_connections = 10
   }
 {% endfor %}

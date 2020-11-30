@@ -5,6 +5,7 @@ mediawiki_lts_version: REL1_31
 mediawiki_lua_version: 5.1
 
 packages:
+  - apache2
   - composer
   - "lua{{ mediawiki_lua_version }}"
   - libapache2-mod-auth-kerb
