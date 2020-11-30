@@ -19,6 +19,8 @@ users:
 
 user_groups: []
 
+user_group_ansible_managed: "ansiblemanaged"
+
 user_mythtv:
   username: mythtv
   groups: []

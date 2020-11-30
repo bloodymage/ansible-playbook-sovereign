@@ -337,7 +337,7 @@
     msg:
       - "Name:         {{ item['username'] }}"
       - "Password:     {{ user_password_list.results[index].ansible_facts.password | password_hash('sha512') | default(none) }}"
-      - "Groups:       {{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"        # Empty by default, here we give it some groups
+      - "Groups:       {{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"        # Empty by default, here we give it some groups
       - "Shell:        {{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
       - "Comment:      {{ item['name'] | default(none) }}"
       - "Home:         {{ item['unix_home'] | default('/nonexistent') }}"
@@ -359,7 +359,7 @@
   ansible.builtin.debug:
     msg:
       - "Name:         {{ item['username'] }}"
-      #- "Groups:       {{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"        # Empty by default, here we give it some groups
+      #- "Groups:       {{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"        # Empty by default, here we give it some groups
       - "Shell:        {{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
       - "Comment:      {{ item['name'] | default(none) }}"
       - "Home:         {{ item['unix_home'] | default('/nonexistent') }}"
@@ -381,7 +381,7 @@
   user:
     name: "{{ item['username'] }}"
     password: "{{ user_password_list.results[index].ansible_facts.password | password_hash('sha512') }}"
-    groups: "{{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"        # Empty by default, here we give it some groups
+    groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"        # Empty by default, here we give it some groups
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
     system: no                         # Defaults to no
@@ -406,7 +406,7 @@
 - name: Create login users (Password Disabled)
   user:
     name: "{{ item.username }}"
-    groups: "{{ item['groups'] + ['ansiblemanaged'] | default(['ansiblemanaged']) }}"
+    groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
     system: no                         # Defaults to no
@@ -500,42 +500,42 @@
 # ...
 #
 # ==================================================================================================
-# - name: Determine existing users
-#   shell: 'grep ansiblemanaged /etc/group | cut -d: -f4 | tr "," "\n"'
-#   changed_when: false
-#   register: existing_users
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: Determine existing users
+  shell: 'grep {{ user_group_ansible_managed }} /etc/group | cut -d: -f4 | tr "," "\n"'
+  changed_when: false
+  register: existing_users
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
-# - name: Determine removed users
-#   set_fact:
-#     removed_users: "{{ existing_users.stdout_lines | difference(users) }}"
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: Determine removed users
+  set_fact:
+    removed_users: "{{ existing_users.stdout_lines | difference(users) }}"
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
-# - name: Delete removed user accounts
-#   user:
-#     name: "{{ item }}"
-#     state: absent
-#   with_items: "{{ removed_users }}"
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: Delete removed user accounts
+  user:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ removed_users }}"
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
-# - name: Remove sudoers for remove accounts
-#   file:
-#     name: "/etc/sudoers.d/{{ item }}"
-#     state: absent
-#   with_items: "{{ removed_users }}"
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: Remove sudoers for remove accounts
+  file:
+    name: "/etc/sudoers.d/{{ item }}"
+    state: absent
+  with_items: "{{ removed_users }}"
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
 # ==================================================================================================
 #
