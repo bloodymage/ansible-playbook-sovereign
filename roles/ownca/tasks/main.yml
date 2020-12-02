@@ -248,6 +248,8 @@
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   become: no
+  when:
+    - inventory_hostname == "localhost"
   tags:
     - ownca
     - ownca_debug
@@ -274,7 +276,10 @@
     group: "{{ ownca_user }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  run_once: yes
   become: no
+  when:
+    - inventory_hostname == "localhost"
   tags:
     - ownca
     - ownca_debug
@@ -290,16 +295,41 @@
     provider: "{{ item.provider }}"
     owner: "{{ ownca_user }}"
     group: "{{ ownca_user }}"
+    backup: yes
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  run_once: yes
   become: no
   when:
+    - inventory_hostname == "localhost"
     - item.provider == "selfsigned"
+  register: success
   tags:
     - ownca
     - ownca_debug
     - ownca-debug
     - ownca-all
+
+- name: Check if Selfsigned Certificate was a success
+  debug:
+    msg:
+      - "{{ success }}"
+    verbosity: 1
+  tags:
+    - never
+    - ownca_debug
+    - ownca-debug
+
+- name: If self signed certificate was regenerated; force regeneration of the remaining certificates
+  set_fact:
+    __ownca_force_regeneration: yes
+  when:
+    - success.changed
+  tags:
+    - ownca
+    - ownca_debug
+    - ownca-debug
+
 
 - name: Generate OwnCA Signed Certificate
   openssl_certificate:
@@ -309,8 +339,10 @@
     ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.key"
     ownca_privatekey_passphrase: "{{ item.ownca_privatekey_passphrase }}"
     provider: "{{ item.provider }}"
+    backup: yes
     owner: "{{ ownca_user }}"
     group: "{{ ownca_user }}"
+    force: "{{ __ownca_force_regeneration }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   become: no
