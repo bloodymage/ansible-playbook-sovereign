@@ -301,7 +301,7 @@
     - ownca-host-certs-debug
     - ownca-all
 
-- name: Copy domain controllers' certificate chain back to server.
+- name: Copy domain controllers' certificate chain to server.
   copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
     dest: "/usr/local/share/ca-certificates/"

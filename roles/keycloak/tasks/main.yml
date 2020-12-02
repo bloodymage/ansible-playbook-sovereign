@@ -141,6 +141,7 @@
 - name: Generate PKCS#12 file
   community.crypto.openssl_pkcs12:
     action: export
+    backup: yes
     path:  "{{ keycloak_install_dir }}/{{ keycloak_mode }}/configuration/keycloak.jks"
     friendly_name: "{{ keycloak_keystore_alias }}"
     passphrase: "{{ keycloak_keystore_password }}"
@@ -159,7 +160,7 @@
     mode: '0600'
     owner: root
     group: root
-    force: yes
+    #force: yes
   become: yes
   notify: restart keycloak
   tags:
