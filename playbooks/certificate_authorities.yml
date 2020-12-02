@@ -1,5 +1,8 @@
-- hosts: certificate_authorities
+- hosts: localhost
   roles:
     - bloodymage.rebeldream.sshca
+
+- hosts: certificate_authorities
+  roles:    
     - bloodymage.rebeldream.ownca
     - bloodymage.rebeldream.ownca_crl

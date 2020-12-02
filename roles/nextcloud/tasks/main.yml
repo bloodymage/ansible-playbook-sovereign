@@ -25,6 +25,12 @@
     name: "{{ packages }}"
     state: present
   become: yes
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled 
   tags:
     - nextcloud
     - nextcloud_debug
@@ -44,6 +50,13 @@
     checksum: "sha256:{{ item.checksum }}"
     mode: '0644'
   loop: "{{ nextcloud_source_url }}"
+  become: no
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled 
   tags:
     - nextcloud
     - nextcloud_debug
@@ -107,6 +120,13 @@
     - dir
     - mime
   notify: reload apache
+  become: yes
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled 
   tags:
     - nextcloud
     - nextcloud_debug
@@ -155,6 +175,7 @@
     path: "/srv/www/{{ item.name }}/data"
   loop: "{{ hosts }}"
   register: dir_stat
+  become: no
   when:
     - hosts is defined
     - item.content is defined

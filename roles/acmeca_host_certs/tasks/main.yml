@@ -5,7 +5,7 @@
   vars:
     params:
       files:
-        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_network_os | default('nofile') }}.yml"
         - "{{ ansible_distribution | lower }}.yml"
         - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
         - "{{ ansible_os_family | lower }}_family.yml"

@@ -15,12 +15,12 @@ $TTL	{{ bind_zone_ttl }}
 )  
 ;
 {% for ns in bind_zone_dnsservers -%}
-  {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'NS'.ljust(6) }}{{ ns.name }}.{{ zone }}.
+  {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'NS'.ljust(6) }}{{ ns.name }}.{{ bind_zone }}.
 {% endfor %}
 
 
 {% for ns in bind_zone_dnsservers -%}
-  {{ ns.name }}.{{ zone }}.      IN A      {{ ns.address_ipv4 }}
+  {{ ns.name }}.{{ bind_zone }}.      IN A      {{ ns.address_ipv4 }}
 {% endfor %}
 {% if zone_address_ipv4 is defined -%}
   {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'A'.ljust(6) }}{{ zone_address_ipv4 }}

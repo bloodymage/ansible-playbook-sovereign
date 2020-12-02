@@ -4,6 +4,8 @@
   become: yes
   loop: "{{ user.spns }}"
   when:
+    - __samba_schema_master is defined
+    - inventory_hostname == __samba_schema_master
     - item.spn is defined
     - item.host is defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -23,6 +25,8 @@
   become: yes
   loop: "{{ user.spns }}"
   when:
+    - __samba_schema_master is defined
+    - inventory_hostname == __samba_schema_master
     - item.spn is defined
     - item.host is defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -43,6 +47,7 @@
   become: yes
   loop: "{{ user.spns }}"
   when:
+    - __samba_schema_master is defined
     - item.spn is defined
     - inventory_hostname == __samba_schema_master
   tags:

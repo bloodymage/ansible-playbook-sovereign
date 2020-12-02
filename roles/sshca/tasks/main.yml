@@ -32,6 +32,8 @@
         name: "{{ packages }}"
         state: present
       become: yes
+      delegate_to: localhost
+      run_once: yes
       tags:
         - sshca
         - sshca_debug
@@ -49,6 +51,8 @@
     path: "{{ sshca_key_directory }}"
     state: directory
     mode: '0700'
+  delegate_to: localhost
+  run_once: yes
   tags:
     - sshca
     - sshca_debug
@@ -64,6 +68,8 @@
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
   vars:
     password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
+  delegate_to: localhost
+  run_once: yes
   when:
     - sshca_host_key_password == "password"
   tags:
@@ -76,6 +82,8 @@
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
   vars:
     password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_user_key_password"
+  delegate_to: localhost
+  become: no
   when:
     - sshca_user_key_password == "password"
   tags:
@@ -115,6 +123,8 @@
   args:
     creates: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
   #no_log: true
+  delegate_to: localhost
+  become: no
   tags:
     - sshca
     - sshca_debug
@@ -133,6 +143,8 @@
   args:
     creates: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
   no_log: true
+  delegate_to: localhost
+  become: no
   tags:
     - sshca
     - sshca_debug

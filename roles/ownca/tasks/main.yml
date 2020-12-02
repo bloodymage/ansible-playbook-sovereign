@@ -19,6 +19,8 @@
       paths:
         - "vars"
   become: no
+  delegate_to: localhost
+  run_once: yes
   tags:
     - ownca
     - ownca_debug
@@ -32,6 +34,8 @@
     state: present
   become: yes
   register: result
+  delegate_to: localhost
+  run_once: yes
   tags:
     - ownca
     - ownca_debug
@@ -112,6 +116,7 @@
     force: no
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  become: no
   tags:
     - ownca
     - ownca_debug
@@ -163,6 +168,8 @@
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_root_password == "password"
+  delegate_to: localhost
+  run_once: yes
   tags:
     - ownca
     - ownca_debug
@@ -176,6 +183,7 @@
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_intermediate_password == "password"
+  delegate_to: localhost
   tags:
     - ownca
     - ownca_debug
@@ -189,6 +197,7 @@
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_component_password == "password"
+  delegate_to: localhost
   tags:
     - ownca
     - ownca_debug
@@ -202,6 +211,7 @@
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_identity_password == "password"
+  delegate_to: localhost
   tags:
     - ownca
     - ownca_debug
@@ -215,6 +225,7 @@
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_codesign_password == "password"
+  delegate_to: localhost
   tags:
     - ownca
     - ownca_debug
@@ -231,11 +242,14 @@
     passphrase: "{{ item.password }}"
     type: "{{ ownca_privatekey_type }}"
     cipher: "auto"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
     mode: "0400"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  become: no
+  when:
+    - inventory_hostname == "localhost"
   tags:
     - ownca
     - ownca_debug
@@ -258,10 +272,14 @@
     basic_constraints: "{{ item.basic_constraints }}"
     basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
     create_subject_key_identifier: yes
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  run_once: yes
+  become: no
+  when:
+    - inventory_hostname == "localhost"
   tags:
     - ownca
     - ownca_debug
@@ -275,17 +293,43 @@
     privatekey_passphrase: "{{ item.password }}"
     csr_path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
     provider: "{{ item.provider }}"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
+    backup: yes
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  run_once: yes
+  become: no
   when:
+    - inventory_hostname == "localhost"
     - item.provider == "selfsigned"
+  register: success
   tags:
     - ownca
     - ownca_debug
     - ownca-debug
     - ownca-all
+
+- name: Check if Selfsigned Certificate was a success
+  debug:
+    msg:
+      - "{{ success }}"
+    verbosity: 1
+  tags:
+    - never
+    - ownca_debug
+    - ownca-debug
+
+- name: If self signed certificate was regenerated; force regeneration of the remaining certificates
+  set_fact:
+    __ownca_force_regeneration: yes
+  when:
+    - success.changed
+  tags:
+    - ownca
+    - ownca_debug
+    - ownca-debug
+
 
 - name: Generate OwnCA Signed Certificate
   openssl_certificate:
@@ -295,10 +339,13 @@
     ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.key"
     ownca_privatekey_passphrase: "{{ item.ownca_privatekey_passphrase }}"
     provider: "{{ item.provider }}"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    backup: yes
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
+    force: "{{ __ownca_force_regeneration }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  become: no
   when:
     - item.provider == "ownca"
   tags:
@@ -314,13 +361,15 @@
 # ==================================================================================================
 - name: Find root certificate
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item }}-ca.crt') }}"
+    input_chain: "{{ lookup('file', ownca_ca_directory + '/certs/' + rebeldream_org_name + '-' + rebeldream_org_unit_name + '-' + item + '-ca.crt') }}"
     intermediate_certificates:
       - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
     root_certificates:
       - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca.crt"
   loop: "{{ ownca_issuing_authorities }}"
   register: parent_cert_authorities
+  delegate_to: localhost
+  become: no
   tags:
     - ownca
     - ownca_debug
@@ -338,6 +387,7 @@
     verbosity: 1
   loop: "{{ parent_cert_authorities.results }}"
   delegate_to: localhost
+  become: no
   when:
     - item.chain is defined
   tags:
@@ -355,6 +405,7 @@
     - parent_cert_authorities is defined
     - parent_cert_authorities.results is defined
   delegate_to: localhost
+  become: no
   tags:
     - never
     - ownca_debug
@@ -369,6 +420,7 @@
     - parent_cert_authorities is defined
     - parent_cert_authorities.results is defined
   delegate_to: localhost
+  become: no
   tags:
     - never
     - ownca_debug
@@ -382,6 +434,7 @@
   when:
     - parent_cert_authorities is defined
   delegate_to: localhost
+  become: no
   tags:
     - never
     - ownca_debug
@@ -389,10 +442,12 @@
 
 - name: Find root certificate
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', '{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt') }}"
+    input_chain: "{{ lookup('file', ownca_ca_directory + '/certs/' + rebeldream_org_name + '-' + rebeldream_org_unit_name + '-ca.crt') }}"
     root_certificates:
       - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca.crt"
   register: root_cert_authorities
+  delegate_to: localhost
+  become: no
   tags:
     - ownca
     - ownca_debug
@@ -408,6 +463,7 @@
       - "{{ root_cert_authorities.root }}"
     verbosity: 1
   delegate_to: localhost
+  become: no
   when:
     - parent_cert_authorities.chain is defined
   tags:
@@ -420,9 +476,10 @@
     msg:
       - "{{ root_cert_authorities }}"
     verbosity: 4
+  delegate_to: localhost
+  become: no
   when:
     - parent_cert_authorities is defined
-  delegate_to: localhost
   tags:
     - never
     - ownca_debug
@@ -433,6 +490,8 @@
     dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item.item }}-ca-chain.crt"
     content: "{{ ''.join(item.complete_chain) }}"
   loop: "{{ parent_cert_authorities.results }}"
+  delegate_to: localhost
+  become: no
   when:
     - item.complete_chain is defined
   tags:
@@ -446,6 +505,8 @@
   copy:
     dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
     content: "{{ ''.join(root_cert_authorities.complete_chain) }}"
+  delegate_to: localhost
+  become: no
   when:
     - root_cert_authorities.complete_chain is defined
   tags:

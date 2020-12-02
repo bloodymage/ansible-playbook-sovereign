@@ -152,7 +152,7 @@
 
 - name: Ensure Sieve Pipe Bin Dir exists
   file:
-    path: "{{ sieve_pipe_bin_dir }}"
+    path: "{{ dovecot_sieve_pipe_bin_dir }}"
     state: directory
   become: yes
   tags:
@@ -164,12 +164,12 @@
 - name: Install IMAPSieve Spam Update Filters
   template:
     src: "report-sieve.j2"
-    dest: "{{ sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
+    dest: "{{ dovecot_sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
     owner: root
     group: root
     mode: 0644
   become: yes
-  loop: "{{ imapsieve_mailboxes }}"
+  loop: "{{ dovecot_imapsieve_mailboxes }}"
   tags:
     - dovecot
     - dovecot_debug
@@ -179,12 +179,12 @@
 - name: Install IMAPSieve Spam Update Filters
   template:
     src: "sa-learn.j2"
-    dest: "{{ sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
+    dest: "{{ dovecot_sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
     owner: root
     group: root
     mode: 0755
   become: yes
-  loop: "{{ imapsieve_mailboxes }}"
+  loop: "{{ dovecot_imapsieve_mailboxes }}"
   tags:
     - dovecot
     - dovecot_debug

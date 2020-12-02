@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-{% for user in sasl_auth_users_list -%}
-  {{ user.origin.ljust(20) }} {{ relay_host }}
+{% for user in postfix_sasl_auth_users_list -%}
+  {{ user.origin.ljust(20) }} {{ postfix_relay_host }}
 {% endfor %}
-{{ sasl_auth_user.ljust(20) }} {{ relay_host }}
+{{ postfix_sasl_auth_user.ljust(20) }} {{ postfix_relay_host }}

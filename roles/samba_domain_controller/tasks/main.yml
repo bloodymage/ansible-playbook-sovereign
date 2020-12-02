@@ -685,6 +685,7 @@
   become: yes
   when:
     - inventory_hostname == __samba_schema_master
+  ignore_errors: yes
   tags:
     - samba_domain_controllers
     - samba-domain-controllers

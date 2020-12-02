@@ -1,83 +1,83 @@
 # {{ ansible_managed }}
 
 plugin {
-{% if sieve is defined %}
-  sieve = {{ sieve }}
+{% if dovecot_sieve is defined %}
+  sieve = {{ dovecot_sieve }}
 {% endif %}
-{% if sieve_default is defined %}
-  sieve_default = {{ sieve_default }}
+{% if dovecot_sieve_default is defined %}
+  sieve_default = {{ dovecot_sieve_default }}
 {% endif %}
-{% if sieve_default_name is defined %}
-  sieve_default_name = {{ sieve_default_name }}
+{% if dovecot_sieve_default_name is defined %}
+  sieve_default_name = {{ dovecot_sieve_default_name }}
 {% endif %}
-{% if sieve_global is defined %}
-  sieve_global = {{ sieve_global }}
+{% if dovecot_sieve_global is defined %}
+  sieve_global = {{ dovecot_sieve_global }}
 {% endif %}
-{% if sieve_discard is defined %}
-  sieve_discard = {{ sieve_discard }}
+{% if dovecot_sieve_discard is defined %}
+  sieve_discard = {{ dovecot_sieve_discard }}
 {% endif %}
-{% for location in sieve_before %}
+{% for location in dovecot_sieve_before %}
   sieve_before{{ loop.index if not loop.first else "" }} = {{ location }}
 {% endfor %}
-{% for location in sieve_after %}
+{% for location in dovecot_sieve_after %}
   sieve_after{{ loop.index if not loop.first else "" }} = {{ location }}
 {% endfor %}
-{% if sieve_extensions is defined %}
-  sieve_extensions = {{ sieve_extensions }}
+{% if dovecot_sieve_extensions is defined %}
+  sieve_extensions = {{ dovecot_sieve_extensions }}
 {% endif %}
-{% if sieve_global_extensions is defined %}
-  sieve_global_extensions = {{ sieve_global_extensions }}
+{% if dovecot_sieve_global_extensions is defined %}
+  sieve_global_extensions = {{ dovecot_sieve_global_extensions }}
 {% endif %}
-{% if sieve_plugins is defined %}
-  sieve_plugins = {{ sieve_plugins }}
+{% if dovecot_sieve_plugins is defined %}
+  sieve_plugins = {{ dovecot_sieve_plugins }}
 
-  {% for mailbox in imapsieve_mailboxes -%}
+  {% for mailbox in dovecot_imapsieve_mailboxes -%}
     imapsieve_mailbox{{ loop.index }}_name = {{ mailbox.name }}
     {% if mailbox.from is defined %}
       imapsieve_mailbox{{ loop.index }}_from = {{ mailbox.from }}
     {% endif %}
     imapsieve_mailbox{{ loop.index }}_causes = COPY
-    imapsieve_mailbox{{ loop.index }}_{{ mailbox.timing }} = file:{{ sieve_pipe_bin_dir }}/report-{{ mailbox.type }}.sieve
+    imapsieve_mailbox{{ loop.index }}_{{ mailbox.timing }} = file:{{ dovecot_sieve_pipe_bin_dir }}/report-{{ mailbox.type }}.sieve
 
 {% endfor %}
 {% endif %}
-{% if recipient_delimiter is defined %}
-  recipient_delimiter = {{ recipient_delimiter }}
+{% if mail_recipient_delimiter is defined %}
+  recipient_delimiter = {{ mail_recipient_delimiter }}
 {% endif %}
-{% if sieve_max_script_size is defined %}
-  sieve_max_script_size = {{ sieve_max_script_size }}
+{% if dovecot_sieve_max_script_size is defined %}
+  sieve_max_script_size = {{ dovecot_sieve_max_script_size }}
 {% endif %}
-{% if sieve_max_actions is defined %}
-  sieve_max_actions = {{ sieve_max_actions }}
+{% if dovecot_sieve_max_actions is defined %}
+  sieve_max_actions = {{ dovecot_sieve_max_actions }}
 {% endif %}
-{% if sieve_max_redirects is defined %}
-  sieve_max_redirects = {{ sieve_max_redirects }}
+{% if dovecot_sieve_max_redirects is defined %}
+  sieve_max_redirects = {{ dovecot_sieve_max_redirects }}
 {% endif %}
-{% if sieve_quota_max_scripts is defined %}
-  sieve_quota_max_scripts = {{ sieve_quota_max_scripts }}
+{% if dovecot_sieve_quota_max_scripts is defined %}
+  sieve_quota_max_scripts = {{ dovecot_sieve_quota_max_scripts }}
 {% endif %}
-{% if sieve_quota_max_storage is defined %}
-  sieve_quota_max_storage = {{ sieve_quota_max_storage }}
+{% if dovecot_sieve_quota_max_storage is defined %}
+  sieve_quota_max_storage = {{ dovecot_sieve_quota_max_storage }}
 {% endif %}
-{% if sieve_user_email is defined %}
-  sieve_user_email = {{ sieve_user_email }}
+{% if dovecot_sieve_user_email is defined %}
+  sieve_user_email = {{ dovecot_sieve_user_email }}
 {% endif %}
-{% if sieve_user_log is defined %}
-  sieve_user_log = {{ sieve_user_log }}
+{% if dovecot_sieve_user_log is defined %}
+  sieve_user_log = {{ dovecot_sieve_user_log }}
 {% endif %}
-{% if sieve_redirect_envelope_from is defined %}
-  sieve_redirect_envelope_from = {{ sieve_redirect_envelope_from }}
+{% if dovecot_sieve_redirect_envelope_from is defined %}
+  sieve_redirect_envelope_from = {{ dovecot_sieve_redirect_envelope_from }}
 {% endif %}
-{% if sieve_trace_dir is defined %}
-  sieve_trace_dir = {{ sieve_trace_dir }}
+{% if dovecot_sieve_trace_dir is defined %}
+  sieve_trace_dir = {{ dovecot_sieve_trace_dir }}
 {% endif %}
-{% if sieve_trace_level is defined %}
-  sieve_trace_level = {{ sieve_trace_level }}
+{% if dovecot_sieve_trace_level is defined %}
+  sieve_trace_level = {{ dovecot_sieve_trace_level }}
 {% endif %}
-{% if sieve_trace_debug is defined %}
-  sieve_trace_debug = {{ sieve_trace_debug }}
+{% if dovecot_sieve_trace_debug is defined %}
+  sieve_trace_debug = {{ dovecot_sieve_trace_debug }}
 {% endif %}
-{% if sieve_trace_address is defined %}
-  sieve_trace_address = {{ sieve_trace_address }}
+{% if dovecot_sieve_trace_address is defined %}
+  sieve_trace_address = {{ dovecot_sieve_trace_address }}
 {% endif %}
 }

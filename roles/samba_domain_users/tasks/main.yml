@@ -369,6 +369,7 @@
   when:
     - inventory_hostname == __samba_schema_master
     - item.username not in existing_user_list.stdout_lines
+  ignore_errors: yes
   delegate_to: "{{ __samba_schema_master }}"
   tags:
     - samba_domain_users
@@ -384,6 +385,7 @@
   become: yes
   loop: "{{ domain_users }}"
   when:
+    - inventory_hostname == __samba_schema_master
     - item.account_expire is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
@@ -401,8 +403,12 @@
   loop_control:
     loop_var: user
   when:
+    - __samba_schema_master is defined
+    - inventory_hostname == __samba_schema_master
     - user.spns is defined
-  tags:  
+  delegate_to: "{{ __samba_schema_master }}"
+  run_once: yes
+  tags:
     - samba_domain_users
     - samba-domain-users
     - samba_domain_users_debug

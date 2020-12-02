@@ -38,6 +38,7 @@
     state: present
   become: yes
   register: result
+  delegate_to: localhost
   tags:
     - ownca_crl
     - ownca-crl
@@ -70,6 +71,82 @@
 
 # ==================================================================================================
 #
+# Generate Passwords if they don't exist
+#
+# ==================================================================================================
+- name: "Ensure we have a password for the Root CA"
+  ansible.builtin.set_fact:
+    ownca_root_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ rebeldream_org_name }}_common/ownca/ownca_root_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  when:
+    - ownca_root_password == "password"
+  delegate_to: localhost
+  run_once: yes
+  tags:
+    - ownca
+    - ownca_debug
+    - ownca-debug
+
+- name: "Ensure we have a password for the Intermediate CA"
+  ansible.builtin.set_fact:
+    ownca_intermediate_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_intermediate_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  when:
+    - ownca_intermediate_password == "password"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca_debug
+    - ownca-debug
+
+- name: "Ensure we have a password for the Component Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_component_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  when:
+    - ownca_component_password == "password"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca_debug
+    - ownca-debug
+
+- name: "Ensure we have a password for the Identity Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_identity_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  when:
+    - ownca_identity_password == "password"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca_debug
+    - ownca-debug
+
+- name: "Ensure we have a password for the Code Sign Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_codesign_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/ownca/ownca_codesign_password"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  when:
+    - ownca_codesign_password == "password"
+  delegate_to: localhost
+  tags:
+    - ownca
+    - ownca_debug
+    - ownca-debug
+
+# ==================================================================================================
+#
 # Create CRLs
 #
 # ==================================================================================================
@@ -85,7 +162,6 @@
     revoked_certificates: "{{ item.revoked_certificates | default(ownca_revoked_certificates) }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
-  run_once: true
   tags:
     - ownca_crl
     - ownca-crl

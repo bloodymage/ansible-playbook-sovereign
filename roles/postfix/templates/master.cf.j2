@@ -17,11 +17,11 @@ smtpd     pass  -       -       y       -       -       smtpd
 dnsblog   unix  -       -       y       -       0       dnsblog
 tlsproxy  unix  -       -       y       -       0       tlsproxy
 submission inet n       -       y       -       -       smtpd
-{% for option in master_submission_options %}
+{% for option in postfix_master_submission_options %}
   {{ option }}
 {% endfor %}
 smtps inet  n       -       y       -       -       smtpd
-{% for option in master_smtps_options %}
+{% for option in postfix_master_smtps_options %}
   {{ option }}
 {% endfor %}
 #628       inet  n       -       y       -       -       qmqpd
@@ -40,7 +40,7 @@ proxymap  unix  -       -       n       -       -       proxymap
 proxywrite unix -       -       n       -       1       proxymap
 smtp      unix  -       -       y       -       -       smtp
 relay     unix  -       -       y       -       -       smtp
-{% for option in master_relay_options %}
+{% for option in postfix_master_relay_options %}
   {{ option }}
 {% endfor %}
 showq     unix  n       -       y       -       -       showq
@@ -68,7 +68,7 @@ postlog   unix-dgram n  -       n       -       1       postlogd
 # Also specify in main.cf: maildrop_destination_recipient_limit=1
 # ================================================================================================== #}
 maildrop  unix  -       n       n       -       -       pipe
-{% for option in master_maildrop_options %}
+{% for option in postfix_master_maildrop_options %}
   {{ option }}
 {% endfor %}
 
@@ -103,7 +103,7 @@ maildrop  unix  -       n       n       -       -       pipe
 # See the Postfix UUCP_README file for configuration details.
 #
 uucp      unix  -       n       n       -       -       pipe
-{% for option in master_uucp_options %}
+{% for option in postfix_master_uucp_options %}
   {{ option }}
 {% endfor %}
 
@@ -111,22 +111,22 @@ uucp      unix  -       n       n       -       -       pipe
 # Other external delivery methods.
 #
 ifmail    unix  -       n       n       -       -       pipe
-{% for option in master_ifmail_options %}
+{% for option in postfix_master_ifmail_options %}
   {{ option }}
 {% endfor %}
 bsmtp     unix  -       n       n       -       -       pipe
-{% for option in master_bsmtp_options %}
+{% for option in postfix_master_bsmtp_options %}
   {{ option }}
 {% endfor %}
 scalemail-backend unix	-	n	n	-	2	pipe
-{% for option in master_scalemail_options %}
+{% for option in postfix_master_scalemail_options %}
   {{ option }}
 {% endfor %}
 mailman   unix  -       n       n       -       -       pipe
-{% for option in master_mailman_options %}
+{% for option in postfix_master_mailman_options %}
   {{ option }}
 {% endfor %}
 dovecot   unix  -       n       n       -       -       pipe
-{% for option in master_dovecot_options %}
+{% for option in postfix_master_dovecot_options %}
   {{ option }}
 {% endfor %}

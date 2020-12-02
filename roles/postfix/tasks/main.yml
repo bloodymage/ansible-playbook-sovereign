@@ -78,7 +78,7 @@
   become: yes
   loop: "{{ postfix_ldap_maps }}"
   when:
-    - inventory_hostname in groups['samba_domain_members']
+    - inventory_hostname in groups['samba_domain']
     - mail_user_password is defined
   notify: restart postfix
   tags:

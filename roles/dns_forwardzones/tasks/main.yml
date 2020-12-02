@@ -25,13 +25,13 @@
     key_secret: "{{ item.bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
     server: "{{ item.address_ipv4 }}"
-    zone: "{{ zone }}"
+    zone: "{{ bind_zone }}"
     record: "{{ inventory_hostname_short }}"
     value: "{{ ansible_default_ipv4.address | default(ansible_host) }}"
-  loop: "{{ zone_dnsservers }}"
+  loop: "{{ bind_zone_dnsservers }}"
   become: yes
   when:
-    - zone is defined
+    - bind_zone is defined
   remote_user: root
   delegate_to: "{{ item.address_ipv4 }}"
   tags:
@@ -48,14 +48,14 @@
     key_secret: "{{ item.bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
     server: "{{ item.address_ipv4 }}"
-    zone: "{{ zone }}"
+    zone: "{{ bind_zone }}"
     record: "{{ inventory_hostname_short }}"
     value: "{{ ansible_default_ipv6.address }}"
     type: "AAAA"
-  loop: "{{ zone_dnsservers }}"
+  loop: "{{ bind_zone_dnsservers }}"
   become: yes
   when:
-    - zone is defined
+    - bind_zone is defined
     - ansible_default_ipv6.address is defined
   remote_user: root
   delegate_to: "{{ item.address_ipv4 }}"
@@ -72,14 +72,14 @@
     key_secret: "{{ item[0].bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
     server: "{{ item[0].address_ipv4 }}"
-    zone: "{{ zone }}"
+    zone: "{{ bind_zone }}"
     record: "{{ item[1].name.split('.')[0] }}"
     value: "{{ inventory_hostname }}."
     type: "CNAME"
-  loop: "{{ zone_dnsservers | product(hosts) | list }}"
+  loop: "{{ bind_zone_dnsservers | product(hosts) | list }}"
   become: yes
   when:
-    - zone is defined
+    - bind_zone is defined
     - hosts is defined
   remote_user: root
   delegate_to: "{{ item[0].address_ipv4 }}"
@@ -103,7 +103,7 @@
 #   loop: "{{ zone_dnsservers }}"
 #   become: yes
 #   when:
-#     - zone is defined
+#     - bind_zone is defined
 #     - bind_mx_record is defined
 #   remote_user: root
 #   delegate_to: "{{ item.address_ipv4 }}"

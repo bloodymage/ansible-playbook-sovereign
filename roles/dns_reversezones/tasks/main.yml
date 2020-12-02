@@ -5,14 +5,14 @@
     key_secret: "{{ item.bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
     server: "{{ item.address_ipv4 }}"
-    zone: "{{ reverse_zone.split('.')[1] }}.{{ reverse_zone.split('.')[0] }}.in-addr.arpa"
+    zone: "{{ bind_reverse_zone.split('.')[1] }}.{{ bind_reverse_zone.split('.')[0] }}.in-addr.arpa"
     record: "{{ bind_ipv4_ptr_record }}"
     value: "{{ ansible_fqdn | default(inventory_hostname) }}."
     type: "PTR"
-  loop: "{{ zone_dnsservers }}"
+  loop: "{{ bind_zone_dnsservers }}"
   become: yes
   when:
-    - reverse_zone is defined
+    - bind_reverse_zone is defined
   remote_user: root
   delegate_to: "{{ item.address_ipv4 }}"
   tags:
