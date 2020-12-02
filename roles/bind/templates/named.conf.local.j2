@@ -13,8 +13,12 @@ include "/etc/bind/rndc.key";
   notify no;
   allow-query { any; };
   allow-transfer { any; };
+{% if localzone.file is defined %}
+  file "{{ localzone.file }}";
+{% else %}
   allow-update { key ansible; };
-  file "{{ bind_zone_dir }}/db.{{ localzone.name }}"; # zone file path
+  file "{{ bind_zone_dir }}/db.{{ localzone.name }}";
+{% endif %}
   };
 
 {% endfor %}

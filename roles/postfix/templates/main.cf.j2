@@ -117,7 +117,7 @@ mailbox_transport = {{ postfix_mailbox_transport }}
 sender_dependent_relayhost_maps = {{ postfix_sender_dependent_relayhost_maps }}
 
 canonical_maps = {{ postfix_canonical_maps }}
-home_mailbox = {{ mail_home_mailbox }}
+home_mailbox = {{ postfix_home_mailbox }}
 {% if postfix_message_size_limit is defined -%}
   message_size_limit = {{ postfix_message_size_limit }}
 {% endif %}
@@ -137,7 +137,7 @@ virtual_mailbox_maps =
 {% endfor %}
 virtual_transport = {{ postfix_virtual_transport }}
 
-dovecot_destination_recipient_limit = {{ dovecot_destination_recipient_limit }}
+dovecot_destination_recipient_limit = {{ postfix_dovecot_destination_recipient_limit }}
 
 milter_default_action = {{ postfix_milter_default_action }}
 milter_connect_macros = {{ postfix_milter_connect_macros }}

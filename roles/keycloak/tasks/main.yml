@@ -147,11 +147,11 @@
     privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key
     certificate_path: /etc/ssl/certs/{{ inventory_hostname }}-chain.pem
     other_certificates:
-      - "/etc/ssl/certs/drbr-olympus-component-ca.pem"
-      - "/etc/ssl/certs/drbr-olympus-ca.pem"
-      - "/etc/ssl/certs/drbr-swg-component-ca.pem"
-      - "/etc/ssl/certs/drbr-swg-ca.pem"
-      - "/etc/ssl/certs/drbr-root-ca.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-root-ca.pem"
       - "/etc/ssl/certs/zeus.olympus.drbr.org-chain.pem"
     state: present
     iter_size: 0

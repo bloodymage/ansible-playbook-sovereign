@@ -43,33 +43,34 @@
 # Set Variables
 #
 # ==================================================================================================
-- name: Query DNS
+- name: Query DNS for zone SOA
   ansible.builtin.set_fact:
-    __zone_soa: "{{ lookup('community.general.dig', zone + '/SOA') }}"
+    __zone_soa: "{{ lookup('community.general.dig', bind_zone + '/SOA') }}"
+  become: no
   when:
-    - zone is defined
+    - bind_zone is defined
   tags:
     - bind
     - bind_debug
     - bind-debug
 
-- name: Print Zone Serial Number
-  debug:
-    msg:
-      - "{{ __zone_soa.split(' ')[2] }}"
-    verbosity: 1
+- name: Query DNS for reverse zone SOA
+  ansible.builtin.set_fact:
+    __reverse_zone_soa: "{{ lookup('community.general.dig', bind_reverse_zone + '/SOA') }}"
+  become: no
   when:
-    - __zone_soa is defined
+    - bind_reverse_zone is defined
   tags:
-    - never
+    - bind
     - bind_debug
     - bind-debug
 
 - name: Print Zone SOA
   debug:
     msg:
-      - "{{ __zone_soa }}"
-    verbosity: 4
+      - "Serial Number: {{ __zone_soa.split(' ')[2] | default(none) }}"
+    verbosity: 1
+  become: no
   when:
     - __zone_soa is defined
   tags:
@@ -77,11 +78,62 @@
     - bind_debug
     - bind-debug
 
-- name: Get Current Serial Number
-  ansible.builtin.set_fact:
-    __zone_current_serial_number: "{{ __zone_soa.split(' ')[2] }}"
+- name: Print Reverse Zone SOA
+  debug:
+    msg:
+      - "Serial Number: {{ __reverse_zone_soa.split(' ')[2] | default (none) }}"
+    verbosity: 1
+  become: no
+  when:
+    - __reverse_zone_soa is defined
+  tags:
+    - never
+    - bind_debug
+    - bind-debug
+
+- name: "Print Zone SOA"
+  debug:
+    msg:
+      - "{{ __zone_soa }}"
+    verbosity: 2
+  become: no
   when:
     - __zone_soa is defined
+  tags:
+    - never
+    - bind_debug
+    - bind-debug
+
+- name: "Print Reverse Zone SOA"
+  debug:
+    msg:
+      - "{{ __reverse_zone_soa }}"
+    verbosity: 2
+  become: no
+  when:
+    - __zone_soa is defined
+  tags:
+    - never
+    - bind_debug
+    - bind-debug
+
+- name: "Get Zone's Current Serial Number"
+  ansible.builtin.set_fact:
+    __zone_current_serial_number: "{{ __zone_soa.split(' ')[2] }}"
+  become: no
+  when:
+    - __zone_soa is defined
+  tags:
+    - bind
+    - bind_debug
+    - bind-debug
+
+- name: "Get Reverse Zone's Current Serial Number"
+  ansible.builtin.set_fact:
+    __reverse_zone_current_serial_number: "{{ __reverse_zone_soa.split(' ')[2] | default(bind_reverse_zone_serial_number) }}"
+  become: no
+  when:
+    - __reverse_zone_soa is defined
   tags:
     - bind
     - bind_debug
@@ -89,10 +141,23 @@
 
 - name: Set new Serial Number
   ansible.builtin.set_fact:
-    zone_serial_number: "{{ __zone_current_serial_number + 1 }}"
+    bind_zone_serial_number: "{{ __zone_current_serial_number | int + 1 }}"
+  become: no
   when:
     - __zone_current_serial_number is defined
-    - __zone_current_serial_number >= zone_serial_number
+    - __zone_current_serial_number >= bind_zone_serial_number
+  tags:
+    - bind
+    - bind_debug
+    - bind-debug
+
+- name: Set new Serial Number
+  ansible.builtin.set_fact:
+    bind_reverse_zone_serial_number: "{{ __reverse_zone_current_serial_number | int + 1 }}"
+  become: no
+  when:
+    - __reverse_zone_current_serial_number is defined
+    - __reverse_zone_current_serial_number >= bind_reverse_zone_serial_number
   tags:
     - bind
     - bind_debug
@@ -102,7 +167,9 @@
   ansible.builtin.debug:
     msg:
       - "Current Serial Number: {{ __zone_current_serial_number }}"
-      - "New Serial Number:     {{ zone_serial_number }}"
+      - "New Serial Number:     {{ bind_zone_serial_number }}"
+    verbosity: 1
+  become: no
   when:
     - __zone_current_serial_number is defined
   tags:
@@ -281,14 +348,14 @@
 
 - name: "Installing Forward Zone files"
   template:
-    src: "{{ role_path }}/templates/forwardzone.j2"
-    dest: "{{ bind_zone_dir }}/db.{{ zone }}"
+    src: "forwardzone.j2"
+    dest: "{{ bind_zone_dir }}/db.{{ bind_zone }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "0644"
   become: yes
   when:
-    - zone is defined
+    - bind_zone is defined
   notify: restart bind
   tags:
     - bind
@@ -298,14 +365,14 @@
 
 - name: "Installing Reverse Zone files"
   template:
-    src: "{{ role_path }}/templates/reversezone.j2"
-    dest: "{{ bind_zone_dir }}/db.{{ reverse_zone }}"
+    src: "reversezone.j2"
+    dest: "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "0644"
   become: yes
   when:
-    - reverse_zone is defined
+    - bind_reverse_zone is defined
   notify: restart bind
   tags:
     - bind

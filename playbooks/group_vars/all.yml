@@ -12,6 +12,9 @@ rebeldream_country: "{{ country }}"
 rebeldream_region: "{{ region }}"
 rebeldream_state: "{{ rebeldream_region }}"
 rebeldream_city: "{{ city }}"
+rebeldream_zones:
+  - internal
+  - dmz
 
 # Domain Information
 rebeldream_domain_list: "{{ ansible_domain.split('.')[-2:] }}"

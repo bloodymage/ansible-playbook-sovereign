@@ -42,7 +42,7 @@ postfix_smtp_sasl_security_options: "noanonymous"
 postfix_smtp_sender_dependent_authentication: "yes"
 postfix_smtp_tls_note_starttls_offer: "yes"
 postfix_smtp_tls_security_level: "may"
-smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
+postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 postfix_smtp_tls_wrappermode: "no"
 postfix_smtpd_banner: "$myhostname ESMTP"
 postfix_smtpd_client_restrictions:
@@ -102,20 +102,20 @@ postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
 postfix_smtpd_tls_session_cache_timeout: "3600s"
 postfix_smtpd_use_tls: "yes"
 
-tls_random_source: "dev:/dev/urandom"
-transport_maps: "hash:/etc/postfix/transport"
-unknown_address_reject_code: "550"
-unknown_client_reject_code: "550"
-unknown_hostname_reject_code: "550"
-virtual_alias_maps:
+postfix_tls_random_source: "dev:/dev/urandom"
+postfix_transport_maps: "hash:/etc/postfix/transport"
+postfix_unknown_address_reject_code: "550"
+postfix_unknown_client_reject_code: "550"
+postfix_unknown_hostname_reject_code: "550"
+postfix_virtual_alias_maps:
   - "hash:/etc/postfix/virtual"
-virtual_mailbox_domains:
+postfix_virtual_mailbox_domains:
   - "hash:/etc/postfix/virtual-mailbox-domains"
-virtual_mailbox_maps:
+postfix_virtual_mailbox_maps:
   - "hash:/etc/postfix/virtual-mailbox-users"
-virtual_transport: "dovecot"
+postfix_virtual_transport: "dovecot"
 
-master_submission_options:
+postfix_master_submission_options:
   - "-o smtpd_tls_security_level=encrypt"
   - "-o smtpd_sasl_auth_enable=yes"
   - "-o smtpd_sasl_type=dovecot"
@@ -127,34 +127,33 @@ master_submission_options:
   - "-o smtpd_sender_restrictions=reject_sender_login_mismatch"
   - "-o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject"
 
-master_smtps_options:
+postfix_master_smtps_options:
   - "-o smtpd_tls_wrappermode=yes"
   - "-o smtpd_sasl_auth_enable=yes"
 
-master_relay_options:
+postfix_master_relay_options:
   - "-o syslog_name=postfix/$service_name"
 
-master_maildrop_options:
+postfix_master_maildrop_options:
   - "flags=DRhu user=vmail argv=/usr/bin/maildrop -d ${recipient}"
 
-master_uucp_options:
+postfix_master_uucp_options:
   - "flags=Fqhu user=uucp argv=uux -r -n -z -a$sender - $nexthop!rmail ($recipient)"
 
-master_ifmail_options:
+postfix_master_ifmail_options:
   - "flags=F user=ftn argv=/usr/lib/ifmail/ifmail -r $nexthop ($recipient)"
 
-master_bsmtp_options:
+postfix_master_bsmtp_options:
   - "flags=Fq. user=bsmtp argv=/usr/lib/bsmtp/bsmtp -t$nexthop -f$sender $recipient"
 
-master_scalemail_options:
+postfix_master_scalemail_options:
   - "flags=R user=scalemail argv=/usr/lib/scalemail/bin/scalemail-store ${nexthop} ${user} ${extension}"
 
-
-master_mailman_options:
+postfix_master_mailman_options:
   - "flags=FR user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py"
   - "${nexthop} ${user}"
 
-master_dovecot_options:
+postfix_master_dovecot_options:
   - "flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver"
   - "-f ${sender} -d ${user}@${nexthop} -a ${original_recipient}"
 

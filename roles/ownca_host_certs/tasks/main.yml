@@ -93,7 +93,6 @@
   vars:
     password_store_id: "{{ ansible_domain }}/ownca/ownca_component_password"
   delegate_to: localhost
-  run_once: yes
   when:
     - ownca_component_password == "password"
   tags:
@@ -203,7 +202,7 @@
 
 - name: Create Complete Chain Bundles
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', '{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt') }}"
+    input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + inventory_hostname + '.crt') }}"
     intermediate_certificates:
       - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
       - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
@@ -231,12 +230,9 @@
   when:
     - parent_cert_authorities.chain is defined
   tags:
-    - ownca_host_certs
-    - ownca-host-certs
+    - never
     - ownca_host_certs_debug
     - ownca-host-certs-debug
-    - ownca-bundles
-    - ownca-all
 
 - name: Print Cert Authorities (Full)
   debug:
@@ -247,12 +243,9 @@
     - parent_cert_authorities is defined
   delegate_to: localhost
   tags:
-    - ownca_host_certs
-    - ownca-host-certs
+    - never
     - ownca_host_certs_debug
     - ownca-host-certs-debug
-    - ownca-bundles
-    - ownca-all
 
 - name: Write complete chain to disk
   copy:
@@ -330,12 +323,18 @@
     dest: "/usr/local/share/ca-certificates/"
   loop:
     - "{{ rebeldream_org_name }}-root-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
   become: yes
   notify: restart all
   tags:
@@ -365,6 +364,9 @@
     - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain"
     - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain"
     - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca"
   delegate_to: localhost
   run_once: yes
   tags:
