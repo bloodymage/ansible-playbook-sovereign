@@ -15,6 +15,7 @@
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   delegate_to: localhost
   no_log: yes
+  become: no
   when:
     - mysql_administrator_password == "password"
   tags:
@@ -30,6 +31,7 @@
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   delegate_to: localhost
   no_log: yes
+  become: no
   when:
     - mysql_system_maintenance_user_password == "password"
   tags:
@@ -122,7 +124,7 @@
     state: absent
     login_user: "{{ mysql_administrator }}"
     login_password: "{{ mysql_administrator_password }}"
-  become: yes
+  become: no
   tags:
     - mariadb
     - mariadb-debug
@@ -135,7 +137,7 @@
     state: present
     login_user: "{{ mysql_administrator }}"
     login_password: "{{ mysql_administrator_password }}"
-  become: yes
+  become: no
   tags:
     - mariadb
     - mariadb-debug

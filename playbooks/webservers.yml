@@ -17,4 +17,7 @@
     - bloodymage.rebeldream.nextcloud
     # - bloodymage.rebeldream.drush
     # - bloodymage.rebeldream.website_drupal
+
+- hosts: acme_servers
+  roles:
     - bloodymage.rebeldream.acmeca_host_certs
