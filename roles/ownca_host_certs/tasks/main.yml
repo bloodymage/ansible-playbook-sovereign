@@ -107,8 +107,8 @@
     type: '{{ ownca_privatekey_type }}'
     size: 4096
     owner: root
-    group: root
-    mode: '0600'
+    group: ssl-cert
+    mode: '0640'
     force: no
   become: yes
   tags:

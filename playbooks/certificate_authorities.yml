@@ -3,6 +3,6 @@
     - bloodymage.rebeldream.sshca
 
 - hosts: certificate_authorities
-  roles:    
+  roles:
     - bloodymage.rebeldream.ownca
     - bloodymage.rebeldream.ownca_crl

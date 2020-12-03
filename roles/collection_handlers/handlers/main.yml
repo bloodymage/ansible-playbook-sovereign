@@ -114,6 +114,7 @@
     name: apache2
     state: reloaded
   listen: "reload all"
+  become: yes
   when:
     - inventory_hostname in groups['apache_servers']
 

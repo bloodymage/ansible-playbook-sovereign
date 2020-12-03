@@ -1,11 +1,11 @@
 ---
 # tasks file for acmeca_host_certs
 - name: Include OS-specific variables.
-  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
+  include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
       files:
-        - "{{ ansible_network_os | default('nofile') }}.yml"
+        - "{{ ansible_network_os | default(none)  }}.yml"
         - "{{ ansible_distribution | lower }}.yml"
         - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
         - "{{ ansible_os_family | lower }}_family.yml"
@@ -24,6 +24,7 @@
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
+  become: yes
   tags:
     - acmeca_host_certs
     - acmeca-host-certs
@@ -34,6 +35,7 @@
 - name: Determine whether to force private key regeneration
   ansible.builtin.set_fact:
     acme_certificate_INTERNAL_force_regenerate_private_key: yes
+  become: no
   tags:
     - never
     - issue-tls-certs-newkey
@@ -43,6 +45,7 @@
     acmeca_directory: "{{ letsencrypt_staging_directory }}"
     acmeca_directory_url: "{{ letsencrypt_staging_url }}"
     acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_staging_directory }}"
+  become: no
   tags:
     - never
     - issue-staging-certs
@@ -65,12 +68,12 @@
     - "{{ acmeca_archive_dir }}"
     - "{{ acmeca_keys_dir }}"
     - "{{ acmeca_live_dir }}"
+  become: no
   tags:
     - acmeca_host_certs
     - acmeca-host-certs
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
-
 
 - name: "Generate Let's Encrypt Account private key"
   community.crypto.openssl_privatekey:
@@ -99,6 +102,7 @@
     contact:
       - mailto:{{ acmeca_account_email }}
     validate_certs: yes
+  become: no
   tags:
     - acmeca_host_certs
     - acmeca-host-certs
@@ -113,6 +117,9 @@
     group: root
     mode: "0755"
   loop: "{{ hosts }}"
+  become: no
+  when:
+    - item.certificate == "acme"
   tags:
     - acmeca_host_certs
     - acmeca-host-certs

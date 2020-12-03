@@ -40,7 +40,9 @@ users:
     ssh_cert:
       - None
 
-user_groups: []
+user_groups:
+  - name: ssl-cert
+    system: yes
 
 user_group_ansible_managed: "ansiblemanaged"
 
