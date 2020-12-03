@@ -30,6 +30,8 @@ rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ 
 
 # Passwords
 mediawiki_db_password: "password"
+mysql_administrator_password: "password"
+mysql_system_maintenance_user_password: "password"
 ownca_root_password: "password"
 ownca_intermediate_password: "password"
 ownca_component_password: "password"
@@ -155,6 +157,7 @@ mail_user: vmail
 
 # MySQL / MariaDB
 mysql_administrator: "root"
+mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: /var/lib/mysql
 
 # SSH

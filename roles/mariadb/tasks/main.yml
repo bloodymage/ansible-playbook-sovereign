@@ -7,6 +7,36 @@
 # Installs a set of common apps for all systems on the network
 #
 # ==================================================================================================
+- name: "Ensure we have a password for the Administrative User"
+  ansible.builtin.set_fact:
+    mysql_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/services/mysql/{{ mysql_administrator }}"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  delegate_to: localhost
+  no_log: yes
+  when:
+    - mysql_administrator_password == "password"
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
+- name: "Ensure we have a password for the System Maintenance User"
+  ansible.builtin.set_fact:
+    mysql_system_maintenance_user_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
+    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  delegate_to: localhost
+  no_log: yes
+  when:
+    - mysql_system_maintenance_user_password == "password"
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
 - name: Check if MySQL is already installed.
   stat: path=/etc/init.d/mysql
   register: mysql_installed
@@ -76,15 +106,22 @@
 
 # - name: Ensure MySQL Root user password is set
 #   mysql_user:
-#     name: root
-#     password: "{{ mysql_root_user_password }}"
+#     name: "{{ mysql_administrator }}"
+#     password: "{{ mysql_administrator_password }}"
 #     state: present
+#   become: yes
+#   tags:
+#     - mariadb
+#     - mariadb-debug
+#     - mariadb_debug
 
 - name: Removes all anonymous user accounts
-  mysql_user:
+  community.mysql.mysql_user:
     name: ''
     host_all: yes
     state: absent
+    login_user: "{{ mysql_administrator }}"
+    login_password: "{{ mysql_administrator_password }}"
   become: yes
   tags:
     - mariadb
@@ -92,11 +129,28 @@
     - mariadb_debug
 
 - name: Add Debian Upgrade User
-  mysql_user:
-    name: debian-sys-maint
-    password: "{{ mysql_debian_sys_maint_user_password }}"
+  community.mysql.mysql_user:
+    name: "{{ mysql_system_maintenance_user }}"
+    password: "{{ mysql_system_maintenance_user_password }}"
     state: present
+    login_user: "{{ mysql_administrator }}"
+    login_password: "{{ mysql_administrator_password }}"
   become: yes
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
+- name: "Install System Maintenance config"
+  template:
+    src: "debian.cnf.j2"
+    dest: "/etc/mysql/debian.cnf"
+    owner: root
+    group: root
+    mode: 000
+  become: yes
+  when:
+    - ansible_os_family == "Debian"
   tags:
     - mariadb
     - mariadb-debug
