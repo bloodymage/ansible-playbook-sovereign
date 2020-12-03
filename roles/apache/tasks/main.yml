@@ -54,6 +54,7 @@
   loop:
     - ssl
   notify: reload apache
+  become: yes
   tags:
     - apache
     - apache_debug
@@ -72,8 +73,10 @@
 #   when: sestatus.rc != 0
 
 - debug:
-    msg: "{{ hosts }}"
+    msg:
+      - "{{ hosts }}"
     verbosity: 2
+  become: no
   tags:
     - never
     - apache_debug
