@@ -46,6 +46,7 @@
 - name: Query DNS for zone SOA
   ansible.builtin.set_fact:
     __zone_soa: "{{ lookup('community.general.dig', bind_zone + '/SOA') }}"
+    __zone_all: "{{ lookup('community.general.dig', bind_zone, 'qtype=NS', wantlist=True) }}"
   become: no
   when:
     - bind_zone is defined
@@ -57,6 +58,7 @@
 - name: Query DNS for reverse zone SOA
   ansible.builtin.set_fact:
     __reverse_zone_soa: "{{ lookup('community.general.dig', bind_reverse_zone + '/SOA') }}"
+    __reverse_zone_all: "{{ lookup('community.general.dig', bind_reverse_zone, 'qtype=NS', wantlist=True) }}"
   become: no
   when:
     - bind_reverse_zone is defined
@@ -109,6 +111,32 @@
     msg:
       - "{{ __reverse_zone_soa }}"
     verbosity: 2
+  become: no
+  when:
+    - __zone_soa is defined
+  tags:
+    - never
+    - bind_debug
+    - bind-debug
+
+- name: "Print Zone SOA"
+  debug:
+    msg:
+      - "{{ __zone_all }}"
+    verbosity: 4
+  become: no
+  when:
+    - __zone_soa is defined
+  tags:
+    - never
+    - bind_debug
+    - bind-debug
+
+- name: "Print Reverse Zone ALL"
+  debug:
+    msg:
+      - "{{ __reverse_zone_all }}"
+    verbosity: 4
   become: no
   when:
     - __zone_soa is defined
