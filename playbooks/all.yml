@@ -6,9 +6,9 @@
     - bloodymage.rebeldream.sshca_host_certs
     - bloodymage.rebeldream.openssh
     - bloodymage.rebeldream.ntp
+    - bloodymage.rebeldream.users
     - bloodymage.rebeldream.ownca_host_certs
     - bloodymage.rebeldream.global_packages
-    - bloodymage.rebeldream.users
     - bloodymage.rebeldream.sudo
     - bloodymage.rebeldream.skel
     - bloodymage.rebeldream.dotfiles
