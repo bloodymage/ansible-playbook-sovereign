@@ -37,7 +37,7 @@
 
 - name: "Update 'dovecot_password_databases' ldap"
   ansible.builtin.set_fact:
-    dovecot_auth_mechanisims: "{{ dovecot_password_databases + ['ldap'] }}"
+    dovecot_password_databases: "{{ dovecot_password_databases + ['ldap'] }}"
   when:
     - rebeldream_realm_identity_management_system == "samba"
   tags:
@@ -48,7 +48,7 @@
 
 - name: "Update 'dovecot_auth_mechanisms' oauth"
   ansible.builtin.set_fact:
-    dovecot_auth_mechanisims: "{{ ['gssapi'] + dovecot_auth_mechanisims + ['xoauth2'] }}"
+    dovecot_auth_mechanisms: "{{ ['gssapi'] + dovecot_auth_mechanisms + ['xoauth2'] }}"
   when:
     - rebeldream_realm_identity_management_system == "samba"
   tags:
