@@ -83,15 +83,6 @@ user_homeassistant:
   ssh_cert:
     - None
 
-user_odoo:
-  username: odoo
-  groups:
-    - users
-  id_number: 504
-  unix_home: /home/odoo
-  ssh_access_cert:
-    - root-everywhere
-
 user_vmail:
   username: vmail
   groups: []
@@ -100,6 +91,15 @@ user_vmail:
   ssh_access_cert: []
   ssh_cert:
     - None
+
+user_odoo:
+  username: odoo
+  groups: []
+  id_number: "{{ user_odoo_id_number }}"
+  unix_home: /home/odoo
+  ssh_access_cert:
+    - root-everywhere
+
 
 user_root: "{{ __user_root }}"
 

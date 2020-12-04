@@ -21,9 +21,9 @@
 
 - name: Create Keytab for Samba Users
   shell: >
-    samba-tool domain exportkeytab --principal "{{ item.spn }}/{{ item.host }}" "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"
+    samba-tool domain exportkeytab --principal "{{ item.spn }}/{{ item.host }}" "/tmp/{{ user.ansible_facts.username }}-{{ item.spn }}-{{ item.host }}.keytab"
   become: yes
-  loop: "{{ user.spns }}"
+  loop: "{{ user.ansible_facts.spns }}"
   when:
     - __samba_schema_master is defined
     - inventory_hostname == __samba_schema_master
@@ -41,11 +41,11 @@
 
 - name: "Fetch keytab"
   fetch:
-    src: "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"
-    dest: "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"
+    src: "/tmp/{{ user.ansible_facts.username }}-{{ item.spn }}-{{ item.host }}.keytab"
+    dest: "/tmp/{{ user.ansible_facts.username }}-{{ item.spn }}-{{ item.host }}.keytab"
     flat: yes
   become: yes
-  loop: "{{ user.spns }}"
+  loop: "{{ user.ansible_facts.spns }}"
   when:
     - __samba_schema_master is defined
     - item.spn is defined

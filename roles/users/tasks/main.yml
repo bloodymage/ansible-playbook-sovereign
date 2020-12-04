@@ -265,9 +265,20 @@
     - users_debug
     - users-debug
 
+- name: "Ensure we have user groups required by host role"
+  ansible.builtin.set_fact:
+    user_groups: "{{ user_groups + [ user_vmail_group ] }}"
+  when:
+    - inventory_hostname in groups ['mail_servers']
+  become: no
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
 - name: "Ensure we have users required by host role"
   ansible.builtin.set_fact:
-    users: "{{ users | union([ user_mythtv ]) }}"
+    users: "{{ users + [ user_mythtv ] }}"
   when:
     - inventory_hostname in groups ['mythtv']
   become: no
@@ -278,7 +289,7 @@
 
 - name: "Ensure we have users required by host role"
   ansible.builtin.set_fact:
-    users: "{{ users | union([ user_minidlna ]) }}"
+    users: "{{ users + [ user_minidlna ] }}"
   when:
     - inventory_hostname in groups ['minidlna_servers']
   become: no
@@ -289,7 +300,7 @@
 
 - name: "Ensure we have users required by host role"
   ansible.builtin.set_fact:
-    users: "{{ users | union([ user_git ]) }}"
+    users: "{{ users + [ user_git ] }}"
   when:
     - inventory_hostname in groups ['git_servers']
   become: no
@@ -300,7 +311,7 @@
 
 - name: "Ensure we have users required by host role"
   ansible.builtin.set_fact:
-    users: "{{ users | union([ user_homeassistant ]) }}"
+    users: "{{ users + [ user_homeassistant ] }}"
   when:
     - inventory_hostname in groups ['homeassistant']
   become: no
@@ -311,7 +322,7 @@
 
 - name: "Ensure we have users required by host role"
   ansible.builtin.set_fact:
-    users: "{{ users | union([ user_vmail ]) }}"
+    users: "{{ users + [ user_vmail ] }}"
   when:
     - inventory_hostname in groups ['mail_servers']
   become: no
@@ -320,17 +331,35 @@
     - users_debug
     - users-debug
 
-- name: Create groups
+- name: Create groups with ID numbers
   group:
+    name: "{{ item.name }}"
+    state: present
+    system: "{{ item.system | default('no') }}"
+    gid: "{{ item.gid | int }}"
+  loop: "{{ user_groups + __user_groups }}"
+  become: yes
+  when:
+    - item.gid is defined
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
+- name: Create groups without ID numbers
+  ansible.builtin.group:
     name: "{{ item.name }}"
     state: present
     system: "{{ item.system | default('no') }}"
   loop: "{{ user_groups + __user_groups }}"
   become: yes
+  when:
+    - item.gid is not defined
   tags:
     - users
     - users_debug
     - users-debug
+
 
 - name: Print login users
   ansible.builtin.debug:

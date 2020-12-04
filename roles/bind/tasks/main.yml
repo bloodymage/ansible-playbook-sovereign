@@ -382,6 +382,7 @@
     group: "{{ bind_group }}"
     mode: "0644"
   become: yes
+  register: forwardzone_refresh
   when:
     - bind_zone is defined
   notify: restart bind
@@ -399,6 +400,7 @@
     group: "{{ bind_group }}"
     mode: "0644"
   become: yes
+  register: reversezone_refresh
   when:
     - bind_reverse_zone is defined
   notify: restart bind
@@ -419,6 +421,23 @@
   loop:
     - "{{ bind_zone_dir }}"
     - "{{ bind_cache_dir }}"
+  tags:
+    - bind
+    - bind_debug
+    - bind-debug
+    - bind-zones
+
+- name: "Delete Bind journal files"
+  file:
+    path: "{{ item }}"
+    state: absent
+  become: yes
+  loop:
+    - "{{ bind_zone_dir }}/db.{{ bind_zone }}.jnl"
+    - "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}.jnl"
+  when:
+    - bind_zone is defined
+    - bind_reverse_zone is defined
   tags:
     - bind
     - bind_debug

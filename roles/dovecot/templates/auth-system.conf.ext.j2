@@ -22,5 +22,5 @@ result_success = return-ok
 # Static settings generated from template <doc/wiki/UserDatabase.Static.txt>
 userdb {
 driver = static
-args = allow_all_users=yes uid=5000 gid=5000 home=/var/mail/vmail/%d/%n
+args = allow_all_users=yes uid={{ user_vmail_id_number }} gid={{ user_vmail_id_number }} home=/var/mail/vmail/%d/%n
 }
