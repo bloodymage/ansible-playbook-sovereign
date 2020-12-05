@@ -44,6 +44,7 @@
     msg:
       - "Hostname: {{ inventory_hostname }}"
     verbosity: 2
+  become: no
   tags:
     - never
     - hostname_debug
@@ -64,6 +65,7 @@
   routeros_command:
     commands:
       - /system identity print
+  become: no
   when:
     - ansible_network_os is defined
     - ansible_network_os == 'routeros'

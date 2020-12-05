@@ -1,14 +1,29 @@
+#- name: Create groups based on the OS
+#  group_by:
+#    key: 
+
 - hosts: all:!localhost
+  strategy: free
   roles:
     - bloodymage.rebeldream.hostname
     - bloodymage.rebeldream.hosts
     - bloodymage.rebeldream.system_upgrade
+
+- hosts: all:!localhost
+  roles:
     - bloodymage.rebeldream.sshca_host_certs
     - bloodymage.rebeldream.openssh
     - bloodymage.rebeldream.ntp
+
+- hosts: all:!localhost
+  strategy: free
+  roles:
     - bloodymage.rebeldream.users
     - bloodymage.rebeldream.ownca_host_certs
     - bloodymage.rebeldream.global_packages
+
+- hosts: all:!localhost
+  roles:
     - bloodymage.rebeldream.sudo
     - bloodymage.rebeldream.skel
     - bloodymage.rebeldream.dotfiles

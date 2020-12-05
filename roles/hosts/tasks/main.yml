@@ -46,12 +46,13 @@
     msg:
       - "Hostname: {{ inventory_hostname }}"
     verbosity: 1
+  become: no
   tags:
     - never
     - hosts_debug
     - hosts-debug
 
-- name: "{{ ansible_os_family }}: Set proper hosts file"
+- name: "Set proper hosts file"
   template:
     src: "hosts.j2"
     dest: /etc/hosts
@@ -61,6 +62,8 @@
   become: yes
   when:
     - inventory_hostname != 'localhost'
+    - ansible_os_family != "Windows"
+    - ansible_network_os is not defined
   tags:
     - hosts
     - hosts_debug

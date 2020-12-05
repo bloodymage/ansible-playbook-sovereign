@@ -4,6 +4,7 @@ rebeldream_realm_identity_management_system: ""
 rebeldream_smart_card_login: no
 rebeldream_overwrite_password: no
 rebeldream_use_source_code_repos: no
+rebeldream_password_length: "42"
 
 # Organization Info
 rebeldream_org_name: "{{ ansible_domain.split('.')[1] }}"

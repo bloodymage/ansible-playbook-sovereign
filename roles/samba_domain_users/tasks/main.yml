@@ -130,7 +130,7 @@
 
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
-    samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + rebeldream_password_length + ' nosymbols=true') }}"
   vars:
     password_store_id: "{{ ansible_domain }}/domain_users/administrator/password"
   when:
@@ -142,6 +142,81 @@
     - samba-domain-users-debug
     - recreate-realm
     - recreate-realm-debug
+
+- name: "Get Users' password from password-store"
+  ansible.builtin.set_fact:
+    username: "{{ item.username }}"
+    groupname: "{{ item.groupname | default(none) }}"
+    id_number: "{{ item.id_number | default(none) }}"
+    password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + rebeldream_password_length + ' nosymbols=true') }}"
+    given_name: "{{ item.given_name | default(item.username | title) }}"
+    surname: "{{ item.surname | default(none) }}"
+    initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
+    job_title: "{{ item.job_title | default(none) }}"
+    department: "{{ item.department | default(none) }}"
+    company: "{{ item.company | default(none) }}"
+    description: "{{ item.description | default(none) }}"
+    physical_delivery_office: "{{ item.physical_delivery_office | default(none) }}"
+    gecos: "{{ item.gecos | default(none) }}"
+    email_aliases: "{{ item.email_aliases | default(none) }}"
+    email_alt: "{{ item.email_alt | default(none) }}"
+    gpg_keys: "{{ item.gpg_keys | default(none) }}"
+    account_expire: "{{ item.account_expire | default(none) }}"
+    spns: "{{ item.spns | default(none) }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/domain_users/{{ item.username }}/password"
+  loop: "{{ domain_users }}"
+  no_log: yes
+  become: no
+  delegate_to: localhost
+  register: domain_user_list
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: "Get Domain Users"
+  ansible.builtin.set_fact:
+    __domain_users: "{{ domain_user_list.results }}"
+  become: no
+  delegate_to: localhost
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "Username:                        {{ item.ansible_facts.username }}"
+      - "Groupname:                       {{ item.ansible_facts.groupname }}"
+      - "id_number:                       {{ item.ansible_facts.id_number }}"
+      - "password:                        {{ item.ansible_facts.password }}"
+      - "Given Name:                      {{ item.ansible_facts.given_name }}"
+      - "Surname:                         {{ item.ansible_facts.surname }}"
+      - "Initials:                        {{ item.ansible_facts.initials }}"
+      - "Job Title:                       {{ item.ansible_facts.job_title }}"
+      - "Department:                      {{ item.ansible_facts.department }}"
+      - "Company:                         {{ item.ansible_facts.company }}"
+      - "Description                      {{ item.ansible_facts.description }}"
+      - "Physical Delivery Office:        {{ item.ansible_facts.physical_delivery_office }}"
+      - "gecos:                           {{ item.ansible_facts.gecos }}"
+      - "email_aliases:                   {{ item.ansible_facts.email_aliases }}"
+      - "email_alt:                       {{ item.ansible_facts.email_alt }}"
+      - "gpg_keys:                        {{ item.ansible_facts.gpg_keys }}"
+      - "account_expire:                  {{ item.ansible_facts.account_expire }}"
+      - "spns:                            {{ item.ansible_facts.spns }}"
+    verbosity: 1
+  loop: "{{ __domain_users }}"
+  loop_control:
+    index_var: index
+  become: yes
+  tags:
+    - never
+    - samba_domain_users_debug
+    - samba-domain-users-debug
 
 - name: Get Samba Groups
   command: "samba-tool group list"
@@ -300,23 +375,23 @@
 # ==================================================================================================
 - name: Add Samba Users
   shell: >
-    samba-tool user create "{{ item.username }}" "{{ item.password }}"
-    --unix-home "/home/{{ ansible_domain.split('.')[0] }}/{{item.username }}"
-    --uid-number "{{ item.id_number }}"
-    --gid-number "{{ item.id_number }}"
-    --given-name "{{ item.given_name }}"
-    --surname "{{ item.surname }}"
-    --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
+    samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
+    --unix-home "/home/{{ ansible_domain.split('.')[0] }}/{{item.ansible_facts.username }}"
+    --uid-number "{{ item.ansible_facts.id_number }}"
+    --gid-number "{{ item.ansible_facts.id_number }}"
+    --given-name "{{ item.ansible_facts.given_name }}"
+    --surname "{{ item.ansible_facts.surname }}"
+    --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
     --nis-domain "{{ ansible_domain.split('.')[0] }}"
-    --mail-address "{{ item.username }}{{ samba_email_domain }}"
+    --mail-address "{{ item.ansible_facts.username }}{{ samba_email_domain }}"
     --username Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_users }}"
+  loop: "{{ __domain_users }}"
   when:
-    - item.given_name is defined
-    - item.surname != ""
-    - item.username not in existing_user_list.stdout_lines
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.surname != ""
+    - item.ansible_facts.username not in existing_user_list.stdout_lines
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
@@ -329,22 +404,23 @@
 
 - name: Add Samba Users
   shell: >
-    samba-tool user create "{{ item.username }}" "{{ item.password }}"
-    --unix-home "/home/{{ ansible_domain.split('.')[0] }}/{{item.username }}"
-    --uid-number "{{ item.id_number }}"
-    --gid-number "{{ item.id_number }}"
-    --given-name "{{ item.given_name }}"
-    --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
+    samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
+    --unix-home "/home/{{ ansible_domain.split('.')[0] }}/{{item.ansible_facts.username }}"
+    --uid-number "{{ item.ansible_facts.id_number }}"
+    --gid-number "{{ item.ansible_facts.id_number }}"
+    --given-name "{{ item.ansible_facts.given_name }}"
+    --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
     --nis-domain "{{ ansible_domain.split('.')[0] }}"
-    --mail-address "{{ item.username }}{{ samba_email_domain }}"
+    --mail-address "{{ item.ansible_facts.username }}{{ samba_email_domain }}"
     --username Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_users }}"
+  loop: "{{ __domain_users }}"
   when:
-    - item.given_name is defined
-    - item.surname == ""
-    - item.username not in existing_user_list.stdout_lines
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.surname == ""
+    - item.ansible_facts.username not in existing_user_list.stdout_lines
+    - item.ansible_facts.id_number != ""
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
@@ -363,14 +439,16 @@
 # ==================================================================================================
 - name: Add Samba Users
   shell: >
-    samba-tool user create "{{ item.username }}" "{{ item.password }}"
-  become: yes
-  loop: "{{ domain_users }}"
-  when:
-    - inventory_hostname == __samba_schema_master
-    - item.username not in existing_user_list.stdout_lines
+    samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
+  loop: "{{ __domain_users }}"
   ignore_errors: yes
   delegate_to: "{{ __samba_schema_master }}"
+  run_once: yes
+  become: yes
+  when:
+    - inventory_hostname == __samba_schema_master
+    - item.ansible_facts.username not in existing_user_list.stdout_lines
+    - item.ansible_facts.id_number == ""
   tags:
     - samba_domain_users
     - samba-domain-users
@@ -381,12 +459,12 @@
 
 - name: Set expiry for Samba Users
   shell: >
-    samba-tool user setexpiry "{{ item.account_expire }}" "{{ item.username }}"
+    samba-tool user setexpiry "{{ item.ansible_facts.account_expire }}" "{{ item.ansible_facts.username }}"
   become: yes
-  loop: "{{ domain_users }}"
+  loop: "{{ __domain_users }}"
   when:
     - inventory_hostname == __samba_schema_master
-    - item.account_expire is defined
+    - item.ansible_facts.account_expire != ""
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
@@ -399,13 +477,13 @@
 
 - name: "Generate user SPNs"
   include: generate_spns.yml
-  loop: "{{ domain_users }}"
+  loop: "{{ __domain_users }}"
   loop_control:
     loop_var: user
   when:
     - __samba_schema_master is defined
     - inventory_hostname == __samba_schema_master
-    - user.spns is defined
+    - user.ansible_facts.spns != ""
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
