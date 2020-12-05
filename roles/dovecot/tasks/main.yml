@@ -29,6 +29,7 @@
   package:
     name: "{{ packages }}"
     state: present
+  become: yes
   tags:
     - dovecot
     - dovecot_debug
@@ -38,6 +39,7 @@
 - name: "Update 'dovecot_password_databases' ldap"
   ansible.builtin.set_fact:
     dovecot_password_databases: "{{ dovecot_password_databases + ['ldap'] }}"
+  become: no
   when:
     - rebeldream_realm_identity_management_system == "samba"
   tags:
@@ -49,6 +51,7 @@
 - name: "Update 'dovecot_auth_mechanisms' oauth"
   ansible.builtin.set_fact:
     dovecot_auth_mechanisms: "{{ ['gssapi'] + dovecot_auth_mechanisms + ['xoauth2'] }}"
+  become: no
   when:
     - rebeldream_realm_identity_management_system == "samba"
   tags:
@@ -56,6 +59,21 @@
     - dovecot_debug
     - dovecot-debug
     - install-packages
+
+- name: "Get Users' password from password-store"
+  ansible.builtin.set_fact:
+    __mail_user: "{{ mail_user }}"
+    __mail_user_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + rebeldream_password_length + ' nosymbols=true') }}"
+  vars:
+    password_store_id: "{{ ansible_domain }}/domain_users/{{ mail_user }}/password"
+  no_log: yes
+  become: no
+  delegate_to: localhost
+  register: domain_user_list
+  tags:
+    - dovecot
+    - dovecot_debug
+    - dovecot-debug
 
 # ==================================================================================================
 #

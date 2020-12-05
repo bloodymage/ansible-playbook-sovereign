@@ -28,7 +28,7 @@ hosts = dc.{{ ansible_domain }}:389
 dn = cn={{ mail_user }},cn=users,dc=olympus,dc=drbr,dc=org
 
 # Password for LDAP server, if dn is specified.
-dnpass = {{ ldap_mail_user_password | default(mail_user_password) }}
+dnpass = {{ __mail_user_password }}
 
 # Use SASL binding instead of the simple binding. Note that this changes
 # ldap_version automatically to be 3 if it's lower.
