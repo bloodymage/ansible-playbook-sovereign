@@ -81,9 +81,9 @@
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
     username: "{{ item.username }}"
-    groupname: "{{ item.groupname | default(none) }}"
-    id_number: "{{ item.id_number | default(none) }}"
-    password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + item.password_length | default(rebeldream_password_length) + ' nosymbols=true') }}"
+    groupname: "{{ item.groupname }}"
+    id_number: "{{ item.id_number }}"
+    password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true') }}"
     given_name: "{{ item.given_name | default(item.username | title) }}"
     surname: "{{ item.surname | default(none) }}"
     initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
@@ -97,19 +97,23 @@
     email_alt: "{{ item.email_alt | default(none) }}"
     gpg_keys: "{{ item.gpg_keys | default(none) }}"
     account_expire: "{{ item.account_expire | default(none) }}"
-    spns: "{{ item.spns | default(none) }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/domain_users/{{ item.username }}/password"
+    __password_store_id: "{{ ansible_domain }}/domain_users/{{ item.username }}/password"
+    __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
   loop: "{{ domain_users }}"
   no_log: yes
   become: no
   delegate_to: localhost
   register: __domain_user_list
+  when:
+    - item.id_number is defined
+    - item.id_number >= rebeldream_min_domain_id_number
+    - item.spns is not defined
   tags:
-    - samba_domain_users
-    - samba-domain-users
-    - samba_domain_users_debug
-    - samba-domain-users-debug
+    - ownca_user_certs
+    - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 - name: "Get Domain Users"
   ansible.builtin.set_fact:
@@ -117,10 +121,10 @@
   become: no
   delegate_to: localhost
   tags:
-    - samba_domain_users
-    - samba-domain-users
-    - samba_domain_users_debug
-    - samba-domain-users-debug
+    - ownca_user_certs
+    - ownca-user-certs
+    - ownca_user_certs_debug
+    - ownca-user-certs-debug
 
 # ==================================================================================================
 #
@@ -142,7 +146,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.username is defined
-    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -160,7 +164,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.username is defined
-    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -178,7 +182,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.username is defined
-    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -187,7 +191,7 @@
 
 - name: "Create SSL PKCS#12 Key Directories"
   file:
-    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.username }}/.pki/pkcs12'
+    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/pkcs12'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -196,7 +200,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
-    - item.ansible_facts.username is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -224,6 +228,7 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.username is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -261,6 +266,7 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -291,6 +297,7 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -321,6 +328,7 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -351,6 +359,7 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -381,6 +390,7 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -411,6 +421,7 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -431,6 +442,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -446,6 +458,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -461,6 +474,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -479,6 +493,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   delegate_to: localhost
   tags:
     - ownca_user_certs
@@ -498,6 +513,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   delegate_to: localhost
   tags:
     - ownca_user_certs
@@ -517,6 +533,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   delegate_to: localhost
   tags:
     - ownca_user_certs
@@ -535,6 +552,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -552,6 +570,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -569,6 +588,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -592,6 +612,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -615,6 +636,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -638,6 +660,7 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
     - ownca-user-certs
