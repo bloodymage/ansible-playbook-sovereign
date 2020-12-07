@@ -1,16 +1,8 @@
----
-# ==================================================================================================
-#
-# https://wiki.mikrotik.com/wiki/Manual:Create_Certificates
-#
-# ==================================================================================================
 - name: "Install packages"
   package:
     name: "{{ packages }}"
     state: present
   become: yes
-  delegate_to: localhost
-  run_once: yes
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -25,8 +17,7 @@
 
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
-  become: no
-  delegate_to: localhost
+  become: yes
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -50,15 +41,13 @@
 # ==================================================================================================
 - name: "Create SSL Directories"
   file:
-    path: '{{ ownca_hosts_directory }}/{{ item.name }}'
+    path: "{{ ownca_etc }}/{{ item.name }}"
     state: directory
     owner: root
     group: root
     mode: "{{ item.mode }}"
-  become: no
+  become: yes
   loop: "{{ ownca_host_certs_directories }}"
-  delegate_to: localhost
-  run_once: yes
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -89,15 +78,14 @@
 
 - name: Generate Host Private Key
   openssl_privatekey:
-    path: '{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key'
+    path: '{{ ownca_etc }}/private/{{ inventory_hostname }}.key'
     type: '{{ ownca_privatekey_type }}'
     size: 4096
     owner: root
     group: ssl-cert
     mode: '0640'
     force: no
-  become: no
-  delegate_to: localhost
+  become: yes
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -116,11 +104,10 @@
       - "common_name: {{ inventory_hostname }}"
       - "key_usage: {{ ownca_host_certs_key_usage }}"
       - "extended_key_usage: {{ ownca_host_certs_extended_key_usage }}"
-      - "privatekey_path: {{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key"
+      - "privatekey_path: {{ ownca_etc }}/private/{{ inventory_hostname }}.key"
       - "subject_alt_name: {{ ownca_host_certs_subject_alt_name }}"
     verbosity: 1
   become: no
-  delegate_to: localhost
   tags:
     - never
     - ownca_host_certs_debug
@@ -128,7 +115,7 @@
 
 - name: Generate Host CSR
   community.crypto.openssl_csr:
-    path: "{{ ownca_hosts_directory }}/csr/{{ inventory_hostname }}.csr"
+    path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
     mode: "0644"
     owner: root
     group: root
@@ -142,10 +129,9 @@
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_host_certs_extended_key_usage }}"
     extended_key_usage_critical: yes
-    privatekey_path: "{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key"
+    privatekey_path: "{{ ownca_etc }}/private/{{ inventory_hostname }}.key"
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
-  become: no
-  delegate_to: localhost
+  become: yes
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -159,6 +145,19 @@
 #  
 #
 # ==================================================================================================
+- name: Fetch CSRs.
+  fetch:
+    src: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
+    dest: "{{ ownca_hosts_directory }}/csr/"
+    flat: yes
+  become: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
 - name: Generate Host Certificate
   community.crypto.x509_certificate:
     path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
@@ -245,110 +244,138 @@
 #  
 #
 # ==================================================================================================
-# # ======================================================================
-# #
-# # Temporarily allow ftp access to upload cert
-# #
-# # ======================================================================
-# - name: Allow access to ftp
-#   routeros_command:
-#     commands:
-#       - /ip service enable ftp
+- name: Copy Host Certificate back to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop:
+    - "{{ inventory_hostname }}"
+    - "{{ inventory_hostname }}-chain"
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
 
+- name: Copy domain controllers' certificate back to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
+  when:
+    - rebeldream_realm_identity_management_system != ""
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
 
-# - name: Copy Host Certificate back to server.
-#   copy:
-#     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
-#     dest: "/usr/local/share/ca-certificates/"
-#   become: yes
-#   loop:
-#     - "{{ inventory_hostname }}"
-#     - "{{ inventory_hostname }}-chain"
-#   notify: restart all
-#   tags:
-#     - ownca_host_certs
-#     - ownca-host-certs
-#     - ownca_host_certs_debug
-#     - ownca-host-certs-debug
-#     - ownca-all
+- name: Copy domain controllers' certificate chain to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
+  when:
+    - rebeldream_realm_identity_management_system != ""
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
 
+- name: Copy CA Certificates to server.
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "/usr/local/share/ca-certificates/"
+  loop:
+    - "{{ rebeldream_org_name }}-root-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+  become: yes
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
 
-# - name: Copy CA Certificates to server.
-#   copy:
-#     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
-#     dest: "/usr/local/share/ca-certificates/"
-#   loop:
-#     - "{{ rebeldream_org_name }}-root-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
-#   become: yes
-#   notify: restart all
-#   tags:
-#     - ownca_host_certs
-#     - ownca-host-certs
-#     - ownca_host_certs_debug
-#     - ownca-host-certs-debug
-#     - ownca-all
+- name: Copy CRLs to server.
+  copy:
+    src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+    dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+  loop: "{{ ownca_certificate_authorities }}"
+  become: yes
+  tags:
+    - ownca_crl
+    - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
 
-# - name: Copy CRLs to server.
-#   copy:
-#     src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-#     dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-#   loop: "{{ ownca_certificate_authorities }}"
-#   become: yes
-#   tags:
-#     - ownca_crl
-#     - ownca-crl
-#     - ownca_crl_debug
-#     - ownca-crl-debug
+- name: Convert CA Certs to DER
+  command: "openssl x509 -in {{ item }}.crt -inform PEM -out {{ item }}.der -outform DER"
+  become: no
+  loop:
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca"
+  delegate_to: localhost
+  run_once: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
 
-# # # ======================================================================
-# # #
-# # # Tasks:
-# # #  
-# # #
-# # # ======================================================================
-# # - name: Copy certificates back to server.
-# #   shell:
-# #     "{{ item }}"
-# #   with_items:
-# #     - "curl -T {{ ca_directory }}/certs/{{ ansible_hostname }}.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
-# #     - "curl -T {{ ca_directory }}/private/{{ ansible_hostname }}.key ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}" 
-# #     - "curl -T {{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-root-ca.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
-# #     - "curl -T {{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
-# #     - "curl -T {{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-component-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
-
-# # # ======================================================================
-# # #
-# # # Disable ftp access
-# # #
-# # # ======================================================================
-# # - name: Disable access to ftp
-# #   routeros_command:
-# #     commands:
-# #       - /ip service disable ftp
-
-# # # ======================================================================
-# # #
-# # # Temporarily allow ftp access to upload cert
-# # #
-# # # ======================================================================
-# # - name: Allow Import Certs
-# #   routeros_command:
-# #     commands:
-# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_hostname }}.crt"
-# #       - "/certificate import file-name={{ ca_directory }}/private/{{ ansible_hostname }}.key"
-# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-root-ca.crt"
-# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-ca-chain.crt"
-# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-component-ca-chain.crt"
-
+- name: Copy CA Certificates Samba File Server.
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "/srv/samba/pki/"
+  loop:
+    - "{{ rebeldream_org_name }}-root-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-root-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.der"
+  become: yes
+  when:
+    - inventory_hostname == groups['samba_file_servers'][0] | default([])
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all

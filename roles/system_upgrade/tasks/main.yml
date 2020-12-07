@@ -6,12 +6,13 @@
       vars:
         params:
           files:
-            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_network_os.split('.')[2] | default(none) }}.yml"
             - "{{ ansible_lsb.id | lower }}.yml"
             - "{{ ansible_distribution | lower }}.yml"
             - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
             - "{{ ansible_os_family | lower }}_family.yml"
             - "{{ ansible_system | lower }}.yml"
+            - main.yml
           paths:
             - "vars"
       become: no
@@ -21,105 +22,12 @@
         - system_upgrade_debug
         - system-upgrade-debug
 
-- name: Ensure apt repos are up to date
-  block:
-    - name: "Ensure Raspbian Raspberry Pi Repo is current"
-      template:
-        src: "raspi.list.j2"
-        dest: /etc/apt/sources.list.d/raspi.list
-        owner: root
-        group: root
-        mode: '0644'
-      become: yes
-      when:
-        - ansible_lsb.id is defined and ansible_lsb.id == "Raspbian"
-      tags:
-        - system_upgrade
-        - system-upgrade
-        - system_upgrade_debug
-        - system-upgrade-debug
+- name: Include Family Tasks
+  include: "{{ ansible_family | lower }}.yml"
+  when:
+    - ansible_network_os is not defined
 
-    - name: "Ensure sources.list is current"
-      template:
-        src: "sources.list.j2"
-        dest: /etc/apt/sources.list
-        owner: root
-        group: root
-        mode: '0644'
-      become: yes
-      tags:
-        - system_upgrade
-        - system-upgrade
-        - system_upgrade_debug
-        - system-upgrade-debug
-
-# ==================================================================================================
-#
-# Task: Update all packages (Safe upgrade)
-#
-# Updates all packages that do not require removal of other packages to complete the upgrade
-# process.  We do this first, to minimize the impact of the full upgrade done next.
-#
-# ==================================================================================================
-- name: Upgrade all packages
-  block:
-    - name: "Perform Safe Upgrade"
-      apt:
-        update_cache: yes
-        upgrade: safe
-        cache_valid_time: 86400 #One day
-      become: yes
-      tags:
-        - system_upgrade
-        - system-upgrade
-        - system_upgrade_debug
-        - system-upgrade-debug
-
-    - name: "Perform Full Upgrade"
-      apt:
-        update_cache: yes
-        upgrade: full
-        cache_valid_time: 86400 #One day
-      become: yes
-      tags:
-        - system_upgrade
-        - system-upgrade
-        - system_upgrade_debug
-        - system-upgrade-debug
-
-# ==================================================================================================
-#
-# Clean up tasks
-#
-#
-#
-# ==================================================================================================
-- name: "Cleanup system"
-  block:
-    - name: "Remove useless packages from the cache"
-      apt:
-        autoclean: yes
-      become: yes
-      tags:
-        - system_upgrade
-        - system-upgrade
-        - system_upgrade_debug
-        - system-upgrade-debug
-
-    - name: "Remove dependencies that are no longer required"
-      apt:
-        autoremove: yes
-      become: yes
-      tags:
-        - system_upgrade
-        - system-upgrade
-        - system_upgrade_debug
-        - system-upgrade-debug
-
-# - name: Reboot Hosts One at a time
-#   include: "reboot_debian_hosts.yaml"
-#   loop: "{{ hosts }}"
-#   loop_control:
-#     loop_var: host
-#   tags:
-#     - system-upgrade
+- name: Include NetworkOS tasks
+  include: "{{ ansible_network_os.split('.')[2] | lower }}.yml"
+  when:
+    - ansible_network_os is defined

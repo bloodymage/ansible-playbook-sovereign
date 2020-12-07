@@ -1,6 +1,10 @@
-#- name: Create groups based on the OS
-#  group_by:
-#    key: 
+- hosts: all
+  tasks:
+    - name: Create groups based on the OS
+      group_by:
+        key: "{{ ansible_network_os.split('.')[2] | lower }}"
+      when:
+        - ansible_network_os is defined
 
 - hosts: all:!localhost
   strategy: free
@@ -9,7 +13,7 @@
     - bloodymage.rebeldream.hosts
     - bloodymage.rebeldream.system_upgrade
 
-- hosts: all:!localhost
+- hosts: all:!localhost:!routeros
   roles:
     - bloodymage.rebeldream.sshca_host_certs
     - bloodymage.rebeldream.openssh
@@ -20,10 +24,10 @@
   roles:
     - bloodymage.rebeldream.users
     - bloodymage.rebeldream.ownca_host_certs
-    - bloodymage.rebeldream.global_packages
 
-- hosts: all:!localhost
+- hosts: all:!localhost:!routeros
   roles:
+    - bloodymage.rebeldream.global_packages
     - bloodymage.rebeldream.sudo
     - bloodymage.rebeldream.skel
     - bloodymage.rebeldream.dotfiles
