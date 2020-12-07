@@ -115,10 +115,6 @@
 
 - name: Generate Host CSR
   community.crypto.openssl_csr:
-    path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
-    mode: "0644"
-    owner: root
-    group: root
     country_name: "{{ ownca_country_code | default(country) }}"
     state_or_province_name: "{{ rebeldream_region | default(region) }}"
     locality_name: "{{ loc_city | default(none) }}"
@@ -131,6 +127,12 @@
     extended_key_usage_critical: yes
     privatekey_path: "{{ ownca_etc }}/private/{{ inventory_hostname }}.key"
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
+    path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
+    mode: "0644"
+    owner: root
+    group: root
+    backup: yes
+    force: "{{ __ownca_regenerate | default(no) }}"
   become: yes
   tags:
     - ownca_host_certs

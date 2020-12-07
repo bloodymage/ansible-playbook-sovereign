@@ -274,6 +274,7 @@
     create_subject_key_identifier: yes
     owner: "{{ ownca_user }}"
     group: "{{ ownca_user }}"
+    backup: yes
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   run_once: yes
@@ -303,7 +304,7 @@
   when:
     - inventory_hostname == "localhost"
     - item.provider == "selfsigned"
-  register: success
+  register: __new_root
   tags:
     - ownca
     - ownca_debug
@@ -313,7 +314,7 @@
 - name: Check if Selfsigned Certificate was a success
   debug:
     msg:
-      - "{{ success }}"
+      - "{{ __new_root }}"
     verbosity: 1
   tags:
     - never
@@ -324,7 +325,9 @@
   set_fact:
     __ownca_force_regeneration: yes
   when:
-    - success.changed
+    - __new_root.changed
+    - __ownca_regenerate is defined
+    - __ownca_regenetate
   tags:
     - ownca
     - ownca_debug
