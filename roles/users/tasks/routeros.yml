@@ -1,0 +1,13 @@
+---
+- name: Configure RouterOS Users
+  community.network.routeros_command:
+    commands:
+      #- /user add name={{ item.username }} password= group=full
+      - /user remove admin
+      #- /user set 0 allowed-addres=""
+  register: routeros_resources
+  tags:
+    - users
+    - users_debug
+    - users-debug
+    - install-packages
