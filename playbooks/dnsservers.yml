@@ -1,3 +1,11 @@
+- hosts: all
+  tasks:
+    - name: Create groups based on the OS
+      group_by:
+        key: "{{ ansible_network_os.split('.')[2] | lower }}"
+      when:
+        - ansible_network_os is defined
+
 - hosts: dns_servers
   roles:
     - bloodymage.rebeldream.bind
@@ -7,7 +15,7 @@
   roles:
     - bloodymage.rebeldream.dns_forwardzones
 
-- hosts: all:!localhost
+- hosts: all:!localhost:!routeros
   ignore_unreachable: yes
   roles:
     - bloodymage.rebeldream.dns_reversezones

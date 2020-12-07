@@ -52,8 +52,8 @@
   file:
     path: '{{ ownca_hosts_directory }}/{{ item.name }}'
     state: directory
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: pecan
+    group: pecan
     mode: "{{ item.mode }}"
   become: no
   loop: "{{ ownca_host_certs_directories }}"
@@ -92,8 +92,8 @@
     path: '{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key'
     type: '{{ ownca_privatekey_type }}'
     size: 4096
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: pecan
+    group: pecan
     mode: '0640'
     force: no
   become: no
@@ -130,8 +130,8 @@
   community.crypto.openssl_csr:
     path: "{{ ownca_hosts_directory }}/csr/{{ inventory_hostname }}.csr"
     mode: "0644"
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: pecan
+    group: pecan
     country_name: "{{ ownca_country_code | default(country) }}"
     state_or_province_name: "{{ rebeldream_region | default(region) }}"
     locality_name: "{{ loc_city | default(none) }}"
