@@ -6,7 +6,7 @@
       vars:
         params:
           files:
-            - "{{ ansible_network_os.split('.')[2] | default(none) }}.yml"
+            - "{{ ansible_network_os | default(none) }}.yml"
             - "{{ ansible_lsb.id | lower }}.yml"
             - "{{ ansible_distribution | lower }}.yml"
             - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
@@ -23,7 +23,7 @@
         - system-upgrade-debug
 
 - name: Include Family Tasks
-  include: "{{ ansible_family | lower }}.yml"
+  include: "{{ ansible_os_family | lower }}.yml"
   when:
     - ansible_network_os is not defined
 

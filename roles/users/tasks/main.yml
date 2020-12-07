@@ -113,7 +113,7 @@
     - users-debug
 
 - name: Include Family Tasks
-  include: "{{ ansible_family | lower }}.yml"
+  include: "{{ ansible_os_family | lower }}.yml"
   when:
     - ansible_network_os is not defined
 
