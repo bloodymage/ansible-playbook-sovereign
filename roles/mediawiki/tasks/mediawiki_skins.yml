@@ -9,7 +9,7 @@
     - host.content is defined
     - host.content == "mediawiki"
     - host.enabled is defined
-    - host.enabled 
+    - host.enabled
   loop: "{{ mediawiki_skins }}"
   become: yes
   become_user: www-data

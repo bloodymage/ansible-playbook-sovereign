@@ -43,7 +43,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - mediawiki
     - mediawiki_debug
@@ -55,14 +55,14 @@
   community.general.apache2_module:
     state: present
     name: "{{ item }}"
-  loop: "{{ mediawiki_apache_modules}}"
+  loop: "{{ mediawiki_apache_modules }}"
   notify: restart apache
   when:
     - hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - mediawiki
     - mediawiki_debug
@@ -71,7 +71,7 @@
 
 - name: "Install Mediawiki Site"
   git:
-    repo: "https://gerrit.wikimedia.org/r/mediawiki/core.git" 
+    repo: "https://gerrit.wikimedia.org/r/mediawiki/core.git"
     dest: "/srv/www/{{ item.name }}/w"
     force: yes
     depth: 1
@@ -85,7 +85,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - mediawiki
     - mediawiki_debug
@@ -106,7 +106,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - mediawiki
     - mediawiki_debug
@@ -127,7 +127,7 @@
     - mediawiki-debug
     - mediawiki-install
     - websites
-  
+
 - name: "Update Extensions"
   command: "git submodule update --init --recursive"
   args:
@@ -140,7 +140,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - mediawiki
     - mediawiki_debug
@@ -174,7 +174,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - mediawiki
     - mediawiki_debug
@@ -188,6 +188,7 @@
     dest: "/srv/www/{{ item.name }}/w/ldap.json"
     owner: www-data
     group: www-data
+    mode: "0644"
   become: yes
   loop: "{{ hosts }}"
   when:
@@ -210,6 +211,7 @@
     dest: "/srv/www/{{ item.name }}/w/LocalSettings.php"
     owner: www-data
     group: www-data
+    mode: "0644"
   become: yes
   loop: "{{ hosts }}"
   when:
@@ -217,7 +219,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - mediawiki
     - mediawiki-config
@@ -234,7 +236,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   become: yes
   become_user: www-data
   loop: "{{ hosts }}"
@@ -249,6 +251,9 @@
   template:
     src: "apache-site.conf.j2"
     dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
   loop: "{{ hosts }}"
   become: yes
   when:
@@ -256,7 +261,7 @@
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   notify: reload apache
   tags:
     - mediawiki
