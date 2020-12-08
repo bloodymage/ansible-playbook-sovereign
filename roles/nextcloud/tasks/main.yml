@@ -30,7 +30,7 @@
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - nextcloud
     - nextcloud_debug
@@ -56,7 +56,7 @@
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - nextcloud
     - nextcloud_debug
@@ -80,7 +80,7 @@
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - nextcloud
     - nextcloud_debug
@@ -126,7 +126,7 @@
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
-    - item.enabled 
+    - item.enabled
   tags:
     - nextcloud
     - nextcloud_debug
@@ -156,6 +156,7 @@
     state: directory
     owner: www-data
     group: www-data
+    mode: "0755"
   become: yes
   loop: "{{ hosts }}"
   when:

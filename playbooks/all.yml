@@ -8,6 +8,19 @@
 
 - hosts: all
   tasks:
+    - name: Check if we are using debug mode
+      ansible.builtin.set_fact:
+        __debug_mode: yes
+        __free_strategy: "debug"
+        __linear_strategy: "debug"
+      become: no
+      tags:
+        - never
+        - debug
+        - debug-mode
+
+- hosts: all
+  tasks:
     - name: Check if we are regenerating all ownca certs
       ansible.builtin.set_fact:
         __ownca_regenerate: yes
@@ -25,18 +38,20 @@
     - bloodymage.rebeldream.system_upgrade
 
 - hosts: all:!localhost:!routeros
+  strategy: linear
   roles:
     - bloodymage.rebeldream.sshca_host_certs
     - bloodymage.rebeldream.openssh
     - bloodymage.rebeldream.ntp
 
 - hosts: all:!localhost
-  strategy: free
+  strategy: debug
   roles:
     - bloodymage.rebeldream.users
     - bloodymage.rebeldream.ownca_host_certs
 
 - hosts: all:!localhost:!routeros
+  strategy: linear
   roles:
     - bloodymage.rebeldream.global_packages
     - bloodymage.rebeldream.sudo

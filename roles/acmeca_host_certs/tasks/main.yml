@@ -299,7 +299,7 @@
 
 - name: Create live link certs
   ansible.builtin.file:
-    src: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem" 
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/cert.pem"
     state: link
     owner: root
@@ -316,7 +316,7 @@
 
 - name: Setup Live Link chain
   ansible.builtin.file:
-    src: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem" 
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/chain.pem"
     state: link
     owner: root
@@ -333,7 +333,7 @@
 
 - name: Setup Live Link fullchain
   ansible.builtin.file:
-    src: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem" 
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/fullchain.pem"
     state: link
     owner: root
@@ -350,7 +350,7 @@
 
 - name: Setup live link privkey
   ansible.builtin.file:
-    src: "{{ acmeca_archive_dir }}/{{ item.name }}/privkey.pem" 
+    src: "{{ acmeca_archive_dir }}/{{ item.name }}/privkey.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/privkey.pem"
     state: link
     owner: root
