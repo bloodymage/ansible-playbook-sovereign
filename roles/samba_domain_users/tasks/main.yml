@@ -148,7 +148,7 @@
     username: "{{ item.username }}"
     groupname: "{{ item.groupname | default(none) }}"
     id_number: "{{ item.id_number | default(none) }}"
-    password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __overwrite) }}"
+    password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __overwrite) }}"
     given_name: "{{ item.given_name | default(item.username | title) }}"
     surname: "{{ item.surname | default(none) }}"
     initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
