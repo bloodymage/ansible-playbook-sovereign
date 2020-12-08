@@ -66,7 +66,7 @@
 
 - name: "Ensure we have a password for the Identity Issuing CA"
   ansible.builtin.set_fact:
-    ownca_identity_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + overwrite) }}"
+    ownca_identity_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __overwrite) }}"
   vars:
     __password_store_id: "{{ ansible_domain }}/ownca/ownca_identity_password"
     __password_length: "{{ rebeldream_password_length }}"

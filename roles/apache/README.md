@@ -52,6 +52,7 @@ Features and Advantages
 
 Similar Projects
 ----------------
+- [Geerlinguy/ansible-role-apache](https://github.com/geerlingguy/ansible-role-apache)
 
 References
 ----------

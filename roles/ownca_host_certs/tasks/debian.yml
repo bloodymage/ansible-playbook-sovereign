@@ -132,7 +132,7 @@
     owner: root
     group: root
     backup: yes
-    force: "{{ __ownca_regenerate | default(no) }}"
+    force: "{{ __ownca_regenerate }}"
   become: yes
   tags:
     - ownca_host_certs

@@ -168,7 +168,7 @@
     __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
     __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   loop: "{{ domain_users }}"
-  no_log: yes
+  #no_log: yes
   become: no
   delegate_to: localhost
   register: domain_user_list

@@ -182,7 +182,15 @@ sshca_domain_list: "{{ rebeldream_domain_list }}"
 sshca_domain: "{{ rebeldream_domain }}"
 sshca_key_directory: "~/.ssh/ca"
 
-# Play defaults
+# ==================================================================================================
+#
+# The following varibles are defaults that can be modified through tag usage
+#
+#
+# ==================================================================================================
 __debug_mode: no
 __free_strategy: "free"
 __linear_strategy: "linear"
+
+# OwnCA
+__ownca_regenerate: no
