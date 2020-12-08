@@ -144,6 +144,9 @@
 - name: Ensure Virtual Directory definitions exist
   file:
     path: "/etc/dovecot/virtual/{{ item.name }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0755"
     state: directory
   become: yes
   loop: "{{ dovecot_virtual_mailboxes }}"
@@ -171,6 +174,9 @@
 - name: Ensure Sieve Pipe Bin Dir exists
   file:
     path: "{{ dovecot_sieve_pipe_bin_dir }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0755"
     state: directory
   become: yes
   tags:
@@ -178,7 +184,6 @@
     - dovecot_debug
     - dovecot-debug
 
-    
 - name: Install IMAPSieve Spam Update Filters
   template:
     src: "report-sieve.j2"

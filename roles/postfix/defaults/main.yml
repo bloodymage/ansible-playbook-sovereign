@@ -157,5 +157,6 @@ postfix_master_dovecot_options:
   - "flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver"
   - "-f ${sender} -d ${user}@${nexthop} -a ${original_recipient}"
 
+postfix_canonical_mappings: []
 postfix_ldap_maps: []
 postfix_ldap_map_debug_level: 0

@@ -40,7 +40,7 @@
   get_url:
     url: "{{ item.source }}"
     dest: "/tmp/{{ item.file }}"
-    checksum: "{{ item.checksum_type}}:{{ item.checksum }}"
+    checksum: "{{ item.checksum_type }}:{{ item.checksum }}"
     mode: '0644'
   loop: "{{ keycloak_source_url }}"
   become: no

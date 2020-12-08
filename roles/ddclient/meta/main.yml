@@ -23,7 +23,6 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - ddclient
-    - dynamic dns
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers
