@@ -114,13 +114,30 @@
     - canonical
     - client_access
     - helo_access
-    - sasl_passwd
-    - sender_relay
     - transport
     - virtual
     - virtual-mailbox-domains
     - virtual-mailbox-users
   notify: map {{ item }}
+  tags:
+    - postfix
+    - postfix_debug
+    - postfix-debug
+
+- name: "Install Configuration files (postmap update required)"
+  template:
+    src: "{{ item }}.j2"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: 644
+  become: yes
+  loop:
+    - sasl_passwd
+    - sender_relay
+  notify: map {{ item }}
+  when:
+    - postfix_sasl_auth_users_list is defined
   tags:
     - postfix
     - postfix_debug
@@ -137,6 +154,8 @@
   loop:
     - sasl_passwd
   notify: restart postfix
+  when:
+    - postfix_sasl_auth_users_list is defined
   tags:
     - postfix
     - postfix_debug
