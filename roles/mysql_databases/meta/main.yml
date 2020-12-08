@@ -22,8 +22,9 @@ galaxy_info:
 
   galaxy_tags:
     - bloodymage
-    - mysql databases
-    - mariadb databases
+    - mysql
+    - mariadb
+    - databases
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers
