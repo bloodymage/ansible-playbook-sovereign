@@ -1,0 +1,88 @@
+---
+# tasks file for drupal
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files:
+            - "{{ ansible_network_os | default(none) }}.yml"
+            - "{{ ansible_distribution | lower }}.yml"
+            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
+            - "{{ ansible_os_family | lower }}_family.yml"
+            - "{{ ansible_system | lower }}.yml"
+            - main.yml
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - drupal
+
+    - name: "Install packages"
+      package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - drupal
+        - install-packages
+
+- name: Download Drupal
+  community.general.composer:
+    command: create-project
+    arguments: "drupal/recommended-project /srv/www/{{ item.name }}"
+    working_dir: "/srv/www/{{ item.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  when:
+    - item.content == "drupal"
+  tags:
+    - drupal
+
+- name: Install Drupal
+  command:
+    cmd: >
+      drush site:install
+      --db-url=mysql://{{ item.db_user}}:{{ item.db_password }}@{{ item.db_host }}:{{ mysql_port }}/{{ item.db_name }}
+       --db-su={{ mysql_administrator_user }}
+       --db-su-pw={{ mysql_administrator_password }}
+      --account-name : {{ item.administrator_account }}
+      --account-mail : {{ item.administrator_email }}
+      --account-pass : {{ item.administrator_password }}
+      --site-name : {{ item.site_name }}
+      --site-mail : {{ item.site_mail }}
+      --site-pass : {{ item.site_password }}
+    chdir: "/srv/www/{{ item.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  when:
+    - item.content == "drupal"
+  tags:
+    - drupal
+
+- name: "Update Apache Sites-Available .conf"
+  template:
+    src: "apache-site.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+  loop: "{{ hosts }}"
+  become: yes
+  when:
+    - hosts is defined
+    - item.content is defined
+    - item.content == "drupal"
+    - item.enabled is defined
+    - item.enabled 
+  notify: reload apache
+  tags:
+    - drupal
+    - drupal-config
+    - websites
