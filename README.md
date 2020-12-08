@@ -1,6 +1,6 @@
 # Ansible Collection - bloodymage.rebeldream
 
-[![Ansile-Lint](https://github.com/bloodymage/ansible-collection-rebeldream/workflows/%22Ansible+Lint%22/badge.svg?event=push)](https://github.com/bloodymage/ansible-collection-rebeldream/actions?query=workflow%3A%22Ansible+Lint%22)
+[![Ansile-Lint](https://github.com/bloodymage/ansible-collection-rebeldream/workflows/%22Ansible&nbsp;Lint%22/badge.svg?event=push)](https://github.com/bloodymage/ansible-collection-rebeldream/actions?query=workflow%3A%22Ansible+Lint%22)
 
 - [Description](#description)
 - [Installation](#installation)
