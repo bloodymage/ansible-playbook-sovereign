@@ -1,0 +1,7 @@
+Name: Ccreds credential caching - password checking
+Default: yes
+Priority: 0
+Auth-Type: Primary
+Auth:
+	[success=end default=ignore]	pam_ccreds.so minimum_uid=1000 action=validate use_first_pass
+	[default=ignore]		pam_ccreds.so minimum_uid=1000 action=update

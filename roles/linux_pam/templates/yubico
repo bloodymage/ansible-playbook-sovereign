@@ -1,0 +1,8 @@
+Name: Yubico authentication with YubiKey
+Default: no
+Priority: 704
+Auth-Type: Primary
+Auth:
+	required	pam_yubico.so	mode=client try_first_pass id=N key=K
+Auth-Initial:
+	required	pam_yubico.so	mode=client try_first_pass id=N key=K
