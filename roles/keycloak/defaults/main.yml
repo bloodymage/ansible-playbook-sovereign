@@ -4,7 +4,7 @@ packages:
   - openjdk-11-jre
   - python3-openssl
 
-keycloak_version: "11.0.2"
+keycloak_version: "11.0.3"
 keycloak_host: 127.0.0.1
 
 keycloak_install_dir: "/opt/keycloak"
@@ -20,7 +20,7 @@ keycloak_url: "https://downloads.jboss.org/keycloak"
 keycloak_source_url:
   - source: "{{ keycloak_url }}/{{ keycloak_version }}/keycloak-{{ keycloak_version }}.tar.gz"
     file: "keycloak-{{ keycloak_version }}.tar.gz"
-    checksum: "9c870a2fdf7bb44933c23d264ee9a360af4b6a44"
+    checksum: "87bae7fd63b49756f54e4e293fb37329f117e30d"
     checksum_type: "sha1"
 
 keycloak_admin_user: "admin"
@@ -32,3 +32,4 @@ keycloak_force_backend_url_to_frontend_url: "false"
 
 keycloak_keystore_alias: "keycloak"
 keycloak_keystore_password: "password"
+keycloak_keystore_file: "keycloak.pkcs12"

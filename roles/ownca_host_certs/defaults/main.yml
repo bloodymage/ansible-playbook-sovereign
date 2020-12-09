@@ -15,7 +15,7 @@ ownca_host_certs_directories:
     mode: "0755"
 
 ownca_host_certs_subject_alt_name:
-  - "DNS:{{ ansible_fqdn }}"
+  - "DNS:{{ inventory_hostname }}"
   - "IP:{{ ansible_host }}"
 
 ownca_host_certs_extended_key_usage:
