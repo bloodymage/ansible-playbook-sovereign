@@ -27,7 +27,7 @@
     server: "{{ item.address_ipv4 }}"
     zone: "{{ bind_zone }}"
     record: "{{ inventory_hostname_short }}"
-    value: "{{ ansible_default_ipv4.address | default(ansible_host) }}"
+    value: "{{ ansible_host }}"
   loop: "{{ bind_zone_dnsservers }}"
   become: yes
   when:
