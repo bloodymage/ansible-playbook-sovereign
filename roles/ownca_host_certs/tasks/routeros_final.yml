@@ -1,0 +1,120 @@
+---
+# ==================================================================================================
+#
+# https://wiki.mikrotik.com/wiki/Manual:Create_Certificates
+#
+# ==================================================================================================
+
+# ==================================================================================================
+#
+# Tasks: Copy Host Certificate back to Server.
+#  
+#
+# ==================================================================================================
+# # ======================================================================
+# #
+# # Temporarily allow ftp access to upload cert
+# #
+# # ======================================================================
+# - name: Allow access to ftp
+#   routeros_command:
+#     commands:
+#       - /ip service enable ftp
+
+
+# - name: Copy Host Certificate back to server.
+#   copy:
+#     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
+#     dest: "/usr/local/share/ca-certificates/"
+#   become: yes
+#   loop:
+#     - "{{ inventory_hostname }}"
+#     - "{{ inventory_hostname }}-chain"
+#   notify: restart all
+#   tags:
+#     - ownca_host_certs
+#     - ownca-host-certs
+#     - ownca_host_certs_debug
+#     - ownca-host-certs-debug
+#     - ownca-all
+
+
+# - name: Copy CA Certificates to server.
+#   copy:
+#     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+#     dest: "/usr/local/share/ca-certificates/"
+#   loop:
+#     - "{{ rebeldream_org_name }}-root-ca.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca-chain.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca-chain.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca-chain.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca-chain.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca-chain.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
+#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+#   become: yes
+#   notify: restart all
+#   tags:
+#     - ownca_host_certs
+#     - ownca-host-certs
+#     - ownca_host_certs_debug
+#     - ownca-host-certs-debug
+#     - ownca-all
+
+# - name: Copy CRLs to server.
+#   copy:
+#     src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+#     dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+#   loop: "{{ ownca_certificate_authorities }}"
+#   become: yes
+#   tags:
+#     - ownca_crl
+#     - ownca-crl
+#     - ownca_crl_debug
+#     - ownca-crl-debug
+
+# # # ======================================================================
+# # #
+# # # Tasks:
+# # #  
+# # #
+# # # ======================================================================
+# # - name: Copy certificates back to server.
+# #   shell:
+# #     "{{ item }}"
+# #   with_items:
+# #     - "curl -T {{ ca_directory }}/certs/{{ ansible_hostname }}.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+# #     - "curl -T {{ ca_directory }}/private/{{ ansible_hostname }}.key ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}" 
+# #     - "curl -T {{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-root-ca.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+# #     - "curl -T {{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+# #     - "curl -T {{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-component-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+
+# # # ======================================================================
+# # #
+# # # Disable ftp access
+# # #
+# # # ======================================================================
+# # - name: Disable access to ftp
+# #   routeros_command:
+# #     commands:
+# #       - /ip service disable ftp
+
+# # # ======================================================================
+# # #
+# # # Temporarily allow ftp access to upload cert
+# # #
+# # # ======================================================================
+# # - name: Allow Import Certs
+# #   routeros_command:
+# #     commands:
+# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_hostname }}.crt"
+# #       - "/certificate import file-name={{ ca_directory }}/private/{{ ansible_hostname }}.key"
+# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-root-ca.crt"
+# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-ca-chain.crt"
+# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-component-ca-chain.crt"
+

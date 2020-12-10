@@ -1,0 +1,142 @@
+---
+# ==================================================================================================
+#
+# Tasks: Copy Host Certificate back to Server.
+#  
+#
+# ==================================================================================================
+- name: Copy Host Certificate back to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop:
+    - "{{ inventory_hostname }}"
+    - "{{ inventory_hostname }}-chain"
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+- name: Copy domain controllers' certificate back to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
+  when:
+    - rebeldream_realm_identity_management_system != ""
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+- name: Copy domain controllers' certificate chain to server.
+  copy:
+    src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
+    dest: "/usr/local/share/ca-certificates/"
+  become: yes
+  loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
+  when:
+    - rebeldream_realm_identity_management_system != ""
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+- name: Copy CA Certificates to server.
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "/usr/local/share/ca-certificates/"
+  loop:
+    - "{{ rebeldream_org_name }}-root-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+  become: yes
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+- name: Copy CRLs to server.
+  copy:
+    src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+    dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+  loop: "{{ ownca_certificate_authorities }}"
+  become: yes
+  tags:
+    - ownca_crl
+    - ownca-crl
+    - ownca_crl_debug
+    - ownca-crl-debug
+
+- name: Convert CA Certs to DER
+  command: "openssl x509 -in {{ item }}.crt -inform PEM -out {{ item }}.der -outform DER"
+  become: no
+  loop:
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca"
+    - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca"
+  delegate_to: localhost
+  run_once: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+- name: Copy CA Certificates Samba File Server.
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "/srv/samba/pki/"
+  loop:
+    - "{{ rebeldream_org_name }}-root-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.crt"
+    - "{{ rebeldream_org_name }}-root-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.der"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.der"
+  become: yes
+  when:
+    - inventory_hostname == groups['samba_file_servers'][0] | default([])
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all

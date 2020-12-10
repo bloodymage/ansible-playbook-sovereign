@@ -22,6 +22,6 @@ $TTL	{{ bind_zone_ttl }}
 {% if bind_reverse_zone == "10.3" -%}
   {{ ns.address_ipv4.split('.')[3] }}.{{ ns.address_ipv4.split('.')[2] }}.{{ ns.address_ipv4.split('.')[1] }}.{{ ns.address_ipv4.split('.')[0] }}      IN PTR  {{ ns.name }}.{{ bind_zone }}.
 {% else -%}
-  {{ ns.address_ipv4.split('.')[3] }}.{{ ns.address_ipv4.split('.')[2] }}.{{ ns.address_ipv4.split('.')[1] }}.{{ ns.address_ipv4.split('.')[0] }}      IN PTR  {{ ns.name }}.{{ ansible_domain }}.
+  {{ ns.address_ipv4.split('.')[3] }}.{{ ns.address_ipv4.split('.')[2] }}.{{ ns.address_ipv4.split('.')[1] }}.{{ ns.address_ipv4.split('.')[0] }}      IN PTR  {{ ns.name }}.{{ rebeldream_domain }}.
 {% endif %}
 {% endfor %}

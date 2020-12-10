@@ -1,4 +1,4 @@
-dn: CN=nsUniqueId,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+dn: CN=nsUniqueId,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 changetype: add
 objectClass: top
 objectClass: attributeSchema
@@ -11,10 +11,10 @@ attributeSyntax: 2.5.5.10
 oMSyntax: 4
 isSingleValued: TRUE
 searchFlags: 9
-objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 schemaIDGUID:: PTIIe1aUKi0To2hxU1zg==
 
-dn: CN=nsOrgPerson,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+dn: CN=nsOrgPerson,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 changetype: add
 objectClass: top
 objectClass: attributeSchema
@@ -24,7 +24,7 @@ description: MANDATORY: Netscape DS compat person
 lDAPDisplayName: nsOrgPerson
 subClassOf: top
 objectClassCategory: 3
-defaultObjectCategory: CN=nsOrgPerson,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+defaultObjectCategory: CN=nsOrgPerson,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 mayContain: nsUniqueId
 
 
@@ -40,7 +40,7 @@ searchFlags: 9
 objectCategory: CN=Attribute-Schema,${SCHEMADN}
 schemaIDGUID:: mqcwg4e++kmQIA2VphN1oQ==
 
-dn: CN=User,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+dn: CN=User,CN=Schema,CN=Configuration,DC={{ rebeldream_org_unit_name | upper }},DC={{ rebeldream_org_name | upper }},DC={{ rebeldream_tld | upper }}
 changetype: modify
 replace: auxiliaryClass
 auxiliaryClass: ldapPublicKey

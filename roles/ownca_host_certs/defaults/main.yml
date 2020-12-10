@@ -9,6 +9,8 @@ ownca_host_certs_directories:
     mode: "0700"
   - name: csr
     mode: "0700"
+  - name: pkcs12
+    mode: "0700"
   - name: certs
     mode: "0755"
   - name: crls
@@ -25,3 +27,8 @@ ownca_host_certs_extended_key_usage:
 ownca_host_certs_key_usage:
   - digitalSignature
   - keyEncipherment
+
+ownca_generate_locally: no
+ownca_host_certs_pkcs12_password: "password"
+ownca_private_key_group: "root"
+ownca_private_key_mode: "0600"

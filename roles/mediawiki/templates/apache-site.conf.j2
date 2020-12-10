@@ -7,6 +7,9 @@
 <VirtualHost *:443>
 	ServerName {{ item.name }}
 	ServerAdmin webmaster@{{ item.name }}
+{% if item.alias is defined %}
+  ServerAlias {{ item.alias }}
+{% endif %}
 
 	DocumentRoot /srv/www/{{ item.name }}
 
@@ -30,10 +33,10 @@ RewriteRule ^/*$ %{DOCUMENT_ROOT}/w/index.php [PT,L]
   Krb5Keytab /etc/apache2/{{ item.name }}.keytab
   KrbServiceName Any 
   KrbLocalUserMapping On
-  KrbAuthRealms {{ ansible_domain | upper }}
+  KrbAuthRealms {{ rebeldream_domain | upper }}
   AuthLDAPBindDN "cn={{ mediawiki_ldap_authenticator }},{{ mediawiki_ldap_userdn }}" 
   AuthLDAPBindPassword "{{ mediawiki_ldap_password }}" 
-  AuthLDAPURL "ldap://dc.{{ ansible_domain }}/{{ mediawiki_ldap_userdn }}?sAMAccountName,mail,displayName?sub?(objectClass=*)" 
+  AuthLDAPURL "ldap://dc.{{ rebeldream_domain }}/{{ mediawiki_ldap_userdn }}?sAMAccountName,mail,displayName?sub?(objectClass=*)" 
   Require ldap-attribute attribute="value" 
 {% endif %} 
 
@@ -78,15 +81,16 @@ RewriteRule ^/*$ %{DOCUMENT_ROOT}/w/index.php [PT,L]
 	AllowOverride None
 </Directory>
 
-SSLEngine on
-SSLCertificateFile "{{ item.ssl_certificate_file }}"
+{% if item.ssl_certificate_key_file is defined -%}
+  SSLEngine on
+{% endif %}
 SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
-
-#SSLCertificateChainFile /etc/apache2/ssl.crt/server-ca.crt
-SSLCACertificatePath /etc/ssl/certs/
-#SSLCACertificateFile 
+SSLCertificateFile "{{ item.ssl_certificate_file }}"
+SSLCertificateChainFile "{{ item.ssl_certificate_chain_file }}"
+#SSLCACertificatePath /etc/ssl/certs/
+SSLCACertificateFile "{{ rebeldream_component_ca_file }}"
 #SSLCARevocationPath /etc/apache2/ssl.crl/
-#SSLCARevocationFile /etc/apache2/ssl.crl/ca-bundle.crl
+SSLCARevocationFile "{{ rebeldream_component_crl_file }}"
 #SSLVerifyClient require
 #SSLVerifyDepth  10
 #SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire

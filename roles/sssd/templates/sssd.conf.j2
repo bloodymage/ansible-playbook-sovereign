@@ -1,7 +1,7 @@
 [sssd]
 services = nss, pam
 config_file_version = 2
-domains = {{ ansible_domain }}
+domains = {{ rebeldream_domain }}
 debug_level = 0x4000
 #dyndns_update_ptr = false
 
@@ -18,14 +18,14 @@ debug_level = 0x4000
   pam_pwd_expiration_warning = {{ sssd_pam_pwd_expiration_warning }}
 {% endif %}
 
-[domain/{{ ansible_domain }}]
-ad_server = zeus.{{ ansible_domain }}
+[domain/{{ rebeldream_domain }}]
+ad_server = zeus.{{ rebeldream_domain }}
 krb5_store_password_if_offline = True
 cache_credentials = True
 krb5_realm = {{ rebeldream_realm }}
 realmd_tags = manages-system joined-with-adcli 
 id_provider = ad
-ad_domain = {{ ansible_domain }}
+ad_domain = {{ rebeldream_domain }}
 use_fully_qualified_names = False
 ldap_id_mapping = False
 access_provider = ad

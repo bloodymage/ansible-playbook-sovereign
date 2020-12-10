@@ -1,60 +1,8 @@
-- hosts: all
-  tasks:
-    - name: Create groups based on the OS
-      group_by:
-        key: "{{ ansible_network_os.split('.')[2] | lower }}"
-      when:
-        - ansible_network_os is defined
-
-- hosts: all
-  tasks:
-    - name: Check if we are using debug mode
-      ansible.builtin.set_fact:
-        __debug_mode: yes
-        __free_strategy: "debug"
-        __linear_strategy: "debug"
-      become: no
-      tags:
-        - never
-        - debug
-        - debug-mode
-
-- hosts: all
-  tasks:
-    - name: Check if we are regenerating all ownca certs
-      ansible.builtin.set_fact:
-        __ownca_regenerate: yes
-      become: no
-      tags:
-        - never
-        - ownca_regenerate
-        - ownca-regenerate
-
-- hosts: all:!localhost
-  strategy: free
-  roles:
-    - bloodymage.rebeldream.hostname
-    - bloodymage.rebeldream.hosts
-    - bloodymage.rebeldream.system_upgrade
-
-- hosts: all:!localhost:!routeros
-  strategy: linear
-  roles:
-    - bloodymage.rebeldream.sshca_host_certs
-    - bloodymage.rebeldream.openssh
-    - bloodymage.rebeldream.ntp
-
-- hosts: all:!localhost
-  strategy: debug
-  roles:
-    - bloodymage.rebeldream.users
-    - bloodymage.rebeldream.ownca_host_certs
-
-- hosts: all:!localhost:!routeros
-  strategy: linear
-  roles:
-    - bloodymage.rebeldream.global_packages
-    - bloodymage.rebeldream.sudo
-    - bloodymage.rebeldream.skel
-    - bloodymage.rebeldream.dotfiles
-    - bloodymage.rebeldream.etckeeper
+# ==================================================================================================
+#
+# This play has been split into to stages.  While there may be a better way, the second stage is to
+# reset unreachable hosts so that certificates can be generated for them locally.
+#
+# ==================================================================================================
+- import_playbook: all_stage1.yml
+- import_playbook: all_stage2.yml

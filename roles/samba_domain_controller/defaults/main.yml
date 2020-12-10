@@ -15,5 +15,7 @@ packages:
   - rsync
 
 samba_domain_password_expiration: 90
+samba_dns_backend: "BIND9_DLZ"
 
 __samba_recreate_realm: no
+__samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"

@@ -23,7 +23,7 @@ postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
 postfix_milter_default_action: "accept"
 postfix_mydestination:
   - "$myhostname"
-  - "localhost.{{ ansible_domain }}"
+  - "localhost.{{ rebeldream_domain }}"
   - "localhost"
 postfix_non_smtpd_milters: "$smtpd_milters"
 postfix_postscreen_access_list: "permit_mynetworks"

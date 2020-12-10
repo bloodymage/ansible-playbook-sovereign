@@ -1,5 +1,5 @@
 {
-  "{{ ansible_domain }}": {
+  "{{ rebeldream_domain }}": {
 {% for item in mediawiki_json_config %}
   {% if item.options is defined %}
     "{{ item.name }}": {

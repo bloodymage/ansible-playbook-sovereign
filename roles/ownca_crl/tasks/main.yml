@@ -93,7 +93,7 @@
   ansible.builtin.set_fact:
     ownca_intermediate_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/ownca/ownca_intermediate_password"
+    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_intermediate_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_intermediate_password == "password"
@@ -107,7 +107,7 @@
   ansible.builtin.set_fact:
     ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/ownca/ownca_component_password"
+    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_component_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_component_password == "password"
@@ -121,7 +121,7 @@
   ansible.builtin.set_fact:
     ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/ownca/ownca_identity_password"
+    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_identity_password == "password"
@@ -135,7 +135,7 @@
   ansible.builtin.set_fact:
     ownca_codesign_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/ownca/ownca_codesign_password"
+    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_codesign_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - ownca_codesign_password == "password"

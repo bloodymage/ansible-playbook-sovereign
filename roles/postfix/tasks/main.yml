@@ -37,7 +37,7 @@
     __mail_user: "{{ mail_user }}"
     __mail_user_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + rebeldream_password_length + ' nosymbols=true') }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/domain_users/{{ mail_user }}/password"
+    password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
   no_log: yes
   become: no
   delegate_to: localhost
