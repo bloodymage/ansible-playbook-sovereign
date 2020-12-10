@@ -51,6 +51,7 @@
     owner: root
     group: root
     mode: "0644"
+  become: yes
   tags:
     - firefox
     - firefox_debug
@@ -60,6 +61,10 @@
   copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
     dest: "{{ firefox_certificate_path }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
   loop:
     - "{{ rebeldream_org_name }}-root-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
@@ -69,10 +74,20 @@
     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
   become: yes
-  notify: restart all
   tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
+    - firefox
+    - firefox_debug
+    - firefox-debug
+
+- name: Create a symbolic link
+  file:
+    src: "/usr/lib/x86_64-linux-gnu/pkcs11/p11-kit-trust.so"
+    dest: "{{ firefox_lib_path }}/libnssckbi.so"
+    owner: root
+    group: root
+    state: link
+  become: yes
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug

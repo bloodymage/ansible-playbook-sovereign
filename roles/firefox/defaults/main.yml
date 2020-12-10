@@ -3,6 +3,7 @@
 packages:
   - "{{ firefox }}"
   - libgssapi-krb5-2
+  - p11-kit-modules
 
 firefox: "firefox"
 firefox_lib_path: "/usr/lib/{{ firefox }}"
