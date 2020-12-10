@@ -1,6 +1,45 @@
 ---
 # tasks file for firefox
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_network_os | default(none) }}.yml"
+        - "{{ ansible_distribution | lower }}.yml"
+        - "{{ ansible_os_family | lower }}_family.yml"
+        - "{{ ansible_system | lower }}.yml"
+        - main.yml
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug
+    - install-packages
+
+- name: "Install packages"
+  package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug
+    - install-packages
+
 - name: Install kerberos config
   template:
     src: kerberos.j2
     dest: /usr/lib64/firefox/browser/defaults/preferences/kerberos.js
+    owner: root
+    group: root
+    mode: "0644"
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug
+    - install-packages
