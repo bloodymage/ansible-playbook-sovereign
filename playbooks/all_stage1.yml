@@ -55,7 +55,7 @@
 #   - Windows
 #
 # ==================================================================================================
-- hosts: linux
+- hosts: linux:!localhost:!routeros:!tpeap
   strategy: linear
   roles:
     - bloodymage.rebeldream.sshca_host_certs
