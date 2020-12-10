@@ -1,9 +1,9 @@
-# {{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }} Root CA
+# {{ Rebeldream_Domain.Split('.')[1] }} {{ Rebeldream_Domain.Split('.')[2] }} Root CA
 
 [ default ]
-ca                      = {{ ansible_domain.split('.')[1] }}-root-ca            # CA name
+ca                      = {{ rebeldream_domain.split('.')[1] }}-root-ca            # CA name
 dir                     = /root/.pki              # Top dir
-base_url                = http://pki.{{ ansible_domain.split('.')[1] }}.{{ ansible_domain.split('.')[2] }}     # CA base URL
+base_url                = http://pki.{{ rebeldream_domain.split('.')[1] }}.{{ rebeldream_domain.split('.')[2] }}     # CA base URL
 aia_url                 = $base_url/$ca.cert.pem  # CA certificate URL
 crl_url                 = $base_url/$ca.crl       # CRL distribution point
 name_opt                = multiline,-esc_msb,utf8 # Display UTF-8 characters
@@ -23,9 +23,9 @@ req_extensions          = ca_reqext             # Desired extensions
 
 [ ca_dn ]
 countryName             = "US"
-{{ ansible_domain.split('.')[2] }}anizationName        = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }}"
-{{ ansible_domain.split('.')[2] }}anizationalUnitName  = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }} Root CA"
-commonName              = "{{ Ansible_Domain.Split('.')[1] }} {{ Ansible_Domain.Split('.')[2] }} Root CA"
+organizationName        = "{{ Rebeldream_Domain.Split('.')[1] }} {{ Rebeldream_Domain.Split('.')[2] }}"
+organizationalUnitName  = "{{ Rebeldream_Domain.Split('.')[1] }} {{ Rebeldream_Domain.Split('.')[2] }} Root CA"
+commonName              = "{{ Rebeldream_Domain.Split('.')[1] }} {{ Rebeldream_Domain.Split('.')[2] }} Root CA"
 
 [ ca_reqext ]
 keyUsage                = critical,keyCertSign,cRLSign
@@ -61,8 +61,8 @@ crl_extensions          = crl_ext               # CRL extensions
 countryName             = match
 stateOrProvinceName     = optional
 localityName            = optional
-{{ ansible_domain.split('.')[2] }}anizationName        = match
-{{ ansible_domain.split('.')[2] }}anizationalUnitName  = optional
+{{ rebeldream_domain.split('.')[2] }}anizationName        = match
+{{ rebeldream_domain.split('.')[2] }}anizationalUnitName  = optional
 commonName              = supplied
 
 [ any_pol ]
@@ -70,8 +70,8 @@ domainComponent         = optional
 countryName             = optional
 stateOrProvinceName     = optional
 localityName            = optional
-{{ ansible_domain.split('.')[2] }}anizationName        = optional
-{{ ansible_domain.split('.')[2] }}anizationalUnitName  = optional
+{{ rebeldream_domain.split('.')[2] }}anizationName        = optional
+{{ rebeldream_domain.split('.')[2] }}anizationalUnitName  = optional
 commonName              = optional
 emailAddress            = optional
 
@@ -90,7 +90,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always
 authorityInfoAccess     = @issuer_info
 crlDistributionPoints   = @crl_info
-certificatePolicies     = {{ ansible_domain.split('.')[1] }}MediumAssurance,{{ ansible_domain.split('.')[1] }}MediumDevice
+certificatePolicies     = {{ rebeldream_domain.split('.')[1] }}MediumAssurance,{{ rebeldream_domain.split('.')[1] }}MediumDevice
 
 [ crl_ext ]
 authorityKeyIdentifier  = keyid:always
@@ -108,5 +108,5 @@ URI.0                   = $crl_url
 oid_section             = additional_oids
 
 [ additional_oids ]
-{{ ansible_domain.split('.')[1] }}MediumAssurance     = {{ Ansible_Domain.Split('.')[1] }} Medium Assurance, 1.3.6.1.4.1.0.1.7.8
-{{ ansible_domain.split('.')[1] }}MediumDevice        = {{ Ansible_Domain.Split('.')[1] }} Medium Device Assurance, 1.3.6.1.4.1.0.1.7.9
+{{ rebeldream_domain.split('.')[1] }}MediumAssurance     = {{ Rebeldream_Domain.Split('.')[1] }} Medium Assurance, 1.3.6.1.4.1.0.1.7.8
+{{ rebeldream_domain.split('.')[1] }}MediumDevice        = {{ Rebeldream_Domain.Split('.')[1] }} Medium Device Assurance, 1.3.6.1.4.1.0.1.7.9

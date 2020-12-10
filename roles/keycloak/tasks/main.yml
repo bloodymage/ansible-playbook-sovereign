@@ -80,9 +80,11 @@
 
 - name: "Ensure we have a password for the keycloak administrator user"
   ansible.builtin.set_fact:
-    keycloak_admin_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    keycloak_admin_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_admin_password"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_admin_password"
+    __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - keycloak_admin_password == "password"
   tags:
@@ -94,7 +96,7 @@
   ansible.builtin.set_fact:
     keycloak_keystore_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_keystore_password"
+    password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_keystore_password"
   when:
     - keycloak_keystore_password == "password"
   tags:
@@ -145,8 +147,8 @@
     path:  "{{ keycloak_install_dir }}/{{ keycloak_mode }}/configuration/keycloak.jks"
     friendly_name: "{{ keycloak_keystore_alias }}"
     passphrase: "{{ keycloak_keystore_password }}"
-    privatekey_path: /etc/ssl/private/{{ inventory_hostname }}.key
-    certificate_path: /etc/ssl/certs/{{ inventory_hostname }}-chain.pem
+    privatekey_path: "/etc/ssl/private/{{ inventory_hostname }}.key"
+    certificate_path: "/etc/ssl/certs/{{ inventory_hostname }}-chain.pem"
     other_certificates:
       - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.pem"
       - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.pem"

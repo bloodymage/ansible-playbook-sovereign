@@ -1,15 +1,15 @@
 # {{ ansible_managed }}
 [libdefaults]
-    default_realm = {{ ansible_domain | upper }}
+    default_realm = {{ rebeldream_domain | upper }}
     dns_lookup_realm = false
     dns_lookup_kdc = true
 
 [realms]
-{{ ansible_domain | upper }} = {
+{{ rebeldream_domain | upper }} = {
 {% if rebeldream_smart_card_login %}
   pkinit_require_eku = true
   enable-pkinit = yes
-  pkinit_identity = FILE:/etc/ssl/certs/{{ ansible_fqdn }}.pem,/etc/ssl/private/{{ ansible_fqdn }}.key
+  pkinit_identity = FILE:/etc/ssl/certs/{{ rebeldream_fqdn }}.pem,/etc/ssl/private/{{ rebeldream_fqdn }}.key
   pkinit_anchors = FILE:{{ rebeldream_component_ca_chain_file }}
   pkinit_principal_in_certificate = yes
   pkinit_win2k = no
@@ -24,8 +24,8 @@
   }
 
 [domain_realm]
-  {{ ansible_domain }} = {{ ansible_domain | upper }}
-  .{{ ansible_domain }} = {{ ansible_domain | upper }}
+  {{ rebeldream_domain }} = {{ rebeldream_domain | upper }}
+  .{{ rebeldream_domain }} = {{ rebeldream_domain | upper }}
 
 
 

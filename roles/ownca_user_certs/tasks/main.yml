@@ -68,7 +68,7 @@
   ansible.builtin.set_fact:
     ownca_identity_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __overwrite) }}"
   vars:
-    __password_store_id: "{{ ansible_domain }}/ownca/ownca_identity_password"
+    __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
     __password_length: "{{ rebeldream_password_length }}"
     __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
@@ -99,7 +99,7 @@
     gpg_keys: "{{ item.gpg_keys | default(none) }}"
     account_expire: "{{ item.account_expire | default(none) }}"
   vars:
-    __password_store_id: "{{ ansible_domain }}/domain_users/{{ item.username }}/password"
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item.username }}/password"
     __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
     __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   loop: "{{ domain_users }}"
@@ -256,13 +256,13 @@
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }}"
-    email_address: "{{ item.ansible_facts.username}}@{{ ansible_domain }}"
+    email_address: "{{ item.ansible_facts.username}}@{{ rebeldream_domain }}"
     key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_authentication_extended_key_usage }}"
     privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki//private/{{ item.ansible_facts.username }}.key"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ ansible_domain }}"
+    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
   when:
@@ -287,13 +287,13 @@
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.ansible_facts.given_name }}"
-    email_address: "{{ item.ansible_facts.username}}@{{ ansible_domain }}"
+    email_address: "{{ item.ansible_facts.username}}@{{ rebeldream_domain }}"
     key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_authentication_extended_key_usage }}"
     privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ ansible_domain }}"
+    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
   when:

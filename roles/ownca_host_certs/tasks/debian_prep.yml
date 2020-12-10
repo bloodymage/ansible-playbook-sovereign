@@ -1,0 +1,147 @@
+---
+- name: "Install packages"
+  package:
+    name: "{{ packages }}"
+    state: present
+  become: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
+    - install-packages
+    - ownca-all
+
+- name: Get IP geolocation data
+  community.general.ipinfoio_facts:
+  become: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
+    - ownca-all
+
+# ==================================================================================================
+#
+# Create SSL Private Key and CRS Directories
+#
+# Creates the following Directories:
+#   - {{ ownca_etc }}/private mode: 0700
+#   - {{ ownca_etc }}/csr     mode: 0700
+#   - {{ ownca_etc }}/certs   mode: 0755
+#
+# ==================================================================================================
+- name: "Create SSL Directories"
+  file:
+    path: "{{ ownca_etc }}/{{ item.name }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  become: yes
+  loop: "{{ ownca_host_certs_directories }}"
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+# ==================================================================================================
+#
+# Generate Passwords if they don't exist
+#
+# ==================================================================================================
+- name: Generate Host Private Key
+  openssl_privatekey:
+    path: '{{ ownca_etc }}/private/{{ inventory_hostname }}.key'
+    type: '{{ ownca_privatekey_type }}'
+    size: 4096
+    owner: root
+    group: "{{ ownca_private_key_group }}"
+    mode: "{{ ownca_private_key_mode }}"
+    force: no
+  become: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+- name: Print CSR Variables
+  debug:
+    msg:
+      - "country_name: {{ rebeldream_country_code | default(country) }}"
+      - "state_or_province_name: {{ rebeldream_region_name | default(region) }}"
+      - "locality_name: {{ loc_city | default(none) }}"
+      - "organization_name: {{ rebeldream_org_name | title }}"
+      - "organizational_unit_name: {{ rebeldream_org_unit_name | title }}"
+      - "common_name: {{ inventory_hostname }}"
+      - "key_usage: {{ ownca_host_certs_key_usage }}"
+      - "extended_key_usage: {{ ownca_host_certs_extended_key_usage }}"
+      - "privatekey_path: {{ ownca_etc }}/private/{{ inventory_hostname }}.key"
+      - "subject_alt_name: {{ ownca_host_certs_subject_alt_name }}"
+    verbosity: 1
+  become: no
+  tags:
+    - never
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+
+- name: Generate Host CSR
+  community.crypto.openssl_csr:
+    country_name: "{{ ownca_country_code | default(country) }}"
+    state_or_province_name: "{{ rebeldream_region | default(region) }}"
+    locality_name: "{{ loc_city | default(none) }}"
+    organization_name: "{{ rebeldream_org_name | title }}"
+    organizational_unit_name: "{{ rebeldream_org_unit_name | title }}"
+    common_name: "{{ inventory_hostname }}"
+    key_usage: "{{ ownca_host_certs_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ ownca_host_certs_extended_key_usage }}"
+    extended_key_usage_critical: yes
+    privatekey_path: "{{ ownca_etc }}/private/{{ inventory_hostname }}.key"
+    subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
+    path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
+    mode: "0644"
+    owner: root
+    group: root
+    backup: yes
+    force: "{{ __ownca_regenerate }}"
+  become: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+# ==================================================================================================
+#
+# Tasks:
+#  
+#
+# ==================================================================================================
+- name: Fetch CSRs.
+  fetch:
+    src: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
+    dest: "{{ ownca_hosts_directory }}/csr/"
+    flat: yes
+  become: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+

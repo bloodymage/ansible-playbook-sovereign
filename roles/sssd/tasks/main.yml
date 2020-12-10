@@ -58,14 +58,14 @@
 #   become: yes
 
 # - name: Install CA Certificates
-#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ item.name }}-ca.pem"
+#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ rebeldream_org_name | lower }}-{{ item.name }}-ca.pem"
 #   become: yes
 #   loop: "{{ certificate_authorities }}"
 #   when:
 #     - item.name == "root"
 
 # - name: Install CA Certificates
-#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ item.name }}-ca-chain.pem"
+#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ rebeldream_org_name | lower }}-{{ item.name }}-ca-chain.pem"
 #   become: yes
 #   loop: "{{ certificate_authorities }}"
 #   when:
@@ -109,7 +109,7 @@
     - samba-domain-create
 
 - name: Join Realm
-  command: "realm join {{ ansible_domain }}"
+  command: "realm join {{ rebeldream_domain }}"
   become: yes
   tags:
     - never

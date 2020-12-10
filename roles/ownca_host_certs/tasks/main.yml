@@ -1,17 +1,49 @@
 ---
 - name: "Pre-tasks"
   block:
+    - name: "Set Variables"
+      set_fact:
+        __network_os: "{{ ansible_network_os | default(none) }}"
+        __lsb_id: "{{ ansible_lsb.id | default(none) }}"
+        __distribution: "{{ ansible_distribution | default(none) }}"
+        __os_family: "{{ ansible_os_family | default(none) }}"
+        __system: "{{ ansible_system | default(none) }}"
+      become: no
+      tags:
+        - ownca_host_certs
+        - ownca-host-certs
+        - ownca_host_certificates
+        - ownca-host-certificates
+        - ownca_host_certs_debug
+        - ownca-host-certs-debug
+        - ownca_host_certificates_debug
+        - ownca-host-certificates-debug
+
+    - name: Set Variables
+      set_fact:
+        __distribution_short: "{{ __distribution.split(' ')[0] }}"
+      become: no
+      tags:
+        - ownca_host_certs
+        - ownca-host-certs
+        - ownca_host_certificates
+        - ownca-host-certificates
+        - ownca_host_certs_debug
+        - ownca-host-certs-debug
+        - ownca_host_certificates_debug
+        - ownca-host-certificates-debug
+
     - name: Include OS-specific variables.
       include_vars: "{{ lookup('first_found', params) }}"
       vars:
         params:
           files:
-            - "{{ ansible_network_os | default(none) }}.yml"
-            - "{{ ansible_lsb.id | lower }}.yml"
-            - "{{ ansible_distribution | lower }}.yml"
-            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
-            - "{{ ansible_os_family | lower }}_family.yml"
-            - "{{ ansible_system | lower }}.yml"
+            - "{{ __network_os }}.yml"
+            - "{{ __lsb_id | lower }}.yml"
+            - "{{ __distribution | lower }}.yml"
+            - "{{ __distribution_short | lower }}.yml"
+            - "{{ __os_family | lower }}_family.yml"
+            - "{{ __system | lower }}.yml"
             - main.yml
           paths:
             - "vars"
@@ -27,9 +59,11 @@
         - ownca-host-certificates-debug
 
 - name: Include Family Tasks
-  include: "{{ ansible_os_family | lower }}.yml"
+  include: "{{ ansible_os_family | lower }}_prep.yml"
   when:
     - ansible_network_os is not defined
+    - ansible_os_family is defined
+    - not ownca_generate_locally
   become: no
   tags:
     - ownca_host_certs
@@ -41,10 +75,154 @@
     - ownca_host_certificates_debug
     - ownca-host-certificates-debug
 
-- name: Include NetworkOS tasks
-  include: "{{ ansible_network_os.split('.')[2] | lower }}.yml"
+- name: "Include tasks for localhost generation"
+  include: "localhost_prep.yml"
   when:
-    - ansible_network_os is defined
+    - ansible_network_os is defined or ownca_generate_locally
+  become: no
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
+
+- name: "Ensure we have a password for the Component Issuing CA"
+  ansible.builtin.set_fact:
+    ownca_component_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true') }}"
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_component_password"
+    __password_length: "{{ rebeldream_password_length }}"
+    __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  delegate_to: localhost
+  when:
+    - ownca_component_password == "password"
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+
+- name: "Generate Host Certificate"
+  community.crypto.x509_certificate:
+    path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
+    csr_path: "{{ ownca_hosts_directory }}/csr/{{ inventory_hostname }}.csr"
+    ownca_path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
+    ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.key"
+    ownca_privatekey_passphrase: "{{ ownca_component_password }}"
+    provider: ownca
+  become: no
+  delegate_to: localhost
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
+- name: Create Complete Chain Bundles
+  community.crypto.certificate_complete_chain:
+    input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + inventory_hostname + '.crt') }}"
+    intermediate_certificates:
+      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
+    root_certificates:
+      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca.crt"
+  register: parent_cert_authorities
+  become: no
+  delegate_to: localhost
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-bundles
+    - ownca-all
+
+- name: Cert Chain (Name, Ownca, Chain, Complete Chain)
+  debug:
+    msg:
+      - "{{ parent_cert_authorities.chain }}"
+      - "{{ parent_cert_authorities.complete_chain }}"
+      - "{{ parent_cert_authorities.root }}"
+    verbosity: 1
+  delegate_to: localhost
+  when:
+    - parent_cert_authorities.chain is defined
+  tags:
+    - never
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+
+- name: Print Cert Authorities (Full)
+  debug:
+    msg:
+      - "{{ parent_cert_authorities }}"
+    verbosity: 4
+  when:
+    - parent_cert_authorities is defined
+  delegate_to: localhost
+  tags:
+    - never
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+
+- name: Write complete chain to disk
+  copy:
+    dest: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}-chain.crt"
+    content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
+  become: no
+  when:
+    - parent_cert_authorities.complete_chain is defined
+  delegate_to: localhost
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-bundles
+    - ownca-all
+
+- name: Include Family Tasks
+  include: "{{ ansible_os_family | lower }}_final.yml"
+  when:
+    - ansible_network_os is not defined
+    - ansible_os_family is defined
+    - not ownca_generate_locally
+  become: no
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
+
+# - name: Include NetworkOS Tasks
+#   include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
+#   when:
+#     - ansible_network_os is not defined
+#     - not ownca_generate_locally
+#   become: no
+#   tags:
+#     - ownca_host_certs
+#     - ownca-host-certs
+#     - ownca_host_certificates
+#     - ownca-host-certificates
+#     - ownca_host_certs_debug
+#     - ownca-host-certs-debug
+#     - ownca_host_certificates_debug
+#     - ownca-host-certificates-debug
+
+- name: Include Local tasks
+  include: "localhost_final.yml"
+  when:
+    - ownca_generate_locally
   become: no
   tags:
     - ownca_host_certs

@@ -1,6 +1,9 @@
+{#
+# =================================================================================================
+#
 # This file is commonly accessed via passdb {} or userdb {} section in
 # conf.d/auth-ldap.conf.ext
-
+#
 # This file is opened as root, so it should be owned by root and mode 0600.
 #
 # http://wiki2.dovecot.org/AuthDatabase/LDAP
@@ -9,18 +12,20 @@
 # dovecot-auth read access to userPassword field in the LDAP server.
 # With OpenLDAP this is done by modifying /etc/ldap/slapd.conf. There should
 # already be something like this:
-
+#
 # access to attribute=userPassword
 #        by dn="<dovecot's dn>" read # add this
 #        by anonymous auth
 #        by self write
 #        by * none
+#
+# ==================================================================================================
+#}
+{# Space separated list of LDAP hosts to use. host:port is allowed too. #}
+hosts = dc.{{ rebeldream_domain }}:389
 
-# Space separated list of LDAP hosts to use. host:port is allowed too.
-hosts = dc.{{ ansible_domain }}:389
-
-# LDAP URIs to use. You can use this instead of hosts list. Note that this
-# setting isn't supported by all LDAP libraries.
+{# LDAP URIs to use. You can use this instead of hosts list. Note that this #}
+{# setting isn't supported by all LDAP libraries. #}
 #uris = 
 
 # Distinguished Name - the username used to login to the LDAP server.

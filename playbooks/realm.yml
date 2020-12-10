@@ -3,8 +3,144 @@
     - bloodymage.rebeldream.krb5_client_config
 
 - hosts: samba_domain_controllers
+  pre_tasks:
+    - name: "Determine whether to force domain recreation"
+      ansible.builtin.set_fact:
+        __samba_recreate_realm: yes
+      become: no
+      tags:
+        - never
+        - recreate-realm
+        - recreate-realm-debug
+
+    - name: "Set Samba Schema Master to Running Schema Master (Only if not regenerating realm)"
+      command:
+        cmd: "samba-tool fsmo show"
+      register: __samba_schema_master_role
+      run_once: yes
+      become: yes
+      when:
+        - not __samba_recreate_realm
+      tags:
+        - samba_domain_controllers
+        - samba-domain-controllers
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Print Variables
+      debug:
+        msg:
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] }}"
+        verbosity: 1
+      become: no
+      when:
+        - __samba_schema_master_role is defined
+      tags:
+        - never
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Print Variables
+      debug:
+        msg:
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[0] }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[1] }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[2] }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3] }}"
+        verbosity: 2
+      become: no
+      when:
+        - __samba_schema_master_role is defined
+      tags:
+        - never
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Print Variables
+      debug:
+        var: __samba_schema_master_role.stdout_lines[0]
+        verbosity: 3
+      become: no
+      when:
+        - __samba_schema_master_role is defined
+      tags:
+        - never
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Print Variables
+      debug:
+        var: __samba_schema_master_role.stdout_lines
+        verbosity: 4
+      become: no
+      when:
+        - __samba_schema_master_role is defined
+      tags:
+        - never
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Print Variables
+      debug:
+        var: __samba_schema_master_role
+        verbosity: 4
+      become: no
+      when:
+        - __samba_schema_master_role is defined
+      tags:
+        - never
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Set Samba Schema Master For Realm Recreation
+      ansible.builtin.set_fact:
+        __samba_schema_master_list:
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] | lower }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] | lower }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
+      become: no
+      when:
+        - not __samba_recreate_realm
+      tags:
+        - samba_domain_controllers
+        - samba-domain-controllers
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Set Samba Schema Master For Realm Recreation
+      ansible.builtin.set_fact:
+        __samba_schema_master: "{{ __samba_schema_master_list | join('.') }}"
+      become: no
+      when:
+        - not __samba_recreate_realm
+      tags:
+        - samba_domain_controllers
+        - samba-domain-controllers
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
+    - name: Print Variables
+      debug:
+        msg:
+          - "Schema Master: {{ __samba_schema_master }}"
+        verbosity: 1
+      become: no
+      when:
+        - __samba_schema_master_role is defined
+      tags:
+        - never
+        - samba_domain_controllers_debug
+        - samba-domain-controllers-debug
+
   roles:
     - bloodymage.rebeldream.samba_domain_controller
+
+- hosts: __samba_schema_master
+  roles:
     - bloodymage.rebeldream.samba_domain_users
 
 #- hosts: freeipa_controllers

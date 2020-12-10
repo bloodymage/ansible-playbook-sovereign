@@ -6,9 +6,18 @@ rebeldream_overwrite_password: no
 rebeldream_use_source_code_repos: no
 rebeldream_password_length: "42"
 
+# Domain Information
+rebeldream_default_domain: internal.example.com
+rebeldream_domain: "{{ ansible_domain | default(rebeldream_default_domain) }}"
+rebeldream_realm: "{{ rebeldream_domain | upper }}"
+rebeldream_domain_list: "{{ rebeldream_domain.split('.')[-2:] }}"
+rebeldream_root_domain: "{{ rebeldream_domain_list | join('.') }}"
+rebeldream_tld: "{{ rebeldream_domain.split('.')[-1:] }}"
+rebeldream_min_domain_id_number: 10000
+
 # Organization Info
-rebeldream_org_name: "{{ ansible_domain.split('.')[1] }}"
-rebeldream_org_unit_name: "{{ ansible_domain.split('.')[0] }}"
+rebeldream_org_name: "{{ rebeldream_domain.split('.')[1] }}"
+rebeldream_org_unit_name: "{{ rebeldream_domain.split('.')[0] }}"
 rebeldream_country: "{{ country }}"
 rebeldream_region: "{{ region }}"
 rebeldream_state: "{{ rebeldream_region }}"
@@ -17,18 +26,17 @@ rebeldream_zones:
   - internal
   - dmz
 
-# Domain Information
-rebeldream_domain_list: "{{ ansible_domain.split('.')[-2:] }}"
-rebeldream_domain: "{{ rebeldream_domain_list | join('_') }}"
-rebeldream_realm: "{{ ansible_domain | upper }}"
-rebeldream_root_domain: "{{ ansible_domain.split('.')[1] }}.{{ ansible_domain.split('.')[2] }}"
-rebeldream_min_domain_id_number: 10000
+# Host Information
+rebeldream_fqdn: "{{ ansible_fqdn | default(inventory_hostname) }}"
+rebeldream_hostname_short: "{{ rebeldream_fqdn.split('.')[0] }}"
 
-# Cert Authoritiy Files
+# Cert Authoritiy
 rebeldream_component_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
 rebeldream_component_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
+rebeldream_component_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
 rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
 rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
+rebeldream_identity_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
 
 # Passwords
 mediawiki_db_password: "password"
@@ -128,8 +136,8 @@ msKDC: "1.3.6.1.5.2.3.5"
 # Identifies the AD GUID
 msADGUID: "1.3.6.1.4.1.311.25.1"
 
-ownca_pki_url: "pki.{{ ansible_domain }}"
-ownca_ocsp_url: "ocsp.{{ ansible_domain }}"
+ownca_pki_url: "pki.{{ rebeldream_domain }}"
+ownca_ocsp_url: "ocsp.{{ rebeldream_domain }}"
 ownca_crl_distribution_point: "https://{{ pki_url }}"
 ownca_privatekey_type: "RSA"
 
@@ -178,8 +186,10 @@ sshca_host_certificate_file: "{{ ssh_config_dir }}/ssh_host_ed25519_key-cert.pub
 sshca_user_certificate_file: "{{ ssh_config_dir }}/ssh_user_ed25519_key-cert.pub"
 sshca_authorized_keys: "authorized_keys"
 sshca_authorized_principals: "%u"
+
+sshca_cert_identity: "{{ rebeldream_domain_list | join('_') }}"
 sshca_domain_list: "{{ rebeldream_domain_list }}"
-sshca_domain: "{{ rebeldream_domain }}"
+sshca_domain: "{{ sshca_cert_identity }}"
 sshca_key_directory: "~/.ssh/ca"
 
 # ==================================================================================================

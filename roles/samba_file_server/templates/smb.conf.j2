@@ -5,9 +5,9 @@
 #
 # ==================================================================================================
 [global]
-netbios name = {{ inventory_hostname.split('.')[0] | upper }}
-workgroup = {{ ansible_domain.split('.')[0] | upper }}
-realm = {{ ansible_domain | upper }}
+netbios name = {{ inventory_hostname_short | upper }}
+workgroup = {{ rebeldream_org_unit_name | upper }}
+realm = {{ rebeldream_domain | upper }}
 security = {{ samba_security }}
 
 # Logging
@@ -25,12 +25,12 @@ username map = /etc/samba/user.map
 # idmap config for ...
 idmap config * : backend = tdb
 idmap config * : range = 3000-7999
-# idmap config for {{ ansible_domain.split('.')[0] | upper }} domain
-idmap config {{ ansible_domain.split('.')[0] | upper }} : backend = ad
-idmap config {{ ansible_domain.split('.')[0] | upper }} : schema_mode = rfc2307
-idmap config {{ ansible_domain.split('.')[0] | upper }} : range = 100000-99999999
-idmap config {{ ansible_domain.split('.')[0] | upper }} : unix_nss_info = yes
-idmap config {{ ansible_domain.split('.')[0] | upper }} : unix_primary_group = yes
+# idmap config for {{ rebeldream_org_unit_name | upper }} domain
+idmap config {{ rebeldream_org_unit_name | upper }} : backend = ad
+idmap config {{ rebeldream_org_unit_name | upper }} : schema_mode = rfc2307
+idmap config {{ rebeldream_org_unit_name | upper }} : range = 100000-99999999
+idmap config {{ rebeldream_org_unit_name | upper }} : unix_nss_info = yes
+idmap config {{ rebeldream_org_unit_name | upper }} : unix_primary_group = yes
 
 # Winbind Settings
 winbind enum users = {{ winbind_enum_users }}

@@ -1,12 +1,12 @@
 # {{ ansible_managed }}
 
-{{ 'server_host'.ljust(20) }}= dc.{{ ansible_domain }}
+{{ 'server_host'.ljust(20) }}= dc.{{ rebeldream_domain }}
 {{ 'server_port'.ljust(20) }}= 389
 {{ 'version'.ljust(20) }}= 3
 {{ 'bind'.ljust(20) }}= yes
-{{ 'bind_dn'.ljust(20) }}= cn={{ __mail_user }},cn=users,dc={{ ansible_domain.split('.')[0] }},dc={{ ansible_domain.split('.')[1] }},dc={{ ansible_domain.split('.')[2] }}
+{{ 'bind_dn'.ljust(20) }}= cn={{ __mail_user }},cn=users,dc={{ rebeldream_domain.split('.')[0] }},dc={{ rebeldream_domain.split('.')[1] }},dc={{ rebeldream_domain.split('.')[2] }}
 {{ 'bind_pw'.ljust(20) }}= {{ __mail_user_password }}
-{{ 'search_base'.ljust(20) }}= cn=users,dc={{ ansible_domain.split('.')[0] }},dc={{ ansible_domain.split('.')[1] }},dc={{ ansible_domain.split('.')[2] }}
+{{ 'search_base'.ljust(20) }}= cn=users,dc={{ rebeldream_org_unit_name }},dc={{ rebeldream_org_name }},dc={{ rebeldream_tld }}
 {{ 'scope'.ljust(20) }}= {{ item.scope }}
 {{ 'query_filter'.ljust(20) }}= {{ item.query_filter }}
 {% if item.leaf_result_attribute is defined -%}

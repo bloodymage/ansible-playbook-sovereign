@@ -16,15 +16,8 @@
 # 6. All other hosts join domain
 #
 # ==================================================================================================
-- name: Determine whether to force domain recreation
-  ansible.builtin.set_fact:
-    __samba_recreate_realm: yes
-  become: no
-  tags:
-    - never
-    - recreate-realm
-
-- name: Determine if host is already joined as a domain controller
+# TODO: Really check if already joined
+- name: "Determine if host is already joined as a domain controller"
   ansible.builtin.set_fact:
     __samba_joined_as_domain_controller: yes
   become: no
@@ -35,145 +28,18 @@
     - samba-domain-controllers
     - samba_domain_controllers_debug
     - samba-domain-controllers-debug
-
-- name: Set Samba Schema Master For Realm Recreation
-  ansible.builtin.set_fact:
-    __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
-  become: no
-  when:
-    - __samba_recreate_realm
-  tags:
-    - never
     - recreate-realm
+    - recreate-realm-debug
 
-- name: Set Samba Schema Master For Realm Recreation
-  command:
-    cmd: "samba-tool fsmo show"
-  register: __samba_schema_master_role
-  run_once: yes
-  become: yes
-  when:
-    - not __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
 
-- name: Print Variables
-  debug:
-    msg:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] }}"
-    verbosity: 1
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
-- name: Print Variables
-  debug:
-    msg:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[0] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[2] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3] }}"
-    verbosity: 2
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
-- name: Print Variables
-  debug:
-    var: __samba_schema_master_role.stdout_lines[0]
-    verbosity: 3
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
-- name: Print Variables
-  debug:
-    var: __samba_schema_master_role.stdout_lines
-    verbosity: 4
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
-- name: Print Variables
-  debug:
-    var: __samba_schema_master_role
-    verbosity: 4
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
-- name: Set Samba Schema Master For Realm Recreation
-  ansible.builtin.set_fact:
-    __samba_schema_master_list:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] | lower }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] | lower }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
-  become: no
-  when:
-    - not __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
-- name: Set Samba Schema Master For Realm Recreation
-  ansible.builtin.set_fact:
-    __samba_schema_master: "{{ __samba_schema_master_list | join('.') }}"
-  become: no
-  when:
-    - not __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
-- name: Print Variables
-  debug:
-    msg:
-      - "Schema Master: {{ __samba_schema_master }}"
-    verbosity: 1
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-
+# TODO: Break this line up
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
-    samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
   vars:
-    password_store_id: "{{ ansible_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   when:
     - samba_administrator_password == "password"
   no_log: yes
@@ -184,6 +50,17 @@
     - samba-domain-controllers-debug
     - recreate-realm
     - recreate-realm-debug
+
+- name: "Check Ansible Facts Password (WARNING: This will log the password)"
+  ansible.builtin.debug:
+    msg:
+      - "{{ samba_administrator_password }}"
+    verbosity: 1
+  become: no
+  tags:
+    - never
+    - samba_domain_controllers_debug
+    - samba-domain-controllers-debug
 
 - name: Include OS-specific variables.
   include_vars: "{{ lookup('first_found', params) }}"
@@ -222,201 +99,12 @@
     - recreate-realm-debug
     - install-packages
 
-# ==================================================================================================
-#
-# Ensure samba is not currently running on the host system.
-#
-# Steps:
-#   1. Identify the processes
-#
-#
-#
-# Ref: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
-# ==================================================================================================
-- name: Get running processes
-  shell: >
-    ps -ef |
-    grep -v grep |
-    egrep 'samba|smbd|nmbd|winbindd' |
-    awk '{print $2}'
-  register: running_processes
-  become: yes
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Kill running processes
-  shell: "kill {{ item }}"
-  loop: "{{ running_processes.stdout_lines }}"
-  become: yes
-  ignore_errors: yes
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Wait for all processes to be killed
-  wait_for:
-    path: "/proc/{{ item }}/status"
-    state: absent
-  loop: "{{ running_processes.stdout_lines }}"
-  ignore_errors: yes
-  register: killed_processes
-  become: yes
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Force kill stuck processes
-  shell: "kill -9 {{ item }}"
-  loop: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
-  become: yes
-  ignore_errors: yes
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-# ======================================================================
-#
-# Ensure config file does not already exists
-#
-# ======================================================================
-- name: Identify config file if it exists
-  shell: >
-    smbd -b |
-    grep 'CONFIGFILE' |
-    cut -d: -f2 |
-    tr -s "[:blank:]"
-  register: config_file
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Print Variables
-  debug:
-    var: config_file
-    verbosity: 2
+- name: "If we are regenerating the realm: include regeneration tasks"
+  include: "regenerate_realm.yml"
   when:
     - __samba_recreate_realm
   tags:
     - never
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm-debug
-
-- name: Remove config file
-  file:
-    path: "{{ config_file }}"
-    state: absent
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-# ==================================================================================================
-#
-# Ensure Samba databases do not exists
-#
-# ==================================================================================================
-#- name: Identify samba database directories
-#  shell: "smbd -b | egrep 'LOCKDIR|STATEDIR|CACHEDIR|PR0IVATE_DIR'|cut -d: -f2| sed -e 's/^[[:space:]]*//'"
-#  register: database_directories
-
-# - name: Identify samba database files
-#   find:
-#     path: "{{ item }}"
-#     pattern: "*.tdb, *.ldb"
-#   loop:
-#     - "/var/run/samba"
-#     - "/var/lib/samba"
-#     - "/var/cache/samba"
-#     - "/var/lib/samba/private"
-#   become: yes
-#   register: find_logs
-
-# - name: List tdb files
-#   debug:
-#     var: "{{ item.path }}"
-#     verbosity: 1
-#   loop: "{{ find_logs.files }}"
-
-# - name: Remove database files
-#   file:
-#     path: "{{ item.path }}"
-#     state: absent
-#   loop: "{{ find_logs.files }}"
-
-- name: Remove database files
-  shell:
-    cmd: "rm *.tdb *.ldb"
-    chdir: "{{ item }}"
-  loop:
-    - "/var/run/samba"
-    - "/var/lib/samba"
-    - "/var/cache/samba"
-    - "/var/lib/samba/private"
-  become: yes
-  ignore_errors: yes
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-# ==================================================================================================
-#
-# As a precaution, we remove the krb5.conf file
-#
-# ==================================================================================================
-- name: Remove krb5.conf
-  file:
-    path: "/etc/krb5.conf"
-    state: absent
-  when:
-    - __samba_recreate_realm
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
     - recreate-realm
     - recreate-realm-debug
 
@@ -424,15 +112,24 @@
 #
 # Provision First Active Directory Domain Controller
 #
+# TODO: This also needs to happen if the realm does not exist
+#
 # ==================================================================================================
 - name: Provision First Active Directory Domain Controller
-  shell: "samba-tool domain provision --server-role=dc --use-rfc2307 --dns-backend=BIND9_DLZ --realm={{ ansible_domain|upper }} --domain={{ ansible_domain.split('.')[0]|upper }} --adminpass={{ samba_administrator_password }}"
+  command:
+    cmd: >
+      samba-tool domain provision
+      --server-role=dc
+      --use-rfc2307
+      --dns-backend="{{ samba_dns_backend }}"
+      --realm={{ rebeldream_domain | upper }}
+      --domain="{{ rebeldream_org_unit_name | upper }}
+      --adminpass="{{ samba_administrator_password }}"
   register: samba_ad_created
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname == __samba_schema_master
-  notify: restart bind
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -441,11 +138,6 @@
     - recreate-realm
     - recreate-realm-debug
 
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
 - name: Restart bind
   service:
     name: bind9
@@ -453,7 +145,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -462,14 +154,30 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: start samba-ad-dc
+- name: "Configure smb.conf file"
+  template:
+    src: "smb.conf.j2"
+    dest: "/etc/samba/smb.conf"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: restart samba-ad-dc
+  tags:
+    - samba_domain_controllers
+    - samba-domain-controllers
+    - samba_domain_controllers_debug
+    - samba-domain-controllers-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: "start samba-ad-dc"
   service:
     name: samba-ad-dc
     state: started
   become: yes
   when:
-    - __samba_recreate_realm
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -478,13 +186,17 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: Create Reverse Zone
+- name: "Create Reverse Zone"
   command:
-    cmd: "samba-tool dns zonecreate localhost {{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa -U administrator --password={{ samba_administrator_password }}"
+    cmd: >
+      samba-tool dns zonecreate localhost
+      "{{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa"
+      -U administrator
+      --password="{{ samba_administrator_password }}"
   become: yes
   ignore_errors: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -493,13 +205,19 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: Add Domain Controller to Reverse Zone
+- name: "Add Domain Controller to Reverse Zone"
   command:
-    cmd: "samba-tool dns add localhost {{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa {{ ansible_host.split('.')[3] }}.{{ ansible_host.split('.')[2] }} PTR {{ inventory_hostname }} -U administrator --password={{ samba_administrator_password }}"
+    cmd: >
+      samba-tool dns add localhost
+      "{{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa"
+      "{{ ansible_host.split('.')[3] }}.{{ ansible_host.split('.')[2] }}"
+      PTR "{{ rebeldream_fqdn }}"
+      -U administrator
+      --password="{{ samba_administrator_password }}"
   become: yes
   ignore_errors: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -513,12 +231,13 @@
 # Test Active Directory Domain Controller
 #
 # ==================================================================================================
-- name: (Tests) List all shares provided by the DC
-  shell: "smbclient -L localhost -U%"
+- name: "(Tests) List all shares provided by the DC"
+  command:
+    cmd: "smbclient -L localhost -U%"
   register: shares
   become: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -531,7 +250,7 @@
 #   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
 #   register: success
 #   become: yes
-#   when: inventory_hostname == __samba_schema_master
+#   when: rebeldream_fqdn == __samba_schema_master
 #   ignore_errors: yes
 
 #- debug:
@@ -539,11 +258,11 @@
 #    verbosity: 2
 
 - name: "(Tests) Tcp-based _ldap SRV record in the domain"
-  shell: "host -t SRV _ldap._tcp.{{ ansible_domain }}."
+  shell: "host -t SRV _ldap._tcp.{{ rebeldream_domain }}."
   register: success
   become: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -553,11 +272,11 @@
     - recreate-realm-debug
 
 - name: "(Tests) udp-based _kerberos SRV resource record in the domain"
-  shell: "host -t SRV _kerberos._udp.{{ ansible_domain }}."
+  shell: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
   register: success
   become: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -571,7 +290,7 @@
   register: success
   become: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -588,7 +307,7 @@
   no_log: true
   become: no
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -603,7 +322,7 @@
   register: success
   become: no
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -617,7 +336,7 @@
   register: success
   become: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -631,7 +350,7 @@
     msg: "{{ success }}"
     verbosity: 1
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers_debug
     - samba-domain-controllers-debug
@@ -651,7 +370,7 @@
 #   become: yes
 #   loop:
 #     - "samba-tool domain settings account_machine_join_quota 0"
-#   when: inventory_hostname == __samba_schema_master
+#   when: rebeldream_fqdn == __samba_schema_master
 #   ignore_errors: yes
 
 - name: "Disable Guest Account"
@@ -662,7 +381,7 @@
     - "samba-tool user disable Guest"
   ignore_errors: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -684,7 +403,7 @@
   register: success
   become: yes
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   ignore_errors: yes
   tags:
     - samba_domain_controllers
@@ -707,7 +426,7 @@
   no_log: true
   become: no
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -722,7 +441,7 @@
   register: success
   become: no
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -736,7 +455,7 @@
     msg: "{{ success }}"
     verbosity: 1
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers_debug
     - samba-domain-controllers-debug
@@ -748,13 +467,13 @@
 #
 # ==================================================================================================
 - name: Provision Subsequent Active Directory Domain Controller
-  shell: "samba-tool domain join {{ ansible_domain }} DC --dns-backend=BIND9_DLZ -U'{{ ansible_domain.split('.')[0]|upper }}\administrator' --password={{ samba_administrator_password }}"
+  shell: "samba-tool domain join {{ rebeldream_domain }} DC --dns-backend=BIND9_DLZ -U'{{ rebeldream_org_unit_name | upper }}\administrator' --password={{ samba_administrator_password }}"
   register: samba_ad_created
   become: yes
   notify: Update krb5
   when:
     - not __samba_joined_as_domain_controller
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -774,14 +493,14 @@
 #     pattern: idmap.ldb
 #     recurse: yes
 #   register: idmap_file
-#   when: inventory_hostname == __samba_schema_master
+#   when: rebeldream_fqdn == __samba_schema_master
 
 - name: Backup idmap.ldb
   shell: "tdbbackup -s .bak /var/lib/samba/private/idmap.ldb"
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -798,7 +517,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -814,7 +533,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -828,7 +547,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -861,31 +580,14 @@
 #       - '--filter="+ */"'
 #       - '--filter="- *"'
 #   delegate_to: "{{ __samba_schema_master }}"
-#   when: inventory_hostname != __samba_schema_master
+#   when: rebeldream_fqdn != __samba_schema_master
 
 - name: Reset Samba ACLs on Sysvol for New
   shell: "samba-tool ntacl sysvolreset"
   become: yes
   when:
     - __samba_recreate_realm
-    - inventory_hostname != __samba_schema_master
-  tags:
-    - samba_domain_controllers
-    - samba-domain-controllers
-    - samba_domain_controllers_debug
-    - samba-domain-controllers-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Configure smb.conf file
-  template:
-    src: "smb.conf.j2"
-    dest: /etc/samba/smb.conf
-    owner: root
-    group: root
-    mode: 0644
-  become: yes
-  notify: restart samba-ad-dc
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -936,7 +638,7 @@
   shell: "samba-tool drs showrepl"
   become: yes
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   notify: restart bind
   tags:
     - samba_domain_controllers
@@ -951,7 +653,7 @@
   register: shares
   become: yes
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -964,7 +666,7 @@
 #   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
 #   register: success
 #   become: yes
-#   when: inventory_hostname != __samba_schema_master
+#   when: rebeldream_fqdn != __samba_schema_master
 #   ignore_errors: yes
 
 #- debug:
@@ -984,7 +686,7 @@
     - recreate-realm-debug
 
 - name: "(Tests) udp-based _kerberos SRV resource record in the domain"
-  shell: "host -t SRV _kerberos._udp.{{ ansible_domain }}."
+  shell: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
   register: success
   become: yes
   tags:
@@ -1003,7 +705,7 @@
   no_log: true
   become: no
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -1018,7 +720,7 @@
   register: success
   become: no
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers
@@ -1033,7 +735,7 @@
       - "{{ success }}"
     verbosity: 1
   when:
-    - inventory_hostname != __samba_schema_master
+    - rebeldream_fqdn != __samba_schema_master
   tags:
     - samba_domain_controllers_debug
     - samba-domain-controllers-debug
@@ -1147,7 +849,7 @@
 #   become: yes
 #   register: success
 #   when:
-#     - inventory_hostname == __samba_schema_master
+#     - rebeldream_fqdn == __samba_schema_master
 #   tags:
 #     - samba_domain_controllers
 #     - samba-domain-controllers
@@ -1164,7 +866,7 @@
     month: "*"
     job: "/usr/bin/unison -silent"
   when:
-    - inventory_hostname == __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
   tags:
     - samba_domain_controllers
     - samba-domain-controllers

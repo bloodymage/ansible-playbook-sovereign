@@ -1,5 +1,5 @@
 - hosts: all
-  tasks:
+  pre_tasks:
     - name: Create groups based on the OS
       group_by:
         key: "{{ ansible_network_os.split('.')[2] | lower }}"
@@ -15,6 +15,7 @@
   roles:
     - bloodymage.rebeldream.dns_forwardzones
 
+# TODO: Configure RouterOS reversezones
 - hosts: all:!localhost:!routeros
   ignore_unreachable: yes
   roles:

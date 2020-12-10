@@ -1,4 +1,4 @@
-dn: CN=sshPublicKey,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+dn: CN=sshPublicKey,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 changetype: add
 objectClass: top
 objectClass: attributeSchema
@@ -11,10 +11,10 @@ attributeSyntax: 2.5.5.10
 oMSyntax: 4
 isSingleValued: FALSE
 searchFlags: 8
-objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+objectCategory: CN=Attribute-Schema,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 schemaIDGUID:: cjDAZyEXzU+/akI0EGDW+g==
 
-dn: CN=ldapPublicKey,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+dn: CN=ldapPublicKey,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 changetype: add
 objectClass: top
 objectClass: classSchema
@@ -25,12 +25,12 @@ description: MANDATORY: OpenSSH LPK objectclass
 lDAPDisplayName: ldapPublicKey
 subClassOf: top
 objectClassCategory: 3
-objectCategory: CN=Class-Schema,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
-defaultObjectCategory: CN=ldapPublicKey,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+objectCategory: CN=Class-Schema,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
+defaultObjectCategory: CN=ldapPublicKey,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 mayContain: sshPublicKey
 schemaIDGUID:: +8nFQ43rpkWTOgbCCcSkqA==
 
-dn: CN=User,CN=Schema,CN=Configuration,DC={{ ansible_domain.split('.')[0] }},DC={{ ansible_domain.split('.')[1] }},DC={{ ansible_domain.split('.')[2] }}
+dn: CN=User,CN=Schema,CN=Configuration,DC={{ rebeldream_domain.split('.')[0] }},DC={{ rebeldream_domain.split('.')[1] }},DC={{ rebeldream_domain.split('.')[2] }}
 changetype: modify
 replace: auxiliaryClass
 auxiliaryClass: ldapPublicKey
