@@ -36,17 +36,26 @@
     - mediawiki-debug
     - websites
 
+# ==================================================================================================
+#
+# This is a little different from other roles when we install packages for that role.
+#
+# We only want to install packages on servers that have a virtual host containing mediawiki.  This
+# ensure we do not install on other webservers that do not have mediawiki.
+#
+# ==================================================================================================
 - name: "Install packages"
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
-  become: yes
+  loop: "{{ hosts }}"
   when:
     - hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
     - item.enabled
+  become: yes
   tags:
     - mediawiki
     - mediawiki_debug
@@ -60,12 +69,6 @@
     name: "{{ item }}"
   loop: "{{ mediawiki_apache_modules }}"
   notify: restart apache
-  when:
-    - hosts is defined
-    - item.content is defined
-    - item.content == "mediawiki"
-    - item.enabled is defined
-    - item.enabled
   tags:
     - mediawiki
     - mediawiki_debug
