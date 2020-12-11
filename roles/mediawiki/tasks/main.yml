@@ -20,6 +20,17 @@
     - websites
     - install-packages
 
+- name: "Check to determine if we need krb5 support"
+  ansible.builtin.set_fact:
+    packages: "{{ packages + [ mediawiki_krb5_packages ] }}"
+  become: no
+  when:
+    - rebeldream_realm_identity_management_system != ""
+  tags:
+    - users
+    - users_debug
+    - users-debug
+
 - name: "Ensure we have a password for the database user"
   ansible.builtin.set_fact:
     mediawiki_db_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
@@ -49,13 +60,13 @@
     name: "{{ packages }}"
     state: present
   loop: "{{ hosts }}"
+  become: yes
   when:
     - hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
     - item.enabled
-  become: yes
   tags:
     - mediawiki
     - mediawiki_debug
@@ -63,11 +74,23 @@
     - websites
     - install-packages
 
+# ==================================================================================================
+#
+# The conditional needs work.
+#
+# I need it to enable the modules in mediawiki_apache_modules, but only if one of the virtual hosts
+# is a mediawiki website.
+#
+# ==================================================================================================
 - name: "Enable Apache Modules"
   community.general.apache2_module:
     state: present
     name: "{{ item }}"
   loop: "{{ mediawiki_apache_modules }}"
+  become: yes
+  when:
+    - hosts is defined
+    - inventory_hostname in groups['apache_servers']
   notify: restart apache
   tags:
     - mediawiki
@@ -120,7 +143,7 @@
     - mediawiki-install
     - websites
 
-- name: "Install additional mediawiki extensions"
+- name: "Include mediawiki extension task"
   include: mediawiki_extensions.yml
   loop: "{{ hosts }}"
   loop_control:
@@ -135,8 +158,16 @@
     - mediawiki-install
     - websites
 
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
 - name: "Update Extensions"
-  ansible.builtin.command:
+  command:
     cmd: "git submodule update --init --recursive"
     chdir: "/srv/www/{{ item.name }}/w/extensions"
   loop: "{{ hosts }}"
@@ -171,8 +202,16 @@
     - mediawiki-install
     - websites
 
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
 - name: "Update Mediawiki Skins"
-  ansible.builtin.command: 
+  command: 
     cmd: "git submodule update --init --recursive"
     chdir: "/srv/www/{{ item.name }}/w/skins"
   become: yes
@@ -237,8 +276,16 @@
     - mediawiki-debug
     - websites
 
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
 - name: "Update Mediawiki Database"
-  ansible.builtin.command: 
+  command: 
     cmd: "php maintenance/update.php"
     chdir: "/srv/www/{{ item.name }}/w"
   become: yes
