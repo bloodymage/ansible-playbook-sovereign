@@ -49,6 +49,8 @@
 # As of ansible 2.10.3 this fails with the fully qualified collection name:
 # - ansible.builtin.command
 #
+# Potentially enable '--force' to allow using outdate apps?
+#
 # ==================================================================================================
 - name: Enable Nextcloud Apps
   command:
