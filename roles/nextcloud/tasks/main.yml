@@ -1,5 +1,13 @@
 ---
 # tasks file for nextcloud
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
 - name: Include OS-specific variables.
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
@@ -21,7 +29,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -44,7 +52,7 @@
 #
 # ==================================================================================================
 - name: "Download Nextcloud Sources"
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ item.source }}"
     dest: "/tmp/{{ item.file }}"
     checksum: "sha256:{{ item.checksum }}"
@@ -65,7 +73,7 @@
     - download-sources
 
 - name: Extract Sources
-  unarchive:
+  ansible.builtin.unarchive:
     src: "/tmp/{{ nextcloud_source_url[0].file }}"
     dest: "/srv/www/{{ item.name }}"
     remote_src: yes
@@ -73,8 +81,8 @@
     group: www-data
     extra_opts: [--strip-components=1]
     creates: "/srv/www/{{ item.name }}/public.php"
-  become: yes
   loop: "{{ hosts }}"
+  become: yes
   when:
     - hosts is defined
     - item.content is defined
@@ -88,14 +96,14 @@
     - websites
 
 - name: Install Apache site.conf
-  template:
+  ansible.builtin.template:
     src: "apache-site.conf.j2"
     dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
     owner: root
     group: root
     mode: "0644"
-  become: yes
   loop: "{{ hosts }}"
+  become: yes
   when:
     - hosts is defined
     - item.content is defined
@@ -134,10 +142,10 @@
     - websites
 
 - name: Determine New Data Directory
-  set_fact:
+  ansible.builtin.set_fact:
     nextcloud_data_directory: "/srv/www-data/{{ item.name }}/data"
-  become: no
   loop: "{{ hosts }}"
+  become: no
   when:
     - hosts is defined
     - item.content is defined
@@ -151,14 +159,14 @@
     - websites
 
 - name: Create Data Directory
-  file:
+  ansible.builtin.file:
     path: "{{ nextcloud_data_directory }}"
     state: directory
     owner: www-data
     group: www-data
     mode: "0755"
-  become: yes
   loop: "{{ hosts }}"
+  become: yes
   when:
     - hosts is defined
     - item.content is defined
@@ -172,7 +180,7 @@
     - websites
 
 - name: Check If Data Directory in default location
-  stat:
+  ansible.builtin.stat:
     path: "/srv/www/{{ item.name }}/data"
   loop: "{{ hosts }}"
   register: dir_stat
@@ -190,7 +198,7 @@
     - websites
 
 - name: Print dir_stat
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ item.stat.path | default('Not Applicable') }}"
       - "{{ item.stat.exists }}"
@@ -205,7 +213,7 @@
     - nextcloud-debug
 
 - name: Move Data Directory
-  copy:
+  ansible.builtin.copy:
       src: "{{ item.msg.stat.path }}"
       dest: "{{ nextcloud_data_directory }}"
       remote_src: yes
@@ -213,8 +221,8 @@
       group: www-data
       directory_mode: "0755"
       mode: "0644"
-  become: yes
   loop: "{{ dir_stat.results }}"
+  become: yes
   when:
     - item.stat is defined
     - item.stat.exists
@@ -225,11 +233,11 @@
     - websites
 
 - name: Delete old Data directory
-  file:
+  ansible.builtin.file:
     path: "{{ item.stat.path }}"
     state: absent
-  become: yes
   loop: "{{ dir_stat.results }}"
+  become: yes
   when:
     - item.stat is defined
     - item.stat.exists
@@ -241,29 +249,44 @@
     - websites
 
 - name: Update php.ini
-  template:
+  ansible.builtin.template:
     src: "php.ini.j2"
     dest: "/etc/php/7.3/apache2/php.ini"
     owner: root
     group: root
     mode: "0644"
   become: yes
-  notify: restart apache
   when:
     - hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
     - item.enabled
+  notify: restart apache
   tags:
     - nextcloud
     - nextcloud_debug
     - nextcloud-debug
     - websites
 
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
 - name: Install Nextcloud
   command:
-    cmd: "php occ  maintenance:install --database '{{ item.database }}' --database-name '{{ item.db_name }}'  --database-user '{{ item.db_user }}' --database-pass '{{ item.db_password }}' --admin-user '{{ nextcloud_admin_user }}' --admin-pass '{{ nextcloud_admin_password }}'"
+    cmd: >
+      php occ  maintenance:install
+      --database '{{ item.database }}'
+      --database-name '{{ item.db_name }}'
+      --database-user '{{ item.db_user }}'
+      --database-pass '{{ item.db_password }}'
+      --admin-user '{{ nextcloud_admin_user }}'
+      --admin-pass '{{ nextcloud_admin_password }}'
     chdir: "/srv/www/{{ item.name }}"
     creates: "/srv/www/{{ item.name }}/config/config.php"
   become: yes
@@ -280,7 +303,7 @@
     - websites
 
 - name: Update nextcloud config
-  template:
+  ansible.builtin.template:
     src: "config.php.j2"
     dest: "/srv/www/{{ item.name }}/config/config.php"
     owner: www-data
