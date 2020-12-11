@@ -5,7 +5,7 @@
 # TODO: Update this to fully qualified collection name
 #
 # As of ansible 2.10.3 this fails with the fully qualified collection name:
-# - ansible.builtin.command
+# - ansible.builtin.include_vars
 #
 # ==================================================================================================
 - name: Include OS-specific variables.
