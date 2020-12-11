@@ -31,10 +31,23 @@
     - firefox-debug
     - install-packages
 
+- name: "Create SSL Directories"
+  file:
+    path: "{{ firefox_certificate_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug
+
 - name: Install kerberos config
   template:
     src: kerberos.j2
-    dest: /usr/lib64/firefox/browser/defaults/preferences/kerberos.js
+    dest: "{{ firefox_share_path }}/browser/defaults/preferences/kerberos.js"
     owner: root
     group: root
     mode: "0644"
@@ -42,4 +55,24 @@
     - firefox
     - firefox_debug
     - firefox-debug
-    - install-packages
+
+- name: Copy CA Certificates to server.
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "{{ firefox_certificate_path }}/{{ item }}"
+  loop:
+    - "{{ rebeldream_org_name }}-root-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+  become: yes
+  notify: restart all
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all

@@ -28,12 +28,3 @@ pref("datareporting.healthreport.uploadEnabled", false);
 // Default to no suggestions in the urlbar. This still brings a panel asking
 // the user whether they want to opt-in on first use.
 pref("browser.urlbar.suggest.searches", false);
-
-// SSO
-pref("network.automatic-ntlm-auth.allow-non-fqdn", true);
-pref("network.automatic-ntlm-auth.trusted-uris", "cloud.drbr.org,wiki,wiki.olympus.drbr.org,.drbr.org");
-pref("network.negotiate-auth.allow-non-fqdn", true);
-pref("network.negotiate-auth.delegation-uris", "cloud.drbr.org,wiki,wiki.olympus.drbr.org,.drbr.org");
-pref("network.negotiate-auth.trusted-uris", "cloud.drbr.org,wiki,wiki.olympus.drbr.org,.drbr.org");
-pref("network.negotiate-auth.using-native-gsslib", false);
-pref("network.negotiate-auth.gsslib", "/usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2");

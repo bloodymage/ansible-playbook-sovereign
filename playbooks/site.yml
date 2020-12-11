@@ -29,3 +29,4 @@
 - import_playbook: dbservers.yml
 - import_playbook: webservers.yml
 - import_playbook: mailservers.yml
+- import_playbook: workstations.yml

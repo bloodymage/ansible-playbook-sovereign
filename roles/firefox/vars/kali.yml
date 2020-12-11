@@ -1,3 +1,1 @@
-- packages:
-    - firefox-esr
-    - libgssapi-krb5-2
+firefox: "firefox-esr"
