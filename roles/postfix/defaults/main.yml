@@ -104,8 +104,17 @@ postfix_smtpd_milters:
   - "unix:/spamass/spamass.sock"
 postfix_smtpd_sender_login_maps:
   - "$virtual_mailbox_maps"
+postfix_smtpd_sender_restrictions:
+  - "permit_sasl_authenticated"
+  - "permit_mynetworks"
+  - "reject_unknown_sender_domain"
+  - "reject_sender_login_mismatch"
+postfix_smtpd_tls_key_file:  "{{ ownca_etc }}/private/{{ ansible_fqdn }}.key"
+postfix_smtpd_tls_cert_file:  "{{ ownca_etc }}/certs/{{ ansible_fqdn }}.pem"
+postfix_smtpd_tls_CAfile: "{{ rebeldream_component_ca_file }}"
+postfix_smtpd_tls_ask_ccert: "yes"
 postfix_smtpd_tls_auth_only: "yes"
-
+postfix_smtpd_tls_ciphers: "high"
 postfix_smtpd_tls_loglevel: 1
 postfix_smtpd_tls_received_header: "yes"
 postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
