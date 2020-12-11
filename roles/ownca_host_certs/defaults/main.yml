@@ -28,6 +28,13 @@ ownca_host_certs_key_usage:
   - digitalSignature
   - keyEncipherment
 
+# ==================================================================================================
+#
+# The following variables are modified based on system information (host groups, OS Family, etc).
+#
+# These variables are not designed for user configuration.
+#
+# ==================================================================================================
 ownca_generate_locally: no
 ownca_host_certs_pkcs12_password: "password"
 ownca_private_key_group: "root"

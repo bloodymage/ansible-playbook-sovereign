@@ -44,8 +44,8 @@
   file:
     path: "{{ ownca_etc }}/{{ item.name }}"
     state: directory
-    owner: root
-    group: root
+    owner: "{{ ownca_etc_owner }}"
+    group: "{{ ownca_etc_group }}"
     mode: "{{ item.mode }}"
   become: yes
   loop: "{{ ownca_host_certs_directories }}"
@@ -60,13 +60,30 @@
 #
 # Generate Passwords if they don't exist
 #
+# First we check if the host is in the 'apache' web servers group.  Apache requires that the
+# private key have permissions '0644' with the group being 'ssl-certs' otherwise it can't read the
+# private key when starting the server.  (Is this for debian family systems only?)
+#
 # ==================================================================================================
+- name: "Check if host is in 'apache' group"
+  ansible.builtin.set_fact:
+    ownca_private_key_group: "ssl-cert"
+    ownca_private_key_mode: "0640"
+  when:
+    - inventory_hostname in groups['apache_servers']
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
 - name: Generate Host Private Key
   openssl_privatekey:
     path: '{{ ownca_etc }}/private/{{ inventory_hostname }}.key'
     type: '{{ ownca_privatekey_type }}'
     size: 4096
-    owner: root
+    owner: "{{ ownca_etc_owner }}"
     group: "{{ ownca_private_key_group }}"
     mode: "{{ ownca_private_key_mode }}"
     force: no
@@ -114,8 +131,8 @@
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
     path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
     mode: "0644"
-    owner: root
-    group: root
+    owner: "{{ ownca_etc_owner }}"
+    group: "{{ ownca_etc_group }}"
     backup: yes
     force: "{{ __ownca_regenerate }}"
   become: yes
@@ -129,7 +146,7 @@
 # ==================================================================================================
 #
 # Tasks:
-#  
+#
 #
 # ==================================================================================================
 - name: Fetch CSRs.
@@ -144,4 +161,3 @@
     - ownca_host_certs_debug
     - ownca-host-certs-debug
     - ownca-all
-
