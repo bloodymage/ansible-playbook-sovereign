@@ -1,6 +1,16 @@
-- name: Determine Existing Apps
-  shell: 'ls /srv/www/{{ host.name }}/apps'
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
+- name: Determine Existing App
+  command:
+    cmd: 'ls /srv/www/{{ host.name }}/apps'
   changed_when: false
+  become: no
   register: existing_apps
   tags:
     - nextcloud
@@ -8,31 +18,49 @@
     - nextcloud-debug
     - websites
 
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
 - name: Install Nextcloud Apps
   command:
     cmd: "php occ app:install {{ item }}"
     chdir: "/srv/www/{{ host.name }}"
     creates: "/srv/www/{{ host.name }}/apps/{{ item }}/appinfo/info.xml"
+  loop: "{{ nextcloud_apps }}"
   become: yes
   become_user: www-data
-  loop: "{{ nextcloud_apps }}"
   when:
-    - item.content == "nextcloud"
+    - host.content == "nextcloud"
   tags:
     - nextcloud
     - nextcloud_debug
     - nextcloud-debug
     - websites
 
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# Potentially enable '--force' to allow using outdate apps?
+#
+# ==================================================================================================
 - name: Enable Nextcloud Apps
   command:
     cmd: "php occ app:enable {{ item }}"
     chdir: "/srv/www/{{ host.name }}"
+  loop: "{{ nextcloud_apps }}"
   become: yes
   become_user: www-data
-  loop: "{{ nextcloud_apps }}"
   when:
-    - item.content == "nextcloud"
+    - host.content == "nextcloud"
   tags:
     - nextcloud
     - nextcloud_debug
@@ -40,8 +68,11 @@
     - websites
 
 - name: Determine disabled apps
-  set_fact:
+  ansible.builtin.set_fact:
     disabled_apps: "{{ existing_apps.stdout_lines | difference(nextcloud_apps) }}"
+  become: no
+  when:
+    - host.content == "nextcloud"
   tags:
     - nextcloud
     - nextcloud_debug
@@ -49,8 +80,11 @@
     - websites
 
 - name: Determine removed apps
-  set_fact:
+  ansible.builtin.set_fact:
     removed_apps: "{{ disabled_apps | difference(nextcloud_default_apps) }}"
+  become: no
+  when:
+    - host.content == "nextcloud"
   tags:
     - nextcloud
     - nextcloud_debug
@@ -58,10 +92,12 @@
     - websites
 
 - name: Print Disabled Apps
-  debug:
+  ansible.builtin.debug:
     msg: "{{ disabled_apps }}"
     verbosity: 1
   become: no
+  when:
+    - host.content == "nextcloud"
   tags:
     - never
     - nextcloud_debug
@@ -69,25 +105,35 @@
     - websites
 
 - name: Print Remove Apps
-  debug:
+  ansible.builtin.debug:
     msg: "{{ removed_apps }}"
     verbosity: 1
   become: no
+  when:
+    - host.content == "nextcloud"
   tags:
     - never
     - nextcloud_debug
     - nextcloud-debug
     - websites
 
+# ==================================================================================================
+#
+# TODO: Update this to fully qualified collection name
+#
+# As of ansible 2.10.3 this fails with the fully qualified collection name:
+# - ansible.builtin.command
+#
+# ==================================================================================================
 - name: Disable Nextcloud Apps
   command:
     cmd: "php occ app:disable {{ item }}"
     chdir: "/srv/www/{{ host.name }}"
+  loop: "{{ disabled_apps }}"
   become: yes
   become_user: www-data
-  loop: "{{ disabled_apps }}"
   when:
-    - item.content == "nextcloud"
+    - host.content == "nextcloud"
   tags:
     - nextcloud
     - nextcloud_debug
@@ -95,13 +141,13 @@
     - websites
 
 - name: Remove Nextcloud Apps
-  file:
+  ansible.builtin.file:
     path: "/srv/www/{{ host.name }}/apps/{{ item }}"
     state: absent
-  become: yes
   loop: "{{ removed_apps }}"
+  become: yes
   when:
-    - item.content == "nextcloud"
+    - host.content == "nextcloud"
   tags:
     - nextcloud
     - nextcloud_debug

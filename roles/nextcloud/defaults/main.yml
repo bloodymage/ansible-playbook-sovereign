@@ -65,7 +65,7 @@ packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __packages_
 
 
 nextcloud_public_gpg_key: "https://nextcloud.com/nextcloud.asc"
-nextcloud_version: 20.0.0
+nextcloud_version: 20.0.3
 nextcloud_source_url:
   - source: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2"
     file: "nextcloud-{{ nextcloud_version }}.tar.bz2"

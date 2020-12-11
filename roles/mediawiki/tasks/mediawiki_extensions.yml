@@ -1,12 +1,12 @@
 - name: "Get list of extensions to install"
-  set_fact:
+  ansible.builtin.set_fact:
     mediawiki_extensions_install: "{{ mediawiki_extensions | difference(mediawiki_extensions_defaults) }}"
   tags:
     - mediawiki
     - websites
 
-- name: "Install Extensions for {{ host.name }}"
-  git:
+- name: "Install Extensions"
+  ansible.builtin.git:
     repo: "https://gerrit.wikimedia.org/r/mediawiki/extensions/{{ item.name }}"
     dest: "/srv/www/{{ host.name }}/w/extensions/{{ item.name }}"
     version: "{{ item.version | default(mediawiki_version) }}"

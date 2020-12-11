@@ -1,18 +1,18 @@
 - name: "Install Mideawiki Skins for {{ host.name }}"
-  git:
+  ansible.builtin.git:
     repo: "https://gerrit.wikimedia.org/r/mediawiki/skins/{{ item }}"
     dest: "/srv/www/{{ host.name }}/w/skins/{{ item }}"
     version: "{{ mediawiki_version }}"
     force: true
     depth: 1
+  loop: "{{ mediawiki_skins }}"
+  become: yes
+  become_user: www-data
   when:
     - host.content is defined
     - host.content == "mediawiki"
     - host.enabled is defined
     - host.enabled
-  loop: "{{ mediawiki_skins }}"
-  become: yes
-  become_user: www-data
   tags:
     - mediawiki_install
     - install_websites
