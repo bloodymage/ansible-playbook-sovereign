@@ -33,3 +33,8 @@ keycloak_force_backend_url_to_frontend_url: "false"
 keycloak_keystore_alias: "keycloak"
 keycloak_keystore_password: "password"
 keycloak_keystore_file: "keycloak.pkcs12"
+
+keycloak_docs_dir: "{{ keycloak_install_dir }}/docs"
+keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
+keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
+keycloak_license_path: "{{ keycloak_license_dir }}/{{ keycloak_license_file }}"

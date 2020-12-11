@@ -21,7 +21,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -37,7 +37,7 @@
 #
 # ==================================================================================================
 - name: "Download Keycloak Sources"
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ item.source }}"
     dest: "/tmp/{{ item.file }}"
     checksum: "{{ item.checksum_type }}:{{ item.checksum }}"
@@ -51,7 +51,7 @@
     - download-sources
 
 - name: "Create Keycloak Directory"
-  file:
+  ansible.builtin.file:
     path: "{{ keycloak_install_dir }}"
     state: directory
     owner: root
@@ -64,14 +64,14 @@
     - keycloak-debug
 
 - name: Extract Sources
-  unarchive:
+  ansible.builtin.unarchive:
     src: "/tmp/{{ keycloak_source_url[0].file }}"
     dest: "{{ keycloak_install_dir }}"
     remote_src: yes
     owner: root
     group: root
     extra_opts: [--strip-components=1]
-    creates: "{{ keycloak_install_dir }}/docs/licenses-keycloak/org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
+    creates: "{{ keycloak_license_path }}"
   become: yes
   tags:
     - keycloak
@@ -85,6 +85,7 @@
     __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_admin_password"
     __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  become: no
   when:
     - keycloak_admin_password == "password"
   tags:
@@ -97,6 +98,7 @@
     keycloak_keystore_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
   vars:
     password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_keystore_password"
+  become: no
   when:
     - keycloak_keystore_password == "password"
   tags:
@@ -105,7 +107,7 @@
     - keycloak-debug
 
 - name: "Install Service File"
-  template:
+  ansible.builtin.template:
     src: "service.conf.j2"
     dest: "/etc/systemd/system/keycloak.service"
     owner: root
@@ -119,7 +121,7 @@
     - keycloak-debug
 
 - name: "Install Keycloak configuration file"
-  template:
+  ansible.builtin.template:
     src: "keycloak.xml.j2"
     dest: "{{ keycloak_install_dir }}/{{ keycloak_mode }}/configuration/{{ keycloak_mode }}.xml"
     owner: root
@@ -132,9 +134,18 @@
     - keycloak_debug
     - keycloak-debug
 
+# ==================================================================================================
+#
+# I really need a way to test if the admin user is already created.  If so, don't run the command.
+#
+# ==================================================================================================
 - name: "Create admin user"
-  command:
-    cmd: "{{ keycloak_binary_dir }}/add-user-keycloak.sh -r master -u {{ keycloak_admin_user }} -p {{ keycloak_admin_password }}"
+  ansible.builtin.command:
+    cmd: >
+      {{ keycloak_binary_dir }}/add-user-keycloak.sh
+      -r master
+      -u "{{ keycloak_admin_user }}"
+      -p "{{ keycloak_admin_password }}"
   become: yes
   tags:
     - never
