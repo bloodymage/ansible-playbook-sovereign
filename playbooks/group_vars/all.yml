@@ -207,3 +207,4 @@ __linear_strategy: "linear"
 
 # OwnCA
 __ownca_regenerate: no
+__ownca_regenerate_csr: no

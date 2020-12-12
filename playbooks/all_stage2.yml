@@ -1,14 +1,14 @@
-- hosts: all
+- hosts: all:!localhost
   ignore_unreachable: yes
   pre_tasks:
     - name: Check if we are regenerating all ownca certs
       ansible.builtin.set_fact:
         __ownca_regenerate: yes
       become: no
+      changed_when: __ownca_regenerate
       tags:
         - never
-        - ownca_regenerate
-        - ownca-regenerate
+        - regenerate-ownca
 
 - hosts: all:!localhost
   ignore_unreachable: yes

@@ -25,7 +25,7 @@
     packages: "{{ packages + [ mediawiki_krb5_packages ] }}"
   become: no
   when:
-    - rebeldream_realm_identity_management_system != ""
+    - rebeldream_realm_identity_management_system is truthy
   tags:
     - users
     - users_debug
@@ -211,7 +211,7 @@
 #
 # ==================================================================================================
 - name: "Update Mediawiki Skins"
-  command: 
+  command:
     cmd: "git submodule update --init --recursive"
     chdir: "/srv/www/{{ item.name }}/w/skins"
   become: yes
@@ -285,7 +285,7 @@
 #
 # ==================================================================================================
 - name: "Update Mediawiki Database"
-  command: 
+  command:
     cmd: "php maintenance/update.php"
     chdir: "/srv/www/{{ item.name }}/w"
   become: yes

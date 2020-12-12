@@ -40,7 +40,7 @@
 # Next we configure setting applicable to ALL hosts
 #
 # ==================================================================================================
-- hosts: all:!localhost:!tpeap
+- hosts: all:!localhost:!tpeap:!printers
   strategy: free
   roles:
     - bloodymage.rebeldream.hostname
@@ -55,7 +55,7 @@
 #   - Windows
 #
 # ==================================================================================================
-- hosts: linux:!localhost:!routeros:!tpeap
+- hosts: linux:!localhost:!routeros:!tpeap:!printers
   strategy: linear
   roles:
     - bloodymage.rebeldream.sshca_host_certs

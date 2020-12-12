@@ -134,7 +134,7 @@
     owner: "{{ ownca_etc_owner }}"
     group: "{{ ownca_etc_group }}"
     backup: yes
-    force: "{{ __ownca_regenerate }}"
+    force: "{{ __ownca_regenerate_csr }}"
   become: yes
   tags:
     - ownca_host_certs

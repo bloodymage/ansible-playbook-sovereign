@@ -140,6 +140,15 @@
     - bloodymage.rebeldream.samba_domain_controller
 
 - hosts: __samba_schema_master
+  pre_tasks:
+    - name: Check if we are regenerating all ownca certs
+      ansible.builtin.set_fact:
+        __ownca_regenerate: yes
+      become: no
+      changed_when: __ownca_regenerate
+      tags:
+        - never
+        - regenerate-ownca
   roles:
     - bloodymage.rebeldream.samba_domain_users
 

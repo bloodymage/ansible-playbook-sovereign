@@ -164,25 +164,28 @@
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
-    path:  "{{ keycloak_install_dir }}/{{ keycloak_mode }}/configuration/keycloak.jks"
+    path:  "{{ keycloak_install_dir }}/{{ keycloak_mode }}/configuration/{{ keycloak_keystore_file }}"
     friendly_name: "{{ keycloak_keystore_alias }}"
     passphrase: "{{ keycloak_keystore_password }}"
     privatekey_path: "/etc/ssl/private/{{ inventory_hostname }}.key"
     certificate_path: "/etc/ssl/certs/{{ inventory_hostname }}-chain.pem"
     other_certificates:
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca-chain.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca-chain.pem"
+      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca-chain.pem"
       - "/etc/ssl/certs/{{ rebeldream_org_name }}-root-ca.pem"
       - "/etc/ssl/certs/zeus.olympus.drbr.org-chain.pem"
+      - "/etc/ssl/certs/hera.olympus.drbr.org-chain.pem"
+      - "/etc/ssl/certs/zeus.olympus.drbr.org.pem"
+      - "/etc/ssl/certs/hera.olympus.drbr.org.pem"
     state: present
     iter_size: 0
     maciter_size: 0
     mode: '0600'
     owner: root
     group: root
-    #force: yes
+    force: yes
   become: yes
   notify: restart keycloak
   tags:
