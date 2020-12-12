@@ -1,6 +1,7 @@
 ---
 packages:
   - python3-cryptography
+  - python3-openssl
 
 ownca_hosts_directory: "{{ ownca_directory }}/hosts"
 
