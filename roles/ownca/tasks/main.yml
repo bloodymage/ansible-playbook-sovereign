@@ -29,7 +29,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     pkg: "{{ packages }}"
     state: present
   become: yes
@@ -58,7 +58,7 @@
 #
 # ==================================================================================================
 - name: Create PKI Directory
-  file:
+  ansible.builtin.file:
     path: '{{ ownca_ca_directory }}/{{ item }}'
     state: directory
     owner: "{{ ansible_user }}"
@@ -73,6 +73,7 @@
     - db
   delegate_to: localhost
   run_once: true
+  become: yes
   tags:
     - ownca
     - ownca-all
@@ -94,12 +95,13 @@
 #   run_once: true
 
 - name: Print Variable
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ ownca_certificate_authorities }}"
       - "{{ rebeldream_org_unit_name }}"
     verbosity: 2
   delegate_to: localhost
+  become: no
   tags:
     - ownca
     - ownca_debug
@@ -107,7 +109,7 @@
     - ownca-all
 
 - name: Create database
-  copy:
+  ansible.builtin.copy:
     src: "/dev/null"
     dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ item.name }}-ca.db"
     owner: "{{ ansible_user }}"
@@ -124,7 +126,7 @@
     - ownca-all
 
 - name: Create a serial file
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/serial.j2"
     dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ item.name }}-ca.cert.srl"
     owner: "{{ ansible_user }}"
@@ -133,6 +135,7 @@
     force: no
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  become: no
   tags:
     - ownca
     - ownca_debug
@@ -140,7 +143,7 @@
     - ownca-all
 
 - name: Create crl serial file
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/serial.j2"
     dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ item.name }}-ca.crl.srl"
     owner: "{{ ansible_user }}"
@@ -149,6 +152,7 @@
     force: no
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
+  become: no
   tags:
     - ownca
     - ownca_debug
@@ -174,6 +178,7 @@
     - ownca_root_password == "password"
   delegate_to: localhost
   run_once: yes
+  become: no
   tags:
     - ownca
     - ownca_debug
@@ -194,6 +199,7 @@
     - component
     - identity
     - codesign
+  become: no
   when:
     - ownca_{{ item }}_password == "password"
   delegate_to: localhost
@@ -208,7 +214,7 @@
 #
 # ==================================================================================================
 - name: Generate CA Private Key
-  openssl_privatekey:
+  community.crypto.openssl_privatekey:
     path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     passphrase: "{{ item.password }}"
     type: "{{ ownca_privatekey_type }}"
@@ -228,7 +234,7 @@
     - ownca-all
 
 - name: Generate Certificate Authority Certificate Signing Request (CSR)
-  openssl_csr:
+  community.crypto.openssl_csr:
     path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
     privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
@@ -259,7 +265,7 @@
     - ownca-all
 
 - name: Generate Selfsigned Certificate
-  openssl_certificate:
+  community.crypto.openssl_certificate:
     path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
     privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
@@ -284,10 +290,11 @@
     - ownca-all
 
 - name: Check if Selfsigned Certificate was a success
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ __new_root }}"
     verbosity: 1
+  become: no
   tags:
     - never
     - ownca_debug
@@ -296,6 +303,7 @@
 - name: If self signed certificate was regenerated; force regeneration of the remaining certificates
   set_fact:
     __ownca_force_regeneration: yes
+  become: no
   when:
     - __new_root.changed or ( __ownca_regenerate is defined and __ownca_regenerate )
   tags:
@@ -304,7 +312,7 @@
     - ownca-debug
 
 - name: Generate OwnCA Signed Certificate
-  openssl_certificate:
+  community.crypto.openssl_certificate:
     path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
     csr_path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
     ownca_path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.crt"
@@ -351,7 +359,7 @@
     - ownca-all
 
 - name: Cert Chain (Name, Complete Chain)
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ item.item }}"
       - "{{ item.complete_chain }}"
@@ -369,7 +377,7 @@
     - ownca-debug
 
 - name: Print Cert Authorities Results (Item)
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ item }}"
     verbosity: 2
@@ -385,7 +393,7 @@
     - ownca-debug
 
 - name: Print Cert Authorities Results
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ parent_cert_authorities.results }}"
     verbosity: 3
@@ -400,7 +408,7 @@
     - ownca-debug
 
 - name: Print Cert Authorities (Full)
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ parent_cert_authorities }}"
     verbosity: 4
@@ -429,7 +437,7 @@
     - ownca-all
 
 - name: Cert Chain (Name, Ownca, Chain, Complete Chain)
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ root_cert_authorities.chain }}"
       - "{{ root_cert_authorities.complete_chain }}"
@@ -445,7 +453,7 @@
     - ownca-debug
 
 - name: Print Cert Authorities (Full)
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ root_cert_authorities }}"
     verbosity: 4
@@ -459,7 +467,7 @@
     - ownca-debug
 
 - name: Write complete chain to disk
-  copy:
+  ansible.builtin.copy:
     dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item.item }}-ca-chain.crt"
     content: "{{ ''.join(item.complete_chain) }}"
     owner: "{{ ownca_user }}"
@@ -479,7 +487,7 @@
     - ownca-all
 
 - name: Write root chain (intermediates and root) to disk
-  copy:
+  ansible.builtin.copy:
     dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
     content: "{{ ''.join(root_cert_authorities.complete_chain) }}"
     owner: "{{ ownca_user }}"
