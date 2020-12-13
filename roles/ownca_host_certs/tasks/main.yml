@@ -208,21 +208,21 @@
     - ownca_host_certificates_debug
     - ownca-host-certificates-debug
 
-# - name: Include NetworkOS Tasks
-#   include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
-#   when:
-#     - ansible_network_os is not defined
-#     - not ownca_generate_locally
-#   become: no
-#   tags:
-#     - ownca_host_certs
-#     - ownca-host-certs
-#     - ownca_host_certificates
-#     - ownca-host-certificates
-#     - ownca_host_certs_debug
-#     - ownca-host-certs-debug
-#     - ownca_host_certificates_debug
-#     - ownca-host-certificates-debug
+- name: Include NetworkOS Tasks
+  include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
+  when:
+    - ansible_network_os is defined
+    - not ownca_generate_locally
+  become: no
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
 
 - name: Include Local tasks
   include: "localhost_final.yml"
