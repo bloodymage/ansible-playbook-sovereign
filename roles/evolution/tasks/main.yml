@@ -14,9 +14,9 @@
         - "vars"
   become: no
   tags:
-    - firefox
-    - firefox_debug
-    - firefox-debug
+    - evolution
+    - evolution_debug
+    - evolution-debug
     - install-packages
 
 - name: "Install packages"
@@ -26,7 +26,7 @@
   become: yes
   register: result
   tags:
-    - firefox
-    - firefox_debug
-    - firefox-debug
+    - evolution
+    - evolution_debug
+    - evolution-debug
     - install-packages
