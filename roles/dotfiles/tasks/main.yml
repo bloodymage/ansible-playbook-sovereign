@@ -4,29 +4,6 @@
 #
 #
 # ==================================================================================================
-- name: get user home directory
-  shell: >-
-    getent passwd {{ item.username }}  | awk -F: '{ print $6 }'
-  changed_when: false
-  register: user_home
-  become: yes
-  loop: "{{ users }}"
-  when:
-    - users is defined
-  tags:
-    - dotfiles
-    - dotfiles_debug
-    - dotfiles-debug
-
-- name: debug output
-  debug:
-    var: user_home
-  become: no
-  tags:
-    - never
-    - dotfiles_debug
-    - dotfiles-debug
-
 - name: Ensure User Home directory exists
   file:
     dest: "{{ item.unix_home }}"
@@ -38,7 +15,6 @@
   become: yes
   when:
     - users is defined
-    - inventory_hostname not in groups['samba_file_servers']
     - item.unix_home is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
   tags:
@@ -46,11 +22,6 @@
     - dotfiles_debug
     - dotfiles-debug
 
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
 - name: Install User gitconfig
   template:
     src: "gitconfig.j2"
@@ -68,11 +39,6 @@
     - dotfiles_debug
     - dotfiles-debug
 
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
 - name: Ensure user .gnupg folder exists
   file:
     path: "{{ item.unix_home }}/.gnupg"
