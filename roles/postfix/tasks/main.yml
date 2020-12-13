@@ -35,9 +35,14 @@
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
     __mail_user: "{{ mail_user }}"
-    __mail_user_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + rebeldream_password_length + ' nosymbols=true') }}"
+    __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
+    __password_length: "length={{ nextcloud_password_legnth }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   no_log: yes
   become: no
   delegate_to: localhost
@@ -54,7 +59,7 @@
     dest: "/etc/{{ item }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   become: yes
   loop:
     - mailname
@@ -71,7 +76,7 @@
     dest: "/etc/postfix/{{ item }}"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   become: yes
   loop:
     - dynamicmaps.cf
@@ -90,9 +95,9 @@
     dest: "/etc/postfix/{{ item }}.cf"
     owner: root
     group: root
-    mode: 0644
-  become: yes
+    mode: "0644"
   loop: "{{ postfix_ldap_maps }}"
+  become: yes
   when:
     - inventory_hostname in groups['samba_domain']
     - mail_user_password is defined
@@ -108,7 +113,7 @@
     dest: "/etc/postfix/{{ item }}"
     owner: root
     group: root
-    mode: 644
+    mode: "0644"
   become: yes
   loop:
     - canonical
@@ -136,7 +141,7 @@
     dest: "/etc/postfix/{{ item }}"
     owner: root
     group: root
-    mode: 644
+    mode: "0644"
   become: yes
   loop:
     - sasl_passwd

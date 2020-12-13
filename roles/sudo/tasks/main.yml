@@ -13,6 +13,7 @@
     dest: "/etc/sudoers"
     owner: root
     group: root
+    mode: "0640"
     validate: /usr/sbin/visudo -csf %s
   become: yes
   tags:
