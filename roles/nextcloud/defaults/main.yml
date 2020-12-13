@@ -63,7 +63,6 @@ packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __packages_
 # For command line processing (optional):
 # PHP module pcntl (enables command interruption by pressing ctrl-c)
 
-
 nextcloud_public_gpg_key: "https://nextcloud.com/nextcloud.asc"
 nextcloud_version: 20.0.3
 nextcloud_source_url:
@@ -71,6 +70,10 @@ nextcloud_source_url:
     file: "nextcloud-{{ nextcloud_version }}.tar.bz2"
     signature: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2.asc"
     checksum: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2.sha256"
+
+nextcloud_admin_user: "administrator"
+nextcloud_admin_password: "password"
+nextcloud_password_legnth: "{{ rebeldream_password_length }}"
 
 nextcloud_post_max_size: 512M
 nextcloud_upload_max_filesize: 512M
