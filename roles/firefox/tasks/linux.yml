@@ -49,7 +49,6 @@
     owner: root
     group: root
     mode: "0644"
-  become: yes
   loop:
     - "{{ rebeldream_org_name }}-root-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"

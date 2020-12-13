@@ -79,11 +79,14 @@
 
 - name: "Ensure we have a password for the keycloak administrator user"
   ansible.builtin.set_fact:
-    keycloak_admin_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
+    keycloak_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_admin_password"
-    __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_length: "length={{ keycloak_password_legnth }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   become: no
   when:
     - keycloak_admin_password == "password"
@@ -94,9 +97,14 @@
 
 - name: "Ensure we have a password for the keycloak keystore"
   ansible.builtin.set_fact:
-    keycloak_keystore_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    keycloak_keystore_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_keystore_password"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_keystore_password"
+    __password_length: "length={{ keycloak_password_legnth }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   become: no
   when:
     - keycloak_keystore_password == "password"

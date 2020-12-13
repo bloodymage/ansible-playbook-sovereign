@@ -265,7 +265,7 @@
     - ownca-all
 
 - name: Generate Selfsigned Certificate
-  community.crypto.openssl_certificate:
+  community.crypto.x509_certificate:
     path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
     privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
@@ -312,7 +312,7 @@
     - ownca-debug
 
 - name: Generate OwnCA Signed Certificate
-  community.crypto.openssl_certificate:
+  community.crypto.x509_certificate:
     path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
     csr_path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
     ownca_path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.crt"
