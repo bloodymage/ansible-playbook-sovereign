@@ -42,7 +42,7 @@ rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeld
 rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
 rebeldream_identity_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
 
-# Passwords
+# Default Passwords
 mediawiki_db_password: "password"
 mysql_administrator_password: "password"
 mysql_system_maintenance_user_password: "password"
@@ -176,6 +176,9 @@ mail_user: vmail
 mysql_administrator: "root"
 mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: /var/lib/mysql
+
+# Samba
+samba_password_legnth: "{{ rebeldream_password_length }}"
 
 # SSH
 ssh_cnofig_dir: "/etc/ssh"

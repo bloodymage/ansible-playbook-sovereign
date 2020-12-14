@@ -1,0 +1,94 @@
+---
+# ==================================================================================================
+#
+# Set Group membership
+#
+# ==================================================================================================
+- name: "Get Group Membership"
+  command:
+    cmd: >
+      samba-tool group listmembers "{{ group.groupname }}"
+  register: existing_group_list
+  delegate_to: "{{ __samba_schema_master }}"
+  become: yes
+  run_once: yes
+  when:
+    - group.groupname is defined
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: "Add new groups"
+  command:
+    cmd: >
+      samba-tool group addmembers "{{ group.groupname }}" "{{ item }}"
+      --username Administrator
+      --password "{{ samba_administrator_password }}"
+  loop: "{{ group.group_members }}"
+  delegate_to: "{{ __samba_schema_master }}"
+  become: yes
+  run_once: yes
+  when:
+    - item not in existing_group_list.stdout_lines
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
+  
+- name: "Determine removed group members"
+  set_fact:
+    removed_members: "{{ existing_group_list.stdout_lines | difference(group.group_members) }}"
+  delegate_to: "{{ __samba_schema_master }}"
+  become: yes
+  run_once: yes
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: "List removed group members"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }}"
+    verbosity: 1
+  loop: "{{ removed_members }}"
+  delegate_to: "{{ __samba_schema_master }}"
+  become: no
+  run_once: yes
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: "Delete removed group members"
+  command:
+    cmd: >
+      samba-tool group removemembers "{{ group.groupname }}" "{{ item }}"
+      --username Administrator
+      --password "{{ samba_administrator_password }}"
+  loop: "{{ removed_members }}"
+  delegate_to: "{{ __samba_schema_master }}"
+  become: yes
+  run_once: yes
+  when:
+    - removed_members is truthy
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug

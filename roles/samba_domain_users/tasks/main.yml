@@ -1,119 +1,14 @@
 ---
-- name: Set Samba Schema Master For Realm Recreation
-  command:
-    cmd: "samba-tool fsmo show"
-  register: __samba_schema_master_role
-  run_once: yes
-  become: yes
-  when:
-    - not __samba_recreate_realm
-  tags:
-    - samba_domain_users
-    - samba-domain-users
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
-- name: Print Variables
-  debug:
-    msg:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] }}"
-    verbosity: 1
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
-- name: Print Variables
-  debug:
-    msg:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[0] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[2] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3] }}"
-    verbosity: 2
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
-- name: Print Variables
-  debug:
-    var: __samba_schema_master_role.stdout_lines[0]
-    verbosity: 3
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
-- name: Print Variables
-  debug:
-    var: __samba_schema_master_role.stdout_lines
-    verbosity: 4
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
-- name: Print Variables
-  debug:
-    var: __samba_schema_master_role
-    verbosity: 4
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
-- name: Set Samba Schema Master For Realm Recreation
-  ansible.builtin.set_fact:
-    __samba_schema_master_list:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] | lower }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] | lower }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
-  become: no
-  when:
-    - not __samba_recreate_realm
-  tags:
-    - samba_domain_users
-    - samba-domain-users
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
-- name: Set Samba Schema Master For Realm Recreation
-  ansible.builtin.set_fact:
-    __samba_schema_master: "{{ __samba_schema_master_list | join('.') }}"
-  become: no
-  when:
-    - not __samba_recreate_realm
-  tags:
-    - samba_domain_users
-    - samba-domain-users
-    - samba_domain_users_debug
-    - samba-domain-users-debug
-
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
-    samba_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + rebeldream_password_length + ' nosymbols=true') }}"
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_length: "length={{ samba_password_legnth }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   when:
     - samba_administrator_password == "password"
   tags:
@@ -129,7 +24,7 @@
     username: "{{ item.username }}"
     groupname: "{{ item.groupname | default(none) }}"
     id_number: "{{ item.id_number | default(none) }}"
-    password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __overwrite) }}"
+    password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     given_name: "{{ item.given_name | default(item.username | title) }}"
     surname: "{{ item.surname | default(none) }}"
     initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
@@ -146,8 +41,11 @@
     spns: "{{ item.spns | default(none) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item.username }}/password"
-    __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
-    __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   loop: "{{ domain_users }}"
   #no_log: yes
   become: no
@@ -252,7 +150,7 @@
 #
 #
 # ==================================================================================================
-- name: Add Samba Groups
+- name: Add Unix Samba Groups (Without email address)
   shell: >
     samba-tool group add "{{ item.groupname }}"
     --gid-number {{ item.id_number }}
@@ -277,7 +175,7 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: Add Samba Groups
+- name: Add Unix Samba Groups (With email address)
   shell: >
     samba-tool group add "{{ item.groupname }}"
     --gid-number {{ item.id_number }}
@@ -304,7 +202,7 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: Add Samba Groups
+- name: Add Non-Unix Samba Groups (with Email Address)
   shell: >
     samba-tool group add "{{ item.groupname }}"
     --mail-address {{ item.mail_address }}
@@ -328,7 +226,7 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: Add Samba Groups
+- name: Add Non-Unix Samba Groups (without Email Address)
   shell: >
     samba-tool group add "{{ item.groupname }}"
     -U Administrator
@@ -423,6 +321,8 @@
 - name: Add Samba Users
   shell: >
     samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
+    --username Administrator
+    --password {{ samba_administrator_password }}
   loop: "{{ __domain_users }}"
   ignore_errors: yes
   delegate_to: "{{ __samba_schema_master }}"
@@ -441,8 +341,11 @@
     - recreate-realm-debug
 
 - name: Set expiry for Samba Users
-  shell: >
-    samba-tool user setexpiry "{{ item.ansible_facts.account_expire }}" "{{ item.ansible_facts.username }}"
+  command:
+    cmd: >
+      samba-tool user setexpiry "{{ item.ansible_facts.account_expire }}" "{{ item.ansible_facts.username }}"
+      --username Administrator
+      --password {{ samba_administrator_password }}
   become: yes
   loop: "{{ __domain_users }}"
   when:
@@ -468,6 +371,25 @@
     - inventory_hostname == __samba_schema_master
     - user.ansible_facts.spns is defined
     - user.ansible_facts.spns != ""
+  delegate_to: "{{ __samba_schema_master }}"
+  run_once: yes
+  tags:
+    - samba_domain_users
+    - samba-domain-users
+    - samba_domain_users_debug
+    - samba-domain-users-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: "Set Group Membership"
+  include: group_membership.yml
+  loop: "{{ domain_groups }}"
+  loop_control:
+    loop_var: group
+  when:
+    - __samba_schema_master is defined
+    - inventory_hostname == __samba_schema_master
+    - group.group_members is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
