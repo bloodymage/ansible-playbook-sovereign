@@ -22,7 +22,7 @@
         - postfix-debug
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -49,7 +49,7 @@
 
 
 - name: Install config files
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/{{ item }}"
     owner: root
@@ -66,7 +66,7 @@
 
 
 - name: "Install configuration files (Perms=644)"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
     owner: root
@@ -85,7 +85,7 @@
     - postfix-debug
 
 - name: "Install ldap user and group map files"
-  template:
+  ansible.builtin.template:
     src: "ldap_maps.j2"
     dest: "/etc/postfix/{{ item }}.cf"
     owner: root
@@ -103,7 +103,7 @@
     - postfix-debug
 
 - name: "Install Configuration files (postmap update required)"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
     owner: root
@@ -124,8 +124,14 @@
     - postfix_debug
     - postfix-debug
 
+# ==================================================================================================
+#
+# This is separate from above because sometimes we need these only apply if we are configuring
+# authentication to an external relay server
+#
+# ==================================================================================================
 - name: "Install Configuration files (postmap update required)"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
     owner: root
@@ -144,7 +150,7 @@
     - postfix-debug
 
 - name: Create configuration files (Perms=600)
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
     owner: root

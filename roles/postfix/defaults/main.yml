@@ -3,14 +3,61 @@
 packages:
   - postfix
 
-postfix_alias_database: "hash:/etc/aliases"
-postfix_alias_maps:
-  - "hash:/etc/aliases"
-postfix_append_dot_mydomain: "no"
+# ==================================================================================================
+#
+# Postfix main.cf defaults
+#
+# These are the variables that are used in the configuration.  If you wish to deviate from these
+# defaults, you can do so with your inventory, or other variable declarations.
+#
+# For the most part, variables here will be the same as the hard coded internal defaults, which will
+# be any variable beginning with '__'.
+#
+# Settings that apply to more than one role:
+# - name: recipient_delimiter
+#   variable: mail_recipient_delimiter
+#   default value: "+"
+#
+# ==================================================================================================
+# Variables which our default is different from postfix's default.
 postfix_biff: "no"
+postfix_delay_warning_time: "4h"
+postfix_mailbox_transport: "lmtp:unix:private/dovecot-lmtp"
+postfix_mydestination:
+  - "$myhostname"
+  - "localhost.{{ rebeldream_domain }}"
+  - "localhost"
+postfix_myhostname: "{{ rebeldream_fqdn }}"
+postfix_postscreen_dnsbl_action: "enforce"
+postfix_postscreen_dnsbl_sites:
+  - "zen.spamhaus.org"
+  - "b.barracudacentral.org"
+  - "bl.spamcop.net"
+postfix_postscreen_greet_action: "enforce"
+postfix_smtpd_banner: "$myhostname ESMTP"
+postfix_smtpd_tls_chain_files:
+  - "/etc/ssl/private/{{ rebeldream_fqdn }}.key"
+  - "/etc/ssl/certs/{{ rebeldream_fqdn }}-chain.pem"
+postfix_smtpd_tls_ciphers: "high"
+postfix_smtpd_tls_ask_ccert: "yes"
+
+# Variables which have the same default as postfix
+postfix_alias_database: "{{ __postfix_alias_database }}"
+postfix_alias_maps: "{{ __postfix_alias_maps }}"
+postfix_append_dot_mydomain: "{{ __postfix_append_dot_mydomain }}"
+postfix_compatibility_level: "{{ __postfix_compatibility_level }}"
+postfix_myorigin: "{{ __postfix_myorigin }}"
+postfix_postscreen_access_list: "{{ __postfix_postscreen_access_list }}"
+postfix_mynetworks_style: "{{ __postfix_mynetworks_style }}"
+postfix_relay_host: "{{ __postfix_relay_host }}"
+postfix_smtpd_tls_CAfile: "{{ __postfix_smtpd_tls_CAfile }}"
+postfix_smtpd_tls_cert_file:  "{{ __postfix_smtpd_tls_cert_file }}"
+postfix_smtpd_tls_key_file:  "{{ __postfix_smtpd_tls_key_file }}"
+
+
+# Variables that have not yet been sorted
 postfix_canonical_maps: "hash:/etc/postfix/canonical"
 postfix_default_destination_concurrency_limit: 5
-postfix_delay_warning_time: "4h"
 postfix_disable_vrfy_command: "yes"
 postfix_dovecot_destination_recipient_limit: 1
 postfix_home_mailbox: "Maildir/"
@@ -18,21 +65,10 @@ postfix_inet_interfaces: "all"
 postfix_inet_protocols: "all"
 postfix_local_recipient_maps: "$virtual_mailbox_maps"
 postfix_mailbox_size_limit: 0
-postfix_mailbox_transport: "lmtp:unix:private/dovecot-lmtp"
+postfix_message_size_limit: "104857600"
 postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
 postfix_milter_default_action: "accept"
-postfix_mydestination:
-  - "$myhostname"
-  - "localhost.{{ rebeldream_domain }}"
-  - "localhost"
 postfix_non_smtpd_milters: "$smtpd_milters"
-postfix_postscreen_access_list: "permit_mynetworks"
-postfix_postscreen_dnsbl_action: "enforce"
-postfix_postscreen_dnsbl_sites:
-  - "zen.spamhaus.org"
-  - "b.barracudacentral.org"
-  - "bl.spamcop.net"
-postfix_postscreen_greet_action: "enforce"
 postfix_readme_directory: "no"
 postfix_relay_destination_concurrency_limit: 1
 postfix_sender_dependent_relayhost_maps: "hash:/etc/postfix/sender_relay"
@@ -44,7 +80,7 @@ postfix_smtp_tls_note_starttls_offer: "yes"
 postfix_smtp_tls_security_level: "may"
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 postfix_smtp_tls_wrappermode: "no"
-postfix_smtpd_banner: "$myhostname ESMTP"
+
 postfix_smtpd_client_restrictions:
   - "permit_mynetworks"
   - "permit_sasl_authenticated"
@@ -90,12 +126,8 @@ postfix_smtpd_sender_restrictions:
   - "permit_mynetworks"
   - "reject_unknown_sender_domain"
   - "reject_sender_login_mismatch"
-postfix_smtpd_tls_CAfile: "/etc/ssl/cert/example-cert.pem"
-postfix_smtpd_tls_ask_ccert: "yes"
 postfix_smtpd_tls_auth_only: "yes"
-postfix_smtpd_tls_cert_file:  "/etc/ssl/certs/{{ ansible_fqdn }}.pem"
-postfix_smtpd_tls_ciphers: "high"
-postfix_smtpd_tls_key_file:  "/etc/ssl/private/{{ ansible_fqdn }}.key"
+
 postfix_smtpd_tls_loglevel: 1
 postfix_smtpd_tls_received_header: "yes"
 postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
@@ -115,6 +147,11 @@ postfix_virtual_mailbox_maps:
   - "hash:/etc/postfix/virtual-mailbox-users"
 postfix_virtual_transport: "dovecot"
 
+# ==================================================================================================
+#
+# Postfix master.cf defaults
+#
+# ==================================================================================================
 postfix_master_submission_options:
   - "-o smtpd_tls_security_level=encrypt"
   - "-o smtpd_sasl_auth_enable=yes"
@@ -157,6 +194,185 @@ postfix_master_dovecot_options:
   - "flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver"
   - "-f ${sender} -d ${user}@${nexthop} -a ${original_recipient}"
 
+# ==================================================================================================
+#
+# Variables which aren't config file settings...
+#
+# ==================================================================================================
 postfix_canonical_mappings: []
 postfix_ldap_maps: []
 postfix_ldap_map_debug_level: 0
+
+# ==================================================================================================
+#
+# Postfix main.cf Internal Defaults
+#
+# These are the hard coded defaults from postfix.  DO NOT EDIT!
+#
+# ==================================================================================================
+__postfix_alias_database: "hash:/etc/aliases"
+__postfix_alias_maps:
+  - "hash:/etc/aliases"
+  - "nis:mail.aliases"
+__postfix_append_dot_mydomain: "no"
+__postfix_biff: "yes"
+__postfix_canonical_maps: "hash:/etc/postfix/canonical"
+__postfix_compatibility_level: "0"
+__postfix_default_destination_concurrency_limit: 5
+__postfix_delay_warning_time: "0h"
+__postfix_disable_vrfy_command: "yes"
+__postfix_dovecot_destination_recipient_limit: 1
+__postfix_home_mailbox: ""
+__postfix_inet_interfaces: "all"
+__postfix_inet_protocols: "all"
+__postfix_local_recipient_maps: "$virtual_mailbox_maps"
+__postfix_mailbox_size_limit: 0
+__postfix_mailbox_transport: ""
+__postfix_message_size_limit: "10240000"
+__postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
+__postfix_milter_default_action: "accept"
+__postfix_multi_recipient_bounce_reject_code: "550"
+__postfix_mydestination:
+  - "$myhostname"
+  - "localhost.$mydomain"
+  - "localhost"
+__postfix_mydomain: "localdomain"
+__postfix_myhostname: "{{ inventory_hostname_short }}.localdomain"
+__postfix_mynetworks:
+  - "127.0.0.0/8"
+__postfix_mynetworks_style: "hosts"
+__postfix_myorigin: "$myhostname"
+__postfix_non_smtpd_milters: "$smtpd_milters"
+__postfix_postscreen_access_list: "permit_mynetworks"
+__postfix_postscreen_dnsbl_action: "ignore"
+__postfix_postscreen_dnsbl_sites: []
+__postfix_postscreen_greet_action: "ignore"
+__postfix_readme_directory: "no"
+__postfix_recipient_delimiter: ""
+__postfix_relay_destination_concurrency_limit: 1
+__postfix_relay_host: ""
+__postfix_sender_dependent_relayhost_maps: "hash:/etc/postfix/sender_relay"
+__postfix_smtp_sasl_auth_enable: "yes"
+__postfix_smtp_sasl_password_maps: "hash:/etc/postfix/sasl_passwd"
+__postfix_smtp_sasl_security_options: "noanonymous"
+__postfix_smtp_sender_dependent_authentication: "yes"
+__postfix_smtp_tls_note_starttls_offer: "yes"
+__postfix_smtp_tls_security_level: "may"
+__postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
+__postfix_smtp_tls_wrappermode: "no"
+__postfix_smtpd_banner: "$myhostname ESMTP $mail_name"
+__postfix_smtpd_client_restrictions:
+  - "permit_mynetworks"
+  - "permit_sasl_authenticated"
+  - "permit_tls_clientcerts"
+  - "reject"
+__postfix_smtpd_helo_restrictions:
+  - "permit_mynetworks"
+  - "permit_sasl_authenticated"
+  - "reject_invalid_helo_hostname"
+  - "reject_non_fqdn_helo_hostname"
+  - "reject_unknown_helo_hostname"
+  - "check_helo_access hash:/etc/postfix/helo_access"
+__postfix_smtpd_helo_required: "yes"
+__postfix_smtpd_milters:
+  - "unix:/spamass/spamass.sock"
+__postfix_smtpd_recipient_restrictions:
+  - "permit_sasl_authenticated"
+  - "permit_mynetworks"
+  - "permit_auth_destination"
+  - "reject_unknown_client_hostname"
+  - "reject_unknown_sender_domain"
+  - "reject_unknown_recipient_domain"
+  - "reject_unauth_pipelining"
+  - "reject_unauth_destination"
+  - "reject_invalid_hostname"
+  - "reject_non_fqdn_sender"
+__postfix_smtpd_relay_restrictions:
+  - "permit_auth_destination"
+  - "permit_mynetworks"
+  - "permit_sasl_authenticated"
+  - "reject_unauth_destination"
+__postfix_smtpd_sasl_auth_enable: "yes"
+__postfix_smtpd_sasl_authenticated_header: "yes"
+__postfix_smtpd_sasl_local_domain: "$myhostname"
+__postfix_smtpd_sasl_path: "private/auth"
+__postfix_smtpd_sasl_security_options: "noanonymous"
+__postfix_smtpd_sasl_tls_security_options: "$smtpd_sasl_security_options"
+__postfix_smtpd_sasl_type: "dovecot"
+__postfix_smtpd_sender_login_maps:
+  - "$virtual_mailbox_maps"
+__postfix_smtpd_sender_restrictions:
+  - "permit_sasl_authenticated"
+  - "permit_mynetworks"
+  - "reject_unknown_sender_domain"
+  - "reject_sender_login_mismatch"
+__postfix_smtpd_tls_CAfile: ""
+__postfix_smtpd_tls_ask_ccert: "no"
+__postfix_smtpd_tls_auth_only: "yes"
+__postfix_smtpd_tls_cert_file:  ""
+__postfix_smtpd_tls_chain_files: ""
+__postfix_smtpd_tls_ciphers: "medium"
+__postfix_smtpd_tls_key_file:  ""
+__postfix_smtpd_tls_loglevel: 1
+__postfix_smtpd_tls_received_header: "yes"
+__postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
+__postfix_smtpd_tls_session_cache_timeout: "3600s"
+__postfix_smtpd_use_tls: "no"
+__postfix_tls_random_source: "dev:/dev/urandom"
+__postfix_transport_maps: "hash:/etc/postfix/transport"
+__postfix_unknown_address_reject_code: "550"
+__postfix_unknown_client_reject_code: "550"
+__postfix_unknown_hostname_reject_code: "550"
+__postfix_virtual_alias_maps:
+  - "hash:/etc/postfix/virtual"
+__postfix_virtual_mailbox_domains:
+  - "hash:/etc/postfix/virtual-mailbox-domains"
+__postfix_virtual_mailbox_maps:
+  - "hash:/etc/postfix/virtual-mailbox-users"
+__postfix_virtual_transport: "dovecot"
+
+__postfix_master_submission_options:
+  - "-o smtpd_tls_security_level=encrypt"
+  - "-o smtpd_sasl_auth_enable=yes"
+  - "-o smtpd_sasl_type=dovecot"
+  - "-o smtpd_sasl_path=private/auth"
+  - "-o smtpd_sasl_security_options=noanonymous"
+  - "-o smtpd_sasl_local_domain=$myhostname"
+  - "-o smtpd_client_restrictions=permit_sasl_authenticated,reject"
+  - "-o smtpd_sender_login_maps=hash:/etc/postfix/virtual"
+  - "-o smtpd_sender_restrictions=reject_sender_login_mismatch"
+  - "-o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject"
+
+__postfix_master_smtps_options:
+  - "-o smtpd_tls_wrappermode=yes"
+  - "-o smtpd_sasl_auth_enable=yes"
+
+__postfix_master_relay_options:
+  - "-o syslog_name=postfix/$service_name"
+
+__postfix_master_maildrop_options:
+  - "flags=DRhu user=vmail argv=/usr/bin/maildrop -d ${recipient}"
+
+__postfix_master_uucp_options:
+  - "flags=Fqhu user=uucp argv=uux -r -n -z -a$sender - $nexthop!rmail ($recipient)"
+
+__postfix_master_ifmail_options:
+  - "flags=F user=ftn argv=/usr/lib/ifmail/ifmail -r $nexthop ($recipient)"
+
+__postfix_master_bsmtp_options:
+  - "flags=Fq. user=bsmtp argv=/usr/lib/bsmtp/bsmtp -t$nexthop -f$sender $recipient"
+
+__postfix_master_scalemail_options:
+  - "flags=R user=scalemail argv=/usr/lib/scalemail/bin/scalemail-store ${nexthop} ${user} ${extension}"
+
+__postfix_master_mailman_options:
+  - "flags=FR user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py"
+  - "${nexthop} ${user}"
+
+__postfix_master_dovecot_options:
+  - "flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver"
+  - "-f ${sender} -d ${user}@${nexthop} -a ${original_recipient}"
+
+__postfix_canonical_mappings: []
+__postfix_ldap_maps: []
+__postfix_ldap_map_debug_level: 0

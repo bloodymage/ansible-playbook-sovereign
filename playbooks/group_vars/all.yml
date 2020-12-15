@@ -174,7 +174,7 @@ mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: /var/lib/mysql
 
 # SSH
-ssh_config_dir: "/etc/ssh"
+ssh_cnofig_dir: "/etc/ssh"
 sshca_cert_directory: "{{ ssh_config_dir }}/ca"
 sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
 
