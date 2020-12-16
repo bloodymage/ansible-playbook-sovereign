@@ -135,27 +135,52 @@ relayhost =
     {{ host }}{{ "," if not loop.last else "" }}
 {% endfor %}
 {% endif %}
+{% if postfix_sender_dependent_relayhost_maps != __postfix_sender_dependent_relayhost_maps %}
 sender_dependent_relayhost_maps = {{ postfix_sender_dependent_relayhost_maps }}
+{% endif %}
 
 # SASL
+{% if postfix_smtpd_sasl_path != __postfix_smtpd_sasl_path -%}
 smtpd_sasl_path = {{ postfix_smtpd_sasl_path }}
+{% endif %}
+{% if postfix_smtpd_sasl_type != __postfix_smtpd_sasl_type -%}
 smtpd_sasl_type = {{ postfix_smtpd_sasl_type }}
+{% endif %}
+{% if postfix_smtpd_sasl_auth_enable != __postfix_smtpd_sasl_auth_enable -%}
 smtpd_sasl_auth_enable = {{ postfix_smtpd_sasl_auth_enable }}
+{% endif %}
+{% if postfix_smtpd_sasl_security_options != __postfix_smtpd_sasl_security_options -%}
 smtpd_sasl_security_options = {{ postfix_smtpd_sasl_security_options }}
+{% endif %}
+{% if postfix_smtpd_sasl_tls_security_options != __postfix_smtpd_sasl_tls_security_options -%}
 smtpd_sasl_tls_security_options = {{ postfix_smtpd_sasl_tls_security_options }}
+{% endif %}
+{% if postfix_smtpd_sasl_authenticated_header != __postfix_smtpd_sasl_authenticated_header -%}
 smtpd_sasl_authenticated_header = {{ postfix_smtpd_sasl_authenticated_header }}
+{% endif %}
+{% if postfix_smtpd_sasl_local_domain != __postfix_smtpd_sasl_local_domain -%}
 smtpd_sasl_local_domain = {{ postfix_smtpd_sasl_local_domain }}
+{% endif %}
+{% if postfix_smtp_sasl_auth_enable != __postfix_smtp_sasl_auth_enable -%}
 smtp_sasl_auth_enable = {{ postfix_smtp_sasl_auth_enable }}
+{% endif %}
+{% if postfix_smtp_sasl_security_options != __postfix_smtp_sasl_security_options -%}
 smtp_sasl_security_options = {{ postfix_smtp_sasl_security_options }}
+{% endif %}
+{% if postfix_smtp_sasl_password_maps != __postfix_smtp_sasl_password_maps %}
 smtp_sasl_password_maps = {{ postfix_smtp_sasl_password_maps }}
+{% endif %}
+{% if postfix_smtp_sender_dependent_authentication != __postfix_smtp_sender_dependent_authentication -%}
 smtp_sender_dependent_authentication = {{ postfix_smtp_sender_dependent_authentication }}
+{% endif %}
 
 # Domains
+{% if postfix_virtual_mailbox_domains != __postfix_virtual_mailbox_domains %}
 virtual_mailbox_domains =
 {% for domain in postfix_virtual_mailbox_domains %}
   {{ domain }}{{ "," if not loop.last else "" }}
 {% endfor %}
-
+{% endif %}
 # Users and Aliases
 canonical_maps = {{ postfix_canonical_maps }}
 local_recipient_maps = {{ postfix_local_recipient_maps }}
@@ -178,10 +203,12 @@ alias_database = {{ postfix_alias_database }}
 recipient_delimiter = {{ mail_recipient_delimiter }}
 {% endif %}
 # Mailboxes
+{% if postfix_virtual_mailbox_maps != __postfix_virtual_mailbox_maps %}
 virtual_mailbox_maps =
 {% for map in postfix_virtual_mailbox_maps %}
   {{ map }}{{ "," if not loop.last else "" }}
 {% endfor %}
+{% endif %}
 home_mailbox = {{ postfix_home_mailbox }}
 mailbox_transport = {{ postfix_mailbox_transport }}
 {% if postfix_message_size_limit is defined -%}

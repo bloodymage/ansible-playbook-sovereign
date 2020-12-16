@@ -53,6 +53,7 @@ postfix_mynetworks_style: "{{ __postfix_mynetworks_style }}"
 postfix_myorigin: "{{ __postfix_myorigin }}"
 postfix_postscreen_access_list: "{{ __postfix_postscreen_access_list }}"
 postfix_relay_host: "{{ __postfix_relay_host }}"
+postfix_sender_dependent_relayhost_maps: "{{ __postfix_sender_dependent_relayhost_maps }}"
 postfix_smtpd_client_restrictions: "{{ __postfix_smtpd_client_restrictions }}"
 postfix_smtpd_helo_restrictions: "{{ __postfix_smtpd_helo_restrictions }}"
 postfix_smtpd_recipient_restrictions: "{{ __postfix_smtpd_recipient_restrictions }}"
@@ -64,6 +65,18 @@ postfix_smtpd_tls_key_file:  "{{ __postfix_smtpd_tls_key_file }}"
 postfix_unknown_address_reject_code: "{{ __postfix_unknown_address_reject_code }}"
 postfix_unknown_client_reject_code: "{{ __postfix_unknown_client_reject_code }}"
 postfix_unknown_hostname_reject_code: "{{ __postfix_unknown_hostname_reject_code }}"
+postfix_smtp_sasl_auth_enable: "{{ __postfix_smtp_sasl_auth_enable }}"
+postfix_smtp_sasl_password_maps: "{{ __postfix_smtp_sasl_password_maps }}"
+postfix_smtp_sasl_security_options: "{{ __postfix_smtp_sasl_security_options }}"
+postfix_smtpd_sasl_auth_enable: "{{ __postfix_smtpd_sasl_auth_enable }}"
+postfix_smtpd_sasl_authenticated_header: "{{ __postfix_smtpd_sasl_authenticated_header }}"
+postfix_smtpd_sasl_local_domain: "{{ __postfix_smtpd_sasl_local_domain }}"
+postfix_smtpd_sasl_path: "{{ __postfix_smtpd_sasl_path }}"
+postfix_smtpd_sasl_security_options: "{{ __postfix_smtpd_sasl_security_options }}"
+postfix_smtpd_sasl_tls_security_options: "{{ __postfix_smtpd_sasl_tls_security_options }}"
+postfix_smtpd_sasl_type: "{{ __postfix_smtpd_sasl_type }}"
+postfix_virtual_mailbox_domains: "{{ __postfix_virtual_mailbox_domains }}"
+postfix_virtual_mailbox_maps: "{{ __postfix_virtual_mailbox_maps }}"
 
 # Variables that have not yet been sorted
 postfix_canonical_maps: "hash:/etc/postfix/canonical"
@@ -79,10 +92,7 @@ postfix_milter_default_action: "accept"
 postfix_non_smtpd_milters: "$smtpd_milters"
 postfix_readme_directory: "no"
 postfix_relay_destination_concurrency_limit: 1
-postfix_sender_dependent_relayhost_maps: "hash:/etc/postfix/sender_relay"
-postfix_smtp_sasl_auth_enable: "yes"
-postfix_smtp_sasl_password_maps: "hash:/etc/postfix/sasl_passwd"
-postfix_smtp_sasl_security_options: "noanonymous"
+
 postfix_smtp_sender_dependent_authentication: "yes"
 postfix_smtp_tls_note_starttls_offer: "yes"
 postfix_smtp_tls_security_level: "may"
@@ -92,13 +102,6 @@ postfix_smtp_tls_wrappermode: "no"
 postfix_smtpd_helo_required: "yes"
 postfix_smtpd_milters:
   - "unix:/spamass/spamass.sock"
-postfix_smtpd_sasl_auth_enable: "yes"
-postfix_smtpd_sasl_authenticated_header: "yes"
-postfix_smtpd_sasl_local_domain: "$myhostname"
-postfix_smtpd_sasl_path: "private/auth"
-postfix_smtpd_sasl_security_options: "noanonymous"
-postfix_smtpd_sasl_tls_security_options: "$smtpd_sasl_security_options"
-postfix_smtpd_sasl_type: "dovecot"
 postfix_smtpd_sender_login_maps:
   - "$virtual_mailbox_maps"
 postfix_smtpd_tls_auth_only: "yes"
@@ -113,8 +116,8 @@ postfix_tls_random_source: "dev:/dev/urandom"
 postfix_transport_maps: "hash:/etc/postfix/transport"
 postfix_virtual_alias_maps:
   - "hash:/etc/postfix/virtual"
-postfix_virtual_mailbox_domains:
-  - "hash:/etc/postfix/virtual-mailbox-domains"
+
+
 postfix_virtual_mailbox_maps:
   - "hash:/etc/postfix/virtual-mailbox-users"
 postfix_virtual_transport: "dovecot"
@@ -223,10 +226,12 @@ __postfix_readme_directory: "no"
 __postfix_recipient_delimiter: ""
 __postfix_relay_destination_concurrency_limit: 1
 __postfix_relay_host: ""
-__postfix_sender_dependent_relayhost_maps: "hash:/etc/postfix/sender_relay"
-__postfix_smtp_sasl_auth_enable: "yes"
-__postfix_smtp_sasl_password_maps: "hash:/etc/postfix/sasl_passwd"
-__postfix_smtp_sasl_security_options: "noanonymous"
+__postfix_sender_dependent_relayhost_maps: []
+__postfix_smtp_sasl_auth_enable: "no"
+__postfix_smtp_sasl_password_maps: []
+__postfix_smtp_sasl_security_options:
+  - "noplaintext"
+  - "noanonymous"
 __postfix_smtp_sender_dependent_authentication: "yes"
 __postfix_smtp_tls_note_starttls_offer: "yes"
 __postfix_smtp_tls_security_level: "may"
@@ -243,13 +248,14 @@ __postfix_smtpd_relay_restrictions:
   - "permit_mynetworks"
   - "permit_sasl_authenticated"
   - "defer_unauth_destination"
-__postfix_smtpd_sasl_auth_enable: "yes"
-__postfix_smtpd_sasl_authenticated_header: "yes"
-__postfix_smtpd_sasl_local_domain: "$myhostname"
-__postfix_smtpd_sasl_path: "private/auth"
-__postfix_smtpd_sasl_security_options: "noanonymous"
+__postfix_smtpd_sasl_auth_enable: "no"
+__postfix_smtpd_sasl_authenticated_header: "no"
+__postfix_smtpd_sasl_local_domain: []
+__postfix_smtpd_sasl_path: "smtpd"
+__postfix_smtpd_sasl_security_options:
+  - "noanonymous"
 __postfix_smtpd_sasl_tls_security_options: "$smtpd_sasl_security_options"
-__postfix_smtpd_sasl_type: "dovecot"
+__postfix_smtpd_sasl_type: "cyrus"
 __postfix_smtpd_sender_login_maps:
   - "$virtual_mailbox_maps"
 __postfix_smtpd_sender_restrictions: []
@@ -274,10 +280,8 @@ __postfix_unknown_local_recipient_reject_code: "550"
 __postfix_unknown_relay_recipient_reject_code: "550"
 __postfix_virtual_alias_maps:
   - "hash:/etc/postfix/virtual"
-__postfix_virtual_mailbox_domains:
-  - "hash:/etc/postfix/virtual-mailbox-domains"
-__postfix_virtual_mailbox_maps:
-  - "hash:/etc/postfix/virtual-mailbox-users"
+__postfix_virtual_mailbox_domains: "$virtual_mailbox_maps"
+__postfix_virtual_mailbox_maps: []
 __postfix_virtual_transport: "dovecot"
 
 __postfix_master_submission_options:
