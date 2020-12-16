@@ -1,7 +1,9 @@
 # {{ ansible_managed }}
 
 smtpd_banner = {{ postfix_smtpd_banner }}
-biff = {{ postfix_biff }}
+{% if postfix_biff != __postfix_biff -%}
+  biff = {{ postfix_biff }}
+{% endif %}
 {% if postfix_append_dot_mydomain != __postfix_append_dot_mydomain -%}
   append_dot_mydomain = {{ postfix_append_dot_mydomain }}
 {% endif %}
@@ -14,7 +16,7 @@ smtpd_helo_required = {{ postfix_smtpd_helo_required }}
 
 # TLS parameters
 {% if postfix_smtpd_tls_chain_files != __postfix_smtpd_tls_chain_files -%}
-smtpd_tls_chain_files:
+smtpd_tls_chain_files =
 {% for file in postfix_smtpd_tls_chain_files %}
   {{ file }}{{ "," if not loop.last else "" }}
 {% endfor %}
@@ -46,21 +48,27 @@ smtp_tls_wrappermode = {{ postfix_smtp_tls_wrappermode }}
 tls_random_source = {{ postfix_tls_random_source }}
 
 # Network, hostname, interface definitions
-inet_interfaces = {{ postfix_inet_interfaces }}
-inet_protocols = {{ postfix_inet_protocols }}
+{% if postfix_inet_interfaces != __postfix_inet_interfaces -%}
+  inet_interfaces = {{ postfix_inet_interfaces }}
+{% endif %}
+{% if postfix_inet_protocols != __postfix_inet_protocols -%}
+  inet_protocols = {{ postfix_inet_protocols }}
+{% endif %}
 {% if postfix_myorigin != __postfix_myorigin -%}
   myorigin = {{ postfix_myorigin }}
 {% endif %}
-{% if postfix_myhostname is defined -%}
+{% if postfix_myhostname != __postfix_myhostname -%}
   myhostname = {{ postfix_myhostname }}
 {% endif %}
+{% if postfix_mydestination != __postfix_mydestination %}
 mydestination =
 {% for destination in postfix_mydestination %}
   {{ destination }}{{ "," if not loop.last else "" }}
 {% endfor %}
-{# We need to use either 'mynetworks' or 'mynetworks_style' #}
+{% endif %}
+{# We need to use either mynetworks or mynetworks_style #}
 {# We don't want to use both #}
-{% if postfix_mynetworks is defined -%}
+{% if postfix_mynetworks != __postfix_mynetworks -%}
   mynetworks =
 {% for network in postfix_mynetworks %}
   {{ network }}{{ "," if not loop.last else "" }}
@@ -71,32 +79,48 @@ mydestination =
   mynetworks_style = hosts
 {% endif %}
 
-# Reject Codes
+{# Reject Codes #}
+{% if postfix_unknown_address_reject_code != __postfix_unknown_address_reject_code %}
 unknown_address_reject_code = {{ postfix_unknown_address_reject_code }}
+{% endif %}
+{% if postfix_unknown_hostname_reject_code != __postfix_unknown_hostname_reject_code %}
 unknown_hostname_reject_code = {{ postfix_unknown_hostname_reject_code }}
+{% endif %}
+{% if postfix_unknown_client_reject_code != __postfix_unknown_client_reject_code %}
 unknown_client_reject_code = {{ postfix_unknown_client_reject_code }}
+{% endif %}
 
 # SMTPD settings
+{% if postfix_smtpd_client_restrictions != __postfix_smtpd_client_restrictions %}
 smtpd_client_restrictions =
 {% for restriction in postfix_smtpd_client_restrictions %}
   {{ restriction }}{{ "," if not loop.last else "" }}
 {% endfor %}
+{% endif %}
+{% if postfix_smtpd_helo_restrictions != __postfix_smtpd_helo_restrictions %}
 smtpd_helo_restrictions =
 {% for restriction in postfix_smtpd_helo_restrictions %}
   {{ restriction }}{{ "," if not loop.last else "" }}
 {% endfor %}
-smtpd_sender_restrictions =
-{% for restriction in postfix_smtpd_sender_restrictions %}
-  {{ restriction }}{{ "," if not loop.last else "" }}
-{% endfor %}
+{% endif %}
+{% if postfix_smtpd_recipient_restrictions != __postfix_smtpd_recipient_restrictions %}
 smtpd_recipient_restrictions =
 {% for restriction in postfix_smtpd_recipient_restrictions %}
   {{ restriction }}{{ "," if not loop.last else "" }}
 {% endfor %}
+{% endif %}
+{% if postfix_smtpd_relay_restrictions != __postfix_smtpd_relay_restrictions %}
 smtpd_relay_restrictions =
 {% for restriction in postfix_smtpd_relay_restrictions %}
   {{ restriction }}{{ "," if not loop.last else "" }}
 {% endfor %}
+{% endif %}
+{% if postfix_smtpd_sender_restrictions != __postfix_smtpd_sender_restrictions %}
+smtpd_sender_restrictions =
+{% for restriction in postfix_smtpd_sender_restrictions %}
+  {{ restriction }}{{ "," if not loop.last else "" }}
+{% endfor %}
+{% endif %}
 
 # Relay Definitions
 {% if postfix_relay_domains is defined -%}
