@@ -241,7 +241,10 @@ home_mailbox = {{ postfix_home_mailbox }}
 {% if postfix_mailbox_transport != __postfix_mailbox_transport %}
 mailbox_transport = {{ postfix_mailbox_transport }}
 {% endif %}
-{% if postfix_message_size_limit is defined -%}
+{% if postfix_mailbox_size_limit != __postfix_mailbox_size_limit -%}
+  mailbox_size_limit = {{ postfix_mailbox_size_limit }}
+{% endif %}
+{% if postfix_message_size_limit != __postfix_message_size_limit -%}
   message_size_limit = {{ postfix_message_size_limit }}
 {% endif %}
 

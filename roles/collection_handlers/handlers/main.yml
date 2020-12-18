@@ -5,11 +5,18 @@
   become: yes
   listen: "restart all"
 
+# ==================================================================================================
+#
+# Restart Service Handlers
+#
+# ==================================================================================================
 - name: Restart Apache
   service:
     name: apache2
     state: restarted
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "restart tls"
   become: yes
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
@@ -18,7 +25,9 @@
   service:
     name: bind9
     state: restarted
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "restart tls"
   become: yes
   when:
     - inventory_hostname in groups['dns_servers'] | default([])
@@ -27,7 +36,9 @@
   service:
     name: dovecot
     state: restarted
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "restart tls"
   become: yes
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
@@ -36,7 +47,9 @@
   service:
     name: mosquitto
     state: restarted
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "restart tls"
   become: yes
   when:
     - inventory_hostname in groups['mosquitto_servers'] | default([])
@@ -45,7 +58,9 @@
   service:
     name: mysql
     state: restarted
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "restart tls"
   become: yes
   when:
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
@@ -54,7 +69,9 @@
   service:
     name: postfix
     state: restarted
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "restart tls"
   become: yes
   when:
     - inventory_hostname in groups['postfix_servers'] | default([])
@@ -63,7 +80,9 @@
   service:
     name: samba-ad-dc
     state: restarted
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "restart tls"
   become: yes
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
@@ -74,6 +93,7 @@
     state: restarted
   listen:
     - "restart all"
+    - "restart tls"
     - "restart samba file server"
   become: yes
   when:
@@ -85,6 +105,7 @@
     state: restarted
   listen:
     - "restart all"
+    - "restart tls"
     - "restart samba file server"
   become: yes
   when:
@@ -104,10 +125,37 @@
     state: restarted
   listen:
     - "restart all"
+    - "restart tls"
     - "restart samba file server"
   become: yes
   when:
     - inventory_hostname in groups['samba_file_servers']
+
+- name: restart sssd
+  service:
+    name: sssd
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+    - "restart tls"
+  when:
+    - inventory_hostname in groups['sssd']
+
+# ==================================================================================================
+#
+# Reload Handlers
+#
+# ==================================================================================================
+- name: reload postfix
+  service:
+    name: postfix
+    state: reloaded
+  become: yes
+  listen:
+    - "reload all"
+  when:
+    - inventory_hostname in groups['postfix_servers']
 
 - name: reload apache
   service:
@@ -119,18 +167,15 @@
   when:
     - inventory_hostname in groups['apache_servers']
 
+# ==================================================================================================
+#
+# Start Handlers
+#
+# ==================================================================================================
 - name: start sssd
   service:
     name: sssd
     state: started
   become: yes
   when:
-    - inventory_hostname in groups['apache_servers']
-
-- name: restart sssd
-  service:
-    name: sssd
-    state: restarted
-  become: yes
-  when:
-    - inventory_hostname in groups['apache_servers']
+    - inventory_hostname in groups['sssd']

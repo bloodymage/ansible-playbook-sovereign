@@ -23,8 +23,10 @@ packages:
 postfix_biff: "no"
 postfix_canonical_maps:
   - "hash:/etc/postfix/canonical"
+postfix_compatibility_level: "2"
 postfix_disable_vrfy_command: "yes"
 postfix_home_mailbox: "Maildir/"
+postfix_mailbox_size_limit: "0"
 postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
 postfix_milter_default_action: "accept"
 postfix_mydestination:
@@ -60,13 +62,13 @@ postfix_virtual_mailbox_maps:
 postfix_alias_database: "{{ __postfix_alias_database }}"
 postfix_alias_maps: "{{ __postfix_alias_maps }}"
 postfix_append_dot_mydomain: "{{ __postfix_append_dot_mydomain }}"
-postfix_compatibility_level: "{{ __postfix_compatibility_level }}"
 postfix_default_destination_concurrency_limit: "{{ __postfix_default_destination_concurrency_limit }}"
 postfix_delay_warning_time: "{{ __postfix_delay_warning_time }}"
 postfix_inet_interfaces: "{{ __postfix_inet_interfaces }}"
 postfix_inet_protocols: "{{ __postfix_inet_interfaces }}"
 postfix_local_recipient_maps: "{{ __postfix_local_recipient_maps }}"
 postfix_mailbox_transport: "{{ __postfix_mailbox_transport }}"
+postfix_message_size_limit: "{{ __postfix_message_size_limit }}"
 postfix_mynetworks: "{{ __postfix_mynetworks }}"
 postfix_mynetworks_style: "{{ __postfix_mynetworks_style }}"
 postfix_myorigin: "{{ __postfix_myorigin }}"
@@ -101,8 +103,8 @@ postfix_virtual_mailbox_domains: "{{ __postfix_virtual_mailbox_domains }}"
 postfix_virtual_transport: "{{ __postfix_virtual_transport }}"
 
 # Variables that have not yet been sorted
-postfix_mailbox_size_limit: 0
-postfix_message_size_limit: "104857600"
+
+
 postfix_smtp_sender_dependent_authentication: "yes"
 postfix_smtp_tls_note_starttls_offer: "yes"
 postfix_smtp_tls_security_level: "may"

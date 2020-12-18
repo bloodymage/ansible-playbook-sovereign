@@ -171,3 +171,18 @@
     - postfix
     - postfix_debug
     - postfix-debug
+
+- name: Ensure postfix ca-certificates.crt matches etc/ssl ca-certificates.crt
+  ansible.builtin.copy:
+    src: /etc/ssl/certs/ca-certificates.crt
+    dest: /var/spool/postfix/etc/ssl/certs/ca-certificates.crt
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: yes
+  become: yes
+  notify: reload postfix
+  tags:
+    - postfix
+    - postfix_debug
+    - postfix-debug
