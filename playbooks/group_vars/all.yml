@@ -12,8 +12,12 @@ rebeldream_domain: "{{ ansible_domain | default(rebeldream_default_domain) }}"
 rebeldream_realm: "{{ rebeldream_domain | upper }}"
 rebeldream_domain_list: "{{ rebeldream_domain.split('.')[-2:] }}"
 rebeldream_root_domain: "{{ rebeldream_domain_list | join('.') }}"
-rebeldream_tld: "{{ rebeldream_domain.split('.')[-1:] }}"
+rebeldream_tld: "{{ rebeldream_domain.split('.')[-1] }}"
 rebeldream_min_domain_id_number: 10000
+rebeldream_base_dn: "DC={{ rebeldream_org_unit_name | upper }},DC={{ rebeldream_org_name | upper }},DC={{ rebeldream_tld | upper }}"
+rebeldream_user_dn: "CN=users,{{ rebeldream_base_dn }}"
+rebeldream_config_dn: "CN=Configuration,{{ rebeldream_base_dn }}"
+rebeldream_schema_dn: "CN=Schema,{{ rebeldream_config_dn }}"
 
 # Organization Info
 rebeldream_org_name: "{{ rebeldream_domain.split('.')[1] }}"

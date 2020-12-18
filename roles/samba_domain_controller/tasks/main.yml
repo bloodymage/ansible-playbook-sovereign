@@ -32,14 +32,16 @@
     - recreate-realm-debug
 
 
-# TODO: Break this line up
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
-    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
-    __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   when:
     - samba_administrator_password == "password"
   no_log: yes
@@ -155,7 +157,7 @@
     - recreate-realm-debug
 
 - name: "Configure smb.conf file"
-  template:
+  ansible.builtin.template:
     src: "smb.conf.j2"
     dest: "/etc/samba/smb.conf"
     owner: root
@@ -172,7 +174,7 @@
     - recreate-realm-debug
 
 - name: "start samba-ad-dc"
-  service:
+  ansible.builtin.service:
     name: samba-ad-dc
     state: started
   become: yes
@@ -258,7 +260,8 @@
 #    verbosity: 2
 
 - name: "(Tests) Tcp-based _ldap SRV record in the domain"
-  shell: "host -t SRV _ldap._tcp.{{ rebeldream_domain }}."
+  command:
+    cmd: "host -t SRV _ldap._tcp.{{ rebeldream_domain }}."
   register: success
   become: yes
   when:
@@ -272,7 +275,8 @@
     - recreate-realm-debug
 
 - name: "(Tests) udp-based _kerberos SRV resource record in the domain"
-  shell: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
+  command:
+    cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
   register: success
   become: yes
   when:
@@ -286,7 +290,8 @@
     - recreate-realm-debug
 
 - name: (Tests) The A record of the domain controller"
-  shell: "host -t A {{ ansible_fqdn }}."
+  command:
+    cmd: "host -t A {{ ansible_fqdn }}."
   register: success
   become: yes
   when:
@@ -332,7 +337,8 @@
     - recreate-realm-debug
 
 - name: (Tests) The PTR record of the domain controller"
-  shell: "host -t PTR {{ ansible_host }}"
+  command:
+    cmd: "host -t PTR {{ ansible_host }}"
   register: success
   become: yes
   when:
@@ -346,7 +352,7 @@
     - recreate-realm-debug
 
 - name: Print Success
-  debug:
+  ansible.builtin.debug:
     msg: "{{ success }}"
     verbosity: 1
   when:
@@ -399,7 +405,8 @@
 #
 # ==================================================================================================
 - name: Set Password Expiration
-  shell: "samba-tool domain passwordsettings set --max-pwd-age={{ samba_domain_password_expiration }}"
+  command:
+    cmd: "samba-tool domain passwordsettings set --max-pwd-age={{ samba_domain_password_expiration }}"
   register: success
   become: yes
   when:
@@ -457,6 +464,7 @@
   when:
     - rebeldream_fqdn != __samba_schema_master
   tags:
+    - never
     - samba_domain_controllers_debug
     - samba-domain-controllers-debug
     - recreate-realm-debug
@@ -467,7 +475,12 @@
 #
 # ==================================================================================================
 - name: Provision Subsequent Active Directory Domain Controller
-  shell: "samba-tool domain join {{ rebeldream_domain }} DC --dns-backend=BIND9_DLZ -U'{{ rebeldream_org_unit_name | upper }}\administrator' --password={{ samba_administrator_password }}"
+  command:
+    cmd: >
+      samba-tool domain join {{ rebeldream_domain }} DC
+      --dns-backend=BIND9_DLZ
+      -U'{{ rebeldream_org_unit_name | upper }}\administrator'
+      --password={{ samba_administrator_password }}
   register: samba_ad_created
   become: yes
   notify: Update krb5
@@ -510,7 +523,7 @@
     - recreate-realm-debug
 
 - name: Fetch idmap.ldb
-  fetch: 
+  ansible.builtin.fetch: 
     src: "/var/lib/samba/private/idmap.ldb.bak"
     dest: "/tmp/idmap.ldb"
     flat: yes
@@ -527,7 +540,7 @@
     - recreate-realm-debug
 
 - name: Copy idmap.ldb to New Servers
-  copy:
+  ansible.builtin.copy:
     src: "/tmp/idmap.ldb"
     dest: "/var/lib/samba/private/idmap.ldb"
   become: yes
@@ -543,7 +556,8 @@
     - recreate-realm-debug
 
 - name: Flush Net Cache on New DC
-  shell: "net cache flush"
+  command:
+    cmd: "net cache flush"
   become: yes
   when:
     - __samba_recreate_realm
@@ -874,3 +888,38 @@
     - samba-domain-controllers-debug
     - recreate-realm
     - recreate-realm-debug
+
+- name: Copy schema extensions to schema master
+  ansible.builtin.template:
+    src: "schema.ldif.j2"
+    dest: "/tmp/{{ item.name }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ samba_schema_extensions }}"
+  become: yes
+  when:
+    - rebeldream_fqdn == __samba_schema_master
+  tags:
+    - samba_domain_controllers
+    - samba-domain-controllers
+    - samba_domain_controllers_debug
+    - samba-domain-controllers-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: Install schema extensions
+  command:
+    cmd: "ldbmodify -H /var/lib/samba/private/sam.ldb /tmp/{{ item.name }} --option='dsdb:schema update allowed'=true"
+  loop: "{{ samba_schema_extensions }}"
+  become: yes
+  when:
+    - rebeldream_fqdn == __samba_schema_master
+  tags:
+    - samba_domain_controllers
+    - samba-domain-controllers
+    - samba_domain_controllers_debug
+    - samba-domain-controllers-debug
+    - recreate-realm
+    - recreate-realm-debug
+

@@ -1,0 +1,64 @@
+dn: {{ item.dn }}
+changetype: {{ item.change_type }}
+{% if item.object_class is defined -%}
+  objectClass: {{ item.object_class }}
+{% endif %}
+{% if item.object_class_detail is defined -%}
+  objectClass: {{ item.object_class_detail }}
+{% endif %}
+{% if item.attribute_id is defined -%}
+  attributeID: {{ item.attribute_id }}
+{% endif %}
+{% if item.governs_id is defined -%}
+  governsID: {{ item.governs_id }}
+{% endif %}
+{% if item.cn is defined -%}
+  cn: {{ item.cn }}
+{% endif %}
+{% if item.schema_name is defined -%}
+  name: {{ item.schema_name }}
+{% endif %}
+{% if item.ldap_display_name is defined -%}
+  lDAPDisplayName: {{ item.ldap_display_name }}
+{% endif %}
+{% if item.description is defined -%}
+  description: {{ item.description }}
+{% endif %}
+{% if item.attribute_syntax is defined -%}
+  attributeSyntax: {{ item.attribute_syntax }}
+{% endif %}
+{% if item.om_syntax is defined -%}
+  oMSyntax: {{ item.om_syntax }}
+{% endif %}
+{% if item.single_valued is defined -%}
+  isSingleValued: {{ item.single_valued }}
+{% endif %}
+{% if item.subclass_of is defined -%}
+  subClassOf: {{ item.subclass_of }}
+{% endif %}
+{% if item.object_class_category is defined -%}
+  objectClassCategory: {{ item.object_class_category }}
+{% endif %}
+{% if item.object_category is defined -%}
+  objectCategory: {{ item.object_category }}
+{% endif %}
+{% if item.default_object_category is defined -%} 
+  defaultObjectCategory: {{ item.default_object_category }}  
+{% endif %} 
+{% if item.search_flags is defined -%} 
+  searchFlags: {{ item.search_flags }} 
+{% endif %} 
+{% if item.may_contain is defined -%} 
+  mayContain: {{ item.may_contain }} 
+{% endif %} 
+{% if item.schema_id_guid is defined -%} 
+  schemaIDGUID:{{ item.schema_id_guid }} 
+{% endif %} 
+{% if item.replace is defined -%} 
+  replace: {{ item.replace }} 
+{% endif %} 
+{% if item.auxiliary_class is defined -%} 
+{% for class in item.auxiliary_class %} 
+auxiliaryClass: {{ class }} 
+{% endfor %} 
+{% endif %} 
