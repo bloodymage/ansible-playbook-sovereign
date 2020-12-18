@@ -160,12 +160,16 @@
 # Generate Passwords if they don't exist
 #
 # ==================================================================================================
-- name: "Ensure we have a password for the Root CA"
+- name: "Ensure we have a password for the Root Certificate Authority"
   ansible.builtin.set_fact:
-    ownca_root_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+    ownca_root_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_org_name }}_common/ownca/ownca_root_password"
-    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ rebeldream_org_name }}_common/ownca/ownca_root_password"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   when:
     - ownca_root_password == "password"
   delegate_to: localhost
@@ -175,56 +179,23 @@
     - ownca_debug
     - ownca-debug
 
-- name: "Ensure we have a password for the Intermediate CA"
+- name: "Ensure we have a password for the Intermediate and Issuing Certificate Authorities"
   ansible.builtin.set_fact:
-    ownca_intermediate_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+    ownca_{{ item }}_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_intermediate_password"
-    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_{{ item }}_password"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  loop:
+    - intermediate
+    - component
+    - identity
+    - codesign
   when:
-    - ownca_intermediate_password == "password"
-  delegate_to: localhost
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-- name: "Ensure we have a password for the Component Issuing CA"
-  ansible.builtin.set_fact:
-    ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_component_password"
-    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-  when:
-    - ownca_component_password == "password"
-  delegate_to: localhost
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-- name: "Ensure we have a password for the Identity Issuing CA"
-  ansible.builtin.set_fact:
-    ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
-    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-  when:
-    - ownca_identity_password == "password"
-  delegate_to: localhost
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-- name: "Ensure we have a password for the Code Sign Issuing CA"
-  ansible.builtin.set_fact:
-    ownca_codesign_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ rebeldream_domain }}/ownca/ownca_codesign_password"
-    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-  when:
-    - ownca_codesign_password == "password"
+    - ownca_{{ item }}_password == "password"
   delegate_to: localhost
   tags:
     - ownca
@@ -268,7 +239,7 @@
     organizational_unit_name: "{{ item.organizational_unit_name | default(rebeldream_org_unit_name) | title }}"
     state_or_province_name: "{{ rebeldream_region_name | default(region) }}"
     key_usage: "{{ item.keyusage }}"
-    key_usage_critical: "{{ item.keyusage_critical | default('no')}}"
+    key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
     basic_constraints: "{{ item.basic_constraints }}"
     basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
     create_subject_key_identifier: yes
@@ -297,6 +268,7 @@
     owner: "{{ ownca_user }}"
     group: "{{ ownca_user }}"
     backup: yes
+    force: "{{ __ownca_regenerate }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   run_once: yes
@@ -325,14 +297,11 @@
   set_fact:
     __ownca_force_regeneration: yes
   when:
-    - __new_root.changed
-    - __ownca_regenerate is defined
-    - __ownca_regenetate
+    - __new_root.changed or ( __ownca_regenerate is defined and __ownca_regenerate )
   tags:
     - ownca
     - ownca_debug
     - ownca-debug
-
 
 - name: Generate OwnCA Signed Certificate
   openssl_certificate:
@@ -351,6 +320,7 @@
   become: no
   when:
     - item.provider == "ownca"
+    - inventory_hostname != "localhost"
   tags:
     - ownca
     - ownca_debug
@@ -492,11 +462,15 @@
   copy:
     dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item.item }}-ca-chain.crt"
     content: "{{ ''.join(item.complete_chain) }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
+    mode: "0644"
   loop: "{{ parent_cert_authorities.results }}"
   delegate_to: localhost
   become: no
   when:
     - item.complete_chain is defined
+    - inventory_hostname != "localhost"
   tags:
     - ownca
     - ownca_debug
@@ -508,10 +482,14 @@
   copy:
     dest: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
     content: "{{ ''.join(root_cert_authorities.complete_chain) }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
+    mode: "0644"
   delegate_to: localhost
   become: no
   when:
     - root_cert_authorities.complete_chain is defined
+    - inventory_hostname != "localhost"
   tags:
     - ownca
     - ownca_debug

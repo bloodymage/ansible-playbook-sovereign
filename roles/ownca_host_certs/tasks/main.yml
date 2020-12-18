@@ -92,11 +92,14 @@
 
 - name: "Ensure we have a password for the Component Issuing CA"
   ansible.builtin.set_fact:
-    ownca_component_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true') }}"
+    ownca_component_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_component_password"
-    __password_length: "{{ rebeldream_password_length }}"
-    __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   when:
     - ownca_component_password == "password"
@@ -114,6 +117,8 @@
     ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.key"
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
     provider: ownca
+    backup: yes
+    force: "{{ __ownca_regenerate }}"
   become: no
   delegate_to: localhost
   tags:
@@ -203,21 +208,21 @@
     - ownca_host_certificates_debug
     - ownca-host-certificates-debug
 
-# - name: Include NetworkOS Tasks
-#   include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
-#   when:
-#     - ansible_network_os is not defined
-#     - not ownca_generate_locally
-#   become: no
-#   tags:
-#     - ownca_host_certs
-#     - ownca-host-certs
-#     - ownca_host_certificates
-#     - ownca-host-certificates
-#     - ownca_host_certs_debug
-#     - ownca-host-certs-debug
-#     - ownca_host_certificates_debug
-#     - ownca-host-certificates-debug
+- name: Include NetworkOS Tasks
+  include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
+  when:
+    - ansible_network_os is defined
+    - not ownca_generate_locally
+  become: no
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certificates
+    - ownca-host-certificates
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca_host_certificates_debug
+    - ownca-host-certificates-debug
 
 - name: Include Local tasks
   include: "localhost_final.yml"

@@ -23,7 +23,9 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - ownca
-    - ownca crls
+    - revocation
+    - crl
+    - crls
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers

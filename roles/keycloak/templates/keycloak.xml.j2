@@ -57,7 +57,7 @@
             <security-realm name="UndertowRealm">
               <server-identities>
                 <ssl>
-                  <keystore path="keycloak.jks" relative-to="jboss.server.config.dir" keystore-password="{{ keycloak_keystore_password }}" alias="keycloak" />
+                  <keystore path="{{ keycloak_keystore_file }}" relative-to="jboss.server.config.dir" keystore-password="{{ keycloak_keystore_password }}" alias="keycloak" />
                 </ssl>
               </server-identities>
             </security-realm>
@@ -585,7 +585,7 @@
             <spi name="truststore">
               <provider name="file" enabled="true">
                 <properties>
-                  <property name="file" value="/opt/keycloak/standalone/configuration/keycloak.jks" />
+                  <property name="file" value="/opt/keycloak/standalone/configuration/{{ keycloak_keystore_file }}" />
                   <property name="password" value="{{ keycloak_keystore_password }}"/>
                   <property name="hostname-verification-policy" value="ANY"/>
                   <property name="disabled" value="false"/>
