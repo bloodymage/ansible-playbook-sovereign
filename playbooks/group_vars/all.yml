@@ -16,6 +16,7 @@ rebeldream_tld: "{{ rebeldream_domain.split('.')[-1] }}"
 rebeldream_min_domain_id_number: 10000
 rebeldream_base_dn: "DC={{ rebeldream_org_unit_name | upper }},DC={{ rebeldream_org_name | upper }},DC={{ rebeldream_tld | upper }}"
 rebeldream_user_dn: "CN=users,{{ rebeldream_base_dn }}"
+rebeldream_group_dn: "cn=users,{{ rebeldream_base_dn }}"
 rebeldream_config_dn: "CN=Configuration,{{ rebeldream_base_dn }}"
 rebeldream_schema_dn: "CN=Schema,{{ rebeldream_config_dn }}"
 
@@ -29,6 +30,8 @@ rebeldream_city: "{{ city }}"
 rebeldream_zones:
   - internal
   - dmz
+
+
 
 # Host Information
 rebeldream_fqdn: "{{ ansible_fqdn | default(inventory_hostname) }}"
@@ -179,6 +182,13 @@ mysql_datadir: /var/lib/mysql
 
 # Samba
 samba_password_legnth: "{{ rebeldream_password_length }}"
+
+# Samba LDAP lookups
+samba_user_class: "(objectClass=person)"
+samba_group_class: "(objectClass=group)"
+samba_search: "(|(userPrincipalName=%uid)(sAMAccountName=%uid)(mail=%uid))"
+samba_enabled_users: "(! (userAccountControl:1.2.840.113556.1.4.803:=2))"
+samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
 
 # SSH
 ssh_cnofig_dir: "/etc/ssh"

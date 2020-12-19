@@ -1,0 +1,15 @@
+- name: Create initial config
+  command:
+    cmd: "php occ ldap:set-config {{ id.id }} {{ id.id }}{{ item.ldap_attribute }} '{{ item.ldap_value }}'"
+    chdir: "/srv/www/{{ host.name }}"
+  loop: "{{ id.ldap_config }}"
+  become: yes
+  become_user: www-data
+  when:
+    - host.content == "nextcloud"
+    - id.type == "ldap"
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites

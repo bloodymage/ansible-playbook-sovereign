@@ -289,12 +289,33 @@
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   when:
+    - hosts is defined
     - nextcloud_admin_password == "password"
   tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+- name: "Ensure we have a password for the nextcloud ldap lookup user"
+  ansible.builtin.set_fact:
+    nextcloud_ldap_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ nextcloud_domain }}/domain_users/nextcloud/password"
+    __password_length: "length={{ nextcloud_password_length }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  delegate_to: localhost
+  when:
+    - hosts is defined
+    - nextcloud_ldap_password == "password"
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
 
 - name: Install Nextcloud
   command:
@@ -344,6 +365,45 @@
 
 - name: "Install Nextcloud apps"
   include: nextcloud_apps.yml
+  loop: "{{ hosts }}"
+  loop_control:
+    loop_var: host
+  when:
+    - hosts is defined
+    - host.content is defined
+    - host.content == "nextcloud"
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+
+- name: "Ensure we have a clean nextcloud state before we do anything else"
+  command:
+    cmd: >
+      php occ upgrade
+    chdir: "/srv/www/{{ item.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.content == "nextcloud"
+  tags:
+    - nextcloud_debug
+    - nextcloud-debug
+    - nextcloud
+    - websites
+
+
+# ==================================================================================================
+#
+# Need to limit this to only when 'user_ldap' app is included in 'nextcloud_apps' list
+#
+# ==================================================================================================
+- name: "Configure LDAP"
+  include: nextcloud_ldap.yml
   loop: "{{ hosts }}"
   loop_control:
     loop_var: host
