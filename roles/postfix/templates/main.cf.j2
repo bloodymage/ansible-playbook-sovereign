@@ -50,14 +50,30 @@ smtpd_use_tls = {{ postfix_smtpd_use_tls }}
 {% if postfix_smtpd_tls_ciphers != __postfix_smtpd_tls_ciphers -%}
   smtpd_tls_ciphers = {{ postfix_smtpd_tls_ciphers }}
 {% endif %}
-smtpd_tls_loglevel = {{ postfix_smtpd_tls_loglevel }}
-smtpd_tls_session_cache_timeout = {{ postfix_smtpd_tls_session_cache_timeout }}
-smtpd_tls_auth_only = {{ postfix_smtpd_tls_auth_only }}
-smtpd_tls_received_header = {{ postfix_smtpd_tls_received_header }}
-smtp_tls_note_starttls_offer = {{ postfix_smtp_tls_note_starttls_offer }}
-smtp_tls_security_level = {{ postfix_smtp_tls_security_level }}
-smtp_tls_wrappermode = {{ postfix_smtp_tls_wrappermode }}
-tls_random_source = {{ postfix_tls_random_source }}
+{% if postfix_smtpd_tls_loglevel != __postfix_smtpd_tls_loglevel -%}
+  smtpd_tls_loglevel = {{ postfix_smtpd_tls_loglevel }}
+{% endif %}
+{% if postfix_smtpd_tls_session_cache_timeout != __postfix_smtpd_tls_session_cache_timeout -%}
+  smtpd_tls_session_cache_timeout = {{ postfix_smtpd_tls_session_cache_timeout }}
+{% endif %}
+{% if postfix_smtpd_tls_auth_only != __postfix_smtpd_tls_auth_only -%}
+  smtpd_tls_auth_only = {{ postfix_smtpd_tls_auth_only }}
+{% endif %}
+{% if postfix_smtpd_tls_received_header != __postfix_smtpd_tls_received_header -%}
+  smtpd_tls_received_header = {{ postfix_smtpd_tls_received_header }}
+{% endif %}
+{% if postfix_smtp_tls_note_starttls_offer != __postfix_smtp_tls_note_starttls_offer -%}
+  smtp_tls_note_starttls_offer = {{ postfix_smtp_tls_note_starttls_offer }}
+{% endif %}
+{% if postfix_smtp_tls_security_level != __postfix_smtp_tls_security_level -%}
+  smtp_tls_security_level = {{ postfix_smtp_tls_security_level }}
+{% endif %}
+{% if postfix_smtp_tls_wrappermode != __postfix_smtp_tls_wrappermode -%}
+  smtp_tls_wrappermode = {{ postfix_smtp_tls_wrappermode }}
+{% endif %}
+{% if postfix_tls_random_source != __postfix_tls_random_source -%}
+  tls_random_source = {{ postfix_tls_random_source }}
+{% endif %}
 
 # Network, hostname, interface definitions
 {% if postfix_inet_interfaces != __postfix_inet_interfaces -%}
@@ -278,17 +294,29 @@ milter_default_action = {{ postfix_milter_default_action }}
 {% if postfix_milter_connect_macros != __postfix_milter_connect_macros %}
 milter_connect_macros = {{ postfix_milter_connect_macros }}
 {% endif %}
-non_smtpd_milters = {{ postfix_non_smtpd_milters }}
+{% if postfix_non_smtpd_milters != __postfix_non_smtpd_milters -%}
+  non_smtpd_milters = {{ postfix_non_smtpd_milters }}
+{% endif %}
+{% if postfix_smtpd_milters != __postfix_smtpd_milters %}
 smtpd_milters =
 {% for milter in postfix_smtpd_milters %}
   {{ milter }}{{ "," if not loop.last else "" }}
 {% endfor %}
+{% endif %}
 
 # Postscreen
-postscreen_access_list = {{ postfix_postscreen_access_list }}
-postscreen_dnsbl_action = {{ postfix_postscreen_dnsbl_action }}
+{% if postfix_postscreen_access_list != __postfix_postscreen_access_list -%}
+  postscreen_access_list = {{ postfix_postscreen_access_list }}
+{% endif %}
+{% if postfix_postscreen_dnsbl_action != __postfix_postscreen_dnsbl_action -%}
+  postscreen_dnsbl_action = {{ postfix_postscreen_dnsbl_action }}
+{% endif %}
+{% if postfix_postscreen_dnsbl_sites != __postfix_postscreen_dnsbl_sites -%}
 postscreen_dnsbl_sites =
 {% for site in postfix_postscreen_dnsbl_sites %}
   {{ site }}{{ "," if not loop.last else "" }}
 {% endfor -%}
-postscreen_greet_action = {{ postfix_postscreen_greet_action }}
+{% endif %}
+{% if postfix_postscreen_greet_action != __postfix_postscreen_greet_action -%}
+  postscreen_greet_action = {{ postfix_postscreen_greet_action }}
+{% endif %}
