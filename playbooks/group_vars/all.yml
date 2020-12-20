@@ -31,19 +31,9 @@ rebeldream_zones:
   - internal
   - dmz
 
-
-
 # Host Information
 rebeldream_fqdn: "{{ ansible_fqdn | default(inventory_hostname) }}"
 rebeldream_hostname_short: "{{ rebeldream_fqdn.split('.')[0] }}"
-
-# Cert Authoritiy
-rebeldream_component_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
-rebeldream_component_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
-rebeldream_component_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
-rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
-rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
-rebeldream_identity_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
 
 # Default Passwords
 mediawiki_db_password: "password"
@@ -58,7 +48,11 @@ samba_administrator_password: "password"
 sshca_host_key_password: "password"
 sshca_user_key_password: "password"
 
+# ==================================================================================================
+#
 # Certificate Authority Configuration:
+#
+# ==================================================================================================
 ownca_certificate_authorities:
   - name: "root"
     common_name: "{{ rebeldream_org_name | title }} {{ 'root' | title }} CA"
@@ -129,19 +123,48 @@ ownca_issuing_authorities:
   - codesign
 
 ownca_revoked_certificates: []
+
+# Ownca Files and Directories
 ownca_directory: "~/.pki"
 ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities" 
-ownca_format: 'pem'
 ownca_etc: "/etc/ssl"
 ownca_etc_owner: "root"
 ownca_etc_group: "root"
 ownca_privatekey_type: "RSA"
 
+# File
+ownca_format: 'pem'
+
+# Cert Authoritiy
+rebeldream_component_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
+rebeldream_component_ca_key: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
+rebeldream_component_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
+rebeldream_component_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
+rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+rebeldream_identity_ca_key: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
+rebeldream_identity_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+
+
 ownca_pki_url: "pki.{{ rebeldream_domain }}"
 ownca_ocsp_url: "ocsp.{{ rebeldream_domain }}"
 ownca_crl_distribution_point: "https://{{ pki_url }}"
 
+# ==================================================================================================
+#
+# OIDs
+#
+#===================================================================================================
 # OwnCA OIDs
+ownca_mskdc: "msKDC"
+ownca_mskdc_oid: "1.3.6.1.5.2.3.5"
+ownca_msadguid: "msADGUID"
+ownca_msadguid_oid: "1.3.6.1.4.1.311.25.1"
+ownca_scardLogin: "msSmartcardLogin"
+ownca_scardlogin_oid: "1.3.6.1.4.1.311.20.2.2"
+ownca_msupn: "msUPN"
+ownca_msupn_oid: "1.3.6.1.4.1.311.20.2.3"
+
 mskdc_oid: "1.3.6.1.5.2.3.5"
 msadguid_oid: "1.3.6.1.4.1.311.25.1"
 scardlogin_oid: "1.3.6.1.4.1.311.20.2.2" 
@@ -156,6 +179,14 @@ msKDC: "1.3.6.1.5.2.3.5"
 # Identifies the AD GUID
 msADGUID: "1.3.6.1.4.1.311.25.1"
 
+oid_ssh_public_key: "1.3.6.1.4.1.24552.500.1.1.1.13"
+oid_ldap_public_key: "1.3.6.1.4.1.24552.500.1.1.2.0"
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
 # Misc
 rebeldream_raspberrypi_distribution_release: "buster"
 
@@ -166,6 +197,7 @@ user_git_id_number: 502
 user_homeassistant_id_number: 503
 user_vmail_id_number:  504
 user_odoo_id_number: 505
+
 
 # Mail Servers
 mail_location: "mbox:~/mail:INBOX=/var/mail/%u"
@@ -180,6 +212,11 @@ mysql_administrator: "root"
 mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: /var/lib/mysql
 
+# ==================================================================================================
+#
+# Samba
+#
+# ==================================================================================================
 # Samba
 samba_password_legnth: "{{ rebeldream_password_length }}"
 
@@ -190,6 +227,11 @@ samba_search: "(|(userPrincipalName=%uid)(sAMAccountName=%uid)(mail=%uid))"
 samba_enabled_users: "(! (userAccountControl:1.2.840.113556.1.4.803:=2))"
 samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
 
+# ==================================================================================================
+#
+# SSH
+#
+# ==================================================================================================
 # SSH
 ssh_cnofig_dir: "/etc/ssh"
 sshca_cert_directory: "{{ ssh_config_dir }}/ca"

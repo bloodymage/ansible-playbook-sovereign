@@ -179,7 +179,10 @@
   copy:
     dest: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
-  become: no
+    owner: root
+    group: root
+    mode: "0600"
+    become: no
   when:
     - parent_cert_authorities.complete_chain is defined
   delegate_to: localhost
