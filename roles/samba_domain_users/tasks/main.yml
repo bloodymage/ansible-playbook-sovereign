@@ -100,7 +100,8 @@
     - samba-domain-users-debug
 
 - name: Get Samba Groups
-  command: "samba-tool group list"
+  command:
+    cmd: "samba-tool group list"
   register: existing_group_list
   delegate_to: "{{ __samba_schema_master }}"
   become: yes
@@ -114,16 +115,18 @@
     - recreate-realm-debug
 
 - name: Print Existing Groups
-  debug:
+  ansible.builtin.debug:
     var: existing_group_list.stdout_lines
     verbosity: 1
+  become: no
   tags:
     - samba_domain_users_debug
     - samba-domain-users-debug
     - recreate-realm-debug
 
 - name: Get Samba Users
-  command: "samba-tool user list"
+  command:
+    cmd: "samba-tool user list"
   register: existing_user_list
   delegate_to: "{{ __samba_schema_master }}"
   become: yes
@@ -137,9 +140,10 @@
     - recreate-realm-debug
 
 - name: Print Existing Groups
-  debug:
+  ansible.builtin.debug:
     var: existing_user_list.stdout_lines
     verbosity: 1
+  become: no
   tags:
     - samba_domain_users_debug
     - samba-domain-users-debug
@@ -255,23 +259,24 @@
 #
 # ==================================================================================================
 - name: Add Samba Users
-  shell: >
-    samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
-    --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{item.ansible_facts.username }}"
-    --uid-number "{{ item.ansible_facts.id_number }}"
-    --gid-number "{{ item.ansible_facts.id_number }}"
-    --given-name "{{ item.ansible_facts.given_name }}"
-    --surname "{{ item.ansible_facts.surname }}"
-    --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
-    --nis-domain "{{ rebeldream_org_unit_name | upper }}"
-    --mail-address "{{ item.ansible_facts.username }}{{ samba_email_domain }}"
-    --username Administrator
-    --password {{ samba_administrator_password }}
+  command:
+    cmd: >
+      samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
+      --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"
+      --uid-number "{{ item.ansible_facts.id_number }}"
+      --gid-number "{{ item.ansible_facts.id_number }}"
+      --given-name "{{ item.ansible_facts.given_name }}"
+      --surname "{{ item.ansible_facts.surname }}"
+      --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
+      --nis-domain "{{ rebeldream_org_unit_name | upper }}"
+      --mail-address "{{ item.ansible_facts.username }}{{ samba_email_domain }}"
+      --username Administrator
+      --password {{ samba_administrator_password }}
   become: yes
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname != ""
+    - item.ansible_facts.surname is truthy
     - item.ansible_facts.username not in existing_user_list.stdout_lines
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
@@ -286,7 +291,7 @@
 - name: Add Samba Users
   shell: >
     samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
-    --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{item.ansible_facts.username }}"
+    --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"
     --uid-number "{{ item.ansible_facts.id_number }}"
     --gid-number "{{ item.ansible_facts.id_number }}"
     --given-name "{{ item.ansible_facts.given_name }}"
@@ -299,9 +304,9 @@
   loop: "{{ __domain_users }}"
   when:
     - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname == ""
+    - item.ansible_facts.surname is falsy
     - item.ansible_facts.username not in existing_user_list.stdout_lines
-    - item.ansible_facts.id_number != ""
+    - item.ansible_facts.id_number is truthy
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
@@ -331,7 +336,7 @@
   when:
     - inventory_hostname == __samba_schema_master
     - item.ansible_facts.username not in existing_user_list.stdout_lines
-    - item.ansible_facts.id_number == ""
+    - item.ansible_facts.id_number is falsy
   tags:
     - samba_domain_users
     - samba-domain-users
@@ -350,7 +355,7 @@
   loop: "{{ __domain_users }}"
   when:
     - inventory_hostname == __samba_schema_master
-    - item.ansible_facts.account_expire != ""
+    - item.ansible_facts.account_expire is truthy
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:
@@ -370,7 +375,7 @@
     - __samba_schema_master is defined
     - inventory_hostname == __samba_schema_master
     - user.ansible_facts.spns is defined
-    - user.ansible_facts.spns != ""
+    - user.ansible_facts.spns is truthy
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   tags:

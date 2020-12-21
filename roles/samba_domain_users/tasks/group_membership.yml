@@ -41,7 +41,7 @@
     - samba-domain-users-debug
     - recreate-realm
     - recreate-realm-debug
-  
+
 - name: "Determine removed group members"
   set_fact:
     removed_members: "{{ existing_group_list.stdout_lines | difference(group.group_members) }}"

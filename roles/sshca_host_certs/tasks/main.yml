@@ -149,7 +149,7 @@
 # ==================================================================================================
 - name: Find certificates.
   find:
-    path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote}}{{ ssh_config_dir }}/"
+    path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote }}{{ ssh_config_dir }}/"
     pattern: ssh_host_*_key-cert.pub
   register: certificates
   delegate_to: localhost
@@ -166,10 +166,17 @@
 #
 # ======================================================================
 - name: Compare certificates.
-  shell: diff <(ssh-keygen -L -f "{{ item.path | quote }}" |
-           tail -n +2) <(ssh-keygen -L -f "{{ temporary_directory.path | quote }}/existing_certificates/{{ inventory_hostname | quote }}/{{ ssh_config_dir }}/{{ item.path | basename | quote }}" | tail -n +2)
-  args:
-    executable: /bin/bash
+  command:
+    cmd: >
+      diff <(ssh-keygen -L -f "{{ item.path | quote }}" |
+      tail -n +2) <(ssh-keygen -L -f "{{ __existing_cert_path }}" |
+      tail -n +2)
+  vars:
+    __existing_cert_dir: "{{ temporary_directory.path | quote }}/existing_certificates"
+    __existing_host_dir: "{{ __existing_cert_dir }}/{{ rebeldream_fqdn | quote }}"
+    __existing_ssh_config_dir: "{{ __existing_host_dir }}/{{ ssh_config_dir }}"
+    __existing_cert: "{{ item.path | basename | quote }}"
+    __existing_cert_path: "{{ __existing_ssh_config_dir }}/{{ __existing_cert }}"
   with_items: "{{ certificates.files }}"
   changed_when: false
   failed_when: false
@@ -190,7 +197,10 @@
 - name: Copy certificates back to server.
   copy:
     src: "{{ item.item.path }}"
-    dest: "{{ ssh_config_dir }}/"
+    dest: "{{ ssh_config_dir }}/{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   with_items: "{{ certificate_comparison.results }}"
   notify: restart ssh
   become: yes
