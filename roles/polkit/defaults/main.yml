@@ -9,4 +9,4 @@ polkit_sudo_groups:
     group: sudo
   - name: "52-bloodymage_wheel.conf"
     group: wheel
-    
+
