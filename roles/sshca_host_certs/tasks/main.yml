@@ -29,7 +29,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -61,7 +61,7 @@
     - sshca-host-certs-debug
 
 - name: Find SSH host keys.
-  find:
+  ansible.builtin.find:
     path: "{{ ssh_config_dir }}"
     pattern: ssh_host_*_key
   register: private_keys
@@ -88,7 +88,7 @@
     - sshca-host-certs-debug
 
 - name: Fetch public keys.
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ item.path }}.pub"
     dest: "{{ temporary_directory.path }}/public_keys/"
   with_items: "{{ private_keys.files }}"
@@ -100,7 +100,7 @@
     - sshca-host-certs-debug
 
 - name: Fetch existing certificates.
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ item.path }}-cert.pub"
     dest: "{{ temporary_directory.path }}/existing_certificates/"
     fail_on_missing: false
@@ -148,7 +148,7 @@
 #
 # ==================================================================================================
 - name: Find certificates.
-  find:
+  ansible.builtin.find:
     path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote }}{{ ssh_config_dir }}/"
     pattern: ssh_host_*_key-cert.pub
   register: certificates
@@ -195,7 +195,7 @@
 #
 # ==================================================================================================
 - name: Copy certificates back to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ item.item.path }}"
     dest: "{{ ssh_config_dir }}/{{ item }}"
     owner: "root"
@@ -219,7 +219,7 @@
 #
 # ==================================================================================================
 - name: Remove local temporary directory.
-  file:
+  ansible.builtin.file:
     name: "{{ temporary_directory.path }}"
     state: absent
   become: yes

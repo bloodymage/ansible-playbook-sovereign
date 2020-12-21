@@ -5,7 +5,7 @@
 #
 # ==================================================================================================
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -49,7 +49,7 @@
 #
 # ==================================================================================================
 - name: "Create SSL Directories"
-  file:
+  ansible.builtin.file:
     path: '{{ ownca_hosts_directory }}/{{ item.name }}'
     state: directory
     owner: pecan
@@ -67,7 +67,7 @@
     - ownca-all
 
 - name: Generate Host Private Key
-  openssl_privatekey:
+  community.crypto.openssl_privatekey:
     path: "{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key"
     type: "{{ ownca_privatekey_type }}"
     size: 4096
@@ -85,7 +85,7 @@
     - ownca-all
 
 - name: Print CSR Variables
-  debug:
+  ansible.builtin.debug:
     msg:
       - "country_name: {{ rebeldream_country_code | default(country) }}"
       - "state_or_province_name: {{ rebeldream_region_name | default(region) }}"

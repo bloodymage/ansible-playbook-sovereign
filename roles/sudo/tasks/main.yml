@@ -8,7 +8,7 @@
 #
 # ==================================================================================================
 - name: Setup Master Sudoers file
-  template:
+  ansible.builtin.template:
     src: "sudoers.j2"
     dest: "/etc/sudoers"
     owner: root

@@ -6,7 +6,7 @@
 #
 # ==================================================================================================
 - name: Copy Host Certificate back to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
     dest: "/usr/local/share/ca-certificates/"
     owner: root
@@ -25,7 +25,7 @@
     - ownca-all
 
 - name: Copy domain controllers' certificate to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
     dest: "/usr/local/share/ca-certificates/"
     owner: root
@@ -44,7 +44,7 @@
     - ownca-all
 
 - name: Copy domain controllers' certificate chain to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
     dest: "/usr/local/share/ca-certificates/{{ item }}-chain.crt"
     owner: root
@@ -63,7 +63,7 @@
     - ownca-all
 
 - name: Copy CA Certificates to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
     dest: "/usr/local/share/ca-certificates/"
     owner: root
@@ -93,7 +93,7 @@
     - ownca-all
 
 - name: Copy CRLs to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
     dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
     owner: root
@@ -130,7 +130,7 @@
     - ownca-all
 
 - name: Copy CA Certificates Samba File Server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
     dest: "/srv/samba/pki/"
     owner: root

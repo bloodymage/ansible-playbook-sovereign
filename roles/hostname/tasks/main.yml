@@ -22,7 +22,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -40,9 +40,9 @@
 #
 # ==================================================================================================
 - name: "Print Variables"
-  debug:
+  ansible.builtin.debug:
     msg:
-      - "Hostname: {{ inventory_hostname }}"
+      - "Hostname: {{ rebeldream_hostname_short }}"
     verbosity: 2
   become: no
   tags:
@@ -51,8 +51,8 @@
     - hostname-debug
 
 - name: "Set Hostname"
-  hostname:
-    name: "{{ inventory_hostname_short }}"
+  ansible.builtin.hostname:
+    name: "{{ rebeldream_hostname_short }}"
   become: yes
   when:
     - inventory_hostname != "localhost"
@@ -62,7 +62,7 @@
     - hostname
 
 - name: "RouterOS: Set Hostname"
-  routeros_command:
+  community.network.routeros_command:
     commands:
       - /system identity print
   become: no

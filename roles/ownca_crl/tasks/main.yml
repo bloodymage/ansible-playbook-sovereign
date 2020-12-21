@@ -33,7 +33,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     pkg: "{{ packages }}"
     state: present
   become: yes
@@ -49,6 +49,7 @@
 
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
+  become: no
   tags:
     - ownca_crl
     - ownca-crl
@@ -56,7 +57,7 @@
     - ownca-crl-debug
 
 - name: "Create SSL CRL Directory"
-  file:
+  ansible.builtin.file:
     path: "/etc/ssl/crls"
     state: directory
     owner: root
@@ -80,10 +81,11 @@
   vars:
     password_store_id: "{{ rebeldream_org_name }}_common/ownca/ownca_root_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-  when:
-    - ownca_root_password == "password"
+  become: no
   delegate_to: localhost
   run_once: yes
+  when:
+    - ownca_root_password == "password"
   tags:
     - ownca
     - ownca_debug
@@ -95,6 +97,7 @@
   vars:
     password_store_id: "{{ rebeldream_domain }}/ownca/ownca_intermediate_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  become: no
   when:
     - ownca_intermediate_password == "password"
   delegate_to: localhost
@@ -109,6 +112,7 @@
   vars:
     password_store_id: "{{ rebeldream_domain }}/ownca/ownca_component_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  become: no
   when:
     - ownca_component_password == "password"
   delegate_to: localhost
@@ -123,9 +127,10 @@
   vars:
     password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  become: no
+  delegate_to: localhost
   when:
     - ownca_identity_password == "password"
-  delegate_to: localhost
   tags:
     - ownca
     - ownca_debug
@@ -137,6 +142,7 @@
   vars:
     password_store_id: "{{ rebeldream_domain }}/ownca/ownca_codesign_password"
     overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+  become: no
   when:
     - ownca_codesign_password == "password"
   delegate_to: localhost
@@ -161,6 +167,7 @@
     next_update: "+7d"
     revoked_certificates: "{{ item.revoked_certificates | default(ownca_revoked_certificates) }}"
   loop: "{{ ownca_certificate_authorities }}"
+  become: no
   delegate_to: localhost
   tags:
     - ownca_crl

@@ -1,6 +1,6 @@
 ---
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   tags:
@@ -226,7 +226,7 @@
     - users-debug
 
 - name: Create groups with ID numbers
-  group:
+  ansible.builtin.group:
     name: "{{ item.name }}"
     state: present
     system: "{{ item.system | default('no') }}"
@@ -302,7 +302,7 @@
     - users-debug
 
 - name: Create login users (Password Enabled)
-  user:
+  ansible.builtin.user:
     name: "{{ item['username'] }}"
     password: "{{ user_password_list.results[index].ansible_facts.password | password_hash('sha512') }}"
     groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"        # Empty by default, here we give it some groups
@@ -328,7 +328,7 @@
     - users-debug
 
 - name: Create login users (Password Disabled)
-  user:
+  ansible.builtin.user:
     name: "{{ item.username }}"
     groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"
     state: present
@@ -358,7 +358,7 @@
 #
 # ==================================================================================================
 - name: Create User SSH Keys
-  user:
+  ansible.builtin.user:
     name: "{{ item['username'] }}"
     generate_ssh_key: yes
     ssh_key_type: "{{ item.ssh_keytype | default('ed25519') }}"
@@ -377,17 +377,17 @@
     - users-debug
 
 - name: Create SSH Principals file for users
-  template:
+  ansible.builtin.template:
     src: "ssh_principals.j2"
     dest: "/etc/ssh/auth_principals/{{ item.username }}"
     owner: root
     group: root
     mode: '0644'
   loop: "{{ users }}"
+  become: yes
   when:
     - item.ssh_access_cert is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  become: yes
   tags:
     - users
     - users_debug
@@ -401,7 +401,7 @@
 #
 # ==================================================================================================
 - name: "Setup Sudoers file for user"
-  template:
+  ansible.builtin.template:
     src: "user_sudoers.j2"
     dest: "/etc/sudoers.d/{{ item.username }}"
     owner: "root"

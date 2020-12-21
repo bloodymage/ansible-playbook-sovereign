@@ -35,6 +35,7 @@
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  become: no
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
     __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
@@ -103,6 +104,7 @@
 
 - name: "If we are regenerating the realm: include regeneration tasks"
   include: "recreate_realm.yml"
+  become: no
   when:
     - __samba_recreate_realm
   tags:
@@ -355,6 +357,7 @@
   ansible.builtin.debug:
     msg: "{{ success }}"
     verbosity: 1
+  become: no
   when:
     - rebeldream_fqdn == __samba_schema_master
   tags:
@@ -755,6 +758,7 @@
     msg:
       - "{{ success }}"
     verbosity: 1
+  become: no
   when:
     - rebeldream_fqdn != __samba_schema_master
   tags:
@@ -931,4 +935,3 @@
     - samba-domain-controllers-debug
     - recreate-realm
     - recreate-realm-debug
-

@@ -2,7 +2,7 @@
 - name: "Pre-tasks"
   block:
     - name: "Set Variables"
-      set_fact:
+      ansible.builtin.set_fact:
         __network_os: "{{ ansible_network_os | default(none) }}"
         __lsb_id: "{{ ansible_lsb.id | default(none) }}"
         __distribution: "{{ ansible_distribution | default(none) }}"
@@ -20,7 +20,7 @@
         - ownca-host-certificates-debug
 
     - name: Set Variables
-      set_fact:
+      ansible.builtin.set_fact:
         __distribution_short: "{{ __distribution.split(' ')[0] }}"
       become: no
       tags:
@@ -100,6 +100,7 @@
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  become: no
   delegate_to: localhost
   when:
     - ownca_component_password == "password"
@@ -148,12 +149,13 @@
     - ownca-all
 
 - name: Cert Chain (Name, Ownca, Chain, Complete Chain)
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ parent_cert_authorities.chain }}"
       - "{{ parent_cert_authorities.complete_chain }}"
       - "{{ parent_cert_authorities.root }}"
     verbosity: 1
+  become: no
   delegate_to: localhost
   when:
     - parent_cert_authorities.chain is defined
@@ -163,29 +165,30 @@
     - ownca-host-certs-debug
 
 - name: Print Cert Authorities (Full)
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ parent_cert_authorities }}"
     verbosity: 4
+  become: no
+  delegate_to: localhost
   when:
     - parent_cert_authorities is defined
-  delegate_to: localhost
   tags:
     - never
     - ownca_host_certs_debug
     - ownca-host-certs-debug
 
 - name: Write complete chain to disk
-  copy:
+  ansible.builtin.copy:
     dest: "{{ ownca_hosts_directory }}/certs/{{ rebeldream_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
     owner: root
     group: root
     mode: "0600"
-    become: no
+  become: no
+  delegate_to: localhost
   when:
     - parent_cert_authorities.complete_chain is defined
-  delegate_to: localhost
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -213,10 +216,10 @@
 
 - name: Include NetworkOS Tasks
   include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
+  become: no
   when:
     - ansible_network_os is defined
     - not ownca_generate_locally
-  become: no
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -229,9 +232,9 @@
 
 - name: Include Local tasks
   include: "localhost_final.yml"
+  become: no
   when:
     - ownca_generate_locally
-  become: no
   tags:
     - ownca_host_certs
     - ownca-host-certs

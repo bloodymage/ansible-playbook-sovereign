@@ -101,7 +101,7 @@
     - mariadb_debug
 
 - name: Delete innodb log files created by apt package after initial install.
-  file:
+  ansible.builtin.file:
     path: "{{ mysql_datadir }}/{{ item }}"
     state: absent
   become: yes
@@ -152,7 +152,7 @@
     - mariadb_debug
 
 - name: "Install System Maintenance config"
-  template:
+  ansible.builtin.template:
     src: "debian.cnf.j2"
     dest: "/etc/mysql/debian.cnf"
     owner: root

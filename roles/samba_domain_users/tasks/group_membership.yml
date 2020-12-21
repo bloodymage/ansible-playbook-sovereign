@@ -43,10 +43,10 @@
     - recreate-realm-debug
 
 - name: "Determine removed group members"
-  set_fact:
+  ansible.builtin.set_fact:
     removed_members: "{{ existing_group_list.stdout_lines | difference(group.group_members) }}"
   delegate_to: "{{ __samba_schema_master }}"
-  become: yes
+  become: no
   run_once: yes
   tags:
     - samba_domain_users

@@ -28,7 +28,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -68,7 +68,7 @@
     - bind-debug
 
 - name: Print Zone SOA
-  debug:
+  ansible.builtin.debug:
     msg:
       - "Serial Number: {{ __zone_soa.split(' ')[2] | default(none) }}"
     verbosity: 1
@@ -81,7 +81,7 @@
     - bind-debug
 
 - name: Print Reverse Zone SOA
-  debug:
+  ansible.builtin.debug:
     msg:
       - "Serial Number: {{ __reverse_zone_soa.split(' ')[2] | default (none) }}"
     verbosity: 1
@@ -94,7 +94,7 @@
     - bind-debug
 
 - name: "Print Zone SOA"
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ __zone_soa }}"
     verbosity: 2
@@ -107,7 +107,7 @@
     - bind-debug
 
 - name: "Print Reverse Zone SOA"
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ __reverse_zone_soa }}"
     verbosity: 2
@@ -120,7 +120,7 @@
     - bind-debug
 
 - name: "Print Zone SOA"
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ __zone_all }}"
     verbosity: 4
@@ -133,7 +133,7 @@
     - bind-debug
 
 - name: "Print Reverse Zone ALL"
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ __reverse_zone_all }}"
     verbosity: 4
@@ -286,7 +286,7 @@
 #
 # ==================================================================================================
 - name: "Install Bind Config Files"
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ bind_conf_dir }}/{{ item }}"
     owner: root
@@ -314,7 +314,7 @@
 #
 # ==================================================================================================
 - name: "Install Dynamic DNS Keys"
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/ddns_key.j2"
     dest: "{{ bind_conf_dir }}/{{ item }}.key"
     owner: root
@@ -338,7 +338,7 @@
 #
 # ==================================================================================================
 - name: Ensure Zone Directory Exists
-  file:
+  ansible.builtin.file:
     dest: "{{ bind_zone_dir }}"
     state: directory
     owner: "{{ bind_owner }}"
@@ -359,7 +359,7 @@
 #
 # ==================================================================================================
 - name: Download Root Zone file
-  get_url:
+  ansible.builtin.get_url:
     url: http://www.internic.net/domain/root.zone
     dest: "{{ bind_cache_dir }}/db.root"
     owner: bind
@@ -375,7 +375,7 @@
     - bind-zones
 
 - name: "Installing Forward Zone files"
-  template:
+  ansible.builtin.template:
     src: "forwardzone.j2"
     dest: "{{ bind_zone_dir }}/db.{{ bind_zone }}"
     owner: "{{ bind_owner }}"
@@ -393,7 +393,7 @@
     - bind-zones
 
 - name: "Installing Reverse Zone files"
-  template:
+  ansible.builtin.template:
     src: "reversezone.j2"
     dest: "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}"
     owner: "{{ bind_owner }}"
@@ -411,7 +411,7 @@
     - bind-zones
 
 - name: "Ensure Bind can write to bind directories"
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
@@ -428,7 +428,7 @@
     - bind-zones
 
 - name: "Delete Bind journal files"
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   become: yes

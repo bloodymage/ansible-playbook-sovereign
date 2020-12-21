@@ -1,8 +1,9 @@
 ---
 # tasks file for ntp
 - name: Set timezone
-  timezone:
+  community.general.timezone:
     name: "America/New_York"
+  become: yes
   notify: restart ntp
   tags:
     - ntp

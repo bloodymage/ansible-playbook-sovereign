@@ -20,7 +20,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     pkg: "{{ packages }}"
     state: present
   become: yes
@@ -38,7 +38,7 @@
 #
 # ==================================================================================================
 - name: "Create config files"
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: /etc/{{ item }}
     owner: root

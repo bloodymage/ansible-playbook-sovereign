@@ -28,7 +28,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -47,7 +47,7 @@
 #
 # ==================================================================================================
 - name: Create CA key directory
-  file:
+  ansible.builtin.file:
     path: "{{ sshca_key_directory }}"
     state: directory
     mode: '0700'

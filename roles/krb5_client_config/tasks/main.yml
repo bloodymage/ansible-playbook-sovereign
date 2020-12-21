@@ -26,7 +26,7 @@
     - krb5_client_config_debug
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -37,7 +37,7 @@
     - krb5_client_config_debug
 
 - name: "Update /etc/krb5.conf"
-  template:
+  ansible.builtin.template:
     src: "krb5.conf.j2"
     dest: "/etc/krb5.conf"
     owner: root

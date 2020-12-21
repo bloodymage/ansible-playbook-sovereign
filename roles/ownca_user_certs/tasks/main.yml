@@ -45,7 +45,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     pkg: "{{ packages }}"
     state: present
   become: yes
@@ -60,6 +60,7 @@
 
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
+  become: no
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -76,6 +77,7 @@
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  become: no
   when:
     - ownca_identity_password == "password"
   tags:
@@ -143,7 +145,7 @@
 #
 # ==================================================================================================
 - name: "Create SSL Private Key Directories"
-  file:
+  ansible.builtin.file:
     path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/private'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
@@ -161,7 +163,7 @@
     - ownca-user-certs-debug
 
 - name: "Create SSL CSR Key Directories"
-  file:
+  ansible.builtin.file:
     path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/csr'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
@@ -179,7 +181,7 @@
     - ownca-user-certs-debug
 
 - name: "Create SSL Cert Directories"
-  file:
+  ansible.builtin.file:
     path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
@@ -197,7 +199,7 @@
     - ownca-user-certs-debug
 
 - name: "Create SSL PKCS#12 Key Directories"
-  file:
+  ansible.builtin.file:
     path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/pkcs12'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
@@ -220,7 +222,7 @@
 #
 # ==================================================================================================
 - name: Generate User Private Key
-  openssl_privatekey:
+  community.crypto.openssl_privatekey:
     path: "{{ __pki_privatekey_file }}"
     type: "{{ ownca_privatekey_type }}"
     owner: "{{ item.ansible_facts.id_number }}"
@@ -488,7 +490,7 @@
 #
 # ==================================================================================================
 - name: Fetch Authentication CSRs.
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ __pki_csr_file }}"
     dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
@@ -509,7 +511,7 @@
     - ownca-user-certs-debug
 
 - name: Fetch Identification CSRs.
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ __pki_csr_file }}"
     dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
@@ -530,7 +532,7 @@
     - ownca-user-certs-debug
 
 - name: Fetch Encryption CSRs.
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ __pki_csr_file }}"
     dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
@@ -611,7 +613,7 @@
     - ownca-user-certs-debug
 
 - name: Copy User Authentication Certificates to workstation.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_authentication.crt"
     dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_authentication.crt"
     owner: "{{ item.ansible_facts.id_number }}"
@@ -638,7 +640,7 @@
     - ownca-user-certs-debug
 
 - name: Copy User Identification Certificates to workstation.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_identification.crt"
     dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_identification.crt"
     owner: "{{ item.ansible_facts.id_number }}"
@@ -665,7 +667,7 @@
     - ownca-user-certs-debug
 
 - name: Copy User Encryption Certificates to workstation.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_encryption.crt"
     dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_encryption.crt"
     owner: "{{ item.ansible_facts.id_number }}"

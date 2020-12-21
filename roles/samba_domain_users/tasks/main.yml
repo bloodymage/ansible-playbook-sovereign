@@ -9,6 +9,7 @@
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  become: no
   when:
     - samba_administrator_password == "password"
   tags:
@@ -93,7 +94,7 @@
   loop: "{{ __domain_users }}"
   loop_control:
     index_var: index
-  become: yes
+  become: no
   tags:
     - never
     - samba_domain_users_debug

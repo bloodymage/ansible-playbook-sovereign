@@ -5,7 +5,7 @@
 #
 # ==================================================================================================
 - name: Ensure User Home directory exists
-  file:
+  ansible.builtin.file:
     dest: "{{ item.unix_home }}"
     state: directory
     owner: "{{ item.username }}"
@@ -23,7 +23,7 @@
     - dotfiles-debug
 
 - name: Install User gitconfig
-  template:
+  ansible.builtin.template:
     src: "gitconfig.j2"
     dest: "{{ item.unix_home }}/.gitconfig"
     owner: "{{ item.username }}"
@@ -40,7 +40,7 @@
     - dotfiles-debug
 
 - name: Ensure user .gnupg folder exists
-  file:
+  ansible.builtin.file:
     path: "{{ item.unix_home }}/.gnupg"
     state: directory
     owner: "{{ item.username }}"
@@ -57,7 +57,7 @@
     - dotfiles-debug
 
 - name: Install gpg.conf
-  template:
+  ansible.builtin.template:
     src: "gpg.conf.j2"
     dest: "{{ item.unix_home }}/.gnupg/gpg.conf"
     owner: "{{ item.username }}"
@@ -74,7 +74,7 @@
     - dotfiles-debug
 
 - name: Install gpg-agent.conf
-  template:
+  ansible.builtin.template:
     src: "gpg-agent.conf.j2"
     dest: "{{ item.unix_home }}/.gnupg/gpg-agent.conf"
     owner: "{{ item.username }}"

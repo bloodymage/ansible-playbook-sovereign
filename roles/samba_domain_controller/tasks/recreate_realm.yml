@@ -96,6 +96,7 @@
       tr -s "[:blank:]"
     executable: "/bin/bash"
   register: config_file
+  become: no
   when:
     - __samba_recreate_realm
   tags:
@@ -107,9 +108,10 @@
     - recreate-realm-debug
 
 - name: Print Variables
-  debug:
+  ansible.builtin.debug:
     var: config_file
     verbosity: 2
+  become: no
   when:
     - __samba_recreate_realm
   tags:
@@ -119,7 +121,7 @@
     - recreate-realm-debug
 
 - name: Remove config file
-  file:
+  ansible.builtin.file:
     path: "{{ config_file }}"
     state: absent
   when:
@@ -137,11 +139,11 @@
 # Ensure Samba databases do not exists
 #
 # ==================================================================================================
-- name: Identify samba database directories
-  shell:
-    cmd: "set -o pipefail && smbd -b | egrep 'LOCKDIR|STATEDIR|CACHEDIR|PR0IVATE_DIR'|cut -d: -f2| sed -e 's/^[[:space:]]*//'"
-    executable: "/bin/bash"
-  register: database_directories
+# - name: Identify samba database directories
+#   shell:
+#     cmd: "set -o pipefail && smbd -b | egrep 'LOCKDIR|STATEDIR|CACHEDIR|PR0IVATE_DIR'|cut -d: -f2| sed -e 's/^[[:space:]]*//'"
+#     executable: "/bin/bash"
+#   register: database_directories
 
 # - name: Identify samba database files
 #   find:
@@ -197,6 +199,7 @@
   ansible.builtin.file:
     path: "/etc/krb5.conf"
     state: absent
+  become: yes
   when:
     - __samba_recreate_realm
   tags:

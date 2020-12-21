@@ -1,7 +1,8 @@
 ---
 # handlers file for collection_handlers
 - name: Update System CA Certificates
-  command: "update-ca-certificates"
+  command:
+    cmd: "update-ca-certificates"
   become: yes
   listen: "restart all"
 
@@ -11,7 +12,7 @@
 #
 # ==================================================================================================
 - name: Restart Apache
-  service:
+  ansible.builtin.service:
     name: apache2
     state: restarted
   listen:
@@ -22,7 +23,7 @@
     - inventory_hostname in groups['apache_servers'] | default([])
 
 - name: Restart Bind9
-  service:
+  ansible.builtin.service:
     name: bind9
     state: restarted
   listen:
@@ -33,7 +34,7 @@
     - inventory_hostname in groups['dns_servers'] | default([])
 
 - name: Restart Dovecot
-  service:
+  ansible.builtin.service:
     name: dovecot
     state: restarted
   listen:
@@ -44,7 +45,7 @@
     - inventory_hostname in groups['dovecot_servers'] | default([])
 
 - name: Restart Mosquitto
-  service:
+  ansible.builtin.service:
     name: mosquitto
     state: restarted
   listen:
@@ -55,7 +56,7 @@
     - inventory_hostname in groups['mosquitto_servers'] | default([])
 
 - name: Restart MySQL
-  service:
+  ansible.builtin.service:
     name: mysql
     state: restarted
   listen:
@@ -66,7 +67,7 @@
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
 
 - name: Restart Postfix
-  service:
+  ansible.builtin.service:
     name: postfix
     state: restarted
   listen:
@@ -77,7 +78,7 @@
     - inventory_hostname in groups['postfix_servers'] | default([])
 
 - name: Restart Samba Domain Controller
-  service:
+  ansible.builtin.service:
     name: samba-ad-dc
     state: restarted
   listen:
@@ -88,7 +89,7 @@
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
 
 - name: Restart SMBD Server
-  service:
+  ansible.builtin.service:
     name: smbd
     state: restarted
   listen:
@@ -100,7 +101,7 @@
     - inventory_hostname in groups['samba_file_servers']
 
 - name: Restart NMBD Server
-  service:
+  ansible.builtin.service:
     name: nmbd
     state: restarted
   listen:
@@ -112,7 +113,7 @@
     - inventory_hostname in groups['samba_file_servers']
 
 - name: Restart SSH Server
-  service:
+  ansible.builtin.service:
     name: ssh
     state: restarted
   listen:
@@ -120,7 +121,7 @@
   become: yes
 
 - name: Restart Winbind Server
-  service:
+  ansible.builtin.service:
     name: winbind
     state: restarted
   listen:
@@ -132,7 +133,7 @@
     - inventory_hostname in groups['samba_file_servers']
 
 - name: restart sssd
-  service:
+  ansible.builtin.service:
     name: sssd
     state: restarted
   become: yes
@@ -148,7 +149,7 @@
 #
 # ==================================================================================================
 - name: reload postfix
-  service:
+  ansible.builtin.service:
     name: postfix
     state: reloaded
   become: yes
@@ -158,7 +159,7 @@
     - inventory_hostname in groups['postfix_servers']
 
 - name: reload apache
-  service:
+  ansible.builtin.service:
     name: apache2
     state: reloaded
   listen:
@@ -173,7 +174,7 @@
 #
 # ==================================================================================================
 - name: start sssd
-  service:
+  ansible.builtin.service:
     name: sssd
     state: started
   become: yes

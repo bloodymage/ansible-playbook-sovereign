@@ -26,7 +26,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -86,17 +86,17 @@
 #
 # ==================================================================================================
 - name: Install config files to /etc/dovecot
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/dovecot/{{ item }}"
     owner: root
     group: root
     mode: 0644
-  become: yes
   loop:
     - dovecot.conf
     - dovecot-oauth2.conf.ext
     #- passwd.db
+  become: yes
   notify: restart dovecot
   tags:
     - dovecot
@@ -104,7 +104,7 @@
     - dovecot-debug
 
 - name: Install configuration files to /etc/dovecot/conf.d
-  template:
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/dovecot/conf.d/{{ item }}"
     owner: root
@@ -147,7 +147,7 @@
     - dovecot-debug
 
 - name: Ensure Virtual Directory definitions exist
-  file:
+  ansible.builtin.file:
     path: "/etc/dovecot/virtual/{{ item.name }}"
     owner: "{{ mail_user }}"
     group: "{{ mail_user }}"
@@ -162,7 +162,7 @@
 
 
 - name: Install configuration files to /etc/dovecot/virtual
-  template:
+  ansible.builtin.template:
     src: "dovecot-virtual.j2"
     dest: "/etc/dovecot/virtual/{{ item.name }}/dovecot-virtual"
     owner: root
@@ -177,7 +177,7 @@
 
 
 - name: Ensure Sieve Pipe Bin Dir exists
-  file:
+  ansible.builtin.file:
     path: "{{ dovecot_sieve_pipe_bin_dir }}"
     owner: "{{ mail_user }}"
     group: "{{ mail_user }}"
@@ -190,7 +190,7 @@
     - dovecot-debug
 
 - name: Install IMAPSieve Spam Update Filters
-  template:
+  ansible.builtin.template:
     src: "report-sieve.j2"
     dest: "{{ dovecot_sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
     owner: root
@@ -205,7 +205,7 @@
 
 
 - name: Install IMAPSieve Spam Update Filters
-  template:
+  ansible.builtin.template:
     src: "sa-learn.j2"
     dest: "{{ dovecot_sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
     owner: root

@@ -23,7 +23,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -39,7 +39,7 @@
 #
 # ==================================================================================================
 - name: "Install Emacsclient.desktop"
-  copy:
+  ansible.builtin.copy:
     src: "emacsclient.desktop"
     dest: "/usr/share/applications/emacsclient.desktop"
     owner: root
