@@ -79,7 +79,7 @@
     - ownca-all
 
 - name: Generate Host Private Key
-  communty.crypto.openssl_privatekey:
+  community.crypto.openssl_privatekey:
     path: '{{ ownca_etc }}/private/{{ inventory_hostname }}.key'
     type: '{{ ownca_privatekey_type }}'
     size: 4096
