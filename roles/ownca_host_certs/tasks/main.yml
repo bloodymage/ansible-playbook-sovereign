@@ -113,8 +113,8 @@
   community.crypto.x509_certificate:
     path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
     csr_path: "{{ ownca_hosts_directory }}/csr/{{ inventory_hostname }}.csr"
-    ownca_path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
-    ownca_privatekey_path: "{{ ownca_ca_directory }}/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.key"
+    ownca_path: "{{ ownca_component_ca_cert }}"
+    ownca_privatekey_path: "{{ ownca_component_ca_key }}"
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
     provider: ownca
     backup: yes
@@ -130,12 +130,12 @@
 
 - name: Create Complete Chain Bundles
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + inventory_hostname + '.crt') }}"
+    input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + rebeldream_fqdn + '.crt') }}"
     intermediate_certificates:
-      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
-      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
+      - "{{ ownca_component_ca_cert }}"
+      - "{{ ownca_intermediate_ca_cert }}"
     root_certificates:
-      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca.crt"
+      - "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-root-ca.crt"
   register: parent_cert_authorities
   become: no
   delegate_to: localhost
@@ -177,7 +177,7 @@
 
 - name: Write complete chain to disk
   copy:
-    dest: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}-chain.crt"
+    dest: "{{ ownca_hosts_directory }}/certs/{{ rebeldream_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
     owner: root
     group: root

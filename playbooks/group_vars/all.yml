@@ -32,7 +32,7 @@ rebeldream_zones:
   - dmz
 
 # Host Information
-rebeldream_fqdn: "{{ ansible_fqdn | default(inventory_hostname) }}"
+rebeldream_fqdn: "{{ ansible_fqdn | default(inventory_hostname_short + '.' + rebeldream_domain) }}"
 rebeldream_hostname_short: "{{ rebeldream_fqdn.split('.')[0] }}"
 
 # Default Passwords
@@ -126,24 +126,43 @@ ownca_revoked_certificates: []
 
 # Ownca Files and Directories
 ownca_directory: "~/.pki"
-ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities" 
+ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities"
+ownca_ca_private_key_directory: "{{ ownca_ca_directory }}/private"
+ownca_ca_certs_directory: "{{ ownca_ca_directory }}/certs"
+ownca_ca_crl_directory: "{{ ownca_ca_directory }}/crl"
+ownca_ca_csr_directory: "{{ ownca_ca_directory }}/csr"
 ownca_etc: "/etc/ssl"
 ownca_etc_owner: "root"
 ownca_etc_group: "root"
-ownca_privatekey_type: "RSA"
 
 # File
 ownca_format: 'pem'
+ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy
 rebeldream_component_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
-rebeldream_component_ca_key: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
 rebeldream_component_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
 rebeldream_component_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
 rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
-rebeldream_identity_ca_key: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
 rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
 rebeldream_identity_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+
+ownca_intermediate_ca_key: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.key"
+ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
+ownca_intermediate_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
+ownca_intermediate_crl_file: "{{ ownca_ca_crl_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}.crl"
+ownca_component_ca_key: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.key"
+ownca_component_ca_cert: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
+ownca_component_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.crt"
+ownca_component_crl_file: "{{ ownca_ca_crl_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
+ownca_identity_ca_key: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.key"
+ownca_identity_ca_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
+ownca_identity_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.crt"
+ownca_identity_crl_file: "{{ ownca_ca_crl_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+ownca_codesign_ca_key: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign-ca.key"
+ownca_codesign_ca_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign-ca.crt"
+ownca_codesign_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign-ca-chain.crt"
+ownca_codesign_crl_file: "{{ ownca_ca_crl_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign.crl"
 
 
 ownca_pki_url: "pki.{{ rebeldream_domain }}"
@@ -197,7 +216,6 @@ user_git_id_number: 502
 user_homeassistant_id_number: 503
 user_vmail_id_number:  504
 user_odoo_id_number: 505
-
 
 # Mail Servers
 mail_location: "mbox:~/mail:INBOX=/var/mail/%u"

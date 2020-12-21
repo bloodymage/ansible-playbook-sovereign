@@ -102,7 +102,7 @@
     - install-packages
 
 - name: "If we are regenerating the realm: include regeneration tasks"
-  include: "regenerate_realm.yml"
+  include: "recreate_realm.yml"
   when:
     - __samba_recreate_realm
   tags:
@@ -380,7 +380,8 @@
 #   ignore_errors: yes
 
 - name: "Disable Guest Account"
-  shell: "{{ item }}"
+  command:
+    cmd: "{{ item }}"
   register: success
   become: yes
   loop:
@@ -509,7 +510,8 @@
 #   when: rebeldream_fqdn == __samba_schema_master
 
 - name: Backup idmap.ldb
-  shell: "tdbbackup -s .bak /var/lib/samba/private/idmap.ldb"
+  command:
+    cmd: "tdbbackup -s .bak /var/lib/samba/private/idmap.ldb"
   become: yes
   when:
     - __samba_recreate_realm
@@ -523,7 +525,7 @@
     - recreate-realm-debug
 
 - name: Fetch idmap.ldb
-  ansible.builtin.fetch: 
+  ansible.builtin.fetch:
     src: "/var/lib/samba/private/idmap.ldb.bak"
     dest: "/tmp/idmap.ldb"
     flat: yes
@@ -597,7 +599,8 @@
 #   when: rebeldream_fqdn != __samba_schema_master
 
 - name: Reset Samba ACLs on Sysvol for New
-  shell: "samba-tool ntacl sysvolreset"
+  command:
+    cmd: "samba-tool ntacl sysvolreset"
   become: yes
   when:
     - __samba_recreate_realm
@@ -611,7 +614,7 @@
     - recreate-realm-debug
 
 - name: Configure user.map file
-  template:
+  ansible.builtin.template:
     src: "user_map.j2"
     dest: /etc/samba/user.map
     owner: root
@@ -649,7 +652,8 @@
 #
 # ==================================================================================================
 - name: (Tests) Verify Sysvol Replication
-  shell: "samba-tool drs showrepl"
+  command:
+    cmd: "samba-tool drs showrepl"
   become: yes
   when:
     - rebeldream_fqdn != __samba_schema_master
@@ -663,7 +667,8 @@
     - recreate-realm-debug
 
 - name: (Tests) List all shares provided by the Domain Controller
-  shell: "smbclient -L localhost -U%"
+  command:
+    cmd: "smbclient -L localhost -U%"
   register: shares
   become: yes
   when:
@@ -688,7 +693,8 @@
 #    verbosity: 2
 
 - name: (Tests) The A record of the domain controller"
-  shell: "host -t A {{ ansible_fqdn }}."
+  command:
+    cmd: "host -t A {{ ansible_fqdn }}."
   register: success
   become: yes
   tags:
@@ -700,7 +706,8 @@
     - recreate-realm-debug
 
 - name: "(Tests) udp-based _kerberos SRV resource record in the domain"
-  shell: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
+  command:
+    cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
   register: success
   become: yes
   tags:
@@ -744,7 +751,7 @@
     - recreate-realm-debug
 
 - name: Print Success
-  debug:
+  ansible.builtin.debug:
     msg:
       - "{{ success }}"
     verbosity: 1
@@ -753,7 +760,6 @@
   tags:
     - samba_domain_controllers_debug
     - samba-domain-controllers-debug
-    - recreate-realm
     - recreate-realm-debug
 
 # ==================================================================================================
@@ -766,7 +772,7 @@
 #
 # ==================================================================================================
 - name: Make Control Directory
-  file:
+  ansible.builtin.file:
     path: "~/.ssh/ctl"
     state: directory
     owner: root
@@ -782,7 +788,7 @@
     - recreate-realm-debug
 
 - name: Create SSH Control Configuration
-  template:
+  ansible.builtin.template:
     src: "control_ssh.j2"
     dest: "~/.ssh/ctl/config"
     owner: root
@@ -798,7 +804,7 @@
     - recreate-realm-debug
 
 - name: Create Log File
-  file:
+  ansible.builtin.file:
     path: "/var/log/sysvol-sync.log"
     state: touch
     owner: root
@@ -814,7 +820,7 @@
     - recreate-realm-debug
 
 - name: Ensure unison configuration directory exists
-  file:
+  ansible.builtin.file:
     path: "~/.unison"
     state: directory
     owner: root
@@ -830,7 +836,7 @@
     - recreate-realm-debug
 
 - name: Create Unison Preferences
-  template:
+  ansible.builtin.template:
     src: "unison.j2"
     dest: "~/.unison/default.prf"
     owner: root
@@ -846,9 +852,12 @@
     - recreate-realm-debug
 
 - name: Create Backup of SysVol directory
-  archive:
+  ansible.builtin.archive:
     path: /var/lib/samba/sysvol
     dest: ~/sysvol.tar.xz
+    owner: "root"
+    group: "root"
+    mode: "0644"
   become: yes
   tags:
     - samba_domain_controllers
