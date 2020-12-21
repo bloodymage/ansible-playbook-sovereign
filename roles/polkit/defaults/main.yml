@@ -5,8 +5,6 @@ packages:
   - libpolkit-gobject-1-0
 
 polkit_sudo_groups:
-  - name: "52-bloodymage_sudo.conf"
-    group: sudo
-  - name: "52-bloodymage_wheel.conf"
-    group: wheel
+  - "sudo"
+  - "wheel"
 

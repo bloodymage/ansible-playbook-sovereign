@@ -1,50 +1,11 @@
 ---
 - name: "Pre-tasks"
   block:
-    - name: "Set Variables"
-      ansible.builtin.set_fact:
-        __network_os: "{{ ansible_network_os | default(none) }}"
-        __lsb_id: "{{ ansible_lsb.id | default(none) }}"
-        __distribution: "{{ ansible_distribution | default(none) }}"
-        __os_family: "{{ ansible_os_family | default(none) }}"
-        __system: "{{ ansible_system | default(none) }}"
-      become: no
-      tags:
-        - ownca_host_certs
-        - ownca-host-certs
-        - ownca_host_certificates
-        - ownca-host-certificates
-        - ownca_host_certs_debug
-        - ownca-host-certs-debug
-        - ownca_host_certificates_debug
-        - ownca-host-certificates-debug
-
-    - name: Set Variables
-      ansible.builtin.set_fact:
-        __distribution_short: "{{ __distribution.split(' ')[0] }}"
-      become: no
-      tags:
-        - ownca_host_certs
-        - ownca-host-certs
-        - ownca_host_certificates
-        - ownca-host-certificates
-        - ownca_host_certs_debug
-        - ownca-host-certs-debug
-        - ownca_host_certificates_debug
-        - ownca-host-certificates-debug
-
     - name: Include OS-specific variables.
       include_vars: "{{ lookup('first_found', params) }}"
       vars:
         params:
-          files:
-            - "{{ __network_os }}.yml"
-            - "{{ __lsb_id | lower }}.yml"
-            - "{{ __distribution | lower }}.yml"
-            - "{{ __distribution_short | lower }}.yml"
-            - "{{ __os_family | lower }}_family.yml"
-            - "{{ __system | lower }}.yml"
-            - main.yml
+          files: "{{ __os_variables_files }}"
           paths:
             - "vars"
       become: no
@@ -129,7 +90,7 @@
     - ownca-host-certs-debug
     - ownca-all
 
-- name: Create Complete Chain Bundles
+- name: "Identify Certificate Complete Chain"
   community.crypto.certificate_complete_chain:
     input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + rebeldream_fqdn + '.crt') }}"
     intermediate_certificates:
@@ -148,7 +109,7 @@
     - ownca-bundles
     - ownca-all
 
-- name: Cert Chain (Name, Ownca, Chain, Complete Chain)
+- name: "Print Cert Chain (Name, Ownca, Chain, Complete Chain)"
   ansible.builtin.debug:
     msg:
       - "{{ parent_cert_authorities.chain }}"
@@ -178,12 +139,12 @@
     - ownca_host_certs_debug
     - ownca-host-certs-debug
 
-- name: Write complete chain to disk
+- name: "Write complete chain to disk"
   ansible.builtin.copy:
     dest: "{{ ownca_hosts_directory }}/certs/{{ rebeldream_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
-    owner: root
-    group: root
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
     mode: "0600"
   become: no
   delegate_to: localhost

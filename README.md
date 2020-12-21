@@ -142,6 +142,14 @@ Sovereign is a set of ansible playbooks to build and maintain your own private s
 - VPN
 - and more. 
 
+### Related Projects
+#### [Hearthminion](https://github.com/hearthminion/ansible-collection-hearthminion)
+
+The Hearthminion ansible collection expands on this collection adding in new features relating to home automation and entertainment.
+- Home Assistant
+- MythTV
+- RetroPie
+
 ### References
 - [Ansible Documentation](https://docs.ansible.com/ansible/latest/index.html)
 - [Ansible Examples](https://github.com/ansible/ansible-examples)
