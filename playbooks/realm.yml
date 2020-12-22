@@ -22,16 +22,7 @@
       when:
         - not __samba_recreate_realm
       tags:
-        - samba_domain_controllers
-        - samba-domain-controllers
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm
-        - recreate-realm-debug
+        - always
 
     - name: Print Samba Schema Master Role
       debug:
@@ -48,11 +39,8 @@
         - never
         - samba_domain_controllers_debug
         - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
         - samba_domain_users_debug
         - samba-domain-users-debug
-        - recreate-realm
         - recreate-realm-debug
 
     - name: Print Variables
@@ -70,11 +58,8 @@
         - never
         - samba_domain_controllers_debug
         - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
         - samba_domain_users_debug
         - samba-domain-users-debug
-        - recreate-realm
         - recreate-realm-debug
 
     - name: Print Variables
@@ -88,11 +73,8 @@
         - never
         - samba_domain_controllers_debug
         - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
         - samba_domain_users_debug
         - samba-domain-users-debug
-        - recreate-realm
         - recreate-realm-debug
 
     - name: Print Variables
@@ -106,11 +88,8 @@
         - never
         - samba_domain_controllers_debug
         - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
         - samba_domain_users_debug
         - samba-domain-users-debug
-        - recreate-realm
         - recreate-realm-debug
 
     - name: Print Variables
@@ -124,52 +103,24 @@
         - never
         - samba_domain_controllers_debug
         - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
         - samba_domain_users_debug
         - samba-domain-users-debug
-        - recreate-realm
-        - recreate-realm-debug
-
-    - name: Set Samba Schema Master List
-      ansible.builtin.set_fact:
-        __samba_schema_master_list:
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] | lower }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] | lower }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
-      become: no
-      when:
-        - not __samba_recreate_realm
-      tags:
-        - samba_domain_controllers
-        - samba-domain-controllers
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm
         - recreate-realm-debug
 
     - name: Set Samba Schema Master
       ansible.builtin.set_fact:
         __samba_schema_master: "{{ __samba_schema_master_list | join('.') }}"
       become: no
+      vars:
+        __samba_schema_master_list:
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] | lower }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] | lower }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
+          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
       when:
         - not __samba_recreate_realm
       tags:
-        - samba_domain_controllers
-        - samba-domain-controllers
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm
-        - recreate-realm-debug
+        - always
 
     - name: Print Samba Schema Master
       debug:
@@ -187,7 +138,7 @@
         - samba-domain-users-debug
         - recreate-realm-debug
 
-    - name: "Create groups based on the System"
+    - name: "Create Samba Schema Master Group"
       add_host:
         name: "{{ __samba_schema_master }}"
         groups:
@@ -195,15 +146,7 @@
       when:
         - __samba_schema_master is defined
       tags:
-        - never
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users
-        - samba-domain-users
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm
-        - recreate-realm-debug
+        - always
 
   roles:
     - bloodymage.rebeldream.samba_domain_controller
@@ -221,7 +164,7 @@
   roles:
     - bloodymage.rebeldream.samba_domain_users
 
-#- hosts: freeipa_controllers
+# - hosts: freeipa_controllers
 
 # - hosts: openldap_servers
 #   roles:

@@ -33,7 +33,9 @@ rebeldream_zones:
 
 # Host Information
 rebeldream_fqdn: "{{ ansible_fqdn | default(inventory_hostname_short + '.' + rebeldream_domain) }}"
-rebeldream_hostname_short: "{{ rebeldream_fqdn.split('.')[0] }}"
+rebeldream_hostname: "{{ rebeldream_fqdn.split('.')[0] }}"
+# Eliminate after verifying no longer in use
+rebeldream_hostname_short: "{{ rebeldream_hostname }}"
 
 # Default Passwords
 mediawiki_db_password: "password"
@@ -47,6 +49,32 @@ ownca_codesign_password: "password"
 samba_administrator_password: "password"
 sshca_host_key_password: "password"
 sshca_user_key_password: "password"
+
+# ==================================================================================================
+#
+# Files, Directories, and URLs
+#
+# ==================================================================================================
+# Directories
+keycloak_name: "keycloak"
+keycloak_home: "/opt/{{ keycloak_name }}"
+ownca_directory: "~/.pki"
+ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities"
+ownca_ca_private_key_directory: "{{ ownca_ca_directory }}/private"
+ownca_ca_certs_directory: "{{ ownca_ca_directory }}/certs"
+ownca_ca_crl_directory: "{{ ownca_ca_directory }}/crl"
+ownca_ca_csr_directory: "{{ ownca_ca_directory }}/csr"
+ownca_etc: "/etc/ssl"
+mysql_datadir: "/var/lib/mysql"
+ssh_config_dir: "/etc/ssh"
+sshca_key_directory: "~/.ssh/ca"
+sshca_cert_directory: "{{ ssh_config_dir }}/ca"
+sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
+
+# URLs
+ownca_pki_url: "pki.{{ rebeldream_domain }}"
+ownca_ocsp_url: "ocsp.{{ rebeldream_domain }}"
+ownca_crl_distribution_point: "https://{{ ownca_pki_url }}"
 
 # ==================================================================================================
 #
@@ -125,13 +153,6 @@ ownca_issuing_authorities:
 ownca_revoked_certificates: []
 
 # Ownca Files and Directories
-ownca_directory: "~/.pki"
-ownca_ca_directory: "{{ ownca_directory }}/certificate_authorities"
-ownca_ca_private_key_directory: "{{ ownca_ca_directory }}/private"
-ownca_ca_certs_directory: "{{ ownca_ca_directory }}/certs"
-ownca_ca_crl_directory: "{{ ownca_ca_directory }}/crl"
-ownca_ca_csr_directory: "{{ ownca_ca_directory }}/csr"
-ownca_etc: "/etc/ssl"
 ownca_etc_owner: "root"
 ownca_etc_group: "root"
 
@@ -140,12 +161,12 @@ ownca_format: 'pem'
 ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy
-rebeldream_component_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
-rebeldream_component_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
-rebeldream_component_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
-rebeldream_identity_ca_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
-rebeldream_identity_ca_chain_file: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
-rebeldream_identity_crl_file: "/etc/ssl/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+rebeldream_component_ca_file: "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
+rebeldream_component_ca_chain_file: "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
+rebeldream_component_crl_file: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
+rebeldream_identity_ca_file: "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+rebeldream_identity_ca_chain_file: "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca-chain.pem"
+rebeldream_identity_crl_file: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
 
 ownca_intermediate_ca_key: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.key"
 ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
@@ -164,10 +185,6 @@ ownca_codesign_ca_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }
 ownca_codesign_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign-ca-chain.crt"
 ownca_codesign_crl_file: "{{ ownca_ca_crl_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign.crl"
 
-
-ownca_pki_url: "pki.{{ rebeldream_domain }}"
-ownca_ocsp_url: "ocsp.{{ rebeldream_domain }}"
-ownca_crl_distribution_point: "https://{{ pki_url }}"
 
 # ==================================================================================================
 #
@@ -228,7 +245,7 @@ mail_user: vmail
 # MySQL / MariaDB
 mysql_administrator: "root"
 mysql_system_maintenance_user: "debian-sys-maint"
-mysql_datadir: /var/lib/mysql
+
 
 # ==================================================================================================
 #
@@ -251,10 +268,6 @@ samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
 #
 # ==================================================================================================
 # SSH
-ssh_cnofig_dir: "/etc/ssh"
-sshca_cert_directory: "{{ ssh_config_dir }}/ca"
-sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
-
 sshca_host_keyfile: "{{ sshca_domain }}_host_key"
 sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"
 sshca_hostca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_host_pubfile }}"
@@ -270,7 +283,7 @@ sshca_authorized_principals: "%u"
 sshca_cert_identity: "{{ rebeldream_domain_list | join('_') }}"
 sshca_domain_list: "{{ rebeldream_domain_list }}"
 sshca_domain: "{{ sshca_cert_identity }}"
-sshca_key_directory: "~/.ssh/ca"
+
 
 # ==================================================================================================
 #
@@ -285,6 +298,10 @@ __linear_strategy: "linear"
 # OwnCA
 __ownca_regenerate: no
 __ownca_regenerate_csr: no
+
+# Samba
+__samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
+__samba_recreate_realm: no
 
 # ==================================================================================================
 #
@@ -306,4 +323,3 @@ __os_variables_files:
   - "{{ __os_family | lower }}_family.yml"
   - "{{ __system | lower }}.yml"
   - main.yml
-            
