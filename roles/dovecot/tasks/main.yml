@@ -66,12 +66,12 @@
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
-    __password_length: "length={{ nextcloud_password_legnth }}"
+    __password_length: "length={{ rebeldream_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  no_log: yes
+  #no_log: yes
   become: no
   delegate_to: localhost
   register: domain_user_list
@@ -95,6 +95,7 @@
   loop:
     - dovecot.conf
     - dovecot-oauth2.conf.ext
+    - dovecot-ldap.conf.ext
     #- passwd.db
   become: yes
   notify: restart dovecot
@@ -160,7 +161,6 @@
     - dovecot_debug
     - dovecot-debug
 
-
 - name: Install configuration files to /etc/dovecot/virtual
   ansible.builtin.template:
     src: "dovecot-virtual.j2"
@@ -174,7 +174,6 @@
     - dovecot
     - dovecot_debug
     - dovecot-debug
-
 
 - name: Ensure Sieve Pipe Bin Dir exists
   ansible.builtin.file:
