@@ -15,10 +15,10 @@
   ansible.builtin.service:
     name: apache2
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
 
@@ -26,10 +26,10 @@
   ansible.builtin.service:
     name: bind9
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups['dns_servers'] | default([])
 
@@ -37,10 +37,10 @@
   ansible.builtin.service:
     name: dovecot
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
 
@@ -48,10 +48,10 @@
   ansible.builtin.service:
     name: mosquitto
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups['mosquitto_servers'] | default([])
 
@@ -59,10 +59,10 @@
   ansible.builtin.service:
     name: mysql
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
 
@@ -70,10 +70,10 @@
   ansible.builtin.service:
     name: nginx
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups ['nginx_servers'] | default([])
 
@@ -81,10 +81,10 @@
   ansible.builtin.service:
     name: postfix
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups['postfix_servers'] | default([])
 
@@ -92,10 +92,10 @@
   ansible.builtin.service:
     name: samba-ad-dc
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
-  become: yes
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
 
@@ -103,11 +103,11 @@
   ansible.builtin.service:
     name: smbd
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
     - "restart samba file server"
-  become: yes
   when:
     - inventory_hostname in groups['samba_file_servers']
 
@@ -115,11 +115,11 @@
   ansible.builtin.service:
     name: nmbd
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
     - "restart samba file server"
-  become: yes
   when:
     - inventory_hostname in groups['samba_file_servers']
 
@@ -127,19 +127,19 @@
   ansible.builtin.service:
     name: ssh
     state: restarted
+  become: yes
   listen:
     - "restart all"
-  become: yes
 
 - name: Restart Winbind Server
   ansible.builtin.service:
     name: winbind
     state: restarted
+  become: yes
   listen:
     - "restart all"
     - "restart tls"
     - "restart samba file server"
-  become: yes
   when:
     - inventory_hostname in groups['samba_file_servers']
 
@@ -163,9 +163,9 @@
   ansible.builtin.service:
     name: apache2
     state: reloaded
+  become: yes
   listen:
     - "reload all"
-  become: yes
   when:
     - inventory_hostname in groups['apache_servers']
 
@@ -173,9 +173,9 @@
   ansible.builtin.service:
     name: nginx
     state: reloaded
+  become: yes
   listen:
     - "reload all"
-  become: yes
   when:
     - inventory_hostname in groups['nginx_servers']
 
