@@ -38,7 +38,7 @@
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
-    __password_length: "length={{ nextcloud_password_legnth }}"
+    __password_length: "length={{ rebeldream_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
