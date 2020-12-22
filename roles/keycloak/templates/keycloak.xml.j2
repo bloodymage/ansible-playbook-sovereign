@@ -94,12 +94,13 @@
     <profile>
         <subsystem xmlns="urn:jboss:domain:logging:8.0">
             <console-handler name="CONSOLE">
-                <level name="INFO"/>
+                <level name="{{ keycloak_loglevel }}" />
                 <formatter>
                     <named-formatter name="COLOR-PATTERN"/>
                 </formatter>
             </console-handler>
             <periodic-rotating-file-handler name="FILE" autoflush="true">
+                <level name="{{ keycloak_loglevel }}" />
                 <formatter>
                     <named-formatter name="PATTERN"/>
                 </formatter>
@@ -120,7 +121,7 @@
                 <level name="WARN"/>
             </logger>
             <root-logger>
-                <level name="INFO"/>
+                <level name="{{ keycloak_loglevel }}"/>
                 <handlers>
                     <handler name="CONSOLE"/>
                     <handler name="FILE"/>
@@ -585,10 +586,10 @@
             <spi name="truststore">
               <provider name="file" enabled="true">
                 <properties>
-                  <property name="file" value="/opt/keycloak/standalone/configuration/{{ keycloak_keystore_file }}" />
+                  <property name="file" value="{{ keycloak_config_dir }}/{{ keycloak_keystore_file }}" />
                   <property name="password" value="{{ keycloak_keystore_password }}"/>
-                  <property name="hostname-verification-policy" value="ANY"/>
-                  <property name="disabled" value="false"/>
+                  <property name="hostname-verification-policy" value="{{ keycloak_hostname_verification_policy }}"/>
+                  <property name="enabled" value="true"/>
                 </properties>
               </provider>
             </spi>

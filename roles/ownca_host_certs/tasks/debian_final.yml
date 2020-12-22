@@ -163,10 +163,10 @@
 
 - name: "Ensure we have a PKCS12 password for the Host"
   ansible.builtin.set_fact:
-    ownca_host_cert_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    ownca_host_certs_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/ownca_host_cert_pkcs12_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/ownca_host_cert_pkcs12_password"
+    __password_length: "length={{ rebeldream_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
@@ -184,14 +184,14 @@
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
-    path:  "{{ ownca_etc }}/certs/{{ inventory_hostname }}.pkcs12"
-    friendly_name: "{{ inventory_hostname }}"
+    path:  "{{ ownca_etc }}/certs/{{ rebeldream_fqdn }}.pkcs12"
+    friendly_name: "{{ rebeldream_fqdn }}"
     passphrase: "{{ ownca_host_certs_pkcs12_password }}"
-    privatekey_path: "{{ ownca_etc }}/private/{{ inventory_hostname }}.key"
-    certificate_path: "{{ ownca_etc }}/certs/{{ inventory_hostname }}-chain.pem"
+    privatekey_path: "{{ ownca_etc }}/private/{{ rebeldream_fqdn }}.key"
+    certificate_path: "{{ ownca_etc }}/certs/{{ rebeldream_fqdn }}-chain.pem"
     other_certificates:
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
       - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
     state: present
     iter_size: 0
