@@ -66,6 +66,17 @@
   when:
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
 
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+  listen:
+    - "restart all"
+    - "restart tls"
+  become: yes
+  when:
+    - inventory_hostname in groups ['nginx_servers'] | default([])
+
 - name: Restart Postfix
   ansible.builtin.service:
     name: postfix
@@ -148,16 +159,6 @@
 # Reload Handlers
 #
 # ==================================================================================================
-- name: reload postfix
-  ansible.builtin.service:
-    name: postfix
-    state: reloaded
-  become: yes
-  listen:
-    - "reload all"
-  when:
-    - inventory_hostname in groups['postfix_servers']
-
 - name: reload apache
   ansible.builtin.service:
     name: apache2
@@ -167,6 +168,26 @@
   become: yes
   when:
     - inventory_hostname in groups['apache_servers']
+
+- name: reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
+  listen:
+    - "reload all"
+  become: yes
+  when:
+    - inventory_hostname in groups['nginx_servers']
+
+- name: reload postfix
+  ansible.builtin.service:
+    name: postfix
+    state: reloaded
+  become: yes
+  listen:
+    - "reload all"
+  when:
+    - inventory_hostname in groups['postfix_servers']
 
 # ==================================================================================================
 #
