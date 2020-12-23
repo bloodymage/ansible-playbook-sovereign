@@ -143,6 +143,11 @@
 #
 # I really need a way to test if the admin user is already created.  If so, don't run the command.
 #
+# As far as I can tell, no new file is created as a result.
+#
+# This site may have some hints:
+# https://gitlab.archlinux.org/seblu/infrastructure/-/blob/keycloak-open-registration/roles/keycloak/tasks/main.yml
+#
 # ==================================================================================================
 - name: "Create admin user"
   ansible.builtin.command:

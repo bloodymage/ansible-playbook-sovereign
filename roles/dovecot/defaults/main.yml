@@ -28,3 +28,65 @@ dovecot_imap_protocols:
     mail_plugins: "$mail_plugins"
 
 dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
+
+dovecot_auth_conf:
+  - "{{ dovecot_auth_conf_system }}"
+
+dovecot_auth_deny:
+  name: "deny"
+  passdb:
+    - driver: passwd-file
+      deny: yes
+      args: /etc/dovecot/deny-users
+
+dovecot_auth_conf_system:
+  name: "system"
+  passdb:
+    - driver: "pam"
+  userdb:
+    - driver: "static"
+      args: "allow_all_users=yes uid={{ user_vmail_id_number }} gid={{ user_vmail_id_number }} home=/var/mail/vmail/%d/%n"
+
+
+dovecot_password_file: "/etc/dovecot/passwd.db"
+
+dovecot_auth_conf_passwdfile:
+  name: "passwdfile"
+  passdb:
+    - driver: "passwd-file"
+      args: "username_format=%u scheme=ssha512 {{ dovecot_password_file }}"
+      deny: "no"
+      master: "no"
+      pass: "no"
+      skip: "never"
+      result_failure: "continue"
+      result_internalfail: "continue"
+      result_success: "return-ok"
+  userdb:
+    - driver: passwd-file
+      args: username_format=%u /etc/dovecot/users
+
+dovecot_auth_conf_sql:
+  name: "sql"
+  passdb:
+    - driver: "sql"
+      args: "/etc/dovecot/dovecot-sql.conf.ext"
+  userdb:
+    - driver: "sql"
+      args: "/etc/dovecot/dovecot-sql.conf.ext"
+
+dovecot_auth_conf_ldap:
+  name: "ldap"
+  passdb:
+    - driver: "ldap"
+      args: "/etc/dovecot/dovecot-ldap.conf.ext"
+  userdb:
+    - driver: "ldap"
+      args: "/etc/dovecot/dovecot-ldap.conf.ext"
+
+dovecot_auth_conf_oauth2:
+  name: "oauth2"
+  passdb:
+    - driver: "oauth2"
+      mechanisms: "xoauth2 oauthbearer"
+      args: "/etc/dovecot/dovecot-oauth2.conf.ext"
