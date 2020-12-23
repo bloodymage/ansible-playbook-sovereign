@@ -25,3 +25,6 @@ ownca_user_certs_encryption_key_usage:
 
 ownca_user_certs_encryption_extended_key_usage:
   - "emailProtection"
+
+ownca__home_dir: "/home/{{ rebeldream_org_unit_name | upper }}"
+ownca_user_pki_dir: ".pki"

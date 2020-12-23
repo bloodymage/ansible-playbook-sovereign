@@ -1,6 +1,6 @@
 ---
 - name: "Add or modify host PTR records (IPv4)"
-  nsupdate:
+  community.general.nsupdate:
     key_name: "ansible"
     key_secret: "{{ item.bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"

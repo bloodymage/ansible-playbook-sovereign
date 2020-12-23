@@ -26,7 +26,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -90,7 +90,7 @@
     - samba-domain-create
 
 - name: Clear old data
-  file:
+  ansible.builtin.file:
     path: /var/lib/sss/db
     state: absent
   tags:
@@ -98,7 +98,7 @@
     - samba-domain-create
 
 - name: Ensure DB directory exists
-  file:
+  ansible.builtin.file:
     path: /var/lib/sss/db
     state: direcotory
     owner: sssd
@@ -116,7 +116,7 @@
     - samba-domain-create
 
 - name: "Install sssd.conf"
-  template:
+  ansible.builtin.template:
     src: "{{ role_path }}/templates/sssd.conf.j2"
     dest: "/etc/sssd/sssd.conf"
     owner: root

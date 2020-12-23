@@ -26,7 +26,7 @@
     - apache-debug
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -72,7 +72,7 @@
 #     persistent: yes
 #   when: sestatus.rc != 0
 
-- debug:
+- ansible.builtin.debug:
     msg:
       - "{{ hosts }}"
     verbosity: 2
@@ -83,7 +83,7 @@
     - apache-debug
 
 - name: Create file directories for each site
-  file:
+  ansible.builtin.file:
     path: "/srv/www/{{ item.name }}"
     owner: www-data
     group: www-data
@@ -106,7 +106,7 @@
 #
 # ======================================================================
 - name: Ensure file directories have proper permissions
-  file:
+  ansible.builtin.file:
     path: "/srv/www"
     owner: www-data
     group: www-data
@@ -127,7 +127,7 @@
     - websites
 
 - name: Create log directories for each site
-  file:
+  ansible.builtin.file:
     path: "/var/log/apache2/{{ item.name }}"
     owner: root
     group: root

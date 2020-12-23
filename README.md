@@ -12,7 +12,7 @@
 - [License](#license)
 
 ## Description
-This collection is a set of ansible playbooks that you can use to build and maintain your own personal self-hosted services.  
+This collection is a set of ansible playbooks that you can use to build and maintain your own personal self-hosted services.
 Initial services are:
 1. Email (Postfix and Dovecot)
 2. Address Book and Calendars (Nextcloud)
@@ -20,6 +20,8 @@ Initial services are:
 4. File server (Samba)
 
 For access to these services, a focus on centralized user management with a goal of single sign on across all services.  Eventually I will add smart card capabilities to minimize password requirements. 
+
+For single signon, I use native SSO capabilities where possible, keycloak Identity Provider native SSO doesn't work.
 
 There are three reasons I had with creating this with this project.
 1. I wanted to learn how to use Ansible
@@ -59,6 +61,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [Keycloak](roles/keycloak/README.md)
 #### [KRB5 Client Config](roles/krb5_client_config/README.md)
 #### [MariaDB](roles/mariadb/README.md)
+#### [Mediawiki](roles/website_mediawiki/README.md)
 #### [MySQL Databases](roles/mysql_databases/README.md)
 #### [Nextcloud](roles/nextcloud/README.md)
 #### [NTP](roles/ntp/README.md)
@@ -69,29 +72,24 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 #### [OWNCA User Certificates](roles/ownca_user_certs/README.md)
 #### [Password-Store](roles/password_store/README.md)
 #### [Postfix](roles/postfix/README.md)
-#### [Reboot](roles/reboot/README.md)
 #### [Samba Domain Controller](roles/samba_domain_controller/README.md)
 #### [Samba Domain Users](roles/samba_domain_users/README.md)
 #### [Samba File Server](roles/samba_file_server/README.md)
-#### [Shutdown](roles/shutdown/README.md)
 #### [SSHCA](roles/sshca/README.md)
 #### [SSHCA Host Certificates](roles/sshca_host_certs/README.md)
-#### [SSHCA User Certificates](roles/sshca_user_certs/README.md)
 #### [SSSD](roles/sssd/README.md)
 #### [SUDO](roles/sudo/README.md)
 #### [System Upgrade](roles/system_upgrade/README.md)
 #### [Users](roles/users/README.md)
-#### Websites
-##### [Mediawiki](roles/website_mediawiki/README.md)
-##### [Nextcloud](roles/nextcloud/README.md)
-
 
 ### Variables
 #### Global Variables
 ##### Users
 ##### Domain Users
 
-#### Role variables are defined in each role's README.md
+#### Role variables 
+Each role's variables are defined in their README.md file.
+
 #### Passwords
 
 Passwords are managed through the use of [Password Store](https://password-store.org).
@@ -143,6 +141,14 @@ Sovereign is a set of ansible playbooks to build and maintain your own private s
 - IRC bouncer
 - VPN
 - and more. 
+
+### Related Projects
+#### [Hearthminion](https://github.com/hearthminion/ansible-collection-hearthminion)
+
+The Hearthminion ansible collection expands on this collection adding in new features relating to home automation and entertainment.
+- Home Assistant
+- MythTV
+- RetroPie
 
 ### References
 - [Ansible Documentation](https://docs.ansible.com/ansible/latest/index.html)

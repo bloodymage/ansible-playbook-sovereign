@@ -40,7 +40,7 @@
     - recreate-realm-debug
 
 - name: "Fetch keytab"
-  fetch:
+  ansible.builtin.fetch:
     src: "/tmp/{{ user.ansible_facts.username }}-{{ item.spn }}-{{ item.host }}.keytab"
     dest: "/tmp/{{ user.ansible_facts.username }}-{{ item.spn }}-{{ item.host }}.keytab"
     flat: yes

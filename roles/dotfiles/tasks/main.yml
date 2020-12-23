@@ -4,31 +4,8 @@
 #
 #
 # ==================================================================================================
-- name: get user home directory
-  shell: >-
-    getent passwd {{ item.username }}  | awk -F: '{ print $6 }'
-  changed_when: false
-  register: user_home
-  become: yes
-  loop: "{{ users }}"
-  when:
-    - users is defined
-  tags:
-    - dotfiles
-    - dotfiles_debug
-    - dotfiles-debug
-
-- name: debug output
-  debug:
-    var: user_home
-  become: no
-  tags:
-    - never
-    - dotfiles_debug
-    - dotfiles-debug
-
 - name: Ensure User Home directory exists
-  file:
+  ansible.builtin.file:
     dest: "{{ item.unix_home }}"
     state: directory
     owner: "{{ item.username }}"
@@ -38,7 +15,6 @@
   become: yes
   when:
     - users is defined
-    - inventory_hostname not in groups['samba_file_servers']
     - item.unix_home is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
   tags:
@@ -46,13 +22,8 @@
     - dotfiles_debug
     - dotfiles-debug
 
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
 - name: Install User gitconfig
-  template:
+  ansible.builtin.template:
     src: "gitconfig.j2"
     dest: "{{ item.unix_home }}/.gitconfig"
     owner: "{{ item.username }}"
@@ -68,13 +39,8 @@
     - dotfiles_debug
     - dotfiles-debug
 
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
 - name: Ensure user .gnupg folder exists
-  file:
+  ansible.builtin.file:
     path: "{{ item.unix_home }}/.gnupg"
     state: directory
     owner: "{{ item.username }}"
@@ -91,7 +57,7 @@
     - dotfiles-debug
 
 - name: Install gpg.conf
-  template:
+  ansible.builtin.template:
     src: "gpg.conf.j2"
     dest: "{{ item.unix_home }}/.gnupg/gpg.conf"
     owner: "{{ item.username }}"
@@ -108,7 +74,7 @@
     - dotfiles-debug
 
 - name: Install gpg-agent.conf
-  template:
+  ansible.builtin.template:
     src: "gpg-agent.conf.j2"
     dest: "{{ item.unix_home }}/.gnupg/gpg-agent.conf"
     owner: "{{ item.username }}"

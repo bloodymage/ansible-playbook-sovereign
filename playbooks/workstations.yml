@@ -1,0 +1,4 @@
+- hosts: workstations
+  roles:
+    - bloodymage.rebeldream.evolution
+    - bloodymage.rebeldream.firefox

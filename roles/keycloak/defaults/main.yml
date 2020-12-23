@@ -4,37 +4,49 @@ packages:
   - openjdk-11-jre
   - python3-openssl
 
-keycloak_version: "11.0.3"
+# Names
+keycloak_keystore_alias: "{{ keycloak_name | lower }}"
+keycloak_service_description: "{{ keycloak_name | title }}"
+
+# Keycloak ...
+keycloak_version: "12.0.1"
 keycloak_host: 127.0.0.1
-
-keycloak_install_dir: "/opt/keycloak"
-keycloak_binary_dir: "{{ keycloak_install_dir }}/bin"
 keycloak_mode: "standalone"
-keycloak_binary: "{{ keycloak_binary_dir }}/{{ keycloak_mode }}.sh"
-
-keycloak_service_description: "Keycloak"
+keycloak_keystore_type: "pkcs12"
+keycloak_http_port: 8080
+keycloak_https_port: 8443
+keycloak_force_backend_url_to_frontend_url: "false"
 keycloak_service_switches: "-b {{ keycloak_host }}"
+keycloak_admin_user: "admin"
+keycloak_admin_password: "password"
+keycloak_keystore_password: "password"
+keycloak_password_legnth: "{{ rebeldream_password_length }}"
+keycloak_loglevel: "INFO"
+keycloak_hostname_verification_policy: "ANY" #Default to "WILDCARD"
 
-keycloak_url: "https://downloads.jboss.org/keycloak"
+# Directories
+keycloak_config_dir: "{{ keycloak_home }}/{{ keycloak_mode }}/configuration"
+keycloak_binary_dir: "{{ keycloak_home }}/bin"
+keycloak_docs_dir: "{{ keycloak_home }}/docs"
+keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
+keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
+
+# Files
+keycloak_binary: "{{ keycloak_binary_dir }}/{{ keycloak_mode }}.sh"
+keycloak_keystore_file: "{{ keycloak_name | lower }}.{{ keycloak_keystore_type }}"
+
+# Paths
+keycloak_license_path: "{{ keycloak_license_dir }}/{{ keycloak_license_file }}"
+
+# Download Config
+keycloak_url: "https://github.com/keycloak/keycloak/releases/download"
 
 keycloak_source_url:
   - source: "{{ keycloak_url }}/{{ keycloak_version }}/keycloak-{{ keycloak_version }}.tar.gz"
     file: "keycloak-{{ keycloak_version }}.tar.gz"
-    checksum: "87bae7fd63b49756f54e4e293fb37329f117e30d"
+    checksum: "67ed335ff99b9f7f7c0812bc23f8b38ff288530e"
     checksum_type: "sha1"
-
-keycloak_admin_user: "admin"
-keycloak_admin_password: "password"
-
-keycloak_http_port: 8080
-keycloak_https_port: 8443
-keycloak_force_backend_url_to_frontend_url: "false"
-
-keycloak_keystore_alias: "keycloak"
-keycloak_keystore_password: "password"
-keycloak_keystore_file: "keycloak.pkcs12"
-
-keycloak_docs_dir: "{{ keycloak_install_dir }}/docs"
-keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
-keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
-keycloak_license_path: "{{ keycloak_license_dir }}/{{ keycloak_license_file }}"
+  
+keycloak_samba_federation:
+  - name: "{{ rebeldream_org_unit_name }} Active Directory"
+    edit_mode: "READONLY"

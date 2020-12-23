@@ -28,7 +28,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -45,7 +45,7 @@
 #
 # ==================================================================================================
 - name: Create Required Directories for Cert authorization.
-  file:
+  ansible.builtin.file:
     name: "{{ item }}"
     state: directory
     owner: root
@@ -61,7 +61,7 @@
     - openssh-debug
 
 - name: Install Host CA Certificate on Hosts
-  copy:
+  ansible.builtin.copy:
     src: "{{ sshca_key_directory }}/{{ sshca_host_pubfile }}"
     dest: "{{ sshca_hostca_certificate }}"
     owner: root
@@ -75,7 +75,7 @@
     - openssh-debug
 
 - name: Install User CA Certificate on Hosts
-  copy:
+  ansible.builtin.copy:
     src: "{{ sshca_key_directory }}/{{ sshca_user_pubfile }}"
     dest: "{{ sshca_userca_certificate }}"
     owner: root
@@ -89,7 +89,7 @@
     - openssh-debug
 
 - name: "Install Configuration files"
-  template:
+  ansible.builtin.template:
     src: "{{ item.name }}.j2"
     dest: "{{ ssh_config_dir }}/{{ item.name }}"
     owner: root

@@ -29,7 +29,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -61,7 +61,7 @@
     - sshca-host-certs-debug
 
 - name: Find SSH host keys.
-  find:
+  ansible.builtin.find:
     path: "{{ ssh_config_dir }}"
     pattern: ssh_host_*_key
   register: private_keys
@@ -88,7 +88,7 @@
     - sshca-host-certs-debug
 
 - name: Fetch public keys.
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ item.path }}.pub"
     dest: "{{ temporary_directory.path }}/public_keys/"
   with_items: "{{ private_keys.files }}"
@@ -100,7 +100,7 @@
     - sshca-host-certs-debug
 
 - name: Fetch existing certificates.
-  fetch:
+  ansible.builtin.fetch:
     src: "{{ item.path }}-cert.pub"
     dest: "{{ temporary_directory.path }}/existing_certificates/"
     fail_on_missing: false
@@ -148,8 +148,8 @@
 #
 # ==================================================================================================
 - name: Find certificates.
-  find:
-    path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote}}{{ ssh_config_dir }}/"
+  ansible.builtin.find:
+    path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote }}{{ ssh_config_dir }}/"
     pattern: ssh_host_*_key-cert.pub
   register: certificates
   delegate_to: localhost
@@ -166,10 +166,17 @@
 #
 # ======================================================================
 - name: Compare certificates.
-  shell: diff <(ssh-keygen -L -f "{{ item.path | quote }}" |
-           tail -n +2) <(ssh-keygen -L -f "{{ temporary_directory.path | quote }}/existing_certificates/{{ inventory_hostname | quote }}/{{ ssh_config_dir }}/{{ item.path | basename | quote }}" | tail -n +2)
-  args:
-    executable: /bin/bash
+  command:
+    cmd: >
+      diff <(ssh-keygen -L -f "{{ item.path | quote }}" |
+      tail -n +2) <(ssh-keygen -L -f "{{ __existing_cert_path }}" |
+      tail -n +2)
+  vars:
+    __existing_cert_dir: "{{ temporary_directory.path | quote }}/existing_certificates"
+    __existing_host_dir: "{{ __existing_cert_dir }}/{{ rebeldream_fqdn | quote }}"
+    __existing_ssh_config_dir: "{{ __existing_host_dir }}/{{ ssh_config_dir }}"
+    __existing_cert: "{{ item.path | basename | quote }}"
+    __existing_cert_path: "{{ __existing_ssh_config_dir }}/{{ __existing_cert }}"
   with_items: "{{ certificates.files }}"
   changed_when: false
   failed_when: false
@@ -188,9 +195,12 @@
 #
 # ==================================================================================================
 - name: Copy certificates back to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ item.item.path }}"
-    dest: "{{ ssh_config_dir }}/"
+    dest: "{{ ssh_config_dir }}/{{ item }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   with_items: "{{ certificate_comparison.results }}"
   notify: restart ssh
   become: yes
@@ -209,7 +219,7 @@
 #
 # ==================================================================================================
 - name: Remove local temporary directory.
-  file:
+  ansible.builtin.file:
     name: "{{ temporary_directory.path }}"
     state: absent
   become: yes

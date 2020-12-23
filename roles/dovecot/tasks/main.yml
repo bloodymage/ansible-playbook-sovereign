@@ -26,7 +26,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -36,21 +36,11 @@
     - dovecot-debug
     - install-packages
 
-- name: "Update 'dovecot_password_databases' ldap"
+- name: "Update password and auth mechanims"
   ansible.builtin.set_fact:
     dovecot_password_databases: "{{ dovecot_password_databases + ['ldap'] }}"
-  become: no
-  when:
-    - rebeldream_realm_identity_management_system == "samba"
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
-    - install-packages
-
-- name: "Update 'dovecot_auth_mechanisms' oauth"
-  ansible.builtin.set_fact:
-    dovecot_auth_mechanisms: "{{ ['gssapi'] + dovecot_auth_mechanisms + ['xoauth2'] }}"
+    dovecot_auth_mechanisms: "{{ ['gssapi'] + dovecot_auth_mechanisms + ['oauthbearer xoauth2'] }}"
+    dovecot_auth_conf: "{{ dovecot_auth_conf + [dovecot_auth_conf_ldap] + [dovecot_auth_conf_oauth2] }}"
   become: no
   when:
     - rebeldream_realm_identity_management_system == "samba"
@@ -63,10 +53,11 @@
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
     __mail_user: "{{ mail_user }}"
-    __mail_user_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=' + rebeldream_password_length + ' nosymbols=true') }}"
+    __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
-  no_log: yes
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
+    __password_lookup: "{{ __password_store_id }}"
+  #no_log: yes
   become: no
   delegate_to: localhost
   register: domain_user_list
@@ -80,31 +71,48 @@
 # Configuration tasks
 #
 # ==================================================================================================
-- name: Install config files to /etc/dovecot
-  template:
+- name: "Install config files to /etc/dovecot"
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/dovecot/{{ item }}"
-    owner: root
-    group: root
-    mode: 0644
-  become: yes
+    owner: "root"
+    group: "root"
+    mode: "0644"
   loop:
     - dovecot.conf
-    - dovecot-oauth2.conf.ext
-    #- passwd.db
+    #- "{{ dovecot_password_file }}"
+  become: yes
   notify: restart dovecot
   tags:
     - dovecot
     - dovecot_debug
     - dovecot-debug
 
-- name: Install configuration files to /etc/dovecot/conf.d
-  template:
+- name: "Install auth config files to /etc/dovecot"
+  ansible.builtin.template:
+    src: "dovecot-{{ item.name }}.conf.ext.j2"
+    dest: "/etc/dovecot/dovecot-{{ item.name }}.conf.ext"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ dovecot_auth_conf }}"
+  become: yes
+  notify: restart dovecot
+  when:
+    - item.name != "system"
+    - item.name != "deny"
+  tags:
+    - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
+- name: "Install configuration files to /etc/dovecot/conf.d"
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/dovecot/conf.d/{{ item }}"
-    owner: root
-    group: root
-    mode: 0644
+    owner: "root"
+    group: "root"
+    mode: "0644"
   become: yes
   loop:
     - 10-auth.conf
@@ -125,15 +133,9 @@
     - 90-sieve-extprograms.conf
     - 90-sieve.conf
     - auth-checkpassword.conf.ext
-    - auth-deny.conf.ext
     - auth-dict.conf.ext
-    - auth-ldap.conf.ext
     - auth-master.conf.ext
-    - auth-oauth2.conf.ext
-    - auth-passwdfile.conf.ext
-    - auth-sql.conf.ext
     - auth-static.conf.ext
-    - auth-system.conf.ext
     - auth-vpopmail.conf.ext
   notify: restart dovecot
   tags:
@@ -141,8 +143,23 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: Ensure Virtual Directory definitions exist
-  file:
+- name: "Install authorization configuration files to /etc/dovecot/conf.d"
+  ansible.builtin.template:
+    src: "auth.conf.j2"
+    dest: "/etc/dovecot/conf.d/auth-{{ item.name }}.conf.ext"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_auth_conf }}"
+  notify: restart dovecot
+  tags:
+    - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
+- name: "Ensure Virtual Directory definitions exist"
+  ansible.builtin.file:
     path: "/etc/dovecot/virtual/{{ item.name }}"
     owner: "{{ mail_user }}"
     group: "{{ mail_user }}"
@@ -155,14 +172,13 @@
     - dovecot_debug
     - dovecot-debug
 
-
-- name: Install configuration files to /etc/dovecot/virtual
-  template:
+- name: "Install configuration files to /etc/dovecot/virtual"
+  ansible.builtin.template:
     src: "dovecot-virtual.j2"
     dest: "/etc/dovecot/virtual/{{ item.name }}/dovecot-virtual"
-    owner: root
-    group: root
-    mode: 0644
+    owner: "root"
+    group: "root"
+    mode: "0644"
   become: yes
   loop: "{{ dovecot_virtual_mailboxes }}"
   tags:
@@ -170,9 +186,8 @@
     - dovecot_debug
     - dovecot-debug
 
-
-- name: Ensure Sieve Pipe Bin Dir exists
-  file:
+- name: "Ensure Sieve Pipe Bin Dir exists"
+  ansible.builtin.file:
     path: "{{ dovecot_sieve_pipe_bin_dir }}"
     owner: "{{ mail_user }}"
     group: "{{ mail_user }}"
@@ -184,8 +199,8 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: Install IMAPSieve Spam Update Filters
-  template:
+- name: "Install IMAPSieve Spam Update Filters"
+  ansible.builtin.template:
     src: "report-sieve.j2"
     dest: "{{ dovecot_sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
     owner: root
@@ -198,14 +213,13 @@
     - dovecot_debug
     - dovecot-debug
 
-
-- name: Install IMAPSieve Spam Update Filters
-  template:
+- name: "Install IMAPSieve Spam Update Filters"
+  ansible.builtin.template:
     src: "sa-learn.j2"
     dest: "{{ dovecot_sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
-    owner: root
-    group: root
-    mode: 0755
+    owner: "root"
+    group: "root"
+    mode: "0755"
   become: yes
   loop: "{{ dovecot_imapsieve_mailboxes }}"
   tags:

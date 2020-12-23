@@ -1,0 +1,14 @@
+---
+# defaults file for firefox
+packages:
+  - "{{ firefox }}"
+  - libgssapi-krb5-2
+  - p11-kit-modules
+
+firefox: "firefox"
+firefox_lib_path: "/usr/lib/{{ firefox }}"
+firefox_share_path: "/usr/share/{{ firefox }}"
+mozilla_lib_path: "/usr/lib/mozilla"
+firefox_etc: "/etc/{{ firefox }}"
+
+firefox_certificate_path: "{{ mozilla_lib_path }}/certificates"

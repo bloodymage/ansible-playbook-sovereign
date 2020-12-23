@@ -23,8 +23,7 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - ownca
-    - ownca user certs
-    - user certs
+    - certificates
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers

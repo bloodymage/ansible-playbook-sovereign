@@ -1,0 +1,10 @@
+---
+# defaults file for polkit
+packages:
+  - libpolkit-agent-1-0
+  - libpolkit-gobject-1-0
+
+polkit_sudo_groups:
+  - "sudo"
+  - "wheel"
+

@@ -30,7 +30,7 @@
         - install-packages
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -46,7 +46,7 @@
 #
 # ==================================================================================================
 - name: Install ddclient.conf
-  template:
+  ansible.builtin.template:
     src: ddclient.j2
     dest: /etc/ddclient.conf
     owner: root

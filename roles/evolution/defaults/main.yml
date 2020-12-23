@@ -1,0 +1,7 @@
+---
+# defaults file for evolution
+packages:
+  - evolution
+  - evolution-plugins
+  - evolution-plugins-experimental
+  - evolution-rss

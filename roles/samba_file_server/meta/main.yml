@@ -23,8 +23,7 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - samba
-    - file server
-    - samba file server
+    - fileserver
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers
