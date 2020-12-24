@@ -23,9 +23,6 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - samba
-    - domain controller
-    - domain controllers
-    - samba domain controllers
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers

@@ -5,10 +5,13 @@
 #  
 #
 # ==================================================================================================
-- name: Copy Host Certificate back to server.
-  copy:
+- name: "Copy Host Certificate back to server."
+  ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
-    dest: "/usr/local/share/ca-certificates/"
+    dest: "/usr/local/share/ca-certificates/{{ item }}.crt"
+    owner: "root"
+    group: "root"
+    mode: "0644"
   become: yes
   loop:
     - "{{ inventory_hostname }}"
@@ -22,9 +25,12 @@
     - ownca-all
 
 - name: Copy domain controllers' certificate to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
-    dest: "/usr/local/share/ca-certificates/"
+    dest: "/usr/local/share/ca-certificates/{{ item }}.crt"
+    owner: root
+    group: root
+    mode: "0644"
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
@@ -38,9 +44,12 @@
     - ownca-all
 
 - name: Copy domain controllers' certificate chain to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
     dest: "/usr/local/share/ca-certificates/{{ item }}-chain.crt"
+    owner: root
+    group: root
+    mode: "0644"
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
@@ -54,9 +63,12 @@
     - ownca-all
 
 - name: Copy CA Certificates to server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
-    dest: "/usr/local/share/ca-certificates/"
+    dest: "/usr/local/share/ca-certificates/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
   loop:
     - "{{ rebeldream_org_name }}-root-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.crt"
@@ -81,9 +93,12 @@
     - ownca-all
 
 - name: Copy CRLs to server.
-  copy:
-    src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+  ansible.builtin.copy:
+    src: "{{ ownca_ca_directory }}/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
     dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+    owner: root
+    group: root
+    mode: "0644"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   tags:
@@ -93,7 +108,9 @@
     - ownca-crl-debug
 
 - name: Convert CA Certs to DER
-  command: "openssl x509 -in {{ item }}.crt -inform PEM -out {{ item }}.der -outform DER"
+  command:
+    cmd: "openssl x509 -in {{ item }}.crt -inform PEM -out {{ item }}.der -outform DER"
+    creates: "{{ item }}.der"
   become: no
   loop:
     - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca"
@@ -113,9 +130,12 @@
     - ownca-all
 
 - name: Copy CA Certificates Samba File Server.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
     dest: "/srv/samba/pki/"
+    owner: root
+    group: root
+    mode: "0644"
   loop:
     - "{{ rebeldream_org_name }}-root-ca.crt"
     - "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
@@ -143,10 +163,10 @@
 
 - name: "Ensure we have a PKCS12 password for the Host"
   ansible.builtin.set_fact:
-    ownca_host_cert_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    ownca_host_certs_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/ownca_host_cert_pkcs12_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/ownca_host_cert_pkcs12_password"
+    __password_length: "length={{ rebeldream_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
@@ -164,21 +184,21 @@
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
-    path:  "{{ ownca_etc }}/certs/{{ inventory_hostname }}.pkcs12"
-    friendly_name: "{{ inventory_hostname }}"
+    path:  "{{ ownca_etc }}/certs/{{ rebeldream_fqdn }}.pkcs12"
+    friendly_name: "{{ rebeldream_fqdn }}"
     passphrase: "{{ ownca_host_certs_pkcs12_password }}"
-    privatekey_path: "/etc/ssl/private/{{ inventory_hostname }}.key"
-    certificate_path: "/etc/ssl/certs/{{ inventory_hostname }}-chain.pem"
+    privatekey_path: "{{ ownca_etc }}/private/{{ rebeldream_fqdn }}.key"
+    certificate_path: "{{ ownca_etc }}/certs/{{ rebeldream_fqdn }}-chain.pem"
     other_certificates:
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca-chain.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-root-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
     state: present
     iter_size: 0
     maciter_size: 0
-    mode: '0600'
     owner: root
     group: root
+    mode: '0600'
     force: yes
   become: yes
   tags:

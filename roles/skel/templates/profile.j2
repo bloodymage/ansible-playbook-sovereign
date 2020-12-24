@@ -7,17 +7,23 @@ else
   PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/games:/usr/games"
 fi
 
-# Application Specific PATH
-FSLINT=/usr/share/fslint/fslint
+# Application Specific PATHs
+FSLINT="/usr/share/fslint/fslint"
 FSLINTPATH="${FSLINT}:${FSLINT}/fstool"
 if [ -d ${FSLINT} ] ; then
-   PATH="${FSLINTPATH}:${PATH}"
+   PATH="${PATH}:${FSLINTPATH}"
 fi
 
 if [ -d "/usr/games" ]; then
   PATH="/usr/games/:$PATH"
 fi
-
+{% if inventory_hostname in groups['keycloak_servers'] %}
+KEYCLOAK="{{ keycloak_home }}/bin/kcadm.sh"
+KEYCLOAK_PATH="{{ keycloak_home }}/bin"
+if [ -x ${KEYCLOAK} ]; then
+   PATH="${PATH}:${KEYCLOAK_PATH}"
+fi
+{% endif %}
 # set PATH so it includes user's private bin if it exists
 if [ -d "${HOME}/.local/bin" ] ; then
     PATH="${HOME}/.local/bin:$PATH"

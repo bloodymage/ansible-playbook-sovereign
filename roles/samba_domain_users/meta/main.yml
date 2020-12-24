@@ -23,8 +23,7 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - samba
-    - domain users
-    - samba domain users
+    - domain
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers

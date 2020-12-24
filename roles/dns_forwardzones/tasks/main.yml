@@ -1,7 +1,7 @@
 ---
 # tasks file for dns-update
 - name: "Install Apps"
-  apt:
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: present
   become: yes
@@ -20,7 +20,7 @@
     - dns-update
 
 - name: "Add or modify host A records"
-  nsupdate:
+  community.general.nsupdate:
     key_name: "ansible"
     key_secret: "{{ item.bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
@@ -43,7 +43,7 @@
 
 # tasks file for dns-update
 - name: "Add or modify host AAAA records"
-  nsupdate:
+  community.general.nsupdate:
     key_name: "ansible"
     key_secret: "{{ item.bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
@@ -67,7 +67,7 @@
     - dns-update
 
 - name: "Add or modify host CNAME records"
-  nsupdate:
+  community.general.nsupdate:
     key_name: "ansible"
     key_secret: "{{ item[0].bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
@@ -91,7 +91,7 @@
     - dns-update
 
 # - name: "Add or modify MX records"
-#   nsupdate:
+#   community.general.nsupdate:
 #     key_name: "ansible"
 #     key_secret: "{{ item.bind_dnssec_secret }}"
 #     key_algorithm: "hmac-sha256"

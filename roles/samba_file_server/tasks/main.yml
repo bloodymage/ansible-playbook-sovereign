@@ -46,7 +46,7 @@
         - recreate-realm-debug
 
     - name: "Install packages"
-      package:
+      ansible.builtin.package:
         name: "{{ packages }}"
         state: present
       become: yes
@@ -88,13 +88,14 @@
     - recreate-realm-debug
 
 - name: Kill running processes
-  shell: "kill {{ item }}"
+  command:
+    cmd: "kill {{ item }}"
   loop: "{{ running_processes.stdout_lines }}"
   become: yes
   ignore_errors: yes
   when:
     - samba_create_domain is defined
-    - samba_create_domain 
+    - samba_create_domain
   tags:
     - samba_file_server
     - samba-file-server
@@ -113,7 +114,7 @@
   become: yes
   when:
     - samba_create_domain is defined
-    - samba_create_domain 
+    - samba_create_domain
   tags:
     - samba_file_server
     - samba-file-server
@@ -123,13 +124,14 @@
     - recreate-realm-debug
 
 - name: Force kill stuck processes
-  shell: "kill -9 {{ item }}"
+  command:
+    cmd: "kill -9 {{ item }}"
   loop: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
   become: yes
   ignore_errors: yes
   when:
     - samba_create_domain is defined
-    - samba_create_domain 
+    - samba_create_domain
   tags:
     - samba_file_server
     - samba-file-server
@@ -162,9 +164,10 @@
     - recreate-realm-debug
 
 - name: Print Variables
-  debug:
+  ansible.builtin.debug:
     var: config_file
     verbosity: 2
+  become: no
   when:
     - samba_create_domain is defined
     - samba_create_domain
@@ -174,12 +177,13 @@
     - recreate-realm-debug
 
 - name: Remove config file
-  file:
+  ansible.builtin.file:
     path: "{{ config_file }}"
     state: absent
+  become: yes
   when:
     - samba_create_domain is defined
-    - samba_create_domain 
+    - samba_create_domain
   tags:
     - samba_file_server
     - samba-file-server
@@ -222,7 +226,7 @@
 #   loop: "{{ find_logs.files }}"
 
 - name: Remove database files
-  shell:
+  command:
     cmd: "rm *.tdb *.ldb"
     chdir: "{{ item }}"
   loop:
@@ -234,7 +238,7 @@
   ignore_errors: yes
   when:
     - samba_create_domain is defined
-    - samba_create_domain 
+    - samba_create_domain
   tags:
     - samba_file_server
     - samba-file-server
@@ -249,7 +253,7 @@
 #
 # ==================================================================================================
 - name: Remove krb5.conf
-  file:
+  ansible.builtin.file:
     path: "/etc/krb5.conf"
     state: absent
   when:
@@ -266,7 +270,7 @@
 
 # Create Config File
 - name: Install smb.conf configuration file
-  template:
+  ansible.builtin.template:
     src: "smb.conf.j2"
     dest: /etc/samba/smb.conf
     owner: root
@@ -284,7 +288,7 @@
 
 # Create Config File
 - name: Install user.map
-  template:
+  ansible.builtin.template:
     src: "user.map.j2"
     dest: /etc/samba/user.map
     owner: root
@@ -308,7 +312,8 @@
 # - name: Test if host is already join to domain
 
 - name: Join Domain
-  shell: "net ads join -U administrator -w {{ samba_administrator_password }}"
+  command:
+    cmd: "net ads join -U administrator -w {{ samba_administrator_password }}"
   become: yes
   notify: start samba-domain-member
   when:

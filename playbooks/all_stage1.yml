@@ -11,18 +11,24 @@
         key: "{{ ansible_network_os.split('.')[2] | lower }}"
       when:
         - ansible_network_os is defined
+      tags:
+        - always
 
     - name: "Create groups based on the OS Family"
       group_by:
         key: "{{ ansible_os_family | lower }}"
       when:
         - ansible_os_family is defined
+      tags:
+        - always
 
     - name: "Create groups based on the System"
       group_by:
         key: "{{ ansible_system | lower }}"
       when:
         - ansible_system is defined
+      tags:
+        - always
 
 #     - name: Check if we are using debug mode
 #       ansible.builtin.set_fact:
@@ -66,3 +72,4 @@
     - bloodymage.rebeldream.skel
     - bloodymage.rebeldream.dotfiles
     - bloodymage.rebeldream.etckeeper
+    - bloodymage.rebeldream.polkit

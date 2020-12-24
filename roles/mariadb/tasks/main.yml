@@ -9,10 +9,14 @@
 # ==================================================================================================
 - name: "Ensure we have a password for the Administrative User"
   ansible.builtin.set_fact:
-    mysql_administrator_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+    mysql_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_administrator }}"
-    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_administrator }}"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   no_log: yes
   become: no
@@ -25,10 +29,14 @@
 
 - name: "Ensure we have a password for the System Maintenance User"
   ansible.builtin.set_fact:
-    mysql_system_maintenance_user_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
+    mysql_system_maintenance_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
-    overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   no_log: yes
   become: no
@@ -40,7 +48,7 @@
     - mariadb_debug
 
 - name: Check if MySQL is already installed.
-  stat: path=/etc/init.d/mysql
+  ansible.builtin.stat: path=/etc/init.d/mysql
   register: mysql_installed
   become: no
   tags:
@@ -69,7 +77,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
@@ -93,7 +101,7 @@
     - mariadb_debug
 
 - name: Delete innodb log files created by apt package after initial install.
-  file:
+  ansible.builtin.file:
     path: "{{ mysql_datadir }}/{{ item }}"
     state: absent
   become: yes
@@ -144,7 +152,7 @@
     - mariadb_debug
 
 - name: "Install System Maintenance config"
-  template:
+  ansible.builtin.template:
     src: "debian.cnf.j2"
     dest: "/etc/mysql/debian.cnf"
     owner: root

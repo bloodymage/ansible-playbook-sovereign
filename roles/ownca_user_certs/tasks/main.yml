@@ -1,4 +1,6 @@
 ---
+# ==================================================================================================
+#
 # This playbook contains common plays that will be run on all nodes.
 #
 # References:
@@ -19,7 +21,7 @@
 #     - Code Signing:
 #   ...
 #
-# ======================================================================
+# ==================================================================================================
 - name: Include OS-specific variables.
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
@@ -43,7 +45,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     pkg: "{{ packages }}"
     state: present
   become: yes
@@ -58,6 +60,7 @@
 
 - name: Get IP geolocation data
   community.general.ipinfoio_facts:
+  become: no
   tags:
     - ownca_user_certs
     - ownca-user-certs
@@ -66,11 +69,15 @@
 
 - name: "Ensure we have a password for the Identity Issuing CA"
   ansible.builtin.set_fact:
-    ownca_identity_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __overwrite) }}"
+    ownca_identity_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
-    __password_length: "{{ rebeldream_password_length }}"
-    __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  become: no
   when:
     - ownca_identity_password == "password"
   tags:
@@ -138,8 +145,8 @@
 #
 # ==================================================================================================
 - name: "Create SSL Private Key Directories"
-  file:
-    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private'
+  ansible.builtin.file:
+    path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/private'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -156,8 +163,8 @@
     - ownca-user-certs-debug
 
 - name: "Create SSL CSR Key Directories"
-  file:
-    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr'
+  ansible.builtin.file:
+    path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/csr'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -174,8 +181,8 @@
     - ownca-user-certs-debug
 
 - name: "Create SSL Cert Directories"
-  file:
-    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/certs'
+  ansible.builtin.file:
+    path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -192,8 +199,8 @@
     - ownca-user-certs-debug
 
 - name: "Create SSL PKCS#12 Key Directories"
-  file:
-    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/pkcs12'
+  ansible.builtin.file:
+    path: '/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/pkcs12'
     state: directory
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -215,9 +222,9 @@
 #
 # ==================================================================================================
 - name: Generate User Private Key
-  openssl_privatekey:
-    path: '/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key'
-    type: '{{ ownca_privatekey_type }}'
+  community.crypto.openssl_privatekey:
+    path: "{{ __pki_privatekey_file }}"
+    type: "{{ ownca_privatekey_type }}"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     cipher: auto
@@ -227,6 +234,11 @@
     passphrase: "{{ item.ansible_facts.password }}"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.username is defined
@@ -246,7 +258,7 @@
 # ==================================================================================================
 - name: Generate User Authentication CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_authentication.csr"
+    path: "{{ __pki_csr_file }}"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
@@ -256,15 +268,22 @@
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }}"
-    email_address: "{{ item.ansible_facts.username}}@{{ rebeldream_domain }}"
+    email_address: "{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
     key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_authentication_extended_key_usage }}"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki//private/{{ item.ansible_facts.username }}.key"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
@@ -277,7 +296,7 @@
 
 - name: Generate User Authentication CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_authentication.csr"
+    path: "{{ __pki_csr_file }}"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
@@ -287,15 +306,22 @@
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ item.ansible_facts.given_name }}"
-    email_address: "{{ item.ansible_facts.username}}@{{ rebeldream_domain }}"
+    email_address: "{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
     key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_authentication_extended_key_usage }}"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
@@ -308,7 +334,7 @@
 
 - name: Generate User Identeficitation CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_identification.csr"
+    path: "{{ __pki_csr_file }}"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
@@ -322,11 +348,18 @@
     key_usage: "{{ ownca_user_certs_identification_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_identification_extended_key_usage }}"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
@@ -339,7 +372,7 @@
 
 - name: Generate User Identeficitation CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_identification.csr"
+    path: "{{ __pki_csr_file }}"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
@@ -353,11 +386,18 @@
     key_usage: "{{ ownca_user_certs_identification_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_identification_extended_key_usage }}"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
@@ -370,7 +410,7 @@
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_encryption.csr"
+    path: "{{ __pki_csr_file }}"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
@@ -384,11 +424,18 @@
     key_usage: "{{ ownca_user_certs_encryption_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_encryption_extended_key_usage }}"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
@@ -401,7 +448,7 @@
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_encryption.csr"
+    path: "{{ __pki_csr_file }}"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
@@ -415,11 +462,18 @@
     key_usage: "{{ ownca_user_certs_encryption_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_user_certs_encryption_extended_key_usage }}"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
@@ -436,12 +490,17 @@
 #
 # ==================================================================================================
 - name: Fetch Authentication CSRs.
-  fetch:
-    src: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_authentication.csr"
+  ansible.builtin.fetch:
+    src: "{{ __pki_csr_file }}"
     dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -452,12 +511,17 @@
     - ownca-user-certs-debug
 
 - name: Fetch Identification CSRs.
-  fetch:
-    src: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_identification.csr"
+  ansible.builtin.fetch:
+    src: "{{ __pki_csr_file }}"
     dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -468,12 +532,17 @@
     - ownca-user-certs-debug
 
 - name: Fetch Encryption CSRs.
-  fetch:
-    src: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/csr/{{ item.ansible_facts.username }}_encryption.csr"
+  ansible.builtin.fetch:
+    src: "{{ __pki_csr_file }}"
     dest: "{{ ownca_directory }}/users/csr/"
     flat: yes
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_encryption.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -487,8 +556,8 @@
   community.crypto.x509_certificate:
     path: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_authentication.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ item.ansible_facts.username }}_authentication.csr"
-    ownca_path: "{{ ownca_directory }}/certificate_authorities/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
-    ownca_privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.key"
+    ownca_path: "{{ ownca_identity_ca_file }}"
+    ownca_privatekey_path: "{{ ownca_ca_identity_key }}"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -507,8 +576,8 @@
   community.crypto.x509_certificate:
     path: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_identification.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ item.ansible_facts.username }}_identification.csr"
-    ownca_path: "{{ ownca_directory }}/certificate_authorities/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
-    ownca_privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.key"
+    ownca_path: "{{ ownca_identity_ca_file }}"
+    ownca_privatekey_path: "{{ ownca_ca_identity_key }}"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -527,8 +596,8 @@
   community.crypto.x509_certificate:
     path: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_encryption.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ item.ansible_facts.username }}_encryption.csr"
-    ownca_path: "{{ ownca_directory }}/certificate_authorities/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.crt"
-    ownca_privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.key"
+    ownca_path: "{{ ownca_identity_ca_file }}"
+    ownca_privatekey_path: "{{ ownca_ca_identity_key }}"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -544,14 +613,23 @@
     - ownca-user-certs-debug
 
 - name: Copy User Authentication Certificates to workstation.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_authentication.crt"
-    dest: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_authentication.crt"
+    dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_authentication.crt"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_pkcs12_dir: "{{ __user_pki_dir }}/pkcs12"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_cert_dir: "{{ __user_pki_dir }}/certs"
+    __pki_pkcs12_file: "{{ __pki_pkcs12_dir }}/{{ item.ansible_facts.username }}_authentication.p12"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_cert_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.crt"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -562,14 +640,23 @@
     - ownca-user-certs-debug
 
 - name: Copy User Identification Certificates to workstation.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_identification.crt"
-    dest: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_identification.crt"
+    dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_identification.crt"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_pkcs12_dir: "{{ __user_pki_dir }}/pkcs12"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_cert_dir: "{{ __user_pki_dir }}/certs"
+    __pki_pkcs12_file: "{{ __pki_pkcs12_dir }}/{{ item.ansible_facts.username }}_authentication.p12"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_cert_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.crt"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -580,14 +667,23 @@
     - ownca-user-certs-debug
 
 - name: Copy User Encryption Certificates to workstation.
-  copy:
+  ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_encryption.crt"
-    dest: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_encryption.crt"
+    dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_encryption.crt"
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0644"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_pkcs12_dir: "{{ __user_pki_dir }}/pkcs12"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_cert_dir: "{{ __user_pki_dir }}/certs"
+    __pki_pkcs12_file: "{{ __pki_pkcs12_dir }}/{{ item.ansible_facts.username }}_authentication.p12"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_cert_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.crt"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -601,17 +697,26 @@
   community.crypto.openssl_pkcs12:
     action: export
     friendly_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }} (Authentication)"
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/pkcs12/{{ item.ansible_facts.username }}_authentication.p12"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    path: "{{ __pki_pkcs12_file }}"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    certificate_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_authentication.crt"
-    other_certificates: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+    certificate_path: "{{ __pki_cert_file }}"
+    other_certificates: "{{ rebeldream_identity_ca_file }}"
     state: present
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0600"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_pkcs12_dir: "{{ __user_pki_dir }}/pkcs12"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_cert_dir: "{{ __user_pki_dir }}/certs"
+    __pki_pkcs12_file: "{{ __pki_pkcs12_dir }}/{{ item.ansible_facts.username }}_authentication.p12"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_cert_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.crt"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -624,18 +729,27 @@
 - name: Generate PKCS#12 Identification file
   community.crypto.openssl_pkcs12:
     action: export
-    friendly_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }} (Authentication)"
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/pkcs12/{{ item.ansible_facts.username }}_identification.p12"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    friendly_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }} (Identification)"
+    path: "{{ __pki_pkcs12_file }}"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    certificate_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_identification.crt"
-    other_certificates: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+    certificate_path: "{{ __pki_cert_file }}"
+    other_certificates: "{{ rebeldream_identity_ca_file }}"
     state: present
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0600"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_pkcs12_dir: "{{ __user_pki_dir }}/pkcs12"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_cert_dir: "{{ __user_pki_dir }}/certs"
+    __pki_pkcs12_file: "{{ __pki_pkcs12_dir }}/{{ item.ansible_facts.username }}_identification.p12"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_cert_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.crt"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -648,18 +762,27 @@
 - name: Generate PKCS#12 Encryption file
   community.crypto.openssl_pkcs12:
     action: export
-    friendly_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }} (Authentication)"
-    path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/pkcs12/{{ item.ansible_facts.username }}_encryption.p12"
-    privatekey_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/private/{{ item.ansible_facts.username }}.key"
+    friendly_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }} (Encryption)"
+    path: "{{ __pki_pkcs12_file }}"
+    privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    certificate_path: "/home/{{ rebeldream_org_unit_name | upper}}/{{ item.ansible_facts.username }}/.pki/certs/{{ item.ansible_facts.username }}_encryption.crt"
-    other_certificates: "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+    certificate_path: "{{ __pki_cert_file }}"
+    other_certificates: "{{ rebeldream_identity_ca_file }}"
     state: present
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
     mode: "0600"
   become: yes
   loop: "{{ __domain_users }}"
+  vars:
+    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+    __pki_pkcs12_dir: "{{ __user_pki_dir }}/pkcs12"
+    __pki_private_dir: "{{ __user_pki_dir }}/private"
+    __pki_cert_dir: "{{ __user_pki_dir }}/certs"
+    __pki_pkcs12_file: "{{ __pki_pkcs12_dir }}/{{ item.ansible_facts.username }}_encryption.p12"
+    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+    __pki_cert_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_encryption.crt"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none

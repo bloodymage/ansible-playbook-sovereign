@@ -1,7 +1,8 @@
+---
 - name: Ensure apt repos are up to date
   block:
     - name: "Ensure Raspbian Raspberry Pi Repo is current"
-      template:
+      ansible.builtin.template:
         src: "raspi.list.j2"
         dest: /etc/apt/sources.list.d/raspi.list
         owner: root
@@ -17,7 +18,7 @@
         - system-upgrade-debug
 
     - name: "Ensure sources.list is current"
-      template:
+      ansible.builtin.template:
         src: "sources.list.j2"
         dest: /etc/apt/sources.list
         owner: root
@@ -41,7 +42,7 @@
 - name: Upgrade all packages
   block:
     - name: "Perform Safe Upgrade"
-      apt:
+      ansible.builtin.apt:
         update_cache: yes
         upgrade: safe
         cache_valid_time: 86400 #One day
@@ -53,7 +54,7 @@
         - system-upgrade-debug
 
     - name: "Perform Full Upgrade"
-      apt:
+      ansible.builtin.apt:
         update_cache: yes
         upgrade: full
         cache_valid_time: 86400 #One day
@@ -74,7 +75,7 @@
 - name: "Cleanup system"
   block:
     - name: "Remove useless packages from the cache"
-      apt:
+      ansible.builtin.apt:
         autoclean: yes
       become: yes
       tags:
@@ -84,7 +85,7 @@
         - system-upgrade-debug
 
     - name: "Remove dependencies that are no longer required"
-      apt:
+      ansible.builtin.apt:
         autoremove: yes
       become: yes
       tags:

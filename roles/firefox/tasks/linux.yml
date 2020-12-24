@@ -1,0 +1,77 @@
+# ==================================================================================================
+#
+# This configures firefox to provide kerberos logon information to the server.
+#
+# ==================================================================================================
+- name: Install kerberos config
+  template:
+    src: kerberos.j2
+    dest: "{{ firefox_share_path }}/browser/defaults/preferences/kerberos.js"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug
+
+# ==================================================================================================
+#
+# The next 3 tasks configure Firefox to use trust the internal Certificate Authority.
+#
+# The first two tasks simply copy the certificates into the directory where Firefox looks for the
+# certificates.  The final task enables Firefox to actually read the certificates.
+#
+# Refs:
+#  - https://support.mozilla.org/en-US/kb/setting-certificate-authorities-firefox
+#  - https://askubuntu.com/questions/244582/add-certificate-authorities-system-wide-on-firefox
+#
+# ==================================================================================================
+- name: "Ensure Directories exist where Firefox looks for certificates."
+  file:
+    path: "{{ firefox_certificate_path }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug
+
+
+- name: "Copy certificates to the Firefox Certificate folder."
+  copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "{{ firefox_certificate_path }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - "{{ rebeldream_org_name }}-root-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+  become: yes
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug
+
+- name: "Create a symbolic link 'libnssckbi.so' -> 'p11-kit-trust.so'"
+  file:
+    src: "/usr/lib/x86_64-linux-gnu/pkcs11/p11-kit-trust.so"
+    dest: "{{ firefox_lib_path }}/libnssckbi.so"
+    owner: root
+    group: root
+    state: link
+  become: yes
+  tags:
+    - firefox
+    - firefox_debug
+    - firefox-debug

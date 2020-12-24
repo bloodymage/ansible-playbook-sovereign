@@ -23,7 +23,7 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - ssh
-    - certificate authority
+    - certificates
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers

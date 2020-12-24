@@ -2,6 +2,10 @@
 - name: "Ensure we have a PKCS12 password for the Host"
   ansible.builtin.set_fact:
     ownca_host_cert_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  become: no
+  delegate_to: localhost
+  when:
+    - ownca_host_certs_pkcs12_password == "password"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/ownca_host_cert_pkcs12_password"
     __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
@@ -9,9 +13,6 @@
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  delegate_to: localhost
-  when:
-    - ownca_host_certs_pkcs12_password == "password"
   tags:
     - ownca_host_certs
     - ownca-host-certs
