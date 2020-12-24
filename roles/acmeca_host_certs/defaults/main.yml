@@ -54,9 +54,14 @@ acmeca_certificate_key_size: 4096
 # constants that if changed will  cause this playbook to fail.
 #
 # ==================================================================================================
-__acmeca_regenerate_private_key: no
+__acmeca_regenerate_server_private_key: no
+__acmeca_regenerate_acme_account_private_key: no
 
 __letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
 __letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
 __buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
 __buypass_production_directory: "https://api.buypass.com/acme/directory"
+
+__acmeca_timestamp_date: "{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-{{ ansible_date_time.day }}"
+__acmeca_timestamp_time: "{{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}:{{ ansible_date_time.second }}"
+__acmeca_timestamp: "{{ __acmeca_timestamp_date }}@{{ __acmeca_timestamp_time }}"

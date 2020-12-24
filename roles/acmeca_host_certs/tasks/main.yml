@@ -34,11 +34,28 @@
 
 - name: Determine whether to force private key regeneration
   ansible.builtin.set_fact:
-    __acmeca_regenerate_private_key: yes
+    __acmeca_regenerate_acme_account_private_key: yes
+    __acmeca_regenerate_server_private_key: yes
   become: no
   tags:
     - never
     - regenerate-private-key
+
+- name: Determine whether to force private key regeneration
+  ansible.builtin.set_fact:
+    __acmeca_regenerate_server_private_key: yes
+  become: no
+  tags:
+    - never
+    - regenerate-server-private-key
+
+- name: Determine whether to force private key regeneration
+  ansible.builtin.set_fact:
+    __acmeca_regenerate_acme_account_private_key: yes
+  become: no
+  tags:
+    - never
+    - regenerate-account-private-key
 
 - name: Determine whether to use production or staging configuration
   ansible.builtin.set_fact:
@@ -84,7 +101,7 @@
     group: root
     mode: "0600"
     backup: yes
-    force: "{{ __acmeca_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_acme_account_private_key }}"
   become: yes
   tags:
     - acmeca_host_certs
@@ -136,7 +153,7 @@
     owner: root
     group: root
     mode: '0600'
-    force: "{{ __acmeca_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_server_private_key }}"
   become: yes
   loop: "{{ hosts }}"
   when:
@@ -159,7 +176,7 @@
     group: root
     mode: "0644"
     backup: yes
-    force: "{{ __acmeca_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_server_private_key }}"
   become: yes
   loop: "{{ hosts }}"
   when:
@@ -183,7 +200,7 @@
     challenge: "{{ acmeca_challenge_type }}"
     remaining_days: 10
     validate_certs: yes
-    force: "{{ __acmeca_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_server_private_key }}"
   become: no
   loop: "{{ hosts }}"
   when:
@@ -249,6 +266,69 @@
     - acmeca-host-certs-debug
     - acme-challenge
 
+- name: "Backup Old Certs"
+  ansible.builtin.copy:
+    content: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem"
+    dest: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem.{{ __acmeca_timestamp }}~"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
+  tags:
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+    - acme-challenge
+
+- name: "Backup Old Cert Chain"
+  ansible.builtin.copy:
+    content: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
+    dest: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem.{{ __acmeca_timestamp }}~"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
+  tags:
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+    - acme-challenge
+
+- name: "Backup Old Full Certificate Chain"
+  ansible.builtin.copy:
+    content: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
+    dest: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem.{{ __acmeca_timestamp }}~"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
+  tags:
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+    - acme-challenge
+
 - name: "Complete Let's Encrypt challenges"
   community.crypto.acme_certificate:
     acme_directory: "{{ acmeca_directory_url }}"
@@ -261,7 +341,7 @@
     chain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
     fullchain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
     data: "{{ acme_challenge['results'][my_index] }}"
-    force: "{{ __acmeca_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_server_private_key }}"
     validate_certs: yes
   loop: "{{ hosts }}"
   loop_control:
@@ -270,12 +350,12 @@
   when:
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'] is defined
+  notify: restart apache
   tags:
     - acmeca_host_certs
     - acmeca-host-certs
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
-
     - acme-challenge
 
 - name: Setup live link directories
