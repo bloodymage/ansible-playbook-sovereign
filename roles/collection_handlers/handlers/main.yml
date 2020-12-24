@@ -4,14 +4,17 @@
   command:
     cmd: "update-ca-certificates"
   become: yes
-  listen: "restart all"
+  listen:
+    - "restart all"
+    - "update system ca certificates"
+    - "update ca-certificates"
 
 # ==================================================================================================
 #
 # Restart Service Handlers
 #
 # ==================================================================================================
-- name: Restart Apache
+- name: restart apache
   ansible.builtin.service:
     name: apache2
     state: restarted
@@ -19,6 +22,7 @@
   listen:
     - "restart all"
     - "restart tls"
+    - "Restart apache"
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
 
