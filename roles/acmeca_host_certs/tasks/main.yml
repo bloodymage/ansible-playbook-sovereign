@@ -34,16 +34,16 @@
 
 - name: Determine whether to force private key regeneration
   ansible.builtin.set_fact:
-    acme_certificate_INTERNAL_force_regenerate_private_key: yes
+    __acmeca_regenerate_private_key: yes
   become: no
   tags:
     - never
-    - issue-tls-certs-newkey
+    - regenerate-private-key
 
 - name: Determine whether to use production or staging configuration
   ansible.builtin.set_fact:
     acmeca_directory: "{{ letsencrypt_staging_directory }}"
-    acmeca_directory_url: "{{ letsencrypt_staging_url }}"
+    acmeca_directory_url: "{{ __letsencrypt_staging_url }}"
     acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_staging_directory }}"
   become: no
   tags:
@@ -84,7 +84,7 @@
     group: root
     mode: "0600"
     backup: yes
-    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_private_key }}"
   become: yes
   tags:
     - acmeca_host_certs
@@ -136,7 +136,7 @@
     owner: root
     group: root
     mode: '0600'
-    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_private_key }}"
   become: yes
   loop: "{{ hosts }}"
   when:
@@ -159,7 +159,7 @@
     group: root
     mode: "0644"
     backup: yes
-    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_private_key }}"
   become: yes
   loop: "{{ hosts }}"
   when:
@@ -169,7 +169,6 @@
     - acmeca-host-certs
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
-
 
 - name: "Begin Let's Encrypt challenges"
   community.crypto.acme_certificate:
@@ -184,7 +183,7 @@
     challenge: "{{ acmeca_challenge_type }}"
     remaining_days: 10
     validate_certs: yes
-    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_private_key }}"
   become: no
   loop: "{{ hosts }}"
   when:
@@ -262,7 +261,7 @@
     chain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
     fullchain_dest: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
     data: "{{ acme_challenge['results'][my_index] }}"
-    force: "{{ acme_certificate_INTERNAL_force_regenerate_private_key }}"
+    force: "{{ __acmeca_regenerate_private_key }}"
     validate_certs: yes
   loop: "{{ hosts }}"
   loop_control:
@@ -364,3 +363,21 @@
     - acmeca-host-certs
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
+
+- name: "Cleanup acme challenge directory"
+  ansible.builtin.file:
+    path: "/srv/www/{{ item.name }}/{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource'] }}"
+    state: absent
+  loop: "{{ hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
+  tags:
+    - acmeca_host_certs
+    - acmeca-host-certs
+    - acmeca_host_certs_debug
+    - acmeca-host-certs-debug
+    - acme-challenge

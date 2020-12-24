@@ -13,12 +13,6 @@ letsencrypt_live_directory: "{{ letsencrypt_dir }}/live"
 letsencrypt_staging_directory: "acme-staging.api.letsencrypt.org/directory"
 letsencrypt_production_directory: "acme-v02.api.letsencrypt.org/directory"
 
-letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
-letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
-
-buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
-buypass_production_directory: "https://api.buypass.com/acme/directory"
-
 acmeca_staging: no
 
 acmeca_dir: "{{ letsencrypt_dir }}"
@@ -28,7 +22,7 @@ acmeca_archive_dir: "{{ letsencrypt_archive_directory }}"
 acmeca_live_dir: "{{ letsencrypt_live_directory }}"
 
 acmeca_directory: "{{ letsencrypt_production_directory }}"
-acmeca_directory_url: "{{ letsencrypt_production_url }}"
+acmeca_directory_url: "{{ __letsencrypt_production_url }}"
 acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_production_directory }}"
 
 acmeca_domains: "{{ inventory_hostname }}"
@@ -51,4 +45,18 @@ acmeca_account_key_size: 4096
 acmeca_certificate_key_type: RSA
 acmeca_certificate_key_size: 4096
 
-acme_certificate_INTERNAL_force_regenerate_private_key: no
+# ==================================================================================================
+#
+# Do not modify
+#
+# The following variables are defaults that can be modified via tags (eg, the
+# 'regenerate-private-key' will change '__acmeca_regenerate_private_key' to 'yes') or they are
+# constants that if changed will  cause this playbook to fail.
+#
+# ==================================================================================================
+__acmeca_regenerate_private_key: no
+
+__letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
+__letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
+__buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
+__buypass_production_directory: "https://api.buypass.com/acme/directory"
