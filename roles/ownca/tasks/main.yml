@@ -342,16 +342,16 @@
 # ==================================================================================================
 - name: Find root certificate
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', __input_chain_file) }}"
+    input_chain: "{{ lookup('file', __input_chain_path) }}"
     intermediate_certificates:
-      - "{{ __itermediate_cert_path }}"
+      - "{{ __intermediate_cert_path }}"
     root_certificates:
       - "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-root-ca.crt"
   vars:
     __intermediate_cert_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
-    __intermediate_cert_path: "{{ ownca_certs_directory }}/{{ __itermediate_cert_file }}"
+    __intermediate_cert_path: "{{ ownca_ca_certs_directory }}/{{ __intermediate_cert_file }}"
     __input_chain_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item }}-ca.crt"
-    __input_chain_path: "{{ ownca_certs_directory }}/{{ __input_chain_file }}"
+    __input_chain_path: "{{ ownca_ca_certs_directory }}/{{ __input_chain_file }}"
   loop: "{{ ownca_issuing_authorities }}"
   register: parent_cert_authorities
   delegate_to: localhost

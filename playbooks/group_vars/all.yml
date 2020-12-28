@@ -56,6 +56,9 @@ sshca_user_key_password: "password"
 #
 # ==================================================================================================
 # Directories
+sysconf_dir: "/etc"
+
+
 keycloak_name: "keycloak"
 keycloak_home: "/opt/{{ keycloak_name }}"
 ownca_directory: "~/.pki"
@@ -66,7 +69,7 @@ ownca_ca_crl_directory: "{{ ownca_ca_directory }}/crl"
 ownca_ca_csr_directory: "{{ ownca_ca_directory }}/csr"
 ownca_etc: "/etc/ssl"
 mysql_datadir: "/var/lib/mysql"
-ssh_config_dir: "/etc/ssh"
+ssh_config_dir: "{{ sysconf_dir }}/ssh"
 sshca_key_directory: "~/.ssh/ca"
 sshca_cert_directory: "{{ ssh_config_dir }}/ca"
 sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
