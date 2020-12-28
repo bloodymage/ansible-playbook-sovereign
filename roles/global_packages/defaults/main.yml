@@ -12,5 +12,4 @@ packages:
   - members
   - rename
   - rsync
-  - screen
   - trash-cli
