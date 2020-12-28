@@ -30,7 +30,6 @@
       become: yes
       tags:
         - screen
-        - screen
         - screen_debug
         - screen-debug
         - install-packages
@@ -44,7 +43,6 @@
     mode: "0644"
   become: yes
   tags:
-        - screen
         - screen
         - screen_debug
         - screen-debug
