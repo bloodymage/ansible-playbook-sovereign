@@ -34,6 +34,11 @@ Some smaller goals that I have for this project is minimizing the variables I ha
 ### Ansible Galaxy
 ### Github
 
+```
+mkdir -p ~/.ansible/collections/ansible_collections/bloodymage
+cd ~/.ansible/collections/ansible_collections/bloodymage
+git clone https://github.com/bloodymage/ansible-collection-rebeldream rebeldream
+```
 ## Usage
 
 Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
@@ -45,56 +50,36 @@ This will create your site.
 
 Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, otherwise it will use internal certificate authority certs.
 
-### Roles
-#### [ACME CA Certs](roles/acmeca_host_certs/README.md)
-#### [Apache](roles/apache/README.md)
-#### [Bind](roles/bind/README.md)
-#### [Collection Handlers](roles/collection_handlers/README.md)
-#### [DNS Forward Zones](roles/dns_forwardzones/README.md)
-#### [DNS Reverse Zones](roles/dns_reversezones/README.md)
-#### [Dotfiles](roles/dotfiles/README.md)
-#### [Dovecot](roles/dovecot/README.md)
-#### [Etckeeper](roles/etckeeper/README.md)
-#### [Global Packages](roles/global_packages/README.md)
-#### [Hostname](roles/hostname/README.md)
-#### [Hosts](roles/hosts/README.md)
-#### [Keycloak](roles/keycloak/README.md)
-#### [KRB5 Client Config](roles/krb5_client_config/README.md)
-#### [MariaDB](roles/mariadb/README.md)
-#### [Mediawiki](roles/website_mediawiki/README.md)
-#### [MySQL Databases](roles/mysql_databases/README.md)
-#### [Nextcloud](roles/nextcloud/README.md)
-#### [NTP](roles/ntp/README.md)
-#### [OpenSSH](roles/openssh/README.md)
-#### [OWNCA](roles/ownca/README.md)
-#### [OWNCA CRL](roles/ownca_crl/README.md)
-#### [OWNCA Host Certificates](roles/ownca_host_certs/README.md)
-#### [OWNCA User Certificates](roles/ownca_user_certs/README.md)
-#### [Password-Store](roles/password_store/README.md)
-#### [Postfix](roles/postfix/README.md)
-#### [Samba Domain Controller](roles/samba_domain_controller/README.md)
-#### [Samba Domain Users](roles/samba_domain_users/README.md)
-#### [Samba File Server](roles/samba_file_server/README.md)
-#### [SSHCA](roles/sshca/README.md)
-#### [SSHCA Host Certificates](roles/sshca_host_certs/README.md)
-#### [SSSD](roles/sssd/README.md)
-#### [SUDO](roles/sudo/README.md)
-#### [System Upgrade](roles/system_upgrade/README.md)
-#### [Users](roles/users/README.md)
+### Roles ([Full list](docs/ROLES.md))
+
+#### Identity Management
+##### [Samba Domain Controller](roles/samba_domain_controller/README.md)
+##### [Samba Domain Users](roles/samba_domain_users/README.md)
+
+#### Email
+##### [Dovecot](roles/dovecot/README.md)
+##### [Postfix](roles/postfix/README.md)
+
+#### Groupware (Calendar and Contacts)
+##### [Nextcloud](roles/nextcloud/README.md)
+
+#### Cloud Storage / File sync / Fileserver
+##### [Nextcloud](roles/nextcloud/README.md)
+##### [Samba File Server](roles/samba_file_server/README.md)
 
 ### Variables
 #### Global Variables
 ##### Users
 ##### Domain Users
 
-#### Role variables 
+#### Role variables
 Each role's variables are defined in their README.md file.
 
 #### Passwords
 
 Passwords are managed through the use of [Password Store](https://password-store.org).
 To view the passwords in the password store type:
-"pass ..."  
+"pass ..."
 
 If you wish to manually generate your passwords, the following passwords can be defined in your vault:
 - keycloak_admin_password
@@ -128,7 +113,9 @@ Planned modifications will be single sign on, through use of Kerberos and Keyclo
 Not yet implemented advantages:
   3. If you believe multiple passwords may be compromised, you can easily force a regeneration of all passwords.  Plan is to add a tags for password regeneration.  Currently, you can use the password store itself to modify the password(s).
   
-### 
+### Role structure
+
+Each role is built with the idea of do one thing, and do it well.  So there will be many more roles than other projects might have.  The advantage is that you don't have to run every role every time.  Each role can be selected individually by using '--tag' with the role's name, for example '--tag dovecot' will run the dovecot role.  If you wish to run all roles related to email servers, you would run the playbook 'mailservers.yml'
 
 ### Similar Projects
 #### [Sovereign](https://github.com/sovereign/sovereign)
@@ -150,12 +137,13 @@ The Hearthminion ansible collection expands on this collection adding in new fea
 - MythTV
 - RetroPie
 
-### References
+### References and inspiration
 - [Ansible Documentation](https://docs.ansible.com/ansible/latest/index.html)
 - [Ansible Examples](https://github.com/ansible/ansible-examples)
 - [Geerlinguy](https://ansible.jeffgeerling.com/)
 - [Awesome Self-Hosted](https://github.com/awesome-selfhosted/awesome-selfhosted)
 - [Reddit: Selfhosted](https://www.reddit.com/r/selfhosted/)
+- [Self-hosted Cookbook](https://github.com/tborychowski/self-hosted-cookbook/)
 
 ## Contributing
 [How to Contribute](CONTRIBUTING.md)
