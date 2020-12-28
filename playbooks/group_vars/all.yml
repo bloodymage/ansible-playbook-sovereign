@@ -58,7 +58,6 @@ sshca_user_key_password: "password"
 # Directories
 sysconf_dir: "/etc"
 
-
 keycloak_name: "keycloak"
 keycloak_home: "/opt/{{ keycloak_name }}"
 ownca_directory: "~/.pki"

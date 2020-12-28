@@ -42,9 +42,9 @@
 # ==================================================================================================
 - name: "Ensure we have a password for the Host CA Key"
   ansible.builtin.set_fact:
-    sshca_host_key_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true') }}"
+    sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
   vars:
-    password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
+    __password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
   become: no
   when:
     - sshca_host_key_password == "password"
@@ -85,7 +85,7 @@
   ansible.builtin.fetch:
     src: "{{ item.path }}.pub"
     dest: "{{ temporary_directory.path }}/public_keys/"
-  with_items: "{{ private_keys.files }}"
+  loop: "{{ private_keys.files }}"
   changed_when: false
   tags:
     - sshca_host_certs
@@ -98,7 +98,7 @@
     src: "{{ item.path }}-cert.pub"
     dest: "{{ temporary_directory.path }}/existing_certificates/"
     fail_on_missing: false
-  with_items: "{{ private_keys.files }}"
+  loop: "{{ private_keys.files }}"
   changed_when: false
   tags:
     - sshca_host_certs
@@ -121,7 +121,7 @@
     command: ssh-keygen -s "{{ sshca_host_signer_key }}"
              -I "{{ sshca_host_signer_id }}"
              -h -n "{{ sshca_host_signer_hostnames }}"
-             "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote }}{{ item.path | quote }}.pub"
+             "{{ temporary_directory.path }}/public_keys/{{ rebeldream_fqdn }}{{ item.path | quote }}.pub"
     responses:
       (?i)passphrase: "{{ sshca_host_key_password }}"
   become: no
@@ -143,7 +143,7 @@
 # ==================================================================================================
 - name: Find certificates.
   ansible.builtin.find:
-    path: "{{ temporary_directory.path }}/public_keys/{{ inventory_hostname | quote }}{{ ssh_config_dir }}/"
+    path: "{{ temporary_directory.path }}/public_keys/{{ rebeldream_fqdn }}{{ ssh_config_dir }}/"
     pattern: ssh_host_*_key-cert.pub
   register: certificates
   delegate_to: localhost
@@ -153,22 +153,23 @@
     - sshca_host_certs_debug
     - sshca-host-certs-debug
 
-# ======================================================================
+# ==================================================================================================
 #
-# Tasks:
+# Compare certificates
+#
+# This fails unless the 'shell' module is used.  There has got to be a better way.
 # 
 #
-# ======================================================================
+# ==================================================================================================
 - name: Compare certificates.
-  command:
-    cmd: >
-      diff <(ssh-keygen -L -f "{{ item.path | quote }}" |
-      tail -n +2) <(ssh-keygen -L -f "{{ __existing_cert_path }}" |
-      tail -n +2)
+  shell: diff <(ssh-keygen -L -f "{{ item.path }}" |
+           tail -n +2) <(ssh-keygen -L -f "{{ __existing_cert_path }}" | tail -n +2)
+  args:
+    executable: "/bin/bash"
   vars:
     __existing_cert_dir: "{{ temporary_directory.path | quote }}/existing_certificates"
-    __existing_host_dir: "{{ __existing_cert_dir }}/{{ rebeldream_fqdn | quote }}"
-    __existing_ssh_config_dir: "{{ __existing_host_dir }}/{{ ssh_config_dir }}"
+    __existing_host_dir: "{{ __existing_cert_dir }}/{{ rebeldream_fqdn }}"
+    __existing_ssh_config_dir: "{{ __existing_host_dir }}{{ ssh_config_dir }}"
     __existing_cert: "{{ item.path | basename | quote }}"
     __existing_cert_path: "{{ __existing_ssh_config_dir }}/{{ __existing_cert }}"
   with_items: "{{ certificates.files }}"
@@ -195,7 +196,7 @@
     owner: "root"
     group: "root"
     mode: "0644"
-  with_items: "{{ certificate_comparison.results }}"
+  loop: "{{ certificate_comparison.results }}"
   notify: restart ssh
   become: yes
   when:

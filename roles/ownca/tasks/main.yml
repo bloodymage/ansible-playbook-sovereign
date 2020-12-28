@@ -55,8 +55,8 @@
   ansible.builtin.file:
     path: '{{ ownca_ca_directory }}/{{ item }}'
     state: directory
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
     mode: '0700'
   loop:
     - private
@@ -67,7 +67,7 @@
     - db
   delegate_to: localhost
   run_once: true
-  become: yes
+  become: no
   tags:
     - ownca
     - ownca-all

@@ -11,12 +11,12 @@
             - "vars"
       become: no
       tags:
-    - dns_forwardzones
-    - dns-forwardzones
-    - dns_forwardzones_debug
-    - dns-forwardzones-debug
-    - install-packages
-    - dns-update
+        - dns_forwardzones
+        - dns-forwardzones
+        - dns_forwardzones_debug
+        - dns-forwardzones-debug
+        - install-packages
+        - dns-update
 
     - name: "Install packages"
       ansible.builtin.package:
