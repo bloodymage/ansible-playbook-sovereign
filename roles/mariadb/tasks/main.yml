@@ -7,46 +7,6 @@
 # Installs a set of common apps for all systems on the network
 #
 # ==================================================================================================
-- name: "Ensure we have a password for the Administrative User"
-  ansible.builtin.set_fact:
-    mysql_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  vars:
-    __password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_administrator }}"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  delegate_to: localhost
-  no_log: yes
-  become: no
-  when:
-    - mysql_administrator_password == "password"
-  tags:
-    - mariadb
-    - mariadb-debug
-    - mariadb_debug
-
-- name: "Ensure we have a password for the System Maintenance User"
-  ansible.builtin.set_fact:
-    mysql_system_maintenance_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  vars:
-    __password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  delegate_to: localhost
-  no_log: yes
-  become: no
-  when:
-    - mysql_system_maintenance_user_password == "password"
-  tags:
-    - mariadb
-    - mariadb-debug
-    - mariadb_debug
-
 - name: Check if MySQL is already installed.
   ansible.builtin.stat: path=/etc/init.d/mysql
   register: mysql_installed
@@ -60,13 +20,7 @@
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
-      files:
-        - "{{ ansible_network_os | default(none) }}.yml"
-        - "{{ ansible_distribution | lower }}.yml"
-        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
-        - "{{ ansible_os_family | lower }}_family.yml"
-        - "{{ ansible_system | lower }}.yml"
-        - main.yml
+      files: "{{ __os_variables_files }}"
       paths:
         - "vars"
   become: no
@@ -109,6 +63,46 @@
     - ib_logfile0
     - ib_logfile1
   when: not mysql_installed.stat.exists
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
+- name: "Ensure we have a password for the Administrative User"
+  ansible.builtin.set_fact:
+    mysql_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_administrator }}"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  delegate_to: localhost
+  no_log: yes
+  become: no
+  when:
+    - mysql_administrator_password == "password"
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
+- name: "Ensure we have a password for the System Maintenance User"
+  ansible.builtin.set_fact:
+    mysql_system_maintenance_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  delegate_to: localhost
+  no_log: yes
+  become: no
+  when:
+    - mysql_system_maintenance_user_password == "password"
   tags:
     - mariadb
     - mariadb-debug

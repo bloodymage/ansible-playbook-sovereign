@@ -308,7 +308,10 @@ __samba_recreate_realm: no
 
 # ==================================================================================================
 #
+# Collection Defaults
 #
+# These variables affect the operations of the collection, and do not have any bearing on system
+# configuration.
 #
 # ==================================================================================================
 __network_os: "{{ ansible_network_os | default(none) }}"
