@@ -66,11 +66,7 @@
     ownca_identity_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password_lookup: "{{ __password_store_id }}"
   become: no
   when:
     - ownca_identity_password == "password"
@@ -85,7 +81,7 @@
     username: "{{ item.username }}"
     groupname: "{{ item.groupname }}"
     id_number: "{{ item.id_number }}"
-    password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true') }}"
+    password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     given_name: "{{ item.given_name | default(item.username | title) }}"
     surname: "{{ item.surname | default(none) }}"
     initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
@@ -101,8 +97,6 @@
     account_expire: "{{ item.account_expire | default(none) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item.username }}/password"
-    __password_length: "{{ item.password_legnth | default(rebeldream_password_length) }}"
-    __overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
   loop: "{{ domain_users }}"
   no_log: yes
   become: no
