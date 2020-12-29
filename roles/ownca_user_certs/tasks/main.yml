@@ -271,7 +271,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
@@ -309,7 +309,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
@@ -347,7 +347,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
@@ -385,7 +385,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
@@ -423,7 +423,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
@@ -461,7 +461,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
@@ -488,7 +488,7 @@
     __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
     __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -509,7 +509,7 @@
     __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
     __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
@@ -530,7 +530,7 @@
     __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
     __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
-    __pki_csr_file: "{{ __pki_cert_dir }}/{{ item.ansible_facts.username }}_encryption.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_encryption.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none

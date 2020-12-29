@@ -1,5 +1,22 @@
+# {{ ansible_managed }}
 <VirtualHost *:80>
 	ServerName {{ item.name }}
+
+  # ACME Certificate
+  DocumentRoot /srv/www/{{ item.name }}
+  <Directory /srv/www/{{ item.name }}/.well-known/>
+    Options +FollowSymLinks
+    AllowOverride All
+    <IfModule !mod_authz_core.c>
+      Order allow,deny
+      Allow from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+      Require all granted
+    </IfModule>
+    DirectoryIndex index.html
+</Directory>
+
 	Redirect / https://{{ item.name }}/
 </VirtualHost>
 

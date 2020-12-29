@@ -1,0 +1,47 @@
+---
+# tasks file for acmeca_challenge_site
+- name: Pre-tasks
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - acmeca_challenge_site
+        - acmeca-challenge-site
+        - acmeca_challenge_site_debug
+        - acmeca-challenge-site-debug
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - acmeca_challenge_site
+        - acmeca-challenge-site
+        - acmeca_challenge_site_debug
+        - acmeca-challenge-site-debug
+        - install-packages
+
+- name: "Create acmeca challenge host"
+  ansible.builtin.template:
+    src: "apache-site.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ hosts }}"
+  when:
+    - hosts is defined
+    - item.certificate == "acme"
+    - item.content is not defined
+  tags:
+    - acmeca_challenge_site
+    - acmeca-challenge-site
+    - acmeca_challenge_site_debug
+    - acmeca-challenge-site-debug

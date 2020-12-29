@@ -79,7 +79,7 @@
     - "{{ acmeca_archive_dir }}"
     - "{{ acmeca_keys_dir }}"
     - "{{ acmeca_live_dir }}"
-  become: no
+  become: yes
   tags:
     - acmeca_host_certs
     - acmeca-host-certs
@@ -103,7 +103,7 @@
     - acmeca_host_certs_debug
     - acmeca-host-certs-debug
 
-- name: Make sure account exists and has given contacts. We agree to TOS.
+- name: "Make sure account exists and has given contacts. We agree to TOS."
   community.crypto.acme_account:
     account_key_src: "{{ acmeca_account_key_path }}"
     acme_directory: "{{ acmeca_directory_url }}"
@@ -113,7 +113,7 @@
     contact:
       - mailto:{{ acmeca_account_email }}
     validate_certs: yes
-  become: no
+  become: yes
   tags:
     - acmeca_host_certs
     - acmeca-host-certs
@@ -128,8 +128,9 @@
     group: root
     mode: "0755"
   loop: "{{ hosts }}"
-  become: no
+  become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -151,6 +152,7 @@
   become: yes
   loop: "{{ hosts }}"
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -174,6 +176,7 @@
   become: yes
   loop: "{{ hosts }}"
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -198,6 +201,7 @@
   become: no
   loop: "{{ hosts }}"
   when:
+    - hosts is defined
     - item.certificate == "acme"
   register: acme_challenge
   tags:
@@ -215,6 +219,8 @@
     verbosity: 1
   loop: "{{ acme_challenge.results }}"
   become: no
+  when:
+    - acme_challenge is defined
   tags:
     - never
     - acmeca_host_certs_debug
@@ -231,6 +237,7 @@
   loop: "{{ hosts }}"
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -251,6 +258,7 @@
     index_var: my_index
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
   tags:
@@ -272,6 +280,7 @@
     index_var: my_index
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
   tags:
@@ -293,6 +302,7 @@
     index_var: my_index
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
   tags:
@@ -314,6 +324,7 @@
     index_var: my_index
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
   tags:
@@ -342,6 +353,7 @@
     index_var: my_index
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'] is defined
   notify: restart apache
@@ -362,6 +374,7 @@
   loop: "{{ hosts }}"
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -380,6 +393,7 @@
   loop: "{{ hosts }}"
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -397,6 +411,7 @@
   loop: "{{ hosts }}"
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -414,6 +429,7 @@
   loop: "{{ hosts }}"
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -431,6 +447,7 @@
   loop: "{{ hosts }}"
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
   tags:
     - acmeca_host_certs
@@ -447,6 +464,7 @@
     index_var: my_index
   become: yes
   when:
+    - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
   tags:
