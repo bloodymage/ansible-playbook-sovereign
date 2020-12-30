@@ -243,6 +243,7 @@ mail_gid: "{{ user_vmail_id_number }}"
 mail_privileged_group:  mail
 mail_recipient_delimiter: "+"
 mail_user: vmail
+mail_group: "{{ mail_user }}"
 
 # MySQL / MariaDB
 mysql_administrator: "root"
@@ -313,12 +314,12 @@ __samba_recreate_realm: no
 # configuration.
 #
 # ==================================================================================================
-__network_os: "{{ ansible_network_os | default(none) }}"
-__lsb_id: "{{ ansible_lsb.id | default(none) }}"
 __distribution: "{{ ansible_distribution | default(none) }}"
+__distribution_short: "{{ __distribution.split(' ')[0] }}"
+__lsb_id: "{{ ansible_lsb.id | default(none) }}"
+__network_os: "{{ ansible_network_os | default(none) }}"
 __os_family: "{{ ansible_os_family | default(none) }}"
 __system: "{{ ansible_system | default(none) }}"
-__distribution_short: "{{ __distribution.split(' ')[0] }}"
 
 __os_variables_files:
   - "{{ __network_os }}.yml"

@@ -47,7 +47,7 @@
     - dovecot-debug
 
 
-- name: Install config files
+- name: "Install /etc configuration files"
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/{{ item }}"
@@ -64,7 +64,7 @@
     - postfix-debug
 
 
-- name: "Install configuration files (Perms=644)"
+- name: "Install configuration files"
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
@@ -95,6 +95,7 @@
   when:
     - inventory_hostname in groups['samba_domain']
     - mail_user_password is defined
+    - postfix_ldap_maps is defined
   notify: restart postfix
   tags:
     - postfix
@@ -110,14 +111,25 @@
     mode: "0644"
   become: yes
   loop:
-    - canonical
     - client_access
     - helo_access
     - transport
-    - virtual
-    - virtual-mailbox-domains
-    - virtual-mailbox-users
   notify: map {{ item }}
+  tags:
+    - postfix
+    - postfix_debug
+    - postfix-debug
+
+- name: "Install virtual mailboxes' configuration files (postmap update required)"
+  ansible.builtin.template:
+    src: "virtual.j2"
+    dest: "/etc/postfix/{{ item.type }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __postfix_virtual_mailboxes }}"
+  notify: map {{ item.type }}
   tags:
     - postfix
     - postfix_debug

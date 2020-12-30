@@ -53,8 +53,8 @@
   become: yes
   notify: restart postfix
 
-- name: map virtual
-  command: postmap virtual
+- name: map virtual-mailbox-user-aliases
+  command: postmap virtual-mailbox-user-aliases
   args:
     chdir: "/etc/postfix"
   become: yes

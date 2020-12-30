@@ -6,7 +6,7 @@
 {{ 'bind'.ljust(20) }}= yes
 {{ 'bind_dn'.ljust(20) }}= cn={{ __mail_user }},{{ rebeldream_user_dn }}
 {{ 'bind_pw'.ljust(20) }}= {{ __mail_user_password }}
-{{ 'search_base'.ljust(20) }}= cn=users,dc={{ rebeldream_org_unit_name }},dc={{ rebeldream_org_name }},dc={{ rebeldream_tld }}
+{{ 'search_base'.ljust(20) }}= {{ rebeldream_user_dn }}
 {{ 'scope'.ljust(20) }}= {{ item.scope }}
 {{ 'query_filter'.ljust(20) }}= {{ item.query_filter }}
 {% if item.leaf_result_attribute is defined -%}

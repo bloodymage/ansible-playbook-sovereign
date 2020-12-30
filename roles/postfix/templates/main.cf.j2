@@ -294,14 +294,14 @@ milter_default_action = {{ postfix_milter_default_action }}
 {% if postfix_milter_connect_macros != __postfix_milter_connect_macros %}
 milter_connect_macros = {{ postfix_milter_connect_macros }}
 {% endif %}
-{% if postfix_non_smtpd_milters != __postfix_non_smtpd_milters -%}
-  non_smtpd_milters = {{ postfix_non_smtpd_milters }}
-{% endif %}
 {% if postfix_smtpd_milters != __postfix_smtpd_milters %}
 smtpd_milters =
 {% for milter in postfix_smtpd_milters %}
   {{ milter }}{{ "," if not loop.last else "" }}
 {% endfor %}
+{% if postfix_non_smtpd_milters != __postfix_non_smtpd_milters -%}
+  non_smtpd_milters = {{ postfix_non_smtpd_milters }}
+{% endif %}
 {% endif %}
 
 # Postscreen
