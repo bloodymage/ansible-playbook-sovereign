@@ -5,10 +5,21 @@
 
 // SSO
 pref("network.automatic-ntlm-auth.allow-non-fqdn", true);
-pref("network.automatic-ntlm-auth.trusted-uris", "cloud.drbr.org,wiki,wiki.olympus.drbr.org,.drbr.org");
+pref("network.automatic-ntlm-auth.trusted-uris", "
+{%- for uri in firefox_trusted_uris -%}
+  {{ uri }}{{ "," if not loop.last else "" }}
+{%- endfor -%}
+");
 pref("network.negotiate-auth.allow-non-fqdn", true);
-pref("network.negotiate-auth.delegation-uris", "cloud.drbr.org,wiki,wiki.olympus.drbr.org,.drbr.org");
-pref("network.negotiate-auth.trusted-uris", "cloud.drbr.org,wiki,wiki.olympus.drbr.org,.drbr.org");
+pref("network.negotiate-auth.delegation-uris", "
+{%- for uri in firefox_trusted_uris -%}
+  {{ uri }}{{ "," if not loop.last else "" }}
+{%- endfor -%}
+");
+pref("network.negotiate-auth.trusted-uris", "
+{%- for uri in firefox_trusted_uris -%}
+  {{ uri }}{{ "," if not loop.last else "" }}
+{%- endfor -%}
+");
 pref("network.negotiate-auth.using-native-gsslib", false);
 pref("network.negotiate-auth.gsslib", "/usr/lib/x86_64-linux-gnu/libgssapi_krb5.so.2");
-pref("network.negotiate-auth.trusted-uris", ".{{ rebeldream_root_domain }}");

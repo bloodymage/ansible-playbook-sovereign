@@ -15,6 +15,3 @@ sshca_user_key_type: "ed25519"
 sshca_user_key_comment: "{{ sshca_domain }} User CA"
 sshca_user_signer_id: "{{ sshca_domain }}"
 sshca_user_signer_hostnames: "{{ ansible_fqdn }},{{ ansible_hostname }}"
-
-sshca_user_key_password: "password"
-sshca_host_key_password: "password"

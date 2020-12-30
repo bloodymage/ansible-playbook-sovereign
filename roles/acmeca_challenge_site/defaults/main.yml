@@ -1,3 +1,4 @@
 ---
 # defaults file for acmeca_challenge_site
-packages: []
+packages:
+  - python3-cryptography

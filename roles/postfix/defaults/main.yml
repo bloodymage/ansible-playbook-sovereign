@@ -5,11 +5,11 @@ packages:
 
 postfix_mailbox_users: []
 
-postfix_virtual_mailbox_domains:
+postfix_virtual_mailbox_domain_maps:
   - name: "{{ rebeldream_domain }}"
     status: "OK"
   - name: "{{ rebeldream_root_domain }}"
-    status: OK
+    status: "OK"
 
 postfix_local_user_maps:
   - username: webmaster
@@ -407,7 +407,7 @@ __postfix_virtual_mailboxes:
   - type: "canonical"
     data: "{{ postfix_canonical_mappings }}"
   - type: "virtual-mailbox-domains"
-    data: "{{ postfix_virtual_mailbox_domains }}"
+    data: "{{ postfix_virtual_mailbox_domain_maps }}"
   - type: "virtual-mailbox-users"
     data: "{{ postfix_virtual_mailbox_users }}"
   - type: "virtual-mailbox-user-aliases"

@@ -42,10 +42,13 @@
 # ==================================================================================================
 - name: "Ensure we have a password for the Host CA Key"
   ansible.builtin.set_fact:
-    sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
+    sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
+    __password_lookup: "{{ __password_store_id }}"
   become: no
+  changed_when:
+    - sshca_host_key_password != "password"
   when:
     - sshca_host_key_password == "password"
   tags:
@@ -112,7 +115,7 @@
 #
 # TODO: Add serial number
 # TODO: Add expiration
-# TODO: Use expect module for password from ansible vault
+# DONE: Use expect module for password from ansible vault
 #       https://docs.ansible.com/ansible/latest/modules/expect_module.html
 #
 # ==================================================================================================
@@ -125,7 +128,7 @@
     responses:
       (?i)passphrase: "{{ sshca_host_key_password }}"
   become: no
-  no_log: yes
+  #no_log: yes
   loop: "{{ private_keys.files }}"
   changed_when: false
   delegate_to: localhost
