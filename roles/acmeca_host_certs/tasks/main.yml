@@ -221,6 +221,7 @@
   become: no
   when:
     - acme_challenge is defined
+    - acme_challenge.results is defined
   tags:
     - never
     - acmeca_host_certs_debug
