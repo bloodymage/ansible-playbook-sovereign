@@ -1,0 +1,16 @@
+---
+deb_repo_url: "http://archive.ubuntu.com/ubuntu/"
+#deb_src_repo_url: "http://us.archive.ubuntu.com/ubuntu/"
+deb_repos: "main restricted universe multiverse"
+ubuntu_updates_repo_url: "{{ deb_repo_url }}"
+ubuntu_security_updates_repo_url: "http://security.ubuntu.com/ubuntu"
+ubuntu_backports_repo_url: "{{ deb_repo_url }}"
+
+
+
+#  # Uncomment the following two lines to add software from Canonical's
+#  # 'partner' repository.
+#  # This software is not part of Ubuntu, but is offered by Canonical and the
+#  # respective vendors as a service to Ubuntu users.
+# deb http://archive.canonical.com/ubuntu bionic partner
+# deb-src http://archive.canonical.com/ubuntu bionic partner

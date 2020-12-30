@@ -1,4 +1,36 @@
 ---
+- name: Ensure apt repos are up to date
+  block:
+    - name: "Ensure Raspbian Raspberry Pi Repo is current"
+      ansible.builtin.template:
+        src: "raspi.list.j2"
+        dest: /etc/apt/sources.list.d/raspi.list
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+      when:
+        - ansible_lsb.id is defined and ansible_lsb.id == "Raspbian"
+      tags:
+        - system_upgrade
+        - system-upgrade
+        - system_upgrade_debug
+        - system-upgrade-debug
+
+    - name: "Ensure sources.list is current"
+      ansible.builtin.template:
+        src: "sources.list.j2"
+        dest: /etc/apt/sources.list
+        owner: root
+        group: root
+        mode: '0644'
+      become: yes
+      tags:
+        - system_upgrade
+        - system-upgrade
+        - system_upgrade_debug
+        - system-upgrade-debug
+
 # ==================================================================================================
 #
 # Task: Update all packages (Safe upgrade)

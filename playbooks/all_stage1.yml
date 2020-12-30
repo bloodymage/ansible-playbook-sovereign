@@ -56,7 +56,7 @@
 
 # ==================================================================================================
 #
-# Finally we configure settings applicable based on OS:
+# Next we configure settings applicable based on OS:
 #   - Linux
 #   - Windows
 #
@@ -74,3 +74,14 @@
     - bloodymage.rebeldream.etckeeper
     - bloodymage.rebeldream.polkit
     - bloodymage.rebeldream.screen
+
+# ==================================================================================================
+#
+# Finally, we configure settings based on OS Distribution Family:
+#
+# - Debian
+#
+# ==================================================================================================
+- hosts: debian:!localhost:!routeros:!tpeap:!printers
+  roles:
+    - bloodymage.rebeldream.aptitude
