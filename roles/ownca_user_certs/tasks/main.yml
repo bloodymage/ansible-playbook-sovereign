@@ -331,7 +331,7 @@
     locality_name: "{{ rebeldream_city }}"
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
-    common_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }}"
+    common_name: "{{ item.ansible_facts.given_name }}{{ __surname }}"
     email_address: "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
     key_usage: "{{ ownca_user_certs_identification_key_usage }}"
     key_usage_critical: yes
@@ -348,9 +348,9 @@
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
     __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __surname: "{% if item.ansible_facts.surname is defined %} {{ item.ansible_facts.surname }}{% else %}''{% endif %}"
   when:
     - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is defined
     - item.ansible_facts.id_number is not none
   tags:
     - ownca_user_certs
@@ -358,43 +358,43 @@
     - ownca_user_certs_debug
     - ownca-user-certs-debug
 
-- name: Generate User Identeficitation CSR
-  community.crypto.openssl_csr:
-    path: "{{ __pki_csr_file }}"
-    owner: "{{ item.ansible_facts.id_number }}"
-    group: "{{ item.ansible_facts.id_number }}"
-    mode: "0644"
-    country_name: "{{ rebeldream_country }}"
-    state_or_province_name: "{{ rebeldream_region }}"
-    locality_name: "{{ rebeldream_city }}"
-    organization_name: "{{ rebeldream_org_name }}"
-    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
-    common_name: "{{ item.ansible_facts.given_name }}"
-    email_address: "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
-    key_usage: "{{ ownca_user_certs_identification_key_usage }}"
-    key_usage_critical: yes
-    extended_key_usage: "{{ ownca_user_certs_identification_extended_key_usage }}"
-    privatekey_path: "{{ __pki_privatekey_file }}"
-    privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
-  become: yes
-  loop: "{{ __domain_users }}"
-  vars:
-    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
-    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
-    __pki_private_dir: "{{ __user_pki_dir }}/private"
-    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
-    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
-  when:
-    - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is not defined
-    - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
+# - name: Generate User Identeficitation CSR
+#   community.crypto.openssl_csr:
+#     path: "{{ __pki_csr_file }}"
+#     owner: "{{ item.ansible_facts.id_number }}"
+#     group: "{{ item.ansible_facts.id_number }}"
+#     mode: "0644"
+#     country_name: "{{ rebeldream_country }}"
+#     state_or_province_name: "{{ rebeldream_region }}"
+#     locality_name: "{{ rebeldream_city }}"
+#     organization_name: "{{ rebeldream_org_name }}"
+#     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
+#     common_name: "{{ item.ansible_facts.given_name }}"
+#     email_address: "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
+#     key_usage: "{{ ownca_user_certs_identification_key_usage }}"
+#     key_usage_critical: yes
+#     extended_key_usage: "{{ ownca_user_certs_identification_extended_key_usage }}"
+#     privatekey_path: "{{ __pki_privatekey_file }}"
+#     privatekey_passphrase: "{{ item.ansible_facts.password }}"
+#     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
+#   become: yes
+#   loop: "{{ __domain_users }}"
+#   vars:
+#     __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
+#     __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
+#     __pki_private_dir: "{{ __user_pki_dir }}/private"
+#     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
+#     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
+#     __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+#   when:
+#     - item.ansible_facts.given_name is defined
+#     - item.ansible_facts.surname is not defined
+#     - item.ansible_facts.id_number is not none
+#   tags:
+#     - ownca_user_certs
+#     - ownca-user-certs
+#     - ownca_user_certs_debug
+#     - ownca-user-certs-debug
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
@@ -423,7 +423,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_encryption.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is defined
@@ -461,7 +461,7 @@
     __pki_private_dir: "{{ __user_pki_dir }}/private"
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
+    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_encryption.csr"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is not defined
@@ -545,7 +545,7 @@
     path: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_authentication.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ item.ansible_facts.username }}_authentication.csr"
     ownca_path: "{{ ownca_identity_ca_file }}"
-    ownca_privatekey_path: "{{ ownca_ca_identity_key }}"
+    ownca_privatekey_path: "{{ ownca_identity_ca_key }}"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -565,7 +565,7 @@
     path: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_identification.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ item.ansible_facts.username }}_identification.csr"
     ownca_path: "{{ ownca_identity_ca_file }}"
-    ownca_privatekey_path: "{{ ownca_ca_identity_key }}"
+    ownca_privatekey_path: "{{ ownca_identity_ca_key }}"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no
@@ -585,7 +585,7 @@
     path: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_encryption.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ item.ansible_facts.username }}_encryption.csr"
     ownca_path: "{{ ownca_identity_ca_file }}"
-    ownca_privatekey_path: "{{ ownca_ca_identity_key }}"
+    ownca_privatekey_path: "{{ ownca_identity_ca_key }}"
     ownca_privatekey_passphrase: "{{ ownca_identity_password }}"
     provider: ownca
   become: no

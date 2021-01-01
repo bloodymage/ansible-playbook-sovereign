@@ -228,7 +228,7 @@ virtual_alias_maps =
   {{ map }}{{ "," if not loop.last else "" }}
 {% endfor %}
 {% endif %}
-{% if postfix_smtpd_sender_login_maps != __postfix_smtpd_sender_login_maps%}
+{% if postfix_smtpd_sender_login_maps != __postfix_smtpd_sender_login_maps %}
 smtpd_sender_login_maps =
 {% for map in postfix_smtpd_sender_login_maps %}
   {{ map }}{{ "," if not loop.last else "" }}

@@ -8,8 +8,12 @@ postfix_mailbox_users: []
 postfix_virtual_mailbox_domain_maps:
   - name: "{{ rebeldream_domain }}"
     status: "OK"
-  - name: "{{ rebeldream_root_domain }}"
-    status: "OK"
+
+postfix_sasl_relay_files:
+  - filename: "sasl_passwd"
+    mode: "0600"
+  - filename: "sender_relay"
+    mode: "0644"
 
 postfix_local_user_maps:
   - username: webmaster

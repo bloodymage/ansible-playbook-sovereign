@@ -1,8 +1,8 @@
 # {{ ansible_managed }}
 
 {% for user in postfix_sasl_auth_users_list -%}
-  {{ user.origin.ljust(20) }} {{ user.destination }}:{{ user.password }}
+  {{ user.origin.ljust(32) }}{{ user.destination }}:{{ user.password }}
 {% endfor %}
-{{ postfix_sasl_auth_user.ljust(20) }} {{ postfix_sasl_auth_user }}:{{ postfix_sasl_auth_user_password }}
+{{ postfix_sasl_auth_user.ljust(32) }}{{ postfix_sasl_auth_user }}:{{ postfix_sasl_auth_user_password }}
 
-{{ postfix_relay_host[0].ljust(20) }}     {{ postfix_sasl_auth_user }}:{{ postfix_sasl_auth_user_password }}
+{{ postfix_relay_host[0].ljust(32) }}{{ postfix_sasl_auth_user }}:{{ postfix_sasl_auth_user_password }}

@@ -1,20 +1,20 @@
 # {{ ansible_managed }}
 
 {% for key in item.data -%}
-  {# canonical #}
-  {% if key.origin is defined %}
-    {{ key.origin }} {{ key.destination }}
-  {% endif %}
-  {# mailbox_domains #}
-  {% if key.name is defined %}
-    {{ key.name }} {{ key.status }}
-  {% endif %}
-  {# mailbox_users #}
-  {% if key.username is defined %}
-    {{ key.username }} {{ key.email }}
-  {% endif %}
-  {# mailbox_users #}
-  {% if key.alias is defined %}
-    {{ key.alias }} {{ key.email }}
-  {% endif %}
+{# canonical #}
+{% if key.origin is defined -%}
+  {{ key.origin }} {{ key.destination }}
+{% endif %}
+{# mailbox_domains #}
+{% if key.name is defined -%}
+  {{ key.name }} {{ key.status }}
+{% endif %}
+{# mailbox_users #}
+{% if key.username is defined -%}
+  {{ key.username }} {{ key.email }}
+{% endif %}
+{# mailbox_users #}
+{% if key.alias is defined -%}
+  {{ key.alias }} {{ key.email }}
+{% endif %}
 {% endfor %}

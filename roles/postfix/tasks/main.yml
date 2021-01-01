@@ -42,10 +42,9 @@
   delegate_to: localhost
   register: domain_user_list
   tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
-
+    - postfix
+    - postfix_debug
+    - postfix-debug
 
 - name: "Install /etc configuration files"
   ansible.builtin.template:
@@ -86,7 +85,7 @@
 - name: "Install ldap user and group map files"
   ansible.builtin.template:
     src: "ldap_maps.j2"
-    dest: "/etc/postfix/{{ item }}.cf"
+    dest: "/etc/postfix/{{ item.name }}.cf"
     owner: root
     group: root
     mode: "0644"
@@ -94,7 +93,7 @@
   become: yes
   when:
     - inventory_hostname in groups['samba_domain']
-    - mail_user_password is defined
+    - __mail_user_password is defined
     - postfix_ldap_maps is defined
   notify: restart postfix
   tags:
@@ -143,34 +142,14 @@
 # ==================================================================================================
 - name: "Install Configuration files (postmap update required)"
   ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "/etc/postfix/{{ item }}"
+    src: "{{ item.filename }}.j2"
+    dest: "/etc/postfix/{{ item.filename }}"
     owner: root
     group: root
-    mode: "0644"
+    mode: "{{ item.mode  }}"
   become: yes
-  loop:
-    - sasl_passwd
-    - sender_relay
-  notify: map {{ item }}
-  when:
-    - postfix_sasl_auth_users_list is defined
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
-
-- name: Create configuration files (Perms=600)
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "/etc/postfix/{{ item }}"
-    owner: root
-    group: root
-    mode: 0600
-  become: yes
-  loop:
-    - sasl_passwd
-  notify: restart postfix
+  loop: "{{ postfix_sasl_relay_files }}"
+  notify: map {{ item.filename }}
   when:
     - postfix_sasl_auth_users_list is defined
   tags:
