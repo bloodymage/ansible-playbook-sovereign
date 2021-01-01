@@ -69,13 +69,7 @@
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
-      files:
-        - "{{ ansible_network_os | default(none) }}.yml"
-        - "{{ ansible_distribution | lower }}.yml"
-        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
-        - "{{ ansible_os_family | lower }}_family.yml"
-        - "{{ ansible_system | lower }}.yml"
-        - main.yml
+      files: "{{ __os_variables_files }}"
       paths:
         - "vars"
   become: no
@@ -906,8 +900,8 @@
   ansible.builtin.template:
     src: "schema.ldif.j2"
     dest: "/tmp/{{ item.name }}"
-    owner: root
-    group: root
+    owner: "root"
+    group: "root"
     mode: "0644"
   loop: "{{ samba_schema_extensions }}"
   become: yes
@@ -926,6 +920,7 @@
     cmd: "ldbmodify -H /var/lib/samba/private/sam.ldb /tmp/{{ item.name }} --option='dsdb:schema update allowed'=true"
   loop: "{{ samba_schema_extensions }}"
   become: yes
+  ignore_errors: yes
   when:
     - rebeldream_fqdn == __samba_schema_master
   tags:

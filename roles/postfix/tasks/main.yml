@@ -6,13 +6,7 @@
       include_vars: "{{ lookup('first_found', params) }}"
       vars:
         params:
-          files:
-            - "{{ ansible_network_os | default(none) }}.yml"
-            - "{{ ansible_distribution | lower }}.yml"
-            - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
-            - "{{ ansible_os_family | lower }}_family.yml"
-            - "{{ ansible_system | lower }}.yml"
-            - main.yml
+          files: "{{ __os_variables_files }}"
           paths:
             - "vars"
       become: no
@@ -48,12 +42,11 @@
   delegate_to: localhost
   register: domain_user_list
   tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
+    - postfix
+    - postfix_debug
+    - postfix-debug
 
-
-- name: Install config files
+- name: "Install /etc configuration files"
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/{{ item }}"
@@ -70,7 +63,7 @@
     - postfix-debug
 
 
-- name: "Install configuration files (Perms=644)"
+- name: "Install configuration files"
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/postfix/{{ item }}"
@@ -92,7 +85,7 @@
 - name: "Install ldap user and group map files"
   ansible.builtin.template:
     src: "ldap_maps.j2"
-    dest: "/etc/postfix/{{ item }}.cf"
+    dest: "/etc/postfix/{{ item.name }}.cf"
     owner: root
     group: root
     mode: "0644"
@@ -100,7 +93,8 @@
   become: yes
   when:
     - inventory_hostname in groups['samba_domain']
-    - mail_user_password is defined
+    - __mail_user_password is defined
+    - postfix_ldap_maps is defined
   notify: restart postfix
   tags:
     - postfix
@@ -116,14 +110,25 @@
     mode: "0644"
   become: yes
   loop:
-    - canonical
     - client_access
     - helo_access
     - transport
-    - virtual
-    - virtual-mailbox-domains
-    - virtual-mailbox-users
   notify: map {{ item }}
+  tags:
+    - postfix
+    - postfix_debug
+    - postfix-debug
+
+- name: "Install virtual mailboxes' configuration files (postmap update required)"
+  ansible.builtin.template:
+    src: "virtual.j2"
+    dest: "/etc/postfix/{{ item.type }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __postfix_virtual_mailboxes }}"
+  notify: map {{ item.type }}
   tags:
     - postfix
     - postfix_debug
@@ -137,34 +142,14 @@
 # ==================================================================================================
 - name: "Install Configuration files (postmap update required)"
   ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "/etc/postfix/{{ item }}"
+    src: "{{ item.filename }}.j2"
+    dest: "/etc/postfix/{{ item.filename }}"
     owner: root
     group: root
-    mode: "0644"
+    mode: "{{ item.mode  }}"
   become: yes
-  loop:
-    - sasl_passwd
-    - sender_relay
-  notify: map {{ item }}
-  when:
-    - postfix_sasl_auth_users_list is defined
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
-
-- name: Create configuration files (Perms=600)
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "/etc/postfix/{{ item }}"
-    owner: root
-    group: root
-    mode: 0600
-  become: yes
-  loop:
-    - sasl_passwd
-  notify: restart postfix
+  loop: "{{ postfix_sasl_relay_files }}"
+  notify: map {{ item.filename }}
   when:
     - postfix_sasl_auth_users_list is defined
   tags:

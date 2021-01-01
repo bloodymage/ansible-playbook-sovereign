@@ -1,7 +1,6 @@
-# - hosts: web_servers
-#   roles:
-#     - bloodymage.rebeldream.fail2ban
-#     - bloodymage.rebeldream.redis
+- hosts: redis_servers
+  roles:
+    - bloodymage.rebeldream.redis
 
 - hosts: apache_servers
   roles:
@@ -16,8 +15,6 @@
     - bloodymage.rebeldream.mediawiki
     - bloodymage.rebeldream.nextcloud
     # - bloodymage.rebeldream.drush
-    # - bloodymage.rebeldream.website_drupal
-
-- hosts: acme_servers
-  roles:
+    # - bloodymage.rebeldream.drupal
+    - bloodymage.rebeldream.acmeca_challenge_site
     - bloodymage.rebeldream.acmeca_host_certs

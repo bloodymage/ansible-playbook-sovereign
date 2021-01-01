@@ -126,7 +126,9 @@ mailman   unix  -       n       n       -       -       pipe
 {% for option in postfix_master_mailman_options %}
   {{ option }}
 {% endfor %}
+{% if inventory_hostname in groups['dovecot_servers'] %}
 dovecot   unix  -       n       n       -       -       pipe
 {% for option in postfix_master_dovecot_options %}
   {{ option }}
 {% endfor %}
+{% endif %}

@@ -3,6 +3,77 @@
 packages:
   - postfix
 
+postfix_mailbox_users: []
+
+postfix_virtual_mailbox_domain_maps:
+  - name: "{{ rebeldream_domain }}"
+    status: "OK"
+
+postfix_sasl_relay_files:
+  - filename: "sasl_passwd"
+    mode: "0600"
+  - filename: "sender_relay"
+    mode: "0644"
+
+postfix_local_user_maps:
+  - username: webmaster
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: www
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: www-data
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: postmaster
+    email: postmaster@{{ rebeldream_root_domain }}
+  - username: mailer-daemon
+    email: postmaster@{{ rebeldream_root_domain }}
+  - username: abuse
+    email: abuse@{{ rebeldream_root_domain }}
+  - username: nobody
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: hostmaster
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: usenet
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: news
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: ftp
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: noc
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: security
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: clamav
+    email: webmaster@{{ rebeldream_root_domain }}
+
+postfix_virtual_mailbox_users:
+  - username: webmaster@{{ rebeldream_root_domain }}
+    email: webmaster@{{ rebeldream_root_domain }}
+  - username: postmaster@{{ rebeldream_root_domain }}
+    email: postmaster@{{ rebeldream_root_domain }}
+  - username: abuse@{{ rebeldream_root_domain }}
+    email: abuse@{{ rebeldream_root_domain }}
+
+postfix_virtual_mailbox_user_aliases:
+  - alias: webmaster@{{ rebeldream_root_domain }}
+    email: webmaster@{{ rebeldream_root_domain }}
+  - alias: postmaster@{{ rebeldream_root_domain }}
+    email: postmaster@{{ rebeldream_root_domain }}
+  - alias: abuse@{{ rebeldream_root_domain }}
+    email: abuse@{{ rebeldream_root_domain }}
+  - alias: root@{{ rebeldream_root_domain }}
+    email: webmaster@{{ rebeldream_root_domain }}
+  - alias: root@mail.{{ rebeldream_root_domain }}
+    email: webmaster@{{ rebeldream_root_domain }}
+  - alias: hostmaster@{{ rebeldream_root_domain }}
+    email: webmaster@{{ rebeldream_root_domain }}
+
+postfix_canonical_mappings:
+  - origin: "www-data@{{ rebeldream_fqdn }}"
+    destination: "webmaster@{{ rebeldream_root_domain }}"
+
+postfix_ldap_maps: []
+postfix_ldap_map_debug_level: 0
+
 # ==================================================================================================
 #
 # Postfix main.cf defaults
@@ -20,15 +91,15 @@ packages:
 #
 # ==================================================================================================
 # Variables which our default is different from postfix's default.
+postfix_alias_maps:
+  - "hash:/etc/aliases"
 postfix_biff: "no"
 postfix_canonical_maps:
   - "hash:/etc/postfix/canonical"
 postfix_compatibility_level: "2"
-postfix_disable_vrfy_command: "yes"
+
 postfix_home_mailbox: "Maildir/"
 postfix_mailbox_size_limit: "0"
-postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
-postfix_milter_default_action: "accept"
 postfix_mydestination:
   - "$myhostname"
   - "localhost.{{ rebeldream_domain }}"
@@ -41,37 +112,25 @@ postfix_postscreen_dnsbl_sites:
   - "b.barracudacentral.org"
   - "bl.spamcop.net"
 postfix_postscreen_greet_action: "enforce"
-postfix_smtp_sender_dependent_authentication: "yes"
-postfix_smtp_tls_note_starttls_offer: "yes"
-postfix_smtp_tls_security_level: "may"
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 postfix_smtpd_banner: "$myhostname ESMTP"
-postfix_smtpd_milters:
-  - "unix:/spamass/spamass.sock"
-postfix_smtpd_tls_ask_ccert: "yes"
-postfix_smtpd_tls_auth_only: "yes"
 postfix_smtpd_tls_chain_files:
   - "/etc/ssl/private/{{ rebeldream_fqdn }}.key"
   - "/etc/ssl/certs/{{ rebeldream_fqdn }}-chain.pem"
-postfix_smtpd_tls_ciphers: "high"
 postfix_smtpd_helo_required: "yes"
-postfix_smtpd_tls_loglevel: 1
-postfix_smtpd_tls_received_header: "yes"
 postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
 postfix_smtpd_use_tls: "yes"
-postfix_transport_maps:
-  - "hash:/etc/postfix/transport"
 postfix_virtual_alias_maps:
-  - "hash:/etc/postfix/virtual"
+  - "hash:/etc/postfix/virtual-mailbox-user-aliases"
 postfix_virtual_mailbox_maps:
   - "hash:/etc/postfix/virtual-mailbox-users"
 
 # Variables which have the same default as postfix
 postfix_alias_database: "{{ __postfix_alias_database }}"
-postfix_alias_maps: "{{ __postfix_alias_maps }}"
 postfix_append_dot_mydomain: "{{ __postfix_append_dot_mydomain }}"
 postfix_default_destination_concurrency_limit: "{{ __postfix_default_destination_concurrency_limit }}"
 postfix_delay_warning_time: "{{ __postfix_delay_warning_time }}"
+postfix_disable_vrfy_command: "{{ __postfix_disable_vrfy_command }}"
 postfix_inet_interfaces: "{{ __postfix_inet_interfaces }}"
 postfix_inet_protocols: "{{ __postfix_inet_interfaces }}"
 postfix_local_recipient_maps: "{{ __postfix_local_recipient_maps }}"
@@ -88,6 +147,9 @@ postfix_sender_dependent_relayhost_maps: "{{ __postfix_sender_dependent_relayhos
 postfix_smtp_sasl_auth_enable: "{{ __postfix_smtp_sasl_auth_enable }}"
 postfix_smtp_sasl_password_maps: "{{ __postfix_smtp_sasl_password_maps }}"
 postfix_smtp_sasl_security_options: "{{ __postfix_smtp_sasl_security_options }}"
+postfix_smtp_sender_dependent_authentication: "{{ __postfix_smtp_sender_dependent_authentication }}"
+postfix_smtp_tls_note_starttls_offer: "{{ __postfix_smtp_tls_note_starttls_offer }}"
+postfix_smtp_tls_security_level: "{{ __postfix_smtp_tls_security_level }}"
 postfix_smtp_tls_wrappermode: "{{ __postfix_smtp_tls_wrappermode }}"
 postfix_smtpd_client_restrictions: "{{ __postfix_smtpd_client_restrictions }}"
 postfix_smtpd_helo_restrictions: "{{ __postfix_smtpd_helo_restrictions }}"
@@ -103,18 +165,24 @@ postfix_smtpd_sasl_type: "{{ __postfix_smtpd_sasl_type }}"
 postfix_smtpd_sender_login_maps:  "{{ __postfix_smtpd_sender_login_maps }}"
 postfix_smtpd_sender_restrictions: "{{ __postfix_smtpd_sender_restrictions }}"
 postfix_smtpd_tls_CAfile: "{{ __postfix_smtpd_tls_CAfile }}"
+postfix_smtpd_tls_ask_ccert: "{{ __postfix_smtpd_tls_ask_ccert }}"
+postfix_smtpd_tls_auth_only: "{{ __postfix_smtpd_tls_auth_only }}"
 postfix_smtpd_tls_cert_file:  "{{ __postfix_smtpd_tls_cert_file }}"
+postfix_smtpd_tls_ciphers: "{{ __postfix_smtpd_tls_ciphers }}"
 postfix_smtpd_tls_key_file:  "{{ __postfix_smtpd_tls_key_file }}"
+postfix_smtpd_tls_loglevel: "{{ __postfix_smtpd_tls_loglevel }}"
+postfix_smtpd_tls_received_header: "{{ __postfix_smtpd_tls_received_header }}"
 postfix_smtpd_tls_session_cache_timeout: "{{ __postfix_smtpd_tls_session_cache_timeout }}"
 postfix_tls_random_source: "{{ __postfix_tls_random_source }}"
+postfix_transport_maps: "{{ __postfix_transport_maps }}"
 postfix_unknown_address_reject_code: "{{ __postfix_unknown_address_reject_code }}"
 postfix_unknown_client_reject_code: "{{ __postfix_unknown_client_reject_code }}"
 postfix_unknown_hostname_reject_code: "{{ __postfix_unknown_hostname_reject_code }}"
 postfix_virtual_mailbox_domains: "{{ __postfix_virtual_mailbox_domains }}"
 postfix_virtual_transport: "{{ __postfix_virtual_transport }}"
-
-# Variables that have not yet been sorted
-
+postfix_smtpd_milters: "{{ __postfix_smtpd_milters }}"
+postfix_milter_connect_macros: "{{ __postfix_milter_connect_macros }}"
+postfix_milter_default_action: "{{ __postfix_milter_default_action }}"
 
 # Variables which aren't documented except in 'how-to' guides, need further research
 postfix_dovecot_destination_recipient_limit: 1
@@ -165,15 +233,6 @@ postfix_master_mailman_options:
 postfix_master_dovecot_options:
   - "flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver"
   - "-f ${sender} -d ${user}@${nexthop} -a ${original_recipient}"
-
-# ==================================================================================================
-#
-# Variables which aren't config file settings...
-#
-# ==================================================================================================
-postfix_canonical_mappings: []
-postfix_ldap_maps: []
-postfix_ldap_map_debug_level: 0
 
 # ==================================================================================================
 #
@@ -231,6 +290,11 @@ __postfix_mynetworks:
 __postfix_mynetworks_style: "hosts"
 __postfix_myorigin: "$myhostname"
 __postfix_non_smtpd_milters: []
+__postfix_notify_classes:
+  - resource
+  - software
+__postfix_nullmx_code: "556"
+__postfix_openssl_path: "openssl"
 __postfix_postscreen_access_list: "permit_mynetworks"
 __postfix_postscreen_dnsbl_action: "ignore"
 __postfix_postscreen_dnsbl_sites: []
@@ -338,6 +402,17 @@ __postfix_master_dovecot_options:
   - "flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver"
   - "-f ${sender} -d ${user}@${nexthop} -a ${original_recipient}"
 
-__postfix_canonical_mappings: []
-__postfix_ldap_maps: []
-__postfix_ldap_map_debug_level: 0
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+__postfix_virtual_mailboxes:
+  - type: "canonical"
+    data: "{{ postfix_canonical_mappings }}"
+  - type: "virtual-mailbox-domains"
+    data: "{{ postfix_virtual_mailbox_domain_maps }}"
+  - type: "virtual-mailbox-users"
+    data: "{{ postfix_virtual_mailbox_users }}"
+  - type: "virtual-mailbox-user-aliases"
+    data: "{{ postfix_virtual_mailbox_user_aliases }}"

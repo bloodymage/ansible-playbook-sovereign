@@ -1,22 +1,11 @@
 # {{ ansible_managed }}
 
 {% for user in users %}
-  {% if user.email_alias is defined %}
-    {{ user.username }}: {{ user.email_alias }}
-  {% endif %}
+{% if user.email_alias is defined -%}
+  {{ user.username }}: {{ user.email_alias }}
+{% endif %}
 {% endfor %}
 # Need a way to determine if these users exist on the host
-webmaster: webmaster@{{ rebeldream_domain }}
-www: webmaster@{{ rebeldream_domain }}
-www-data: webmaster@{{ rebeldream_domain }}
-postmaster: postmaster@{{ rebeldream_domain }}
-mailer-daemon: postmaster@{{ rebeldream_domain }}
-abuse: abuse@{{ rebeldream_domain }}
-nobody: webmaster@{{ rebeldream_domain }}
-hostmaster: webmaster@{{ rebeldream_domain }}
-# usenet: root
-# news: root
-# ftp: root
-# noc: root
-# security: root
-# clamav: root
+{% for user in postfix_local_user_maps -%}
+  {{ user.username }}: {{ user.email }}
+{% endfor %}

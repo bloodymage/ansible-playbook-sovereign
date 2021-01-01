@@ -1,0 +1,34 @@
+---
+# tasks file for redis
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - redis
+        - redis_debug
+        - redis-debug
+        - install-packages
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - redis
+        - redis_debug
+        - redis-debug
+        - install-packages

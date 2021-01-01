@@ -16,7 +16,7 @@ rebeldream_tld: "{{ rebeldream_domain.split('.')[-1] }}"
 rebeldream_min_domain_id_number: 10000
 rebeldream_base_dn: "DC={{ rebeldream_org_unit_name | upper }},DC={{ rebeldream_org_name | upper }},DC={{ rebeldream_tld | upper }}"
 rebeldream_user_dn: "CN=users,{{ rebeldream_base_dn }}"
-rebeldream_group_dn: "cn=users,{{ rebeldream_base_dn }}"
+rebeldream_group_dn: "CN=users,{{ rebeldream_base_dn }}"
 rebeldream_config_dn: "CN=Configuration,{{ rebeldream_base_dn }}"
 rebeldream_schema_dn: "CN=Schema,{{ rebeldream_config_dn }}"
 
@@ -32,8 +32,8 @@ rebeldream_zones:
   - dmz
 
 # Host Information
-rebeldream_fqdn: "{{ ansible_fqdn | default(inventory_hostname_short + '.' + rebeldream_domain) }}"
-rebeldream_hostname: "{{ rebeldream_fqdn.split('.')[0] }}"
+rebeldream_hostname: "{{ inventory_hostname_short }}"
+rebeldream_fqdn: "{{ rebeldream_hostname }}.{{ rebeldream_domain }}"
 # Eliminate after verifying no longer in use
 rebeldream_hostname_short: "{{ rebeldream_hostname }}"
 
@@ -56,6 +56,8 @@ sshca_user_key_password: "password"
 #
 # ==================================================================================================
 # Directories
+sysconf_dir: "/etc"
+
 keycloak_name: "keycloak"
 keycloak_home: "/opt/{{ keycloak_name }}"
 ownca_directory: "~/.pki"
@@ -66,7 +68,7 @@ ownca_ca_crl_directory: "{{ ownca_ca_directory }}/crl"
 ownca_ca_csr_directory: "{{ ownca_ca_directory }}/csr"
 ownca_etc: "/etc/ssl"
 mysql_datadir: "/var/lib/mysql"
-ssh_config_dir: "/etc/ssh"
+ssh_config_dir: "{{ sysconf_dir }}/ssh"
 sshca_key_directory: "~/.ssh/ca"
 sshca_cert_directory: "{{ ssh_config_dir }}/ca"
 sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
@@ -241,6 +243,7 @@ mail_gid: "{{ user_vmail_id_number }}"
 mail_privileged_group:  mail
 mail_recipient_delimiter: "+"
 mail_user: vmail
+mail_group: "{{ mail_user }}"
 
 # MySQL / MariaDB
 mysql_administrator: "root"
@@ -305,15 +308,18 @@ __samba_recreate_realm: no
 
 # ==================================================================================================
 #
+# Collection Defaults
 #
+# These variables affect the operations of the collection, and do not have any bearing on system
+# configuration.
 #
 # ==================================================================================================
-__network_os: "{{ ansible_network_os | default(none) }}"
-__lsb_id: "{{ ansible_lsb.id | default(none) }}"
 __distribution: "{{ ansible_distribution | default(none) }}"
+__distribution_short: "{{ __distribution.split(' ')[0] }}"
+__lsb_id: "{{ ansible_lsb.id | default(none) }}"
+__network_os: "{{ ansible_network_os | default(none) }}"
 __os_family: "{{ ansible_os_family | default(none) }}"
 __system: "{{ ansible_system | default(none) }}"
-__distribution_short: "{{ __distribution.split(' ')[0] }}"
 
 __os_variables_files:
   - "{{ __network_os }}.yml"

@@ -9,13 +9,7 @@
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
-      files:
-        - "{{ ansible_network_os | default(none) }}.yml"
-        - "{{ ansible_distribution | lower }}.yml"
-        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
-        - "{{ ansible_os_family | lower }}_family.yml"
-        - "{{ ansible_system | lower }}.yml"
-        - main.yml
+      files: "{{ __os_variables_files }}"
       paths:
         - "vars"
   become: no
@@ -61,8 +55,8 @@
   ansible.builtin.file:
     path: '{{ ownca_ca_directory }}/{{ item }}'
     state: directory
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
     mode: '0700'
   loop:
     - private
@@ -73,7 +67,7 @@
     - db
   delegate_to: localhost
   run_once: true
-  become: yes
+  become: no
   tags:
     - ownca
     - ownca-all
@@ -342,16 +336,16 @@
 # ==================================================================================================
 - name: Find root certificate
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', __input_chain_file) }}"
+    input_chain: "{{ lookup('file', __input_chain_path) }}"
     intermediate_certificates:
-      - "{{ __itermediate_cert_path }}"
+      - "{{ __intermediate_cert_path }}"
     root_certificates:
       - "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-root-ca.crt"
   vars:
     __intermediate_cert_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
-    __intermediate_cert_path: "{{ ownca_certs_directory }}/{{ __itermediate_cert_file }}"
+    __intermediate_cert_path: "{{ ownca_ca_certs_directory }}/{{ __intermediate_cert_file }}"
     __input_chain_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item }}-ca.crt"
-    __input_chain_path: "{{ ownca_certs_directory }}/{{ __input_chain_file }}"
+    __input_chain_path: "{{ ownca_ca_certs_directory }}/{{ __input_chain_file }}"
   loop: "{{ ownca_issuing_authorities }}"
   register: parent_cert_authorities
   delegate_to: localhost

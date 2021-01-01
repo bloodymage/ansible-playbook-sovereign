@@ -1,0 +1,9 @@
+- name: Upgrade RouterOS
+  community.network.routeros_command:
+    commands:
+      - /system package update check-for-updates
+  register: routeros_resources
+  become: no
+  tags:
+    - system_upgrade
+    - system-upgrade

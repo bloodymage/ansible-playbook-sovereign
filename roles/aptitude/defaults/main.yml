@@ -1,0 +1,7 @@
+---
+packages:
+  - aptitude
+
+system_upgrade_deb_src: false
+system_upgrade_distribution_release: "{{ ansible_distribution_release }}"
+system_upgrade_raspberrypi_distribution_release: "{{ ansible_distribution_release }}"

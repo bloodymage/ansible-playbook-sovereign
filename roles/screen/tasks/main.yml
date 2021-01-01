@@ -1,0 +1,48 @@
+---
+# tasks file for screen
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+      tags:
+        - screen
+        - screen
+        - screen_debug
+        - screen-debug
+        - install-packages
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+      tags:
+        - screen
+        - screen_debug
+        - screen-debug
+        - install-packages
+
+- name: "Install config file"
+  ansible.builtin.template:
+    src: "screenrc.j2"
+    dest: "/etc/screenrc"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: yes
+  tags:
+        - screen
+        - screen_debug
+        - screen-debug
