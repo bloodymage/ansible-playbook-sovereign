@@ -129,6 +129,17 @@
     extended_key_usage_critical: yes
     privatekey_path: "{{ ownca_etc }}/private/{{ inventory_hostname }}.key"
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
     path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
     mode: "0644"
     owner: "{{ ownca_etc_owner }}"

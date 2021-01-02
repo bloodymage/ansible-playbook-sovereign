@@ -227,7 +227,7 @@
     - ownca-debug
     - ownca-all
 
-- name: Generate Certificate Authority Certificate Signing Request (CSR)
+- name: Generate Certificate Authority Certificate Signing Requests (CSR)
   community.crypto.openssl_csr:
     path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
     privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
@@ -243,6 +243,17 @@
     basic_constraints: "{{ item.basic_constraints }}"
     basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
     create_subject_key_identifier: yes
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
     owner: "{{ ownca_user }}"
     group: "{{ ownca_user }}"
     backup: yes

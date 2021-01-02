@@ -263,6 +263,17 @@
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
   become: yes
   loop: "{{ __domain_users }}"
   vars:
