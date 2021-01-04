@@ -6,8 +6,29 @@ rebeldream_overwrite_password: no
 rebeldream_use_source_code_repos: no
 rebeldream_password_length: "42"
 
+#===================================================================================================
+#
+# This needs to be rewritten
+#
+# This should stem from the most basic definition: root_domain
+#
+# Next it should take into account the zone type: Internal, DMZ, Public.
+# The internal zone can not be accessed from the outside world.  The DMZ zone is the for systems
+# that are available from the outside world, or directly support those systems.
+# For example:
+#   - web servers
+#   - database servers for the websites
+#
+# The Public zone, is the publicly available urls.
+#
+# So, you may have www.example.com is publicly available.  The DMZ zone fqdn may be
+# www.dmz.example.com.
+#
+# The defaults assume one of each zone.
+#
+# ==================================================================================================
 # Domain Information
-rebeldream_default_domain: internal.example.com
+rebeldream_default_domain: "internal.example.com"
 rebeldream_domain: "{{ ansible_domain | default(rebeldream_default_domain) }}"
 rebeldream_realm: "{{ rebeldream_domain | upper }}"
 rebeldream_domain_list: "{{ rebeldream_domain.split('.')[-2:] }}"

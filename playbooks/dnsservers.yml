@@ -6,7 +6,7 @@
       when:
         - ansible_network_os is defined
 
-- hosts: dns_servers
+- hosts: dns_servers:!public_zone
   roles:
     - bloodymage.rebeldream.bind
 

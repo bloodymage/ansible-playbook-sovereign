@@ -99,7 +99,14 @@
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ ownca_certificate_authorities }}"
+  loop:
+    - "{{ rebeldream_org_name }}-root.crl"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}.crl"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component.crl"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity.crl"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}.crl"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component.crl"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity.crl"
   become: yes
   tags:
     - ownca_crl

@@ -174,7 +174,7 @@
   roles:
     - bloodymage.rebeldream.sssd
 
-- hosts: keycloak_servers
+- hosts: keycloak_servers:!public_zone
   roles:
     - bloodymage.rebeldream.keycloak
 
