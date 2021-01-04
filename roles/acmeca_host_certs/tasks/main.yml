@@ -8,58 +8,39 @@
       paths:
         - "vars"
   become: no
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: "Install packages"
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - install-packages
 
-- name: Determine whether to force private key regeneration
-  ansible.builtin.set_fact:
-    __acmeca_regenerate_acme_account_private_key: yes
-    __acmeca_regenerate_server_private_key: yes
-  become: no
-  tags:
-    - never
-    - regenerate-private-key
+# - name: Determine whether to force private key regeneration
+#   ansible.builtin.set_fact:
+#     __acmeca_regenerate_server_private_key: yes
+#   become: no
+#   tags:
+#     - never
+#     - regenerate-server-private-key
+#     - regenerate-private-key
 
-- name: Determine whether to force private key regeneration
-  ansible.builtin.set_fact:
-    __acmeca_regenerate_server_private_key: yes
-  become: no
-  tags:
-    - never
-    - regenerate-server-private-key
+# - name: Determine whether to force private key regeneration
+#   ansible.builtin.set_fact:
+#     __acmeca_regenerate_acme_account_private_key: yes
+#   become: no
+#   tags:
+#     - never
+#     - regenerate-account-private-key
+#     - regenerate-private-key
 
-- name: Determine whether to force private key regeneration
-  ansible.builtin.set_fact:
-    __acmeca_regenerate_acme_account_private_key: yes
-  become: no
-  tags:
-    - never
-    - regenerate-account-private-key
-
-- name: Determine whether to use production or staging configuration
-  ansible.builtin.set_fact:
-    acmeca_directory: "{{ letsencrypt_staging_directory }}"
-    acmeca_directory_url: "{{ __letsencrypt_staging_url }}"
-    acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_staging_directory }}"
-  become: no
-  tags:
-    - never
-    - issue-staging-certs
+# - name: Determine whether to use production or staging configuration
+#   ansible.builtin.set_fact:
+#     acmeca_directory: "{{ __letsencrypt_staging_directory }}"
+#     acmeca_directory_url: "{{ __letsencrypt_staging_url }}"
+#   become: no
+#   tags:
+#     - never
+#     - issue-staging-certs
 
 # ==================================================================================================
 #
@@ -80,11 +61,6 @@
     - "{{ acmeca_keys_dir }}"
     - "{{ acmeca_live_dir }}"
   become: yes
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: "Generate Let's Encrypt Account private key"
   community.crypto.openssl_privatekey:
@@ -97,11 +73,6 @@
     backup: yes
     force: "{{ __acmeca_regenerate_acme_account_private_key }}"
   become: yes
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: "Make sure account exists and has given contacts. We agree to TOS."
   community.crypto.acme_account:
@@ -114,11 +85,6 @@
       - mailto:{{ acmeca_account_email }}
     validate_certs: yes
   become: yes
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: "Create Certificate Directories"
   ansible.builtin.file:
@@ -132,12 +98,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-
 
 - name: "Generate Let's Encrypt Certificate private key"
   community.crypto.openssl_privatekey:
@@ -154,11 +114,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: "Generate Let's Encrypt CSR"
   community.crypto.openssl_csr:
@@ -178,11 +133,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: "Begin Let's Encrypt challenges"
   community.crypto.acme_certificate:
@@ -204,12 +154,6 @@
     - hosts is defined
     - item.certificate == "acme"
   register: acme_challenge
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
 
 - name: Print acme_challenge
   ansible.builtin.debug:
@@ -224,9 +168,7 @@
     - acme_challenge.results is defined
   tags:
     - never
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
+    - debug
 
 - name: "Create .well-known/acme-challenge directory"
   ansible.builtin.file:
@@ -240,12 +182,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
 
 - name: "Implement http-01 challenge files"
   ansible.builtin.copy:
@@ -262,12 +198,6 @@
     - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
 
 - name: "Backup Old Certs"
   ansible.builtin.copy:
@@ -284,12 +214,6 @@
     - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
 
 - name: "Backup Old Cert Chain"
   ansible.builtin.copy:
@@ -306,12 +230,6 @@
     - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
 
 - name: "Backup Old Full Certificate Chain"
   ansible.builtin.copy:
@@ -328,12 +246,6 @@
     - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
 
 - name: "Complete Let's Encrypt challenges"
   community.crypto.acme_certificate:
@@ -358,12 +270,6 @@
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'] is defined
   notify: restart apache
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge
 
 - name: Setup live link directories
   ansible.builtin.file:
@@ -377,12 +283,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-
 
 - name: Create live link certs
   ansible.builtin.file:
@@ -396,11 +296,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: Setup Live Link chain
   ansible.builtin.file:
@@ -414,11 +309,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: Setup Live Link fullchain
   ansible.builtin.file:
@@ -432,11 +322,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: Setup live link privkey
   ansible.builtin.file:
@@ -450,11 +335,6 @@
   when:
     - hosts is defined
     - item.certificate == "acme"
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
 
 - name: "Cleanup acme challenge directory"
   ansible.builtin.file:
@@ -468,9 +348,3 @@
     - hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
-  tags:
-    - acmeca_host_certs
-    - acmeca-host-certs
-    - acmeca_host_certs_debug
-    - acmeca-host-certs-debug
-    - acme-challenge

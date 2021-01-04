@@ -11,7 +11,6 @@
       tags:
         - never
         - recreate-realm
-        - recreate-realm-debug
 
     - name: "Set Samba Schema Master to Running Schema Master (Only if not regenerating realm)"
       command:
@@ -37,11 +36,7 @@
         - __samba_schema_master_role is defined
       tags:
         - never
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm-debug
+        - debug
 
     - name: Print Variables
       debug:
@@ -56,11 +51,7 @@
         - __samba_schema_master_role is defined
       tags:
         - never
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm-debug
+        - debug
 
     - name: Print Variables
       debug:
@@ -71,11 +62,7 @@
         - __samba_schema_master_role is defined
       tags:
         - never
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm-debug
+        - debug
 
     - name: Print Variables
       debug:
@@ -86,11 +73,7 @@
         - __samba_schema_master_role is defined
       tags:
         - never
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm-debug
+        - debug
 
     - name: Print Variables
       debug:
@@ -101,11 +84,7 @@
         - __samba_schema_master_role is defined
       tags:
         - never
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm-debug
+        - debug
 
     - name: Set Samba Schema Master
       ansible.builtin.set_fact:
@@ -132,11 +111,7 @@
         - __samba_schema_master is defined
       tags:
         - never
-        - samba_domain_controllers_debug
-        - samba-domain-controllers-debug
-        - samba_domain_users_debug
-        - samba-domain-users-debug
-        - recreate-realm-debug
+        - debug
 
     - name: "Create Samba Schema Master Group"
       add_host:
@@ -147,9 +122,11 @@
         - __samba_schema_master is defined
       tags:
         - always
-
   roles:
-    - bloodymage.rebeldream.samba_domain_controller
+    - role: bloodymage.rebeldream.samba_domain_controller
+      tags:
+        - samba_domain_controller
+        - samba-domain-controller
 
 - hosts: samba_schema_master
   pre_tasks:
@@ -162,7 +139,12 @@
         - never
         - regenerate-ownca
   roles:
-    - bloodymage.rebeldream.samba_domain_users
+    - role: bloodymage.rebeldream.samba_domain_users
+      tags:
+        - samba_domain_users
+        - samba-domain-users
+        - samba_domain_users_debug
+        - samba-domain-users-debug
 
 # - hosts: freeipa_controllers
 
@@ -184,4 +166,9 @@
 
 - hosts: samba_ownca_user_hosts
   roles:
-    - bloodymage.rebeldream.ownca_user_certs
+    - role: bloodymage.rebeldream.ownca_user_certs
+      tags:
+        - ownca_user_certs
+        - ownca-user-certs
+        - ownca_user_certs_debug
+        - ownca-user-certs-debug

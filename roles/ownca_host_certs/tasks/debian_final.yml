@@ -139,7 +139,7 @@
 - name: Copy CA Certificates Samba File Server.
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
-    dest: "/srv/samba/pki/"
+    dest: "/srv/samba/pki/{{ item }}"
     owner: root
     group: root
     mode: "0644"

@@ -241,27 +241,6 @@
     - recreate-realm
     - recreate-realm-debug
 
-# ==================================================================================================
-#
-# As a precaution, we remove the krb5.conf file
-#
-# ==================================================================================================
-- name: Remove krb5.conf
-  ansible.builtin.file:
-    path: "/etc/krb5.conf"
-    state: absent
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  notify: "Update krb5"
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
 # Create Config File
 - name: Install smb.conf configuration file
   ansible.builtin.template:

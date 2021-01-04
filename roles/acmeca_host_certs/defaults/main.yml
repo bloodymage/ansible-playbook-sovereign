@@ -10,10 +10,6 @@ letsencrypt_certs_dir: "{{ letsencrypt_dir }}/certs"
 letsencrypt_account_dir: "{{ letsencrypt_dir }}/accounts"
 letsencrypt_archive_directory: "{{ letsencrypt_dir }}/archive"
 letsencrypt_live_directory: "{{ letsencrypt_dir }}/live"
-letsencrypt_staging_directory: "acme-staging.api.letsencrypt.org/directory"
-letsencrypt_production_directory: "acme-v02.api.letsencrypt.org/directory"
-
-acmeca_staging: no
 
 acmeca_dir: "{{ letsencrypt_dir }}"
 acmeca_keys_dir: "{{ letsencrypt_keys_dir }}"
@@ -21,9 +17,9 @@ acmeca_csr_dir: "{{ letsencrypt_csr_dir }}"
 acmeca_archive_dir: "{{ letsencrypt_archive_directory }}"
 acmeca_live_dir: "{{ letsencrypt_live_directory }}"
 
-acmeca_directory: "{{ letsencrypt_production_directory }}"
+acmeca_directory: "{{ __letsencrypt_production_directory }}"
 acmeca_directory_url: "{{ __letsencrypt_production_url }}"
-acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ letsencrypt_production_directory }}"
+acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ acmeca_directory }}"
 
 acmeca_domains: "{{ inventory_hostname }}"
 acmeca_challenge_type: "http-01"
@@ -57,6 +53,8 @@ acmeca_certificate_key_size: 4096
 __acmeca_regenerate_server_private_key: no
 __acmeca_regenerate_acme_account_private_key: no
 
+__letsencrypt_staging_directory: "acme-staging.api.letsencrypt.org/directory"
+__letsencrypt_production_directory: "acme-v02.api.letsencrypt.org/directory"
 __letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
 __letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
 __buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"

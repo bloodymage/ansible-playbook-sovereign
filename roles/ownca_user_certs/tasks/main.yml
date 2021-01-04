@@ -22,7 +22,7 @@
 #   ...
 #
 # ==================================================================================================
-- name: Include OS-specific variables.
+- name: "Include OS-specific variables."
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
@@ -30,13 +30,6 @@
       paths:
         - "vars"
   become: no
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
-    - ownca-all
-    - install-packages
 
 - name: "Install packages"
   ansible.builtin.package:
@@ -44,22 +37,10 @@
     state: present
   become: yes
   register: result
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
-    - ownca-all
-    - install-packages
 
-- name: Get IP geolocation data
+- name: "Get IP geolocation data"
   community.general.ipinfoio_facts:
   become: no
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: "Ensure we have a password for the Identity Issuing CA"
   ansible.builtin.set_fact:
@@ -70,11 +51,6 @@
   become: no
   when:
     - ownca_identity_password == "password"
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
@@ -107,10 +83,7 @@
     - item.id_number >= rebeldream_min_domain_id_number
     - item.spns is not defined
   tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
+    - der
 
 - name: "Get Domain Users"
   ansible.builtin.set_fact:
@@ -118,10 +91,50 @@
   become: no
   delegate_to: localhost
   tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
+    - der
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "Username:                        {{ item.ansible_facts.username | default(none) }}"
+      - "Groupname:                       {{ item.ansible_facts.groupname  | default(none) }}"
+      - "id_number:                       {{ item.ansible_facts.id_number  | default(none) }}"
+      - "password:                        {{ item.ansible_facts.password  | default(none) }}"
+      - "Given Name:                      {{ item.ansible_facts.given_name  | default(none) }}"
+      - "Surname:                         {{ item.ansible_facts.surname  | default(none) }}"
+      - "Initials:                        {{ item.ansible_facts.initials  | default(none) }}"
+      - "Job Title:                       {{ item.ansible_facts.job_title | default(none) }}"
+      - "Department:                      {{ item.ansible_facts.department | default(none) }}"
+      - "Company:                         {{ item.ansible_facts.company | default(none) }}"
+      - "Description                      {{ item.ansible_facts.description | default(none) }}"
+      - "Physical Delivery Office:        {{ item.ansible_facts.physical_delivery_office | default(none) }}"
+      - "gecos:                           {{ item.ansible_facts.gecos | default(none) }}"
+      - "email_aliases:                   {{ item.ansible_facts.email_aliases | default(none) }}"
+      - "email_alt:                       {{ item.ansible_facts.email_alt | default(none) }}"
+      - "gpg_keys:                        {{ item.ansible_facts.gpg_keys | default(none) }}"
+      - "account_expire:                  {{ item.ansible_facts.account_expire | default(none) }}"
+      - "spns:                            {{ item.ansible_facts.spns | default(none) }}"
+    verbosity: 1
+  loop: "{{ __domain_users }}"
+  become: no
+  when:
+    - item.ansible_facts is defined
+  tags:
+    - never
+    - debug
+    - der
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }}"
+    verbosity: 2
+  loop: "{{ __domain_users }}"
+  become: no
+  tags:
+    - never
+    - debug
+    - der
 
 # ==================================================================================================
 #
@@ -130,6 +143,9 @@
 # Creates the following Directories:
 #   - /etc/ssl/private
 #   - /etc/ssl/csr
+#
+# Since this is on the file server, we need to determine how not to reset the ACLs when ensuring
+# the folders exist
 #
 # ==================================================================================================
 - name: "Create SSL Private Key Directories"
@@ -144,11 +160,6 @@
   when:
     - item.ansible_facts.username is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: "Create SSL CSR Key Directories"
   ansible.builtin.file:
@@ -162,11 +173,6 @@
   when:
     - item.ansible_facts.username is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: "Create SSL Cert Directories"
   ansible.builtin.file:
@@ -180,11 +186,6 @@
   when:
     - item.ansible_facts.username is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: "Create SSL PKCS#12 Key Directories"
   ansible.builtin.file:
@@ -198,18 +199,13 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 # ==================================================================================================
 #
 # Create User Private Key
 #
 # ==================================================================================================
-- name: Generate User Private Key
+- name: "Generate user private key"
   community.crypto.openssl_privatekey:
     path: "{{ __pki_privatekey_file }}"
     type: "{{ ownca_privatekey_type }}"
@@ -231,17 +227,10 @@
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.username is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 # ==================================================================================================
 #
 # Create Network CA Certificate
-#
-# Notes: Doesn't work with the msUPN OID.
 #
 # ==================================================================================================
 - name: Generate User Authentication CSR
@@ -255,7 +244,7 @@
     locality_name: "{{ rebeldream_city }}"
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
-    common_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }}"
+    common_name: "{{ item.ansible_facts.given_name }}{{ __surname }}"
     email_address: "{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
     key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
     key_usage_critical: yes
@@ -283,53 +272,10 @@
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
     __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
+    __surname: "{% if item.ansible_facts.surname is defined %} {{ item.ansible_facts.surname }}{% else %}''{% endif %}"
   when:
     - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
-
-- name: Generate User Authentication CSR
-  community.crypto.openssl_csr:
-    path: "{{ __pki_csr_file }}"
-    owner: "{{ item.ansible_facts.id_number }}"
-    group: "{{ item.ansible_facts.id_number }}"
-    mode: "0644"
-    country_name: "{{ rebeldream_country }}"
-    state_or_province_name: "{{ rebeldream_region }}"
-    locality_name: "{{ rebeldream_city }}"
-    organization_name: "{{ rebeldream_org_name }}"
-    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
-    common_name: "{{ item.ansible_facts.given_name }}"
-    email_address: "{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
-    key_usage: "{{ ownca_user_certs_authentication_key_usage }}"
-    key_usage_critical: yes
-    extended_key_usage: "{{ ownca_user_certs_authentication_extended_key_usage }}"
-    privatekey_path: "{{ __pki_privatekey_file }}"
-    privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ item.ansible_facts.username }}@{{ rebeldream_domain }}"
-  become: yes
-  loop: "{{ __domain_users }}"
-  vars:
-    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
-    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
-    __pki_private_dir: "{{ __user_pki_dir }}/private"
-    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
-    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_authentication.csr"
-  when:
-    - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is not defined
-    - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Generate User Identeficitation CSR
   community.crypto.openssl_csr:
@@ -350,6 +296,17 @@
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
   become: yes
   loop: "{{ __domain_users }}"
   vars:
@@ -363,49 +320,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
-
-# - name: Generate User Identeficitation CSR
-#   community.crypto.openssl_csr:
-#     path: "{{ __pki_csr_file }}"
-#     owner: "{{ item.ansible_facts.id_number }}"
-#     group: "{{ item.ansible_facts.id_number }}"
-#     mode: "0644"
-#     country_name: "{{ rebeldream_country }}"
-#     state_or_province_name: "{{ rebeldream_region }}"
-#     locality_name: "{{ rebeldream_city }}"
-#     organization_name: "{{ rebeldream_org_name }}"
-#     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
-#     common_name: "{{ item.ansible_facts.given_name }}"
-#     email_address: "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
-#     key_usage: "{{ ownca_user_certs_identification_key_usage }}"
-#     key_usage_critical: yes
-#     extended_key_usage: "{{ ownca_user_certs_identification_extended_key_usage }}"
-#     privatekey_path: "{{ __pki_privatekey_file }}"
-#     privatekey_passphrase: "{{ item.ansible_facts.password }}"
-#     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
-#   become: yes
-#   loop: "{{ __domain_users }}"
-#   vars:
-#     __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
-#     __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
-#     __pki_private_dir: "{{ __user_pki_dir }}/private"
-#     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
-#     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-#     __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_identification.csr"
-#   when:
-#     - item.ansible_facts.given_name is defined
-#     - item.ansible_facts.surname is not defined
-#     - item.ansible_facts.id_number is not none
-#   tags:
-#     - ownca_user_certs
-#     - ownca-user-certs
-#     - ownca_user_certs_debug
-#     - ownca-user-certs-debug
 
 - name: Generate User Encryption CSR
   community.crypto.openssl_csr:
@@ -418,7 +332,7 @@
     locality_name: "{{ rebeldream_city }}"
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
-    common_name: "{{ item.ansible_facts.given_name }} {{ item.ansible_facts.surname }}"
+    common_name: "{{ item.ansible_facts.given_name }}{{ __surname }}"
     email_address: "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
     key_usage: "{{ ownca_user_certs_encryption_key_usage }}"
     key_usage_critical: yes
@@ -426,6 +340,17 @@
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
   become: yes
   loop: "{{ __domain_users }}"
   vars:
@@ -435,53 +360,10 @@
     __pki_csr_dir: "{{ __user_pki_dir }}/csr"
     __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
     __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_encryption.csr"
+    __surname: "{% if item.ansible_facts.surname is defined %} {{ item.ansible_facts.surname }}{% else %}''{% endif %}"
   when:
     - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
-
-- name: Generate User Encryption CSR
-  community.crypto.openssl_csr:
-    path: "{{ __pki_csr_file }}"
-    owner: "{{ item.ansible_facts.id_number }}"
-    group: "{{ item.ansible_facts.id_number }}"
-    mode: "0644"
-    country_name: "{{ rebeldream_country }}"
-    state_or_province_name: "{{ rebeldream_region }}"
-    locality_name: "{{ rebeldream_city }}"
-    organization_name: "{{ rebeldream_org_name }}"
-    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
-    common_name: "{{ item.ansible_facts.given_name }}"
-    email_address: "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
-    key_usage: "{{ ownca_user_certs_encryption_key_usage }}"
-    key_usage_critical: yes
-    extended_key_usage: "{{ ownca_user_certs_encryption_extended_key_usage }}"
-    privatekey_path: "{{ __pki_privatekey_file }}"
-    privatekey_passphrase: "{{ item.ansible_facts.password }}"
-    subject_alt_name: "email:{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
-  become: yes
-  loop: "{{ __domain_users }}"
-  vars:
-    __user_home_dir: "{{ ownca_home_dir }}/{{ item.ansible_facts.username }}"
-    __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
-    __pki_private_dir: "{{ __user_pki_dir }}/private"
-    __pki_csr_dir: "{{ __user_pki_dir }}/csr"
-    __pki_privatekey_file: "{{ __pki_private_dir }}/{{ item.ansible_facts.username }}.key"
-    __pki_csr_file: "{{ __pki_csr_dir }}/{{ item.ansible_facts.username }}_encryption.csr"
-  when:
-    - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is not defined
-    - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 # ==================================================================================================
 #
@@ -503,11 +385,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Fetch Identification CSRs.
   ansible.builtin.fetch:
@@ -524,11 +401,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Fetch Encryption CSRs.
   ansible.builtin.fetch:
@@ -545,11 +417,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Generate User Authentication Certificates
   community.crypto.x509_certificate:
@@ -565,11 +432,6 @@
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
   delegate_to: localhost
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Generate User Identfication Certificates
   community.crypto.x509_certificate:
@@ -585,11 +447,6 @@
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
   delegate_to: localhost
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Generate User Encryption Certificates
   community.crypto.x509_certificate:
@@ -605,11 +462,6 @@
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
   delegate_to: localhost
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Copy User Authentication Certificates to workstation.
   ansible.builtin.copy:
@@ -632,11 +484,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Copy User Identification Certificates to workstation.
   ansible.builtin.copy:
@@ -659,11 +506,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Copy User Encryption Certificates to workstation.
   ansible.builtin.copy:
@@ -686,11 +528,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Generate PKCS#12 Authentication file
   community.crypto.openssl_pkcs12:
@@ -719,11 +556,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Generate PKCS#12 Identification file
   community.crypto.openssl_pkcs12:
@@ -752,11 +584,6 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
-  tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
 
 - name: Generate PKCS#12 Encryption file
   community.crypto.openssl_pkcs12:
@@ -785,8 +612,153 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
+
+- name: Convert User Authentication Cert to DER
+  ansible.builtin.command:
+    cmd: >
+      openssl x509 -in "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.crt"
+      -inform PEM
+      -out "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.der"
+      -outform DER
+    chdir: "{{ __pki_cert_dir }}"
+    creates: "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.der"
+  loop: "{{ __domain_users }}"
+  vars:
+    __pki_cert_dir: "{{ ownca_directory }}/users/certs"
+    __cert_purpose: "authentication"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+  delegate_to: localhost
   tags:
-    - ownca_user_certs
-    - ownca-user-certs
-    - ownca_user_certs_debug
-    - ownca-user-certs-debug
+    - der
+
+- name: Convert User Encryption Cert to DER
+  ansible.builtin.command:
+    cmd: >
+      openssl x509 -in "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.crt"
+      -inform PEM
+      -out "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.der"
+      -outform DER
+    chdir: "{{ __pki_cert_dir }}"
+    creates: "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.der"
+  loop: "{{ __domain_users }}"
+  vars:
+    __pki_cert_dir: "{{ ownca_directory }}/users/certs"
+    __cert_purpose: "encryption"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+  delegate_to: localhost
+  tags:
+    - der
+
+- name: Convert User Identification Cert to DER
+  ansible.builtin.command:
+    cmd: >
+      openssl x509 -in "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.crt"
+      -inform PEM
+      -out "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.der"
+      -outform DER
+    chdir: "{{ __pki_cert_dir }}"
+    creates: "{{ item.ansible_facts.username }}_{{ __cert_purpose }}.der"
+  loop: "{{ __domain_users }}"
+  vars:
+    __pki_cert_dir: "{{ ownca_directory }}/users/certs"
+    __cert_purpose: "identification"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+  delegate_to: localhost
+  tags:
+    - der
+
+# ==================================================================================================
+#
+# This is a temporary work around.  What really needs to happen, is the certs need to be added to
+# each users ldap attributes.
+#
+# ==================================================================================================
+- name: "Copy user authentication certificates Samba File Server."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_authentication.crt"
+    dest: "/srv/samba/pki/users/{{ item.ansible_facts.username }}_authentication.crt"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __domain_users }}"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+
+- name: "Copy user encryption certificates Samba File Server."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_encryption.crt"
+    dest: "/srv/samba/pki/users/{{ item.ansible_facts.username }}_encryption.crt"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __domain_users }}"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+
+- name: "Copy user identification certificates Samba File Server."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_identification.crt"
+    dest: "/srv/samba/pki/users/{{ item.ansible_facts.username }}_identification.crt"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __domain_users }}"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+
+- name: "Copy user authentication certificates Samba File Server."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_authentication.der"
+    dest: "/srv/samba/pki/users/{{ item.ansible_facts.username }}_authentication.cer"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __domain_users }}"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+  tags:
+    - der
+
+- name: "Copy user encryption certificates Samba File Server."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_encryption.der"
+    dest: "/srv/samba/pki/users/{{ item.ansible_facts.username }}_encryption.cer"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __domain_users }}"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+  tags:
+    - der
+
+- name: "Copy user identification certificates Samba File Server."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_identification.der"
+    dest: "/srv/samba/pki/users/{{ item.ansible_facts.username }}_identification.cer"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ __domain_users }}"
+  when:
+    - item.ansible_facts.given_name is defined
+    - item.ansible_facts.id_number is not none
+  tags:
+    - der

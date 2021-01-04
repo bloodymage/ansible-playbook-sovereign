@@ -29,6 +29,13 @@
         - ownca-crl-distribution-points
         - ownca_crl_distribution_points
 
-- hosts: webservers:&public_zone
-    - bloodymage.rebeldream.acmeca_challenge_site
-    - bloodymage.rebeldream.acmeca_host_certs
+- hosts: web_servers:&public_zone
+  roles:
+    - role: bloodymage.rebeldream.acmeca_challenge_site
+      tags:
+        - acmeca-challenge-site
+    - role: bloodymage.rebeldream.acmeca_host_certs
+      tags:
+        - acmeca_host_certs
+        - acmeca-host-certs
+
