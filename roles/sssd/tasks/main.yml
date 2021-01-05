@@ -31,43 +31,6 @@
     - install-packages
   notify: restart sssd
 
-# ==================================================================================================
-#
-# Smart Card Configuration
-#
-# ==================================================================================================
-# - name: Create /etc/pki/nssdb directory
-#   file:
-#     path: "/etc/pki/nssdb"
-#     state: directory
-#     owner: root
-#     group: root
-#     mode: "0755"
-#   become: yes
-
-# - name: Create nssdb
-#   command: "certutil -N -d nssdb --empty-password"
-#   args:
-#     chdir: "/etc/pki"
-#   become: yes
-
-# - name: Install CA Certificates
-#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ rebeldream_org_name | lower }}-{{ item.name }}-ca.pem"
-#   become: yes
-#   loop: "{{ certificate_authorities }}"
-#   when:
-#     - item.name == "root"
-
-# - name: Install CA Certificates
-#   command: "certutil -d /etc/pki/nssdb -A -n {{ item.common_name }} -t CT,CT,CT -a -i /etc/ssl/certs/{{ rebeldream_org_name | lower }}-{{ item.name }}-ca-chain.pem"
-#   become: yes
-#   loop: "{{ certificate_authorities }}"
-#   when:
-#     - item.name != "root"
-
-# - name: Allow nss to read smartcards
-#   command: "modutil -dbdir /etc/pki/nssdb -add "OpenSC" -libfile opensc-pkcs11.so"
-
 - name: stop sssd
   service:
     name: sssd
@@ -78,7 +41,7 @@
     - samba-domain-create
 
 - name: Leave Realm
-  command: "realm leave"
+  ansible.builtin.command: "realm leave"
   tags:
     - never
     - samba-domain-create
@@ -103,7 +66,7 @@
     - samba-domain-create
 
 - name: Join Realm
-  command: "realm join {{ rebeldream_domain }}"
+  ansible.builtin.command: "realm join {{ rebeldream_domain }}"
   become: yes
   tags:
     - never

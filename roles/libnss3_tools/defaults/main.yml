@@ -1,0 +1,4 @@
+---
+# defaults file for libnss3-tools
+packages:
+  - libnss3-tools

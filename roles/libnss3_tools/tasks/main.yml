@@ -1,0 +1,51 @@
+---
+# tasks file for libnss3-tools
+# ==================================================================================================
+#
+# Smart Card Configuration
+#
+# ==================================================================================================
+- name: Create /etc/pki/nssdb directory
+  ansible.builtin.file:
+    path: "/etc/pki/nssdb"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  tags:
+    - nssdb
+
+- name: Create nssdb
+  ansible.builtin.command:
+    cmd: "certutil -N -d nssdb --empty-password"
+  args:
+    chdir: "/etc/pki"
+  become: yes
+
+- name: Install CA Certificates
+  ansible.builtin.command:
+    cmd: >
+      certutil -d /etc/pki/nssdb
+      -A -n "{{ item.common_name }}"
+      -t CT,CT,CT -a
+      -i /usr/local/share/ca-certificates/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt
+  become: yes
+  loop: "{{ ownca_certificate_authorities }}"
+  tags:
+    - nssdb
+
+# ==================================================================================================
+#
+# Currently disabled, the command provides a prompt expecting a confirmation.
+#
+# ==================================================================================================
+# - name: Allow nss to read smartcards
+#   ansible.builtin.command:
+#     cmd: >
+#       modutil -dbdir /etc/pki/nssdb
+#       -add "OpenSC PKCS#11"
+#       -libfile /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+#   become: yes
+#   tags:
+#     - nssdb

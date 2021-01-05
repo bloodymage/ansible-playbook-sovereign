@@ -95,8 +95,8 @@ sshca_cert_directory: "{{ ssh_config_dir }}/ca"
 sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
 
 # URLs
-ownca_pki_url: "pki.{{ rebeldream_domain }}"
-ownca_ocsp_url: "ocsp.{{ rebeldream_domain }}"
+ownca_pki_url: "pki.{{ rebeldream_root_domain }}"
+ownca_ocsp_url: "ocsp.{{ rebeldream_root_domain }}"
 ownca_crl_distribution_point: "https://{{ ownca_pki_url }}"
 
 # ==================================================================================================
