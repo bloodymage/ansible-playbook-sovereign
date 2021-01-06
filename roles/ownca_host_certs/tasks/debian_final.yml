@@ -136,7 +136,7 @@
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
-    path:  "{{ ownca_etc }}/certs/{{ rebeldream_fqdn }}.pkcs12"
+    path:  "{{ ownca_etc }}/pkcs12/{{ rebeldream_fqdn }}.pkcs12"
     friendly_name: "{{ rebeldream_fqdn }}"
     passphrase: "{{ ownca_host_certs_pkcs12_password }}"
     privatekey_path: "{{ ownca_etc }}/private/{{ rebeldream_fqdn }}.key"

@@ -85,3 +85,17 @@
     - sssd
     - sssd_debug
     - sssd-debug
+
+- name: "Ensure pam_preauth_available file exists"
+  ansible.builtin.file:
+    path: "/var/lib/sss/pubconf/pam_preauth_available"
+    owner: "root"
+    group: "root"
+    mode: "0600"
+    state: touch
+  become: yes
+  notify: restart sssd
+  tags:
+    - sssd
+    - sssd_debug
+    - sssd-debug

@@ -1,5 +1,10 @@
 ---
 # handlers file for collection_handlers
+# ==================================================================================================
+#
+# Misc Handlers
+#
+# ==================================================================================================
 - name: Update System CA Certificates
   command:
     cmd: "update-ca-certificates"
@@ -8,6 +13,21 @@
     - "restart all"
     - "update system ca certificates"
     - "update ca-certificates"
+
+- name: "postfix tls"
+  ansible.builtin.copy:
+    src: /etc/ssl/certs/ca-certificates.crt
+    dest: /var/spool/postfix/etc/ssl/certs/ca-certificates.crt
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: yes
+  become: yes
+  notify: reload postfix
+  listen:
+    - "update ca-certificates"
+  when:
+    - inventory_hostname in groups['postfix_servers']
 
 # ==================================================================================================
 #
@@ -47,6 +67,18 @@
     - "restart tls"
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
+
+- name: Restart Keycloak
+  ansible.builtin.service:
+    name: keycloak
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+    - "restart tls"
+    - "restart keycloak"
+  when:
+    - inventory_hostname in groups['keycloak_servers'] | default([])
 
 - name: Restart Mosquitto
   ansible.builtin.service:
@@ -170,6 +202,7 @@
   become: yes
   listen:
     - "reload all"
+    - "reload tls"
   when:
     - inventory_hostname in groups['apache_servers']
 
@@ -180,6 +213,7 @@
   become: yes
   listen:
     - "reload all"
+    - "reload tls"
   when:
     - inventory_hostname in groups['nginx_servers']
 
@@ -190,6 +224,7 @@
   become: yes
   listen:
     - "reload all"
+    - "reload tls"
   when:
     - inventory_hostname in groups['postfix_servers']
 
@@ -205,3 +240,18 @@
   become: yes
   when:
     - inventory_hostname in groups['sssd']
+
+# ==================================================================================================
+#
+# Enable Handlers
+#
+# ==================================================================================================
+- name: enable keycloak
+  ansible.builtin.service:
+    name: "keycloak"
+    state: "{{ item }}"
+  loop:
+    - enabled
+    - started
+  become: yes
+

@@ -554,6 +554,8 @@
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   run_once: yes
+  when:
+    - item.name != "root"
   tags:
     - ownca_host_certs
     - ownca-host-certs
