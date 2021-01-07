@@ -84,6 +84,7 @@
     - item.spns is not defined
   tags:
     - der
+    - user-pkcs11
 
 - name: "Get Domain Users"
   ansible.builtin.set_fact:
@@ -537,7 +538,10 @@
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     certificate_path: "{{ __pki_cert_file }}"
-    other_certificates: "{{ rebeldream_identity_ca_file }}"
+    other_certificates:
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
     state: present
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -556,6 +560,8 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
+  tags:
+    - user-pkcs11
 
 - name: Generate PKCS#12 Identification file
   community.crypto.openssl_pkcs12:
@@ -565,7 +571,10 @@
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     certificate_path: "{{ __pki_cert_file }}"
-    other_certificates: "{{ rebeldream_identity_ca_file }}"
+    other_certificates:
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
     state: present
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -584,6 +593,8 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
+  tags:
+    - user-pkcs11
 
 - name: Generate PKCS#12 Encryption file
   community.crypto.openssl_pkcs12:
@@ -593,7 +604,10 @@
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ item.ansible_facts.password }}"
     certificate_path: "{{ __pki_cert_file }}"
-    other_certificates: "{{ rebeldream_identity_ca_file }}"
+    other_certificates:
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
     state: present
     owner: "{{ item.ansible_facts.id_number }}"
     group: "{{ item.ansible_facts.id_number }}"
@@ -612,6 +626,8 @@
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.id_number is not none
+  tags:
+    - user-pkcs11
 
 - name: Convert User Authentication Cert to DER
   ansible.builtin.command:
