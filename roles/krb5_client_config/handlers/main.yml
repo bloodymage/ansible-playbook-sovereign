@@ -1,7 +1,7 @@
 ---
 # handlers file for krb5_client_config
 - name: "Update krb5"
-  template:
+  ansible.builtin.template:
     src: "krb5.conf.j2"
     dest: "/etc/krb5.conf"
     owner: root

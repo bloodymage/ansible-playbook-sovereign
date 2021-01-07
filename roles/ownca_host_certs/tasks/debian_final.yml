@@ -151,7 +151,29 @@
     owner: root
     group: root
     mode: '0600'
-    force: yes
+    force: "{{ __ownca_regenerate_csr }}"
+  become: yes
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+
+# ==================================================================================================
+#
+# This takes forever on a RPi
+#
+# Are there security implications for generating elsewhere and transferring to the RPi server later?
+#
+# ==================================================================================================
+- name: Generate DH Parameters
+  community.crypto.openssl_dhparam:
+    path: "/etc/ssl/dhparams/{{ rebeldream_fqdn }}.pem"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: yes
+    force: "{{ __ownca_regenerate_csr }}"
   become: yes
   tags:
     - ownca_host_certs

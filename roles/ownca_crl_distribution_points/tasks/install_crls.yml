@@ -14,3 +14,6 @@
     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component.crl"
     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity.crl"
   become: yes
+  tags:
+    - ownca-crl-distribution-points
+    - ownca_crl_distribution_points

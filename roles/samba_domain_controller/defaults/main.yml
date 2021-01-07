@@ -56,6 +56,3 @@ samba_schema_extensions:
     replace: "auxiliaryClass"
     auxiliary_class:
       - "ldapPublicKey"
-
-
-
