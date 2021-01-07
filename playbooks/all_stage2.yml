@@ -1,4 +1,4 @@
-- hosts: all:!localhost
+- hosts: all:!localhost:!public_zone
   ignore_unreachable: yes
   pre_tasks:
     - name: Check if we are regenerating all ownca certs
@@ -10,7 +10,8 @@
         - never
         - regenerate-ownca
 
-- hosts: all:!localhost
+- hosts: all:!localhost:!public_zone
   ignore_unreachable: yes
   roles:
     - bloodymage.rebeldream.ownca_host_certs
+ 

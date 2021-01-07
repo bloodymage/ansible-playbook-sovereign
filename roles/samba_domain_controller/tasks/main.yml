@@ -31,7 +31,6 @@
     - recreate-realm
     - recreate-realm-debug
 
-
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
@@ -286,7 +285,7 @@
     - recreate-realm-debug
 
 - name: (Tests) The A record of the domain controller"
-  command:
+  ansible.builtin.command:
     cmd: "host -t A {{ ansible_fqdn }}."
   register: success
   become: yes
@@ -318,7 +317,7 @@
     - recreate-realm-debug
 
 - name: Test Active Directory Domain Controller
-  command:
+  ansible.builtin.command:
     cmd: "klist"
   register: success
   become: no
@@ -333,7 +332,7 @@
     - recreate-realm-debug
 
 - name: (Tests) The PTR record of the domain controller"
-  command:
+  ansible.builtin.command:
     cmd: "host -t PTR {{ ansible_host }}"
   register: success
   become: yes
@@ -377,7 +376,7 @@
 #   ignore_errors: yes
 
 - name: "Disable Guest Account"
-  command:
+  ansible.builtin.command:
     cmd: "{{ item }}"
   register: success
   become: yes
@@ -403,7 +402,7 @@
 #
 # ==================================================================================================
 - name: Set Password Expiration
-  command:
+  ansible.builtin.command:
     cmd: "samba-tool domain passwordsettings set --max-pwd-age={{ samba_domain_password_expiration }}"
   register: success
   become: yes
@@ -441,7 +440,7 @@
     - recreate-realm-debug
 
 - name: Test Active Directory Domain Controller
-  command:
+  ansible.builtin.command:
     cmd: "klist"
   register: success
   become: no
@@ -473,7 +472,7 @@
 #
 # ==================================================================================================
 - name: Provision Subsequent Active Directory Domain Controller
-  command:
+  ansible.builtin.command:
     cmd: >
       samba-tool domain join {{ rebeldream_domain }} DC
       --dns-backend=BIND9_DLZ
@@ -596,7 +595,7 @@
 #   when: rebeldream_fqdn != __samba_schema_master
 
 - name: Reset Samba ACLs on Sysvol for New
-  command:
+  ansible.builtin.command:
     cmd: "samba-tool ntacl sysvolreset"
   become: yes
   when:
@@ -649,7 +648,7 @@
 #
 # ==================================================================================================
 - name: (Tests) Verify Sysvol Replication
-  command:
+  ansible.builtin.command:
     cmd: "samba-tool drs showrepl"
   become: yes
   when:
@@ -664,7 +663,7 @@
     - recreate-realm-debug
 
 - name: (Tests) List all shares provided by the Domain Controller
-  command:
+  ansible.builtin.command:
     cmd: "smbclient -L localhost -U%"
   register: shares
   become: yes
@@ -690,7 +689,7 @@
 #    verbosity: 2
 
 - name: (Tests) The A record of the domain controller"
-  command:
+  ansible.builtin.command:
     cmd: "host -t A {{ ansible_fqdn }}."
   register: success
   become: yes
@@ -703,7 +702,7 @@
     - recreate-realm-debug
 
 - name: "(Tests) udp-based _kerberos SRV resource record in the domain"
-  command:
+  ansible.builtin.command:
     cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
   register: success
   become: yes
@@ -733,7 +732,7 @@
     - recreate-realm-debug
 
 - name: Test Active Directory Domain Controller
-  command:
+  ansible.builtin.command:
     cmd: "klist"
   register: success
   become: no
@@ -915,9 +914,19 @@
     - recreate-realm
     - recreate-realm-debug
 
+# ==================================================================================================
+#
+# Currently, this gives an error if already installed, what is really needed is a way to test if
+# installed, and if so, don't install again.
+#
+# ==================================================================================================
 - name: Install schema extensions
-  command:
-    cmd: "ldbmodify -H /var/lib/samba/private/sam.ldb /tmp/{{ item.name }} --option='dsdb:schema update allowed'=true"
+  ansible.builtin.command:
+    cmd: >
+      ldbmodify
+      -H /var/lib/samba/private/sam.ldb
+      "/tmp/{{ item.name }}"
+      --option='dsdb:schema update allowed'=true
   loop: "{{ samba_schema_extensions }}"
   become: yes
   ignore_errors: yes

@@ -17,6 +17,11 @@ debug_level = 0x4000
 {% else -%}
   pam_pwd_expiration_warning = {{ sssd_pam_pwd_expiration_warning }}
 {% endif %}
+{% if rebeldream_smart_card_login %}
+{% if sssd_ldap_user_certificate is defined -%}
+  pam_cert_auth = True
+{% endif %}
+{% endif %}
 
 [domain/{{ rebeldream_domain }}]
 ad_server = zeus.{{ rebeldream_domain }}
@@ -30,9 +35,11 @@ use_fully_qualified_names = False
 ldap_id_mapping = False
 access_provider = ad
 enumerate = true
-{% if sssd_ad_gpo_access_control is defined %}
+{% if sssd_ad_gpo_access_control is defined -%}
   ad_gpo_access_control = {{ sssd_ad_gpo_access_control }}
 {% endif %}
-{% if sssd_ldap_user_certificate is defined %}
+{% if rebeldream_smart_card_login %}
+{% if sssd_ldap_user_certificate is defined -%}
   ldap_user_certificate = {{ sssd_ldap_user_certificate }}
+{% endif %}
 {% endif %}

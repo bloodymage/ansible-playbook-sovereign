@@ -30,6 +30,8 @@ There are three reasons I had with creating this with this project.
 
 Some smaller goals that I have for this project is minimizing the variables I have to define in my inventory.  For each role, having sensible defaults, and the fine tuning done in the inventory requires the least amount of definitions as possible.  In addition, I have set it up to simplify password management for various services by using ansible's passwordstore lookup to generate and save any passwords necessary.
 
+Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
+
 ## Installation
 ### Ansible Galaxy
 ### Github
@@ -104,6 +106,9 @@ This collection can use a Samba domain for identity management.  This way you ca
 - File Servers
 
 Planned modifications will be single sign on, through use of Kerberos and Keycloak.  This partially works now, email single sign on in linux for clients that support GSSAPI currently works.  Keycloak and nextcloud can be configured (through their web interface) to use single sign on as well.  The tweaks that are necessary involve windows email clients (Thunderbird works, Outlook does not) and configuring keycloak and nextcloud through their CLI via ansbile.
+
+A note on Samba and DNS:
+While Samba provides it's own internal DNS server, this setup has opted to use Bind9 DNS instead, and configure Samba DCs to use Bind9.  This is decision was made to minimize the impact to the various network services the event of the Samba DC process crashing.  In that case only the Samba DC service is lost, DNS will still work.
 
 ### Password Storage
   By default, all passwords default variables are set to "password."  When a password is encountered that is set to "password," a password will be generated using password_store, and the generated password will be used.  This creates the following advantages:

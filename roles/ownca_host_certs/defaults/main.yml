@@ -2,6 +2,7 @@
 packages:
   - python3-cryptography
   - python3-openssl
+  - rng-tools
 
 ownca_hosts_directory: "{{ ownca_directory }}/hosts"
 
@@ -15,6 +16,8 @@ ownca_host_certs_directories:
   - name: certs
     mode: "0755"
   - name: crls
+    mode: "0755"
+  - name: dhparams
     mode: "0755"
 
 ownca_host_certs_subject_alt_name:

@@ -372,7 +372,6 @@
     - nextcloud-debug
     - websites
 
-
 - name: "Ensure we have a clean nextcloud state before we do anything else"
   command:
     cmd: >
@@ -389,7 +388,6 @@
     - nextcloud-debug
     - nextcloud
     - websites
-
 
 # ==================================================================================================
 #

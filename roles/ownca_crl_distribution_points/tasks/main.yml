@@ -1,0 +1,60 @@
+---
+# tasks file for ownca_crl_distribution_point
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - ownca-crl-distribution-points
+    - ownca_crl_distribution_points
+
+- name: "Install packages"
+  ansible.builtin.package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+  delegate_to: localhost
+  tags:
+    - ownca-crl-distribution-points
+    - ownca_crl_distribution_points
+
+- name: Install Apache site.conf
+  ansible.builtin.template:
+    src: "apache-site.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ virtual_hosts }}"
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "crls"
+    - item.enabled is defined
+    - item.enabled
+  notify: reload apache
+  tags:
+    - ownca-crl-distribution-points
+    - ownca_crl_distribution_points
+
+- name: Copy CRLs to server.
+  include: "install_crls.yml"
+  loop: "{{ virtual_hosts }}"
+  loop_control:
+    loop_var: vhost
+  when:
+    - virtual_hosts is defined
+    - vhost.content is defined
+    - vhost.content == "crls"
+    - vhost.enabled is defined
+    - vhost.enabled
+  become: yes
+  tags:
+    - ownca-crl-distribution-points
+    - ownca_crl_distribution_points

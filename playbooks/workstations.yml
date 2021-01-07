@@ -1,4 +1,5 @@
 - hosts: workstations
   roles:
+    - bloodymage.rebeldream.libnss3_tools
     - bloodymage.rebeldream.evolution
     - bloodymage.rebeldream.firefox

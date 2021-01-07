@@ -1,8 +1,10 @@
 - hosts: redis_servers
   roles:
-    - bloodymage.rebeldream.redis
+    - role: bloodymage.rebeldream.redis
+      tags:
+        redis
 
-- hosts: apache_servers
+- hosts: apache_servers:!public_zone
   roles:
     - bloodymage.rebeldream.apache
 
@@ -12,9 +14,28 @@
 
 - hosts: web_servers
   roles:
-    - bloodymage.rebeldream.mediawiki
-    - bloodymage.rebeldream.nextcloud
+    - role: bloodymage.rebeldream.mediawiki
+      tags:
+        - mediawiki
+        - mediawiki_debug
+        - mediawiki-debug
+    - role: bloodymage.rebeldream.nextcloud
+      tags:
+        - nextcloud
     # - bloodymage.rebeldream.drush
     # - bloodymage.rebeldream.drupal
-    - bloodymage.rebeldream.acmeca_challenge_site
-    - bloodymage.rebeldream.acmeca_host_certs
+    - role: bloodymage.rebeldream.ownca_crl_distribution_points
+      tags:
+        - ownca-crl-distribution-points
+        - ownca_crl_distribution_points
+
+- hosts: web_servers:&public_zone
+  roles:
+    - role: bloodymage.rebeldream.acmeca_challenge_site
+      tags:
+        - acmeca-challenge-site
+    - role: bloodymage.rebeldream.acmeca_host_certs
+      tags:
+        - acmeca_host_certs
+        - acmeca-host-certs
+

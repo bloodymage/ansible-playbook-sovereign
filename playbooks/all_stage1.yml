@@ -3,7 +3,7 @@
 # First we gather some information
 #
 # ==================================================================================================
-- hosts: all
+- hosts: all:!public_zone
   ignore_unreachable: yes
   pre_tasks:
     - name: "Create groups based on the Network OS"
@@ -46,7 +46,7 @@
 # Next we configure setting applicable to ALL hosts
 #
 # ==================================================================================================
-- hosts: all:!localhost:!tpeap:!printers
+- hosts: all:!localhost:!tpeap:!printers:!public_zone
   strategy: free
   roles:
     - bloodymage.rebeldream.hostname
@@ -61,7 +61,7 @@
 #   - Windows
 #
 # ==================================================================================================
-- hosts: linux:!localhost:!routeros:!tpeap:!printers
+- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone
   strategy: linear
   roles:
     - bloodymage.rebeldream.sshca_host_certs
@@ -82,6 +82,6 @@
 # - Debian
 #
 # ==================================================================================================
-- hosts: debian:!localhost:!routeros:!tpeap:!printers
+- hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone
   roles:
     - bloodymage.rebeldream.aptitude
