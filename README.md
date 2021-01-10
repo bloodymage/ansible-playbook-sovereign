@@ -149,6 +149,7 @@ The Hearthminion ansible collection expands on this collection adding in new fea
 - [Awesome Self-Hosted](https://github.com/awesome-selfhosted/awesome-selfhosted)
 - [Reddit: Selfhosted](https://www.reddit.com/r/selfhosted/)
 - [Self-hosted Cookbook](https://github.com/tborychowski/self-hosted-cookbook/)
+- [Debops](https://docs.debops.org/en/master/) [DebOps Github](https://github.com/debops/debops)
 
 ## Contributing
 [How to Contribute](CONTRIBUTING.md)

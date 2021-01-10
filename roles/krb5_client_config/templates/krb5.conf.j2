@@ -1,14 +1,23 @@
 # {{ ansible_managed }}
-{# [logging] #}
-{#    default = FILE:/var/log/krb5.log #}
-{#    default = SYSLOG:INFO:DAEMON #}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# The krb5.conf configuration file                                                               #}
+{#                                                                                                #}
+{# Refs:                                                                                          #}
+{# - https://web.mit.edu/kerberos/krb5-1.18/doc/admin/conf_files/krb5_conf.html                   #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if krb5_config_logging %}
+[logging] 
+  default = FILE:/var/log/krb5.log 
+  default = SYSLOG:INFO:DAEMON 
+{% endif %}
 
-{# =================================================================================================
-#
-# While this works, it needs to be cleaned up a bit
-#
-# ==================================================================================================
-#}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# While this works, it needs to be cleaned up a bit                                              #}
+{#                                                                                                #}
+{# ============================================================================================== #}
 [libdefaults]
   default_realm = {{ rebeldream_domain | upper }}
   dns_lookup_realm = false
@@ -56,9 +65,20 @@
 {% endif %}
   }
 
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# This may come out completely.  This should only be defined if DNS lookups aren't working       #}
+{#                                                                                                #}
+{# Ref:                                                                                           #}
+{# - https://sssd.io/docs/users/ad_provider.html                                                  #}
+{# -                                                                                              #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if krb5_config_domain_realm %}
 [domain_realm]
   {{ rebeldream_domain }} = {{ rebeldream_domain | upper }}
   .{{ rebeldream_domain }} = {{ rebeldream_domain | upper }}
+{% endif %}
 
 {% if rebeldream_smart_card_login %}
 {% if inventory_hostname in groups['samba_domain_controllers'] %}

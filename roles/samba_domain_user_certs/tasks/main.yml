@@ -1,0 +1,19 @@
+---
+# tasks file for samba_domain_user_certs
+# ==================================================================================================
+#
+# A cleaner way to do this might be to user the ansible ldap_attrs module:
+# https://docs.ansible.com/ansible/latest/collections/community/general/ldap_attrs_module.html
+#
+# To do so, we need to get the actual value of the contents of the der cert files, and upload those.
+#
+# Short term solution, is to copy the der files to the schema master, then use an ldif to upload
+# them to the domain controller's ldap database
+#
+# ==================================================================================================
+- name: "Upload User Certs to LDAP Server"
+  include: "schema.yml"
+  become: no
+  loop: "{{ domain_users }}"
+  loop_control:
+    loop_var: user

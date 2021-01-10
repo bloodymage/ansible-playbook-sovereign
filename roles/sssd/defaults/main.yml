@@ -3,12 +3,9 @@
 packages:
   - adcli
   - libnss-sss
-  - libnss3-tools
   - libpam-sss
   - realmd
-  - policykit-1
   - packagekit
-  - samba-common-bin
   - sssd
   - sssd-tools
 

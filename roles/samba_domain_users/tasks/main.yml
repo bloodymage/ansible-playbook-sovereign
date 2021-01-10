@@ -15,24 +15,24 @@
 
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
-    username: "{{ item.username }}"
-    groupname: "{{ item.groupname | default(none) }}"
-    id_number: "{{ item.id_number | default(none) }}"
-    password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    given_name: "{{ item.given_name | default(item.username | title) }}"
-    surname: "{{ item.surname | default(none) }}"
-    initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
-    job_title: "{{ item.job_title | default(none) }}"
-    department: "{{ item.department | default(none) }}"
+    account_expire: "{{ item.account_expire | default(none) }}"
     company: "{{ item.company | default(none) }}"
+    department: "{{ item.department | default(none) }}"
     description: "{{ item.description | default(none) }}"
-    physical_delivery_office: "{{ item.physical_delivery_office | default(none) }}"
-    gecos: "{{ item.gecos | default(none) }}"
     email_aliases: "{{ item.email_aliases | default(none) }}"
     email_alt: "{{ item.email_alt | default(none) }}"
+    gecos: "{{ item.gecos | default(none) }}"
+    given_name: "{{ item.given_name | default(item.username | title) }}"
     gpg_keys: "{{ item.gpg_keys | default(none) }}"
-    account_expire: "{{ item.account_expire | default(none) }}"
+    groupname: "{{ item.groupname | default(item.username + '_g') }}"
+    id_number: "{{ item.id_number | default(none) }}"
+    initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
+    job_title: "{{ item.job_title | default(none) }}"
+    password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    physical_delivery_office: "{{ item.physical_delivery_office | default(none) }}"
     spns: "{{ item.spns | default(none) }}"
+    surname: "{{ item.surname | default(none) }}"
+    username: "{{ item.username }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item.username }}/password"
     __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
@@ -41,7 +41,7 @@
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   loop: "{{ domain_users }}"
-  #no_log: yes
+  no_log: yes
   become: no
   delegate_to: localhost
   register: domain_user_list
@@ -217,6 +217,7 @@
   loop: "{{ __domain_users }}"
   vars:
     __uid_number: "--uid-number '{{ item.ansible_facts.id_number }}'"
+    __gid_number: "--gid-number '{{ item.ansible_facts.id_number }}'"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is truthy
@@ -278,19 +279,6 @@
   when:
     - inventory_hostname == __samba_schema_master
     - item.ansible_facts.account_expire is truthy
-  delegate_to: "{{ __samba_schema_master }}"
-  run_once: yes
-
-- name: "Generate user SPNs"
-  include: generate_spns.yml
-  loop: "{{ __domain_users }}"
-  loop_control:
-    loop_var: user
-  when:
-    - __samba_schema_master is defined
-    - inventory_hostname == __samba_schema_master
-    - user.ansible_facts.spns is defined
-    - user.ansible_facts.spns is truthy
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 

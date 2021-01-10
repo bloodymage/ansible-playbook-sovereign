@@ -1,8 +1,8 @@
 - hosts: imap_servers:!public_zone
   roles:
-    - bloodymage.rebeldream.dovecot
+    - role: bloodymage.rebeldream.dovecot
 
 - hosts: postfix_servers:!public_zone
   roles:
-    - bloodymage.rebeldream.postfix
-    #- bloodymage.rebeldream.spamassassin
+    - role: bloodymage.rebeldream.postfix
+    #- role: bloodymage.rebeldream.spamassassin

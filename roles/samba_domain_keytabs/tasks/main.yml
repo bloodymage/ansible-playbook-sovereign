@@ -1,0 +1,34 @@
+---
+# tasks file for samba_domain_keytabs
+- name: "Get Users' password from password-store"
+  ansible.builtin.set_fact:
+    account_expire: "{{ item.account_expire | default(none) }}"
+    spns: "{{ item.spns | default(none) }}"
+    username: "{{ item.username }}"
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item.username }}/password"
+    __password_lookup: "{{ __password_store_id }}"
+  loop: "{{ domain_users }}"
+  no_log: yes
+  become: no
+  delegate_to: localhost
+  register: domain_user_list
+  run_once: yes
+  when:
+    - item.spns is defined
+
+- name: "Get Domain Users"
+  ansible.builtin.set_fact:
+    __domain_users: "{{ domain_user_list.results }}"
+  become: no
+  run_once: yes
+  delegate_to: localhost
+
+- name: "Generate user SPNs"
+  include: generate_spns.yml
+  loop: "{{ __domain_users }}"
+  loop_control:
+    loop_var: user
+  when:
+    - user.ansible_facts.spns is defined
+    - user.ansible_facts.spns is truthy

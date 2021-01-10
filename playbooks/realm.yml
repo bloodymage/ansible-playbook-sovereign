@@ -27,7 +27,7 @@
 
 - hosts: internal_network:!routeros
   roles:
-    - bloodymage.rebeldream.krb5_client_config
+    - role: bloodymage.rebeldream.krb5_client_config
 
 - hosts: samba_domain_controllers
   pre_tasks:
@@ -177,19 +177,25 @@
 
 # - hosts: openldap_servers
 #   roles:
-#     - bloodymage.rebeldream.openldap
+#     - role: bloodymage.rebeldream.openldap
 
 - hosts: sssd
   roles:
-    - bloodymage.rebeldream.sssd
+    - role: bloodymage.rebeldream.sssd
+
+- hosts: keytabs
+  roles:
+    - role: bloodymage.rebeldream.samba_domain_keytabs
+  tags:
+    - samba-domain-keytabs
 
 - hosts: keycloak_servers:!public_zone
   roles:
-    - bloodymage.rebeldream.keycloak
+    - role: bloodymage.rebeldream.keycloak
 
 # - hosts: samba_dotfiles
 #   roles:
-#     - bloodymage.rebeldream.dotfiles
+#     - role: bloodymage.rebeldream.dotfiles
 
 - hosts: samba_ownca_user_hosts
   roles:
@@ -199,3 +205,9 @@
         - ownca-user-certs
         - ownca_user_certs_debug
         - ownca-user-certs-debug
+
+- hosts: samba_schema_master
+  roles:
+    - role: bloodymage.rebeldream.samba_domain_user_certs
+      tags:
+        - samba-domain-user-certs
