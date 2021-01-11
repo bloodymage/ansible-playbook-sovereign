@@ -11,9 +11,52 @@
 # them to the domain controller's ldap database
 #
 # ==================================================================================================
-- name: "Upload User Certs to LDAP Server"
-  include: "schema.yml"
-  become: no
-  loop: "{{ domain_users }}"
-  loop_control:
-    loop_var: user
+- name: "Copy user certificates to domain schema master."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item[0].username }}_{{ item[1] }}.der"
+    dest: "/tmp/{{ item[0].username }}_{{ item[1] }}.cer"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ domain_users | product(['authentication', 'encryption', 'identification']) | list }}"
+  become: yes
+  when:
+    - item[0].id_number is defined
+
+- name: "Copy user certificates to domain schema master."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/certs/{{ item[0].username }}_{{ item[1] }}.der"
+    dest: "/tmp/{{ item[0].username }}_{{ item[1] }}.cer"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ domain_users | product(['authentication', 'encryption', 'identification']) | list }}"
+  become: yes
+  when:
+    - item[0].id_number is defined
+
+# ==================================================================================================
+#
+# Currently, this gives an error if already installed, what is really needed is a way to test if
+# installed, and if so, don't install again.
+#
+# ==================================================================================================
+- name: "Install user certificates into ldap attributes."
+  ansible.builtin.command:
+    cmd: >
+      ldbmodify
+      -H /var/lib/samba/private/sam.ldb
+      "/tmp/{{ item[0].username }}_{{ item[1] }}.ldif"
+      --option='dsdb:schema update allowed'=true
+  loop: "{{ domain_users | product(['authentication', 'encryption', 'identification']) | list }}"
+  become: yes
+  ignore_errors: yes
+  when:
+    - item[0].id_number is defined
+
+# - name: "Upload User Certs to LDAP Server"
+#   include: "schema.yml"
+#   become: no
+#   loop: "{{ domain_users }}"
+#   loop_control:
+#     loop_var: user
