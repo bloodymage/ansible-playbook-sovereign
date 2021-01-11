@@ -13,64 +13,117 @@
       paths:
         - "vars"
   become: no
-  tags:
-    - sssd
-    - sssd_debug
-    - sssd-debug
-    - install-packages
 
 - name: "Install packages"
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
-  tags:
-    - sssd
-    - sssd_debug
-    - sssd-debug
-    - install-packages
   notify: restart sssd
 
-- name: stop sssd
+- name: "Ensure we have a password for the Samba Administrator account"
+  ansible.builtin.set_fact:
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  become: no
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_lookup: "{{ __password_store_id }}"
+  when:
+    - samba_administrator_password == "password"
+  no_log: yes
+
+  # Check for existing AD
+- name: Checking to see if system is already joined to AD
+  command: /bin/bash -c "/usr/sbin/realm list"
+  register: realm_list_results
+
+- name: Debug realm_list_results
+  ansible.builtin.debug:
+    msg: "{{ realm_list_results.stdout }}"
+    verbosity: 1
+  tags:
+    - never
+    - debug
+
+- name: "stop sssd"
   service:
     name: sssd
     state: stopped
   become: yes
-  tags:
-    - never
-    - samba-domain-create
+  when:
+    - __samba_recreate_realm
+    - realm_list_results.stdout is defined
+    - realm_list_results.stdout is truthy
 
-- name: Leave Realm
-  ansible.builtin.command: "realm leave"
+- name: "Leave Realm"
+  ansible.builtin.command:
+    cmd: "realm leave"
+  become: yes
+  when:
+    - __samba_recreate_realm
+    - realm_list_results.stdout is defined
+    - realm_list_results.stdout is truthy
+
+- name: Checking to see if system still joined to AD
+  command: /bin/bash -c "/usr/sbin/realm list"
+  register: realm_list_results
+  when:
+    - __samba_recreate_realm
+
+- name: Debug realm_list_results
+  ansible.builtin.debug:
+    msg: "{{ realm_list_results.stdout }}"
+    verbosity: 1
+  when:
+    - __samba_recreate_realm
   tags:
     - never
-    - samba-domain-create
+    - debug
 
 - name: Clear old data
   ansible.builtin.file:
-    path: /var/lib/sss/db
+    path: "/var/lib/sss/{{ item }}"
     state: absent
-  tags:
-    - never
-    - samba-domain-create
+  loop:
+    - db
+    - mc
+  become: yes
+  when:
+    - __samba_recreate_realm
 
 - name: Ensure DB directory exists
   ansible.builtin.file:
-    path: /var/lib/sss/db
-    state: direcotory
+    path: "/var/lib/sss/{{ item }}"
+    state: directory
     owner: sssd
     group: sssd
     mode: "0755"
-  tags:
-    - never
-    - samba-domain-create
+  loop:
+    - db
+    - mc
+  become: yes
+  when:
+    - __samba_recreate_realm
+
+- name: "Test Kerberos Logon to Active Directory Domain Controller"
+  expect:
+    command: kinit administrator
+    responses:
+      (?i)password: "{{ samba_administrator_password }}"
+  when:
+    - realm_list_results.stdout is defined
+    - realm_list_results.stdout is falsy
 
 - name: Join Realm
-  ansible.builtin.command: "realm join {{ rebeldream_domain }}"
+  expect:
+    command: /bin/bash -c "/usr/sbin/realm join {{ rebeldream_domain }} --user=Administrator"
+    responses:
+      (?i)Password: "{{ samba_administrator_password }}"
+  ignore_errors: yes
   become: yes
-  tags:
-    - never
-    - samba-domain-create
+  when:
+    - realm_list_results.stdout is defined
+    - realm_list_results.stdout is falsy
 
 - name: "Install sssd.conf"
   ansible.builtin.template:
@@ -81,10 +134,6 @@
     mode: "0600"
   become: yes
   notify: restart sssd
-  tags:
-    - sssd
-    - sssd_debug
-    - sssd-debug
 
 - name: "Ensure pam_preauth_available file exists"
   ansible.builtin.file:
@@ -95,7 +144,5 @@
     state: touch
   become: yes
   notify: restart sssd
-  tags:
-    - sssd
-    - sssd_debug
-    - sssd-debug
+  when:
+    - rebeldream_smart_card_login

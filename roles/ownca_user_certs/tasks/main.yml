@@ -55,7 +55,7 @@
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
     username: "{{ item.username }}"
-    groupname: "{{ item.groupname }}"
+    groupname: "{{ item.groupname | default(item.username + '_g') }}"
     id_number: "{{ item.id_number }}"
     password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     given_name: "{{ item.given_name | default(item.username | title) }}"

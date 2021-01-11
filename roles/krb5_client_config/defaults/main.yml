@@ -7,3 +7,5 @@ packages:
   #-libpam-krb5
 
 krb5_config_logging: no
+
+krb5_config_domain_realm: yes

@@ -46,12 +46,12 @@
     pkinit_identities = PKCS11:opensc-pkcs11.so:slotid=0:certid=01
     pkinit_require_eku = true
     pkinit_anchors = DIR:/etc/ssl/certs
-    pkinit_principal_in_certificate = yes
-    pkinit_win2k = no
-    pkinit_win2k_require_binding = yes
+    #pkinit_principal_in_certificate = yes
+    #pkinit_win2k = no
+    #pkinit_win2k_require_binding = yes
     pkinit_kdc_hostname = dc.olympus.drbr.org
     canonicalize = True
-    default_ccache_name = KEYRING:persistent:%{uid}
+    #default_ccache_name = KEYRING:persistent:%{uid}
   {% endif %}
 {% endif %}
 {% if groups['samba_file_servers'] is defined %}
