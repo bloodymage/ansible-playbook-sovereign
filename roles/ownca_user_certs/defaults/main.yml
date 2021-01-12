@@ -38,6 +38,8 @@ ownca_user_pki_dirs:
     mode: "0755"
   - name: "pkcs12"
     mode: "0700"
+  - name: "ssh"
+    mode: "0755"
 
 ownca_user_cert_purposes:
   - authentication

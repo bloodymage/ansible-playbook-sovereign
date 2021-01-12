@@ -233,6 +233,9 @@
         - ownca-user-certs
         - ownca_user_certs_debug
         - ownca-user-certs-debug
+    - role: bloodymage.rebeldream.sshca_user_certs
+      tags:
+        - sshca-user-certs
 
 - hosts: samba_schema_master
   roles:

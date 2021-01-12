@@ -1,2 +1,146 @@
 ---
 # tasks file for sshca-user-certs
+- name: "Create user pki directories"
+  ansible.builtin.file:
+    path: "{{ ownca_directory }}/users/{{ item.name }}"
+    state: directory
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
+    mode: "{{ item.mode }}"
+  become: no
+  loop: "{{ sshca_user_pki_dirs }}"
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Get information from user authentication x509 certificate"
+  community.crypto.x509_certificate_info:
+    path: "{{ ownca_directory }}/users/certs/{{ item.username }}_authentication.crt"
+  loop: "{{ domain_users }}"
+  register: __result
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - item.username is defined
+    - item.id_number is defined
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.public_key }}"
+    verbosity: 1
+  loop: "{{ __result.results }}"
+  become: no
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - __result.results is defined
+    - item.public_key is defined
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.item.given_name | default(item.item.username) }}"
+      - "{{ item.public_key }}"
+    verbosity: 2
+  loop: "{{ __result.results }}"
+  become: no
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - __result.results is defined
+    - item.public_key is defined
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }}"
+    verbosity: 3
+  loop: "{{ __result.results }}"
+  become: no
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - __result.results is defined
+
+- name: "Check user information"
+  ansible.builtin.debug:
+    msg:
+      - "{{ __result }}"
+    verbosity: 4
+  become: no
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Create user public key"
+  ansible.builtin.copy:
+    dest: "{{ ownca_directory }}/users/certs/{{ item.item.username }}.pub"
+    content:  "{{ item.public_key }}"
+    owner: "{{ ownca_user }}"
+    group: "{{ ownca_user }}"
+    mode: "0644"
+  loop: "{{ __result.results }}"
+  become: no
+  delegate_to: localhost
+  when:
+    - item.public_key is defined
+
+# ==================================================================================================
+#
+# I tried this with 'ansible.builtin.command' it failed every time.  Really not sure why.
+#
+# ==================================================================================================
+- name: "Convert public key to ssh public key format"
+  ansible.builtin.shell:
+    cmd: "ssh-keygen -i -m PKCS8 -f {{ __pubkey }} > {{ __ssh_pubkey }}"
+    executable: "/bin/bash"
+    chdir: "{{ ownca_directory }}/users"
+  loop: "{{ domain_users }}"
+  become: no
+  delegate_to: localhost
+  vars:
+    __pubkey: "certs/{{ item.username }}.pub"
+    __ssh_pubkey: "ssh/{{ item.username }}.pub"
+  when:
+    - item.id_number is defined
+
+- name: "Ensure we have a password for the User CA Key"
+  ansible.builtin.set_fact:
+    sshca_user_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_user_key_password"
+    __password_lookup: "{{ __password_store_id }}"
+  become: no
+  delegate_to: localhost
+  changed_when:
+    - sshca_user_key_password != "password"
+  when:
+    - sshca_user_key_password == "password"
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
+
+- name: Sign SSH keys.
+  expect:
+    command: ssh-keygen -s "{{ sshca_user_signer_key }}"
+             -I "{{ sshca_user_signer_id }}"
+             -n "{{ __ssh_principals }}"
+             "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
+    responses:
+      (?i)passphrase: "{{ sshca_user_key_password }}"
+  loop: "{{ domain_users }}"
+  changed_when: false
+  become: no
+  delegate_to: localhost
+  #no_log: yes
+  vars:
+    __ssh_principals: "{% for principal in item.ssh_principals %}{{ principal }}{{ ',' if not loop.last else '' }}{% endfor %}"
+  when:
+    - item.ssh_principals is defined
+    - item.id_number is defined
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
