@@ -53,10 +53,3 @@
   ignore_errors: yes
   when:
     - item[0].id_number is defined
-
-# - name: "Upload User Certs to LDAP Server"
-#   include: "schema.yml"
-#   become: no
-#   loop: "{{ domain_users }}"
-#   loop_control:
-#     loop_var: user

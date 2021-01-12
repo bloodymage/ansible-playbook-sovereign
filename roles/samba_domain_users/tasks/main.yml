@@ -141,24 +141,6 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
-- name: Add Unix Samba Groups (Without email address)
-  shell: >
-    samba-tool group add "{{ item.ansible_facts.groupname }}"
-    --gid-number {{ item.ansible_facts.id_number }}
-    --nis-domain "{{ rebeldream_org_unit_name | upper }}"
-    -U Administrator
-    --password {{ samba_administrator_password }}
-  become: yes
-  loop: "{{ __domain_users }}"
-  when:
-    - item.ansible_facts.groupname is defined
-    - item.ansible_facts.id_number is truthy
-    - inventory_hostname == __samba_schema_master
-    - item.ansible_facts.groupname not in existing_group_list.stdout_lines
-    - item.ansible_facts.mail_address is not defined
-  delegate_to: "{{ __samba_schema_master }}"
-  run_once: yes
-
 - name: Add Unix Samba Groups (With email address)
   shell: >
     samba-tool group add "{{ item.groupname }}"
@@ -217,8 +199,8 @@
 #
 #
 # ==================================================================================================
-- name: "Add Samba Users (with a surname)"
-  ansible.builtin.command:
+- name: Add Samba Users
+  command:
     cmd: >
       samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
       --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"
@@ -228,7 +210,7 @@
       --surname "{{ item.ansible_facts.surname }}"
       --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
       --nis-domain "{{ rebeldream_org_unit_name | upper }}"
-      --mail-address "{{ item.ansible_facts.username }}{{ samba_email_domain }}"
+      --mail-address "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
       --username Administrator
       --password {{ samba_administrator_password }}
   become: yes
@@ -236,7 +218,6 @@
   vars:
     __uid_number: "--uid-number '{{ item.ansible_facts.id_number }}'"
     __gid_number: "--gid-number '{{ item.ansible_facts.id_number }}'"
-    __surname: "{% if item.ansible_facts.surname %}--surname '{{ item.ansible_facts.surname }}'{% else %}''{% endif %}"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is truthy
@@ -244,7 +225,7 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
-- name: "Add Samba Users (without a surname)"
+- name: Add Samba Users
   shell: >
     samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
     --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"
@@ -253,7 +234,7 @@
     --given-name "{{ item.ansible_facts.given_name }}"
     --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
     --nis-domain "{{ rebeldream_org_unit_name | upper }}"
-    --mail-address "{{ item.ansible_facts.username }}{{ samba_email_domain }}"
+    --mail-address "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
     --username Administrator
     --password {{ samba_administrator_password }}
   become: yes
@@ -312,3 +293,34 @@
     - group.group_members is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
+
+# - name: "Insert User LDAP Attributes"
+#   community.general.ldap_attrs:
+#     dn: "CN={{ __dn }},{{ rebeldream_user_dn }}"
+#     attributes:
+#       #company: "{{ item.company | default(none) }}"
+#       gidNumber: "{{ item.id_number | default(none) }}"
+#       givenName: "{{ __given_name }}"
+#       initials: "{{ __given_name[0] | default(none) }}{{ item.middle_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
+#       mail: "{{ __mail }}"
+#       #mobile: "{{ item.mobile | default(none) }}"
+#       #sn: "{{ item.surname }}"
+#       #title: "{{ item.job_title | default(none) }}"
+#       uidNumber: "{{ item.id_number | default(none) }}"
+#       unixHomeDirectory: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}"
+#       #wWWHomePage: "{{ item.internet_address | default(none) }}"
+#     state: present
+#     bind_dn: "cn=administrator,{{ rebeldream_user_dn }}"
+#     bind_pw: "{{ samba_administrator_password }}"
+#     start_tls: yes
+#     server_uri: "ldap://{{ rebeldream_fqdn }}"
+#   loop: "{{ domain_users }}"
+#   vars:
+#     __default_mail: "{{ item.username }}@{{ rebeldream_root_domain }}"
+#     __mail: "{{ item.mail | default(__default_mail) }}"
+#     __given_name: "{{ item.given_name  | default(item.username) }}"
+#     __surname: "{{ item.surname | default(none) }}"
+#     __sn: "{% if item.surname is defined %}cn: {{ item.surname }}{% endif %}"
+#     __dn: "{{ __given_name }}{% if item.surname is defined %} {{ __surname }}{% endif %}"
+#   when:
+#     - item.id_number is defined

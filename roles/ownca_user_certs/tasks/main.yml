@@ -649,24 +649,3 @@
   delegate_to: localhost
   tags:
     - der
-
-# # Move to SSHCA role
-#
-# See: https://docs.ansible.com/ansible/latest/collections/community/crypto/x509_certificate_info_module.html
-# for ansible method of obtaining the public key
-#
-# - name: Extract public key from authentication certs
-#   ansible.builtin.command:
-#     cmd: >
-#       openssl x509 -in {{ __auth_cert }} -noout -pubkey > {{ __pubkey }}
-#   vars:
-#     __auth_cert: "{{ ownca_directory }}/users/certs/{{ item.ansible_facts.username }}_authentication.crt"
-#     __pubkey: "{{ ownca_directory }}/users/public_keys/{{ item.ansible_facts.username }}_authentication.pem"
-
-# - name: Convert to ssh pubkey
-#   ansible.builtin.command:
-#     cmd: >
-#       ssh-keygen -i -m PKCS8 -f {{ __pubkey }} > {{ __ssh_pubkey }}
-#   vars:
-#     __pubkey: "{{ ownca_directory }}/users/public_keys/{{ item.ansible_facts.username }}_authentication.pem"
-#     __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.ansible_facts.username }}.pub"
