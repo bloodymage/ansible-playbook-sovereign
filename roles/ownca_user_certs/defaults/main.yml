@@ -28,3 +28,18 @@ ownca_user_certs_encryption_extended_key_usage:
 
 ownca_home_dir: "/home/{{ rebeldream_org_unit_name | upper }}"
 ownca_user_pki_dir: ".pki"
+
+ownca_user_pki_dirs:
+  - name: private
+    mode: "0700"
+  - name: csr
+    mode: "0755"
+  - name: "certs"
+    mode: "0755"
+  - name: "pkcs12"
+    mode: "0700"
+
+ownca_user_cert_purposes:
+  - authentication
+  - identification
+  - encryption
