@@ -11,8 +11,7 @@
     - identification
   become: yes
   when:
-    - user.given_name is defined
-    - user.id_number is not none
+    - user.id_number is defined
 
 - name: "Copy schema extensions to domain schema master. Username: {{ user.username }}"
   ansible.builtin.template:
@@ -27,8 +26,7 @@
     - identification
   become: yes
   when:
-    - user.given_name is defined
-    - user.id_number is not none
+    - user.id_number is defined
 
 # ==================================================================================================
 #
@@ -50,5 +48,4 @@
   become: yes
   ignore_errors: yes
   when:
-    - user.given_name is defined
-    - user.id_number is not none
+    - user.id_number is defined

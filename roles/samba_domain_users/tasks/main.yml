@@ -141,6 +141,24 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
+- name: Add Unix Samba Groups (Without email address)
+  shell: >
+    samba-tool group add "{{ item.ansible_facts.groupname }}"
+    --gid-number {{ item.ansible_facts.id_number }}
+    --nis-domain "{{ rebeldream_org_unit_name | upper }}"
+    -U Administrator
+    --password {{ samba_administrator_password }}
+  become: yes
+  loop: "{{ __domain_users }}"
+  when:
+    - item.ansible_facts.groupname is defined
+    - item.ansible_facts.id_number is truthy
+    - inventory_hostname == __samba_schema_master
+    - item.ansible_facts.groupname not in existing_group_list.stdout_lines
+    - item.ansible_facts.mail_address is not defined
+  delegate_to: "{{ __samba_schema_master }}"
+  run_once: yes
+
 - name: Add Unix Samba Groups (With email address)
   shell: >
     samba-tool group add "{{ item.groupname }}"
@@ -199,8 +217,8 @@
 #
 #
 # ==================================================================================================
-- name: Add Samba Users
-  command:
+- name: "Add Samba Users (with a surname)"
+  ansible.builtin.command:
     cmd: >
       samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
       --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"
@@ -218,6 +236,7 @@
   vars:
     __uid_number: "--uid-number '{{ item.ansible_facts.id_number }}'"
     __gid_number: "--gid-number '{{ item.ansible_facts.id_number }}'"
+    __surname: "{% if item.ansible_facts.surname %}--surname '{{ item.ansible_facts.surname }}'{% else %}''{% endif %}"
   when:
     - item.ansible_facts.given_name is defined
     - item.ansible_facts.surname is truthy
@@ -225,7 +244,7 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
-- name: Add Samba Users
+- name: "Add Samba Users (without a surname)"
   shell: >
     samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
     --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"

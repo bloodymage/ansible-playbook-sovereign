@@ -1,0 +1,30 @@
+- name: "Show file path"
+  ansible.builtin.debug:
+    msg:
+      - File: "{{ item.path }}"
+    verbosity: 1
+  loop: "{{ __directory.files }}"
+  when:
+    - __samba_recreate_realm
+    - __directory is defined
+
+- name: Show file information
+  ansible.builtin.debug:
+    msg:
+      - "{{ item }}"
+    verbosity: 2
+  loop: "{{ __directory.files }}"
+  when:
+    - __samba_recreate_realm
+    - __directory is defined
+
+- name: Remove database files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ __directory.files }}"
+  become: yes
+  when:
+    - __samba_recreate_realm
+    - __directory is defined
+    - item.path is defined
