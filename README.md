@@ -141,7 +141,14 @@ Planned modifications will be single sign on, through use of Kerberos and Keyclo
 A note on Samba and DNS:
 While Samba provides it's own internal DNS server, this setup has opted to use Bind9 DNS instead, and configure Samba DCs to use Bind9.  This is decision was made to minimize the impact to the various network services the event of the Samba DC process crashing.  In that case only the Samba DC service is lost, DNS will still work.
 
+### Certificate Authority
+
+This collection will maintain an internal certificate authority.  It will also configure the browsers to recognize your certificate authority.  So all internal sites are verified.  In addition this allows you to use smart cards authentication within active directory.
+
+For sites that are publicly available, the site will use an acme ca  (Let's encrypt, etc).
+
 ### Password Storage
+
   By default, all passwords default variables are set to "password."  When a password is encountered that is set to "password," a password will be generated using password_store, and the generated password will be used.  This creates the following advantages:
   1. You do not need to generate your passwords yourself.
   2. You can create backups, and distribute the passwords via git/gpg (Add specific user gpg keys to any folder you wish to grant access. )
