@@ -93,11 +93,11 @@
     record: "{{ item[1].name.split('.')[0] }}"
     value: "{{ inventory_hostname }}."
     type: "CNAME"
-  loop: "{{ bind_zone_dnsservers | product(hosts) | list }}"
+  loop: "{{ bind_zone_dnsservers | product(virtual_hosts) | list }}"
   become: yes
   when:
     - bind_zone is defined
-    - hosts is defined
+    - virtual_hosts is defined
   remote_user: root
   delegate_to: "{{ item[0].address_ipv4 }}"
   tags:

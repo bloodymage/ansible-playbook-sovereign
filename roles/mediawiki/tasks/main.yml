@@ -53,10 +53,10 @@
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -83,7 +83,7 @@
   loop: "{{ mediawiki_apache_modules }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - inventory_hostname in groups['apache_servers']
   notify: restart apache
   tags:
@@ -102,9 +102,9 @@
     track_submodules: yes
   become: yes
   become_user: www-data
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -123,9 +123,9 @@
     working_dir: "/srv/www/{{ item.name }}/w"
   become: yes
   become_user: www-data
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -139,12 +139,12 @@
 
 - name: "Include mediawiki extension task"
   include: mediawiki_extensions.yml
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     loop_var: host
   become: no
   when:
-    - hosts is defined
+    - virtual_hosts is defined
   tags:
     - mediawiki
     - mediawiki_debug
@@ -164,12 +164,12 @@
   command:
     cmd: "git submodule update --init --recursive"
     chdir: "/srv/www/{{ item.name }}/w/extensions"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   become_user: www-data
   register: success
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -183,12 +183,12 @@
 
 - name: "Install Additional mediawiki skins"
   include: mediawiki_skins.yml
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     loop_var: host
   become: no
   when:
-    - hosts is defined
+    - virtual_hosts is defined
   tags:
     - mediawiki
     - mediawiki_debug
@@ -210,10 +210,10 @@
     chdir: "/srv/www/{{ item.name }}/w/skins"
   become: yes
   become_user: www-data
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   register: success
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -233,9 +233,9 @@
     group: www-data
     mode: "0644"
   become: yes
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -256,9 +256,9 @@
     group: www-data
     mode: "0644"
   become: yes
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -284,9 +284,9 @@
     chdir: "/srv/www/{{ item.name }}/w"
   become: yes
   become_user: www-data
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
@@ -305,10 +305,10 @@
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "mediawiki"
     - item.enabled is defined
