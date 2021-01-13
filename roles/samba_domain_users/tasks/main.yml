@@ -1,88 +1,13 @@
 ---
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
-    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"    
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
-    __password_length: "length={{ samba_password_legnth }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password_lookup: "{{ __password_store_id }}"
   become: no
   when:
     - samba_administrator_password == "password"
-
-- name: "Get Users' password from password-store"
-  ansible.builtin.set_fact:
-    account_expire: "{{ item.account_expire | default(none) }}"
-    company: "{{ item.company | default(none) }}"
-    department: "{{ item.department | default(none) }}"
-    description: "{{ item.description | default(none) }}"
-    email_aliases: "{{ item.email_aliases | default(none) }}"
-    email_alt: "{{ item.email_alt | default(none) }}"
-    gecos: "{{ item.gecos | default(none) }}"
-    given_name: "{{ item.given_name | default(item.username | title) }}"
-    gpg_keys: "{{ item.gpg_keys | default(none) }}"
-    groupname: "{{ item.groupname | default(item.username + '_g') }}"
-    id_number: "{{ item.id_number | default(none) }}"
-    initials: "{{ item.given_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
-    job_title: "{{ item.job_title | default(none) }}"
-    password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    physical_delivery_office: "{{ item.physical_delivery_office | default(none) }}"
-    spns: "{{ item.spns | default(none) }}"
-    surname: "{{ item.surname | default(none) }}"
-    username: "{{ item.username }}"
-  vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item.username }}/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  loop: "{{ domain_users }}"
-  no_log: yes
-  become: no
-  delegate_to: localhost
-  register: domain_user_list
-
-- name: "Get Domain Users"
-  ansible.builtin.set_fact:
-    __domain_users: "{{ domain_user_list.results }}"
-  become: no
-  delegate_to: localhost
-
-- name: "Check user information"
-  ansible.builtin.debug:
-    msg:
-      - "Username:                        {{ item.ansible_facts.username }}"
-      - "Groupname:                       {{ item.ansible_facts.groupname }}"
-      - "id_number:                       {{ item.ansible_facts.id_number }}"
-      - "password:                        {{ item.ansible_facts.password }}"
-      - "Given Name:                      {{ item.ansible_facts.given_name }}"
-      - "Surname:                         {{ item.ansible_facts.surname }}"
-      - "Initials:                        {{ item.ansible_facts.initials }}"
-      - "Job Title:                       {{ item.ansible_facts.job_title }}"
-      - "Department:                      {{ item.ansible_facts.department }}"
-      - "Company:                         {{ item.ansible_facts.company }}"
-      - "Description                      {{ item.ansible_facts.description }}"
-      - "Physical Delivery Office:        {{ item.ansible_facts.physical_delivery_office }}"
-      - "gecos:                           {{ item.ansible_facts.gecos }}"
-      - "email_aliases:                   {{ item.ansible_facts.email_aliases }}"
-      - "email_alt:                       {{ item.ansible_facts.email_alt }}"
-      - "gpg_keys:                        {{ item.ansible_facts.gpg_keys }}"
-      - "account_expire:                  {{ item.ansible_facts.account_expire }}"
-      - "spns:                            {{ item.ansible_facts.spns }}"
-    verbosity: 1
-  loop: "{{ __domain_users }}"
-  loop_control:
-    index_var: index
-  become: no
-  when:
-    __domain_users is defined
-  tags:
-    - never
-    - debug
 
 - name: Get Samba Groups
   command:
@@ -202,48 +127,70 @@
 - name: Add Samba Users
   command:
     cmd: >
-      samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
-      --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"
-      --uid-number "{{ item.ansible_facts.id_number }}"
-      --gid-number "{{ item.ansible_facts.id_number }}"
-      --given-name "{{ item.ansible_facts.given_name }}"
-      --surname "{{ item.ansible_facts.surname }}"
-      --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
+      samba-tool user create "{{ __username }}" "{{ __password }}"
+      --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
+      --uid-number "{{ item.id_number }}"
+      --gid-number "{{ item.id_number }}"
+      --given-name "{{ item.given_name }}"
+      --surname "{{ item.surname }}"
+      --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
       --nis-domain "{{ rebeldream_org_unit_name | upper }}"
-      --mail-address "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
+      --mail-address "{{ __username }}@{{ samba_email_domain }}"
       --username Administrator
       --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ __domain_users }}"
+  loop: "{{ domain_users }}"
   vars:
-    __uid_number: "--uid-number '{{ item.ansible_facts.id_number }}'"
-    __gid_number: "--gid-number '{{ item.ansible_facts.id_number }}'"
+    __username: "{{ item.username }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ __username }}/password"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __id_number: "{{ item.id_number }}"
+    __uid_number: "--uid-number '{{ item.id_number }}'"
+    __gid_number: "--gid-number '{{ item.id_number }}'"
   when:
-    - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is truthy
-    - item.ansible_facts.username not in existing_user_list.stdout_lines
+    - item.given_name is defined
+    - item.surname is defined
+    - item.id_number is defined
+    - item.username not in existing_user_list.stdout_lines
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
 - name: Add Samba Users
   shell: >
-    samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
-    --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.ansible_facts.username }}"
-    --uid-number "{{ item.ansible_facts.id_number }}"
-    --gid-number "{{ item.ansible_facts.id_number }}"
-    --given-name "{{ item.ansible_facts.given_name }}"
-    --login-shell "{{ item.ansible_facts.login_shell | default ('/bin/bash') }}"
+    samba-tool user create "{{ __username }}" "{{ __password }}"
+    --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
+    --uid-number "{{ item.id_number }}"
+    --gid-number "{{ item.id_number }}"
+    --given-name "{{ item.given_name }}"
+    --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
     --nis-domain "{{ rebeldream_org_unit_name | upper }}"
-    --mail-address "{{ item.ansible_facts.username }}@{{ samba_email_domain }}"
+    --mail-address "{{ __username }}@{{ samba_email_domain }}"
     --username Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ __domain_users }}"
+  loop: "{{ domain_users }}"
+  vars:
+    __username: "{{ item.username }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ __username }}/password"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __id_number: "{{ item.id_number }}"
+    __uid_number: "--uid-number '{{ item.id_number }}'"
+    __gid_number: "--gid-number '{{ item.id_number }}'"
   when:
-    - item.ansible_facts.given_name is defined
-    - item.ansible_facts.surname is falsy
-    - item.ansible_facts.username not in existing_user_list.stdout_lines
-    - item.ansible_facts.id_number is truthy
+    - item.given_name is defined
+    - item.surname is not defined
+    - item.username not in existing_user_list.stdout_lines
+    - item.id_number is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
@@ -255,30 +202,38 @@
 # ==================================================================================================
 - name: Add Samba Users
   shell: >
-    samba-tool user create "{{ item.ansible_facts.username }}" "{{ item.ansible_facts.password }}"
+    samba-tool user create "{{ __username }}" "{{ __password }}"
     --username Administrator
     --password {{ samba_administrator_password }}
-  loop: "{{ __domain_users }}"
+  loop: "{{ domain_users }}"
   ignore_errors: yes
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   become: yes
+  vars:
+    __username: "{{ item.username }}"
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ __username }}/password"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   when:
-    - inventory_hostname == __samba_schema_master
-    - item.ansible_facts.username not in existing_user_list.stdout_lines
-    - item.ansible_facts.id_number is falsy
+    - item.username not in existing_user_list.stdout_lines
+    - item.id_number is not defined
 
 - name: Set expiry for Samba Users
   command:
     cmd: >
-      samba-tool user setexpiry "{{ item.ansible_facts.account_expire }}" "{{ item.ansible_facts.username }}"
+      samba-tool user setexpiry "{{ item.account_expire }}" "{{ item.username }}"
       --username Administrator
       --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ __domain_users }}"
+  loop: "{{ domain_users }}"
   when:
     - inventory_hostname == __samba_schema_master
-    - item.ansible_facts.account_expire is truthy
+    - item.account_expire is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
