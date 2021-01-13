@@ -1,33 +1,15 @@
 ---
-# ======================================================================
+# ==================================================================================================
 #
 # Files and Directories
 #
-# ======================================================================
-ownca_user_certs_authentication_key_usage:
-  - "nonRepudiation"
-  - "digitalSignature"
-  - "keyEncipherment"
-
-ownca_user_certs_authentication_extended_key_usage:
-  - "clientAuth"
-  - "msSmartcardLogin"
-
-ownca_user_certs_identification_key_usage:
-  - "digitalSignature"
-
-ownca_user_certs_identification_extended_key_usage:
-  - "emailProtection"
-  - "clientAuth"
-
-ownca_user_certs_encryption_key_usage:
-  - "keyEncipherment"
-
-ownca_user_certs_encryption_extended_key_usage:
-  - "emailProtection"
-
+# ==================================================================================================
 ownca_home_dir: "/home/{{ rebeldream_org_unit_name | upper }}"
 ownca_user_pki_dir: ".pki"
+ownca_user_cert_dir: "{{ ownca_user_pki_dir }}/certs"
+ownca_user_csr_dir: "{{ ownca_user_pki_dir }}/csr"
+ownca_user_private_dir: "{{ ownca_user_pki_dir }}/private"
+ownca_user_pkcs12_dir: "{{ ownca_user_pki_dir }}/pkcs12"
 
 ownca_user_pki_dirs:
   - name: private
@@ -41,7 +23,28 @@ ownca_user_pki_dirs:
   - name: "ssh"
     mode: "0755"
 
+# ==================================================================================================
+#
+# While I know the key usage and extended key usage work, I am not sure if they are right.
+#
+# ==================================================================================================
 ownca_user_cert_purposes:
-  - authentication
-  - identification
-  - encryption
+  - name: authentication
+    key_usage:
+      - "nonRepudiation"
+      - "digitalSignature"
+      - "keyEncipherment"
+    extended_key_usage:
+      - "clientAuth"
+      - "msSmartcardLogin"
+  - name: identification
+    key_usage:
+      - "digitalSignature"
+    extended_key_usage:
+      - "emailProtection"
+      - "clientAuth"
+  - name: encryption
+    key_usage:
+      - "keyEncipherment"
+    extended_key_usage:
+      - "emailProtection"
