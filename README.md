@@ -46,7 +46,9 @@ git clone https://github.com/bloodymage/ansible-collection-rebeldream rebeldream
 Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
 For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) for more information.
 
-```ansible-playbook bloodymage/rebeldream/playbooks/site.yml```
+```
+ansible-playbook bloodymage/rebeldream/playbooks/site.yml
+```
 
 This will create your site.
 
@@ -70,9 +72,38 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 ##### [Samba File Server](roles/samba_file_server/README.md)
 
 ### Variables
+
+Note: This is still in early development.  Some of the variable descriptions and requirements listed below pertain more to how it is planned to eventually work, than how it works right now.
+
 #### Global Variables
+
 ##### Users
+```
+users:
+  - username: bob          (mandatory)
+    id_number: 1000        (mandatory)
+
+```
 ##### Domain Users
+
+```
+domain_users:
+  - given_name: Bob        (Mandatory)
+    id_number: 10000       (Mandatory)
+    username: bob          (optional)
+    surname: bobsurname    (optional)
+    middle_name: bobmid    (optional)
+    password:              (optional)
+```
+
+If the username is not defined, then it will be created based on other defined variables (given_name, surname if available, middle_name if available, and a random number.  If password is defined, the defined password will be used, otherwise a password will be generated (see [Passwords](#Passwords))
+
+##### Choices
+
+The following are optional choices that are not required to be defined.
+
+```smart_card_usage: no```        Options: yes\no
+```realm_management_system: ""``` Options: "" (not thoroughly tested), Samba, OpenLDAP (not implemented), FreeIPA (not implemented)
 
 #### Role variables
 Each role's variables are defined in their README.md file.
