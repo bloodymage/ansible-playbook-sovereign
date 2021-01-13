@@ -199,9 +199,11 @@
 # Add users for other services:
 #   - email
 #
+# Can this be done with 'ldap_entry' instead?
+#
 # ==================================================================================================
 - name: Add Samba Users
-  shell: >
+  ansible.builtin.shell: >
     samba-tool user create "{{ __username }}" "{{ __password }}"
     --username Administrator
     --password {{ samba_administrator_password }}
@@ -223,8 +225,8 @@
     - item.username not in existing_user_list.stdout_lines
     - item.id_number is not defined
 
-- name: Set expiry for Samba Users
-  command:
+- name: "Set expiry for Samba Users"
+  ansible.builtin.command:
     cmd: >
       samba-tool user setexpiry "{{ item.account_expire }}" "{{ item.username }}"
       --username Administrator
@@ -249,6 +251,14 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
+# ==================================================================================================
+#
+# Conceptually this works to update the users ldap attributes.  The problem is, I wish to be able to
+# update the attribute if it is defined.  Otherwise, I don't want it to do anything.  One possible
+# option is to do a nested look "loop: {{ domain_users | product(attributes) }}" then check if that
+# attribute is defined for that user, and if yes, update it.  That's not very efficient though.
+#
+# ==================================================================================================
 # - name: "Insert User LDAP Attributes"
 #   community.general.ldap_attrs:
 #     dn: "CN={{ __dn }},{{ rebeldream_user_dn }}"
