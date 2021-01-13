@@ -93,6 +93,7 @@
     mode: "0600"
     force: no
     passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
+    backup: yes
   become: yes
   loop: "{{ domain_users }}"
   vars:
@@ -112,10 +113,6 @@
 # ==================================================================================================
 - name: Generate User CSRs
   community.crypto.openssl_csr:
-    path: "{{ __user_csr_dir }}/{{ __username }}_{{ item[1].name }}.csr"
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
-    mode: "0644"
     country_name: "{{ rebeldream_country }}"
     state_or_province_name: "{{ rebeldream_region }}"
     locality_name: "{{ rebeldream_city }}"
@@ -140,6 +137,12 @@
           - certificate_hold
           - privilege_withdrawn
           - aa_compromise
+    path: "{{ __user_csr_dir }}/{{ __username }}_{{ item[1].name }}.csr"
+    owner: "{{ __id_number }}"
+    group: "{{ __id_number }}"
+    mode: "0644"
+    backup: yes
+    force: no
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
@@ -184,9 +187,12 @@
     ownca_privatekey_path: "{{ ownca_identity_ca_key }}"
     ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     provider: ownca
+    backup: yes
+    force: no
   become: no
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   delegate_to: localhost
+  register: result
   vars:
     __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
     __password_lookup: "{{ __password_store_id }}"
@@ -194,6 +200,32 @@
   when:
     - item[0].id_number is defined
     - item[0].spns is not defined
+
+# - name: "Get old certificate information"
+#   community.crypto.x509_certificate_info:
+#     path: "{{ item.backup_file }}"
+#   loop: "{{ result.results }}"
+#   register: certs
+#   when:
+#     - result.results is defined
+#     - item.backup_file is defined
+
+# - name: Add serial number to crl database
+#   ansible.builtin.blockinfile:
+#     dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ rebeldrream_org_unit_name }}-identity-ca.crl.srl"
+#     block: |
+#       - serial_number: {{ item.serial_number }}
+#         revocation_date: "{{ lookup('pipe','date --utc +%Y%m%d%H%M%S') }}Z"
+#         reason: "{{ __reason }}"
+#   loop: "{{ certs.results }}"
+#   var:
+#     __reason_default: "superseded"
+#     __reason_key: "{% if __force_cert_regen %}key_compromise{% else %}{{ __reason_default }}{% endif %}"
+#     __reason_ca: "{% if __force_ca_regen %}ca_compromise{% else %}{{ __reason_key }}{% endif %}"
+#     __reason: "{{ __reason_ca }}"
+#   when:
+#     - cert.results is defined
+#     - item.serial_number is defined
 
 - name: Copy User Certificates to workstation.
   ansible.builtin.copy:
@@ -229,6 +261,8 @@
     owner: "{{ __id_number }}"
     group: "{{ __id_number }}"
     mode: "0600"
+    backup: yes
+    force: no
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:

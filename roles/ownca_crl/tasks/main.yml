@@ -161,6 +161,8 @@
     next_update: "+7d"
     revoked_certificates: "{{ item.revoked_certificates | default(ownca_revoked_certificates) }}"
   loop: "{{ ownca_certificate_authorities }}"
+  #vars:
+  #  __revoked_certificate_serials: "{{ lookup('file', ownca_directory + '/certificate_authorities/db/' + rebeldream_org_name + '-' + item.name +'-ca.crl.srl').splitlines() }}"
   become: no
   delegate_to: localhost
   tags:
@@ -168,3 +170,5 @@
     - ownca-crl
     - ownca_crl_debug
     - ownca-crl-debug
+
+
