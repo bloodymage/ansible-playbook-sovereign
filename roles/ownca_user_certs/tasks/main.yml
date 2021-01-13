@@ -239,7 +239,7 @@
     __surname: "{% if item[0].surname is defined %} {{ item[0].surname }} {% else %}{% endif %}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
     __user_cert_dir: "{{ __user_home_dir }}/{{ ownca_user_cert_dir }}"
-    __pki_cert_file: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1] }}.crt"
+    __pki_cert_file: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
     __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
     __pki_privatekey_file: "{{ __user_private_dir }}/{{ __username }}.key"
     __user_pkcs12_dir: "{{ __user_home_dir }}/{{ ownca_user_pkcs12_dir }}"
@@ -255,7 +255,7 @@
     cmd: >
       openssl x509 -in "{{ item[0].username }}_{{ __cert_purpose }}.crt"
       -inform PEM
-      -out "{{ item[0].ansible_facts.username }}_{{ __cert_purpose }}.der"
+      -out "{{ item[0].username }}_{{ __cert_purpose }}.der"
       -outform DER
     chdir: "{{ __pki_cert_dir }}"
     creates: "{{ item[0].username }}_{{ __cert_purpose }}.der"
