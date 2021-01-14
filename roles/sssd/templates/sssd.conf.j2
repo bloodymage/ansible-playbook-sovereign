@@ -1,13 +1,15 @@
+# {{ ansible_managed }}
+
 [sssd]
 {% if not sssd_systemd %}
   services = {{ sssd_services }}
-{% else %}
+{% endif %}
 config_file_version = 2
 domains = {{ rebeldream_domain }}
 debug_level = {{ sssd_debug_level }}
 #dyndns_update_ptr = false
-{% if rebeldream_smart_card_login %}
-{% if sssd_ldap_user_certificate is defined -%}
+{% if rebeldream_smart_card_login and inventory_hostname in groups['workstations'] %}
+{% if sssd_certificate_verification is defined -%}
   certificate_verification = {{ sssd_certificate_verification }}
 {% endif %}
 {% endif %}
@@ -24,14 +26,16 @@ debug_level = {{ sssd_debug_level }}
 {% else -%}
   pam_pwd_expiration_warning = {{ sssd_pam_pwd_expiration_warning }}
 {% endif %}
-{% if rebeldream_smart_card_login %}
+{% if rebeldream_smart_card_login  and inventory_hostname in groups['workstations'] %}
 {% if sssd_ldap_user_certificate is defined -%}
   pam_cert_auth = {{ sssd_pam_cert_auth }}
   pam_cert_db_path = {{ rebeldream_identity_ca_chain_file }}
   #p11_uri = pkcs11:opensc-pkcs11.so:slotid=0:certid=01;id=01
 {% endif %}
 {% endif %}
-#pam_verbosity = {{ sssd_pam_verbosity }}
+{% if sssd_pam_verbosity is defined %}
+  #pam_verbosity = {{ sssd_pam_verbosity }}
+{% endif %}
 
 [domain/{{ rebeldream_domain }}]
 ad_domain = {{ rebeldream_domain }}
@@ -48,16 +52,16 @@ enumerate = true
 {% if sssd_ad_gpo_access_control is defined -%}
   ad_gpo_access_control = {{ sssd_ad_gpo_access_control }}
 {% endif %}
-{% if rebeldream_smart_card_login %}
-  {% if sssd_ldap_user_certificate is defined -%}
-    ldap_tls_reqcert = demand
-    ldap_tls_cacert = {{ rebeldream_component_ca_chain_file }}
+{% if rebeldream_smart_card_login  and inventory_hostname in groups['workstations']  %}
+{% if sssd_ldap_user_certificate is defined -%}
+  ldap_tls_reqcert = demand
+  ldap_tls_cacert = {{ rebeldream_component_ca_chain_file }}
   ldap_user_certificate = {{ sssd_ldap_user_certificate }}
 {% endif %}
 {% endif %}
 
 {# Smart card's don't work without this #}
-{% if rebeldream_smart_card_login -%}
+{% if rebeldream_smart_card_login  and inventory_hostname in groups['workstations'] -%}
   [certmap/{{ rebeldream_domain }}/ms]
   matchrule = <SAN:ntPrincipalName>.*@.*
   maprule = (|(userPrincipal={subject_nt_principal})(samAccountName={subject_nt_principal.short_name}))

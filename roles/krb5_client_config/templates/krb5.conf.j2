@@ -49,7 +49,7 @@
     #pkinit_principal_in_certificate = yes
     #pkinit_win2k = no
     #pkinit_win2k_require_binding = yes
-    pkinit_kdc_hostname = dc.olympus.drbr.org
+    pkinit_kdc_hostname = dc.{{ rebeldream_domain }}
     canonicalize = True
     #default_ccache_name = KEYRING:persistent:%{uid}
   {% endif %}

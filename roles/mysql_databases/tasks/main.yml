@@ -6,6 +6,8 @@
     state: present
   loop: "{{ mariadb_databases }}"
   become: yes
+  when:
+    - mariadb_databases is defined
   tags:
     - mysql_databases
     - mysql-databases
@@ -24,6 +26,8 @@
   loop: "{{ mysql_users }}"
   no_log: true
   become: yes
+  when:
+    - mysql_users is defined
   tags:
     - mysql_databases
     - mysql-databases

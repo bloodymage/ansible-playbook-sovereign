@@ -11,3 +11,7 @@ packages:
 
 sssd_pam_pwd_expiration_warning: 10
 sssd_debug_level: 0x4000
+
+# Really need a way to test for this
+sssd_systemd: no
+sssd_services: "nss, pam"
