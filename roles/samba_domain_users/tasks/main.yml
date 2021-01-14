@@ -264,17 +264,18 @@
 #     dn: "CN={{ __dn }},{{ rebeldream_user_dn }}"
 #     attributes:
 #       #company: "{{ item.company | default(none) }}"
-#       gidNumber: "{{ item.id_number | default(none) }}"
-#       givenName: "{{ __given_name }}"
-#       initials: "{{ __given_name[0] | default(none) }}{{ item.middle_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
-#       mail: "{{ __mail }}"
+#       #gidNumber: "{{ item.id_number | default(none) }}"
+#       #givenName: "{{ __given_name }}"
+#       #initials: "{{ __given_name[0] | default(none) }}{{ item.middle_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
+#       #mail: "{{ __mail }}"
 #       #mobile: "{{ item.mobile | default(none) }}"
 #       #sn: "{{ item.surname }}"
 #       #title: "{{ item.job_title | default(none) }}"
-#       uidNumber: "{{ item.id_number | default(none) }}"
-#       unixHomeDirectory: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}"
+#       #uidNumber: "{{ item.id_number | default(none) }}"
+#       #unixHomeDirectory: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}"
+#       userCertificate: []
 #       #wWWHomePage: "{{ item.internet_address | default(none) }}"
-#     state: present
+#     state: exact
 #     bind_dn: "cn=administrator,{{ rebeldream_user_dn }}"
 #     bind_pw: "{{ samba_administrator_password }}"
 #     start_tls: yes

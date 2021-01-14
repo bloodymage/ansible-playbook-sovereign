@@ -13,24 +13,24 @@
 # ==================================================================================================
 - name: "Copy user certificates to domain schema master."
   ansible.builtin.copy:
-    src: "{{ ownca_directory }}/users/certs/{{ item[0].username }}_{{ item[1] }}.der"
-    dest: "/tmp/{{ item[0].username }}_{{ item[1] }}.cer"
+    src: "{{ ownca_directory }}/users/certs/{{ item[0].username }}_{{ item[1].name }}.der"
+    dest: "/tmp/{{ item[0].username }}_{{ item[1].name }}.cer"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ domain_users | product(['authentication', 'encryption', 'identification']) | list }}"
+  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   become: yes
   when:
     - item[0].id_number is defined
 
 - name: "Copy user certificates to domain schema master."
-  ansible.builtin.copy:
-    src: "{{ ownca_directory }}/users/certs/{{ item[0].username }}_{{ item[1] }}.der"
-    dest: "/tmp/{{ item[0].username }}_{{ item[1] }}.cer"
+  ansible.builtin.template:
+    src: "schema.ldif.j2"
+    dest: "/tmp/{{ item[0].username }}_{{ item[1].name }}.ldif"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ domain_users | product(['authentication', 'encryption', 'identification']) | list }}"
+  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   become: yes
   when:
     - item[0].id_number is defined
@@ -40,16 +40,21 @@
 # Currently, this gives an error if already installed, what is really needed is a way to test if
 # installed, and if so, don't install again.
 #
+# Only install the athentication certificate for now.  Smart card is asking to select a certificate.
+# Trying to run down all possible reasons this could be.  There are legitimate cases when it's
+# needed.
+#
 # ==================================================================================================
 - name: "Install user certificates into ldap attributes."
   ansible.builtin.command:
     cmd: >
       ldbmodify
       -H /var/lib/samba/private/sam.ldb
-      "/tmp/{{ item[0].username }}_{{ item[1] }}.ldif"
+      "/tmp/{{ item[0].username }}_{{ item[1].name }}.ldif"
       --option='dsdb:schema update allowed'=true
-  loop: "{{ domain_users | product(['authentication', 'encryption', 'identification']) | list }}"
+  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   become: yes
   ignore_errors: yes
   when:
     - item[0].id_number is defined
+    - item[1].name == "authentication"

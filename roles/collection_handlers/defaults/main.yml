@@ -178,6 +178,32 @@ ownca_issuing_authorities:
   - identity
   - codesign
 
+# ==================================================================================================
+#
+# While I know the key usage and extended key usage work, I am not sure if they are right.
+#
+# ==================================================================================================
+ownca_user_cert_purposes:
+  - name: authentication
+    key_usage:
+      - "nonRepudiation"
+      - "digitalSignature"
+      - "keyEncipherment"
+    extended_key_usage:
+      - "clientAuth"
+      - "msSmartcardLogin"
+  - name: identification
+    key_usage:
+      - "digitalSignature"
+    extended_key_usage:
+      - "emailProtection"
+      - "clientAuth"
+  - name: encryption
+    key_usage:
+      - "keyEncipherment"
+    extended_key_usage:
+      - "emailProtection"
+
 ownca_revoked_certificates: []
 
 # Ownca Files and Directories

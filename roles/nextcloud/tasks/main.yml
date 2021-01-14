@@ -393,18 +393,20 @@
 #
 # Need to limit this to only when 'user_ldap' app is included in 'nextcloud_apps' list
 #
+# Disabled for now.
+#
 # ==================================================================================================
-- name: "Configure LDAP"
-  include: nextcloud_ldap.yml
-  loop: "{{ virtual_hosts }}"
-  loop_control:
-    loop_var: host
-  when:
-    - virtual_hosts is defined
-    - host.content is defined
-    - host.content == "nextcloud"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
+# - name: "Configure LDAP"
+#   include: nextcloud_ldap.yml
+#   loop: "{{ virtual_hosts }}"
+#   loop_control:
+#     loop_var: host
+#   when:
+#     - virtual_hosts is defined
+#     - host.content is defined
+#     - host.content == "nextcloud"
+#   tags:
+#     - nextcloud
+#     - nextcloud_debug
+#     - nextcloud-debug
+#     - websites
