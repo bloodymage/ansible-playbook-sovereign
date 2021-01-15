@@ -19,7 +19,7 @@
 - name: "Create nssdb"
   ansible.builtin.command:
     cmd: "certutil -N -d nssdb --empty-password"
-    creates: "/etc/pki/cert9.db"
+    creates: "/etc/pki/nssdb/cert9.db"
     chdir: "/etc/pki"
   become: yes
 
