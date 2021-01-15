@@ -1,0 +1,6 @@
+{% if item.ssh_access_cert is defined %}
+{% for principal in item.ssh_access_cert %}
+{{ principal }}
+{% endfor %}
+{% endif %}
+{{ item.username }}

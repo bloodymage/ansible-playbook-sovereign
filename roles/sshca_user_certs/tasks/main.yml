@@ -115,11 +115,6 @@
     - sshca_user_key_password != "password"
   when:
     - sshca_user_key_password == "password"
-  tags:
-    - sshca_host_certs
-    - sshca-host-certs
-    - sshca_host_certs_debug
-    - sshca-host-certs-debug
 
 - name: Sign SSH keys.
   expect:
@@ -135,12 +130,20 @@
   delegate_to: localhost
   #no_log: yes
   vars:
-    __ssh_principals: "{% for principal in item.ssh_principals %}{{ principal }}{{ ',' if not loop.last else '' }}{% endfor %}"
+    __ssh_principals_list: "{{ item.ssh_principals + [item.username] | default([item.username]) }}"
+    __ssh_principals: "{% for principal in __ssh_principals_list %}{{ principal }}{{ ',' if not loop.last else '' }}{% endfor %}"
   when:
     - item.ssh_principals is defined
     - item.id_number is defined
-  tags:
-    - sshca_host_certs
-    - sshca-host-certs
-    - sshca_host_certs_debug
-    - sshca-host-certs-debug
+
+- name: Create SSH Principals file for users
+  ansible.builtin.template:
+    src: "ssh_principals.j2"
+    dest: "/etc/ssh/auth_principals/{{ item.username }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ domain_users }}"
+  become: yes
+  when:
+    - item.id_number is defined

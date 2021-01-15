@@ -39,3 +39,6 @@ openssh_gssapi_cleanup_credentials: "no"
 openssh_gssapi_key_exchange: "no"
 openssh_gssapi_store_credentials_on_rekey: "no"
 #openssh_gssapi_strict_accept_or_check:
+
+# SSH_Config options
+openssh_github: no
