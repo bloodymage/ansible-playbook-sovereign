@@ -22,13 +22,13 @@
 Host *.{{ rebeldream_domain }}
 {% if rebeldream_smart_card_login %}
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
-  CertificateFile ~/.ssh/%u-cert.pub
 {% else %}
   GSSAPIDelegateCredentials yes
 {% endif %}
+  CertificateFile ~/.ssh/%u-cert.pub
 
 {% if rebeldream_smart_card_login %}
-  {% if ssh_github -%}
+  {% if openssh_github -%}
     Host github.com
     PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
   {% endif %}
