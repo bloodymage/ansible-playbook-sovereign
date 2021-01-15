@@ -20,7 +20,7 @@
 {#                                                                                                #}
 {# ============================================================================================== #}
 Host *.{{ rebeldream_domain }}
-{% if rebeldream_smart_card_login %}
+{% if rebeldream_smart_card_login and inventory_hostname in groups['internal_zone'] %}
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
 {% else %}
   GSSAPIDelegateCredentials yes
