@@ -53,6 +53,7 @@ Features and Advantages
 
 Similar Projects
 ----------------
+- https://github.com/tvories/ansible-realmd
 
 References
 ----------

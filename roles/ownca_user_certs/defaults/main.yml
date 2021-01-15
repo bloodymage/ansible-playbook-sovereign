@@ -1,30 +1,24 @@
 ---
-# ======================================================================
+# ==================================================================================================
 #
 # Files and Directories
 #
-# ======================================================================
-ownca_user_certs_authentication_key_usage:
-  - "nonRepudiation"
-  - "digitalSignature"
-  - "keyEncipherment"
-
-ownca_user_certs_authentication_extended_key_usage:
-  - "clientAuth"
-  - "msSmartcardLogin"
-
-ownca_user_certs_identification_key_usage:
-  - "digitalSignature"
-
-ownca_user_certs_identification_extended_key_usage:
-  - "emailProtection"
-  - "clientAuth"
-
-ownca_user_certs_encryption_key_usage:
-  - "keyEncipherment"
-
-ownca_user_certs_encryption_extended_key_usage:
-  - "emailProtection"
-
+# ==================================================================================================
 ownca_home_dir: "/home/{{ rebeldream_org_unit_name | upper }}"
 ownca_user_pki_dir: ".pki"
+ownca_user_cert_dir: "{{ ownca_user_pki_dir }}/certs"
+ownca_user_csr_dir: "{{ ownca_user_pki_dir }}/csr"
+ownca_user_private_dir: "{{ ownca_user_pki_dir }}/private"
+ownca_user_pkcs12_dir: "{{ ownca_user_pki_dir }}/pkcs12"
+
+ownca_user_pki_dirs:
+  - name: private
+    mode: "0700"
+  - name: csr
+    mode: "0755"
+  - name: "certs"
+    mode: "0755"
+  - name: "pkcs12"
+    mode: "0700"
+  - name: "ssh"
+    mode: "0755"

@@ -19,6 +19,7 @@
   become: yes
   register: result
   delegate_to: localhost
+  run_once: yes
   tags:
     - ownca-crl-distribution-points
     - ownca_crl_distribution_points

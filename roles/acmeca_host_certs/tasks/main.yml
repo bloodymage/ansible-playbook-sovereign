@@ -93,10 +93,10 @@
     owner: root
     group: root
     mode: "0755"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: "Generate Let's Encrypt Certificate private key"
@@ -110,9 +110,9 @@
     mode: '0600'
     force: "{{ __acmeca_regenerate_server_private_key }}"
   become: yes
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: "Generate Let's Encrypt CSR"
@@ -129,9 +129,9 @@
     backup: yes
     force: "{{ __acmeca_regenerate_server_private_key }}"
   become: yes
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: "Begin Let's Encrypt challenges"
@@ -149,9 +149,9 @@
     validate_certs: yes
     force: "{{ __acmeca_regenerate_server_private_key }}"
   become: no
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
   register: acme_challenge
 
@@ -177,10 +177,10 @@
     owner: www-data
     group: www-data
     mode: "0755"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: "Implement http-01 challenge files"
@@ -190,12 +190,12 @@
     owner: www-data
     group: www-data
     mode: "0644"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     index_var: my_index
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
@@ -206,12 +206,12 @@
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     index_var: my_index
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
@@ -222,12 +222,12 @@
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     index_var: my_index
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
@@ -238,12 +238,12 @@
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     index_var: my_index
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
@@ -261,12 +261,12 @@
     data: "{{ acme_challenge['results'][my_index] }}"
     force: "{{ __acmeca_regenerate_server_private_key }}"
     validate_certs: yes
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     index_var: my_index
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'] is defined
   notify: restart apache
@@ -278,10 +278,10 @@
     owner: root
     group: root
     mode: "0755"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: Create live link certs
@@ -291,10 +291,10 @@
     state: link
     owner: root
     group: root
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: Setup Live Link chain
@@ -304,10 +304,10 @@
     state: link
     owner: root
     group: root
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: Setup Live Link fullchain
@@ -317,10 +317,10 @@
     state: link
     owner: root
     group: root
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: Setup live link privkey
@@ -330,21 +330,21 @@
     state: link
     owner: root
     group: root
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
 
 - name: "Cleanup acme challenge directory"
   ansible.builtin.file:
     path: "/srv/www/{{ item.name }}/{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource'] }}"
     state: absent
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     index_var: my_index
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined

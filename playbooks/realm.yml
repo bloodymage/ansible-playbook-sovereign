@@ -1,6 +1,7 @@
-- hosts: all:!public_zone
+- name: "Prepare playbook environment"
+  hosts: all:!public_zone
   ignore_unreachable: yes
-  pre_tasks:
+  tasks:
     - name: "Create groups based on the Network OS"
       group_by:
         key: "{{ ansible_network_os.split('.')[2] | lower }}"
@@ -25,12 +26,11 @@
       tags:
         - always
 
-- hosts: internal_network:!routeros
-  roles:
-    - bloodymage.rebeldream.krb5_client_config
+    - name: "Set default domain recreation"
+      ansible.builtin.set_fact:
+        __samba_recreate_realm: no
+      become: no
 
-- hosts: samba_domain_controllers
-  pre_tasks:
     - name: "Determine whether to force domain recreation"
       ansible.builtin.set_fact:
         __samba_recreate_realm: yes
@@ -38,17 +38,6 @@
       tags:
         - never
         - recreate-realm
-
-    - name: "Set Samba Schema Master to Running Schema Master (Only if not regenerating realm)"
-      command:
-        cmd: "samba-tool fsmo show"
-      register: __samba_schema_master_role
-      run_once: yes
-      become: yes
-      when:
-        - not __samba_recreate_realm
-      tags:
-        - always
 
     - name: Print Samba Schema Master Role
       debug:
@@ -113,7 +102,54 @@
         - never
         - debug
 
-    - name: Set Samba Schema Master
+- hosts: internal_network:!routeros
+  name: "Configure baseline Kerberos"
+  roles:
+    - role: bloodymage.rebeldream.krb5_client_config
+
+# ==================================================================================================
+#
+# If we are recreating the realm, we need to:
+# 1. Remove all old files from previous iteration on all domain controller hosts
+# 2. Create the realm on the schema master host
+# 3. Configure all subesquent domain controller hosts
+#
+# ==================================================================================================
+# - hosts: samba_domain_controllers
+#   roles:
+#     - role: bloodymage.rebeldream.samba_domain_clean_environment
+#       tags:
+#         - samba_domain_controller
+#         - samba-domain-controller
+
+# - hosts: samba_schema_master
+#   roles:
+#     - role: bloodymage.rebeldream.samba_domain_controller
+#       tags:
+#         - samba_domain_controller
+#         - samba-domain-controller
+
+- hosts: samba_domain_controllers
+  tasks:
+    - name: "Set Default Samba Schema Master"
+      ansible.builtin.set_fact:
+        __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
+      become: no
+      tags:
+        - always
+
+    - name: "Set Samba Schema Master to Running Schema Master (Only if not regenerating realm)"
+      command:
+        cmd: "samba-tool fsmo show"
+      register: __samba_schema_master_role
+      run_once: yes
+      become: yes
+      when:
+        - not __samba_recreate_realm
+      tags:
+        - always
+
+    - name: Set Samba Schema Master if domain exists
       ansible.builtin.set_fact:
         __samba_schema_master: "{{ __samba_schema_master_list | join('.') }}"
       become: no
@@ -124,31 +160,19 @@
           - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
           - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
       when:
-        - not __samba_recreate_realm
+        - __samba_schema_master_role is defined
+        - __samba_schema_master_role.stdout_lines is defined
       tags:
         - always
-
-    - name: Print Samba Schema Master
-      debug:
-        msg:
-          - "Schema Master: {{ __samba_schema_master }}"
-        verbosity: 1
-      become: no
-      when:
-        - __samba_schema_master is defined
-      tags:
-        - never
-        - debug
 
     - name: "Create Samba Schema Master Group"
       add_host:
         name: "{{ __samba_schema_master }}"
         groups:
           - samba_schema_master
-      when:
-        - __samba_schema_master is defined
       tags:
         - always
+
   roles:
     - role: bloodymage.rebeldream.samba_domain_controller
       tags:
@@ -177,19 +201,29 @@
 
 # - hosts: openldap_servers
 #   roles:
-#     - bloodymage.rebeldream.openldap
+#     - role: bloodymage.rebeldream.openldap
 
 - hosts: sssd
   roles:
-    - bloodymage.rebeldream.sssd
+    - role: bloodymage.rebeldream.sssd
+      tags:
+        - sssd
+
+- hosts: keytabs
+  roles:
+    - role: bloodymage.rebeldream.samba_domain_keytabs
+  tags:
+    - samba-domain-keytabs
 
 - hosts: keycloak_servers:!public_zone
   roles:
-    - bloodymage.rebeldream.keycloak
+    - role: bloodymage.rebeldream.keycloak
+      tags:
+        - keycloak
 
 # - hosts: samba_dotfiles
 #   roles:
-#     - bloodymage.rebeldream.dotfiles
+#     - role: bloodymage.rebeldream.dotfiles
 
 - hosts: samba_ownca_user_hosts
   roles:
@@ -199,3 +233,12 @@
         - ownca-user-certs
         - ownca_user_certs_debug
         - ownca-user-certs-debug
+    - role: bloodymage.rebeldream.sshca_user_certs
+      tags:
+        - sshca-user-certs
+
+- hosts: samba_schema_master
+  roles:
+    - role: bloodymage.rebeldream.samba_domain_user_certs
+      tags:
+        - samba-domain-user-certs

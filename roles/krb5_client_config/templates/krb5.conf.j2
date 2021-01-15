@@ -1,14 +1,23 @@
 # {{ ansible_managed }}
-{# [logging] #}
-{#    default = FILE:/var/log/krb5.log #}
-{#    default = SYSLOG:INFO:DAEMON #}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# The krb5.conf configuration file                                                               #}
+{#                                                                                                #}
+{# Refs:                                                                                          #}
+{# - https://web.mit.edu/kerberos/krb5-1.18/doc/admin/conf_files/krb5_conf.html                   #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if krb5_config_logging %}
+[logging] 
+  default = FILE:/var/log/krb5.log 
+  default = SYSLOG:INFO:DAEMON 
+{% endif %}
 
-{# =================================================================================================
-#
-# While this works, it needs to be cleaned up a bit
-#
-# ==================================================================================================
-#}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# While this works, it needs to be cleaned up a bit                                              #}
+{#                                                                                                #}
+{# ============================================================================================== #}
 [libdefaults]
   default_realm = {{ rebeldream_domain | upper }}
   dns_lookup_realm = false
@@ -37,12 +46,12 @@
     pkinit_identities = PKCS11:opensc-pkcs11.so:slotid=0:certid=01
     pkinit_require_eku = true
     pkinit_anchors = DIR:/etc/ssl/certs
-    pkinit_principal_in_certificate = yes
-    pkinit_win2k = no
-    pkinit_win2k_require_binding = yes
-    pkinit_kdc_hostname = dc.olympus.drbr.org
+    #pkinit_principal_in_certificate = yes
+    #pkinit_win2k = no
+    #pkinit_win2k_require_binding = yes
+    pkinit_kdc_hostname = dc.{{ rebeldream_domain }}
     canonicalize = True
-    default_ccache_name = KEYRING:persistent:%{uid}
+    #default_ccache_name = KEYRING:persistent:%{uid}
   {% endif %}
 {% endif %}
 {% if groups['samba_file_servers'] is defined %}
@@ -56,9 +65,20 @@
 {% endif %}
   }
 
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# This may come out completely.  This should only be defined if DNS lookups aren't working       #}
+{#                                                                                                #}
+{# Ref:                                                                                           #}
+{# - https://sssd.io/docs/users/ad_provider.html                                                  #}
+{# -                                                                                              #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if krb5_config_domain_realm %}
 [domain_realm]
   {{ rebeldream_domain }} = {{ rebeldream_domain | upper }}
   .{{ rebeldream_domain }} = {{ rebeldream_domain | upper }}
+{% endif %}
 
 {% if rebeldream_smart_card_login %}
 {% if inventory_hostname in groups['samba_domain_controllers'] %}

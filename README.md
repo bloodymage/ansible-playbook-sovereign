@@ -46,7 +46,9 @@ git clone https://github.com/bloodymage/ansible-collection-rebeldream rebeldream
 Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
 For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) for more information.
 
-```ansible-playbook bloodymage/rebeldream/playbooks/site.yml```
+```
+ansible-playbook bloodymage/rebeldream/playbooks/site.yml
+```
 
 This will create your site.
 
@@ -70,9 +72,38 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 ##### [Samba File Server](roles/samba_file_server/README.md)
 
 ### Variables
+
+Note: This is still in early development.  Some of the variable descriptions and requirements listed below pertain more to how it is planned to eventually work, than how it works right now.
+
 #### Global Variables
+
 ##### Users
+```
+users:
+  - username: bob          (mandatory)
+    id_number: 1000        (mandatory)
+
+```
 ##### Domain Users
+
+```
+domain_users:
+  - given_name: Bob        (Mandatory)
+    id_number: 10000       (Mandatory)
+    username: bob          (optional)
+    surname: bobsurname    (optional)
+    middle_name: bobmid    (optional)
+    password:              (optional)
+```
+
+If the username is not defined, then it will be created based on other defined variables (given_name, surname if available, middle_name if available, and a random number.  If password is defined, the defined password will be used, otherwise a password will be generated (see [Passwords](#Passwords))
+
+##### Choices
+
+The following are optional choices that are not required to be defined.
+
+```smart_card_usage: no```        Options: yes\no
+```realm_management_system: ""``` Options: "" (not thoroughly tested), Samba, OpenLDAP (not implemented), FreeIPA (not implemented)
 
 #### Role variables
 Each role's variables are defined in their README.md file.
@@ -110,7 +141,14 @@ Planned modifications will be single sign on, through use of Kerberos and Keyclo
 A note on Samba and DNS:
 While Samba provides it's own internal DNS server, this setup has opted to use Bind9 DNS instead, and configure Samba DCs to use Bind9.  This is decision was made to minimize the impact to the various network services the event of the Samba DC process crashing.  In that case only the Samba DC service is lost, DNS will still work.
 
+### Certificate Authority
+
+This collection will maintain an internal certificate authority.  It will also configure the browsers to recognize your certificate authority.  So all internal sites are verified.  In addition this allows you to use smart cards authentication within active directory.
+
+For sites that are publicly available, the site will use an acme ca  (Let's encrypt, etc).
+
 ### Password Storage
+
   By default, all passwords default variables are set to "password."  When a password is encountered that is set to "password," a password will be generated using password_store, and the generated password will be used.  This creates the following advantages:
   1. You do not need to generate your passwords yourself.
   2. You can create backups, and distribute the passwords via git/gpg (Add specific user gpg keys to any folder you wish to grant access. )
@@ -149,6 +187,7 @@ The Hearthminion ansible collection expands on this collection adding in new fea
 - [Awesome Self-Hosted](https://github.com/awesome-selfhosted/awesome-selfhosted)
 - [Reddit: Selfhosted](https://www.reddit.com/r/selfhosted/)
 - [Self-hosted Cookbook](https://github.com/tborychowski/self-hosted-cookbook/)
+- [Debops](https://docs.debops.org/en/master/) [DebOps Github](https://github.com/debops/debops)
 
 ## Contributing
 [How to Contribute](CONTRIBUTING.md)

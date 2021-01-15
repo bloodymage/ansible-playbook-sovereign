@@ -8,9 +8,9 @@
         - never
         - regenerate-ownca
   roles:
-    - bloodymage.rebeldream.sshca
+    - role: bloodymage.rebeldream.sshca
 
 - hosts: certificate_authorities
   roles:
-    - bloodymage.rebeldream.ownca
-    - bloodymage.rebeldream.ownca_crl
+    - role: bloodymage.rebeldream.ownca
+    - role: bloodymage.rebeldream.ownca_crl

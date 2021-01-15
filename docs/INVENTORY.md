@@ -39,7 +39,7 @@
 ### webservers
 #### apache_servers
 #### nginx_servers
-### windows_workstations
+### workstations
 
 ## Inventory Group description
 ### apache_servers
@@ -78,4 +78,4 @@
 ### sssd
 ### syslog_servers
 ### webservers
-### windows_workstations
+### workstations

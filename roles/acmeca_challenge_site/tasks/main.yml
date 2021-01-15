@@ -35,9 +35,9 @@
     owner: "root"
     group: "root"
     mode: "0644"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.certificate == "acme"
     - item.content is not defined
     - inventory_hostname in groups['apache_servers']

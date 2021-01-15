@@ -28,7 +28,7 @@
     state: present
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -54,7 +54,7 @@
   loop: "{{ nextcloud_source_url }}"
   become: no
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -75,10 +75,10 @@
     group: www-data
     extra_opts: [--strip-components=1]
     creates: "/srv/www/{{ item.name }}/public.php"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -96,10 +96,10 @@
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -124,7 +124,7 @@
   notify: reload apache
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -138,10 +138,10 @@
 - name: Determine New Data Directory
   ansible.builtin.set_fact:
     nextcloud_data_directory: "/srv/www-data/{{ item.name }}/data"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: no
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -159,10 +159,10 @@
     owner: www-data
     group: www-data
     mode: "0755"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -176,11 +176,11 @@
 - name: Check If Data Directory in default location
   ansible.builtin.stat:
     path: "/srv/www/{{ item.name }}/data"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   register: dir_stat
   become: no
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -251,7 +251,7 @@
     mode: "0644"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -283,7 +283,7 @@
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - nextcloud_admin_password == "password"
   tags:
     - nextcloud
@@ -303,7 +303,7 @@
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - nextcloud_ldap_password == "password"
   tags:
     - nextcloud
@@ -325,7 +325,7 @@
     creates: "/srv/www/{{ item.name }}/config/config.php"
   become: yes
   become_user: www-data
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
     - item.database is defined
     - item.content == "nextcloud"
@@ -344,9 +344,9 @@
     group: www-data
     mode: "0644"
   become: yes
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "nextcloud"
     - item.enabled is defined
@@ -359,11 +359,11 @@
 
 - name: "Install Nextcloud apps"
   include: nextcloud_apps.yml
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   loop_control:
     loop_var: host
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - host.content is defined
     - host.content == "nextcloud"
   tags:
@@ -379,9 +379,9 @@
     chdir: "/srv/www/{{ item.name }}"
   become: yes
   become_user: www-data
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content == "nextcloud"
   tags:
     - nextcloud_debug
@@ -393,18 +393,20 @@
 #
 # Need to limit this to only when 'user_ldap' app is included in 'nextcloud_apps' list
 #
+# Disabled for now.
+#
 # ==================================================================================================
-- name: "Configure LDAP"
-  include: nextcloud_ldap.yml
-  loop: "{{ hosts }}"
-  loop_control:
-    loop_var: host
-  when:
-    - hosts is defined
-    - host.content is defined
-    - host.content == "nextcloud"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
+# - name: "Configure LDAP"
+#   include: nextcloud_ldap.yml
+#   loop: "{{ virtual_hosts }}"
+#   loop_control:
+#     loop_var: host
+#   when:
+#     - virtual_hosts is defined
+#     - host.content is defined
+#     - host.content == "nextcloud"
+#   tags:
+#     - nextcloud
+#     - nextcloud_debug
+#     - nextcloud-debug
+#     - websites

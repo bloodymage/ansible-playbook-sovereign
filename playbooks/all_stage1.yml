@@ -49,10 +49,10 @@
 - hosts: all:!localhost:!tpeap:!printers:!public_zone
   strategy: free
   roles:
-    - bloodymage.rebeldream.hostname
-    - bloodymage.rebeldream.hosts
-    - bloodymage.rebeldream.system_upgrade
-    - bloodymage.rebeldream.users
+    - role: bloodymage.rebeldream.hostname
+    - role: bloodymage.rebeldream.hosts
+    - role: bloodymage.rebeldream.system_upgrade
+    - role: bloodymage.rebeldream.users
 
 # ==================================================================================================
 #
@@ -64,16 +64,16 @@
 - hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone
   strategy: linear
   roles:
-    - bloodymage.rebeldream.sshca_host_certs
-    - bloodymage.rebeldream.openssh
-    - bloodymage.rebeldream.ntp
-    - bloodymage.rebeldream.global_packages
-    - bloodymage.rebeldream.sudo
-    - bloodymage.rebeldream.skel
-    - bloodymage.rebeldream.dotfiles
-    - bloodymage.rebeldream.etckeeper
-    - bloodymage.rebeldream.polkit
-    - bloodymage.rebeldream.screen
+    - role: bloodymage.rebeldream.sshca_host_certs
+    - role: bloodymage.rebeldream.openssh
+    - role: bloodymage.rebeldream.ntp
+    - role: bloodymage.rebeldream.global_packages
+    - role: bloodymage.rebeldream.sudo
+    - role: bloodymage.rebeldream.skel
+    - role: bloodymage.rebeldream.dotfiles
+    - role: bloodymage.rebeldream.etckeeper
+    - role: bloodymage.rebeldream.polkit
+    - role: bloodymage.rebeldream.screen
 
 # ==================================================================================================
 #
@@ -84,4 +84,4 @@
 # ==================================================================================================
 - hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone
   roles:
-    - bloodymage.rebeldream.aptitude
+    - role: bloodymage.rebeldream.aptitude

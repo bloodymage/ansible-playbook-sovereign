@@ -13,5 +13,5 @@
 - hosts: all:!localhost:!public_zone
   ignore_unreachable: yes
   roles:
-    - bloodymage.rebeldream.ownca_host_certs
+    - role: bloodymage.rebeldream.ownca_host_certs
  

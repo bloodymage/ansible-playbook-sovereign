@@ -9,14 +9,14 @@
 - hosts: all:!localhost
   ignore_unreachable: true
   roles:
-    - bloodymage.rebeldream.dns_forwardzones
+    - role: bloodymage.rebeldream.dns_forwardzones
 
 - hosts: all:!localhost:!routeros
   ignore_unreachable: true
   roles:
-    - bloodymage.rebeldream.dns_reversezones
+    - role: bloodymage.rebeldream.dns_reversezones
 
 - hosts: all:!localhost
   roles:
-    - bloodymage.rebeldream.system_upgrade
-    - bloodymage.rebeldream.dotfiles
+    - role: bloodymage.rebeldream.system_upgrade
+    - role: bloodymage.rebeldream.dotfiles

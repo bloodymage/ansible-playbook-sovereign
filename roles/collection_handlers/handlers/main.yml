@@ -42,6 +42,7 @@
     - "restart all"
     - "restart tls"
     - "Restart apache"
+    - "restart keytab"
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
 
@@ -66,6 +67,7 @@
   listen:
     - "restart all"
     - "restart tls"
+    - "restart keytab"
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
 
@@ -78,6 +80,7 @@
     - "restart all"
     - "restart tls"
     - "restart keycloak"
+    - "restart keytab"
   when:
     - inventory_hostname in groups['keycloak_servers'] | default([])
 
@@ -122,6 +125,7 @@
   listen:
     - "restart all"
     - "restart tls"
+    - "restart keytab"
   when:
     - inventory_hostname in groups['postfix_servers'] | default([])
 

@@ -1,0 +1,4 @@
+dn: CN={{ item[0].given_name | default(item[0].username) }}{% if item[0].surname is defined %} {{ item[0].surname }}{% endif %},{{ rebeldream_user_dn }}
+changetype: modify
+add: userCertificate
+userCertificate:< file:{{ item[0].username }}_{{ item[1].name }}.der

@@ -368,6 +368,13 @@
     - bind-debug
     - bind-zones
 
+# ==================================================================================================
+#
+# The next two templates have 'force' set to 'no' so that they only install a new zone file if one
+# does not already exist.  Any further updates are done via the 'nsupdate' module in either the
+# dns_forwardzone or dns_reversezone roles.
+#
+# ==================================================================================================
 - name: "Installing Forward Zone files"
   ansible.builtin.template:
     src: "forwardzone.j2"
@@ -375,6 +382,7 @@
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "0644"
+    force: no
   become: yes
   register: forwardzone_refresh
   when:
@@ -393,6 +401,7 @@
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "0644"
+    force: no
   become: yes
   register: reversezone_refresh
   when:
@@ -421,19 +430,25 @@
     - bind-debug
     - bind-zones
 
-- name: "Delete Bind journal files"
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  become: yes
-  loop:
-    - "{{ bind_zone_dir }}/db.{{ bind_zone }}.jnl"
-    - "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}.jnl"
-  when:
-    - bind_zone is defined
-    - bind_reverse_zone is defined
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-zones
+# ==================================================================================================
+#
+# Testing, if the zone files aren't recreated each run, I don't think the journal files need to be
+# deleted either.  This was only intended to be temporary until a better solution presented itself.
+#
+# ==================================================================================================
+# - name: "Delete Bind journal files"
+#   ansible.builtin.file:
+#     path: "{{ item }}"
+#     state: absent
+#   become: yes
+#   loop:
+#     - "{{ bind_zone_dir }}/db.{{ bind_zone }}.jnl"
+#     - "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}.jnl"
+#   when:
+#     - bind_zone is defined
+#     - bind_reverse_zone is defined
+#   tags:
+#     - bind
+#     - bind_debug
+#     - bind-debug
+#     - bind-zones

@@ -6,11 +6,11 @@
 
 - hosts: apache_servers:!public_zone
   roles:
-    - bloodymage.rebeldream.apache
+    - role: bloodymage.rebeldream.apache
 
 # - hosts: nginx_servers
 #   roles:
-#     - bloodymage.rebeldream.nginx
+#     - role: bloodymage.rebeldream.nginx
 
 - hosts: web_servers
   roles:
@@ -19,15 +19,8 @@
         - mediawiki
         - mediawiki_debug
         - mediawiki-debug
-    - role: bloodymage.rebeldream.nextcloud
-      tags:
-        - nextcloud
-    # - bloodymage.rebeldream.drush
-    # - bloodymage.rebeldream.drupal
-    - role: bloodymage.rebeldream.ownca_crl_distribution_points
-      tags:
-        - ownca-crl-distribution-points
-        - ownca_crl_distribution_points
+    # - role: bloodymage.rebeldream.drush
+    # - role: bloodymage.rebeldream.drupal
 
 - hosts: web_servers:&public_zone
   roles:
@@ -38,4 +31,11 @@
       tags:
         - acmeca_host_certs
         - acmeca-host-certs
+    - role: bloodymage.rebeldream.nextcloud
+      tags:
+        - nextcloud
+    - role: bloodymage.rebeldream.ownca_crl_distribution_points
+      tags:
+        - ownca-crl-distribution-points
+        - ownca_crl_distribution_points
 

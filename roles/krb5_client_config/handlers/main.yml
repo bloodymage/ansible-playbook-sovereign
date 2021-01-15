@@ -9,3 +9,5 @@
     mode: "0644"
   become: yes
   notify: restart all
+  when:
+    - inventory_hostname not in group['dmz_zone']

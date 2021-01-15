@@ -68,7 +68,7 @@
 
 - ansible.builtin.debug:
     msg:
-      - "{{ hosts }}"
+      - "{{ virtual_hosts }}"
     verbosity: 2
   become: no
   tags:
@@ -85,9 +85,9 @@
     mode: "0755"
   become: yes
   loop:
-    "{{ hosts }}"
+    "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.name is defined
   tags:
     - apache
@@ -109,9 +109,9 @@
     mode: "0755"
   become: yes
   loop:
-    "{{ hosts }}"
+    "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.enable is defined
     - item.enabled
   tags:
@@ -129,9 +129,9 @@
     mode: "0770"
   become: yes
   loop:
-    "{{ hosts }}"
+    "{{ virtual_hosts }}"
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.enable is defined
     - item.enabled
   tags:
