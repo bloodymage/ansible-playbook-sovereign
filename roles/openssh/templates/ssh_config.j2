@@ -32,17 +32,22 @@ Host *.{{ rebeldream_root_domain }}
 {% if inventory_hostname in groups['workstations'] %}
 {% if rebeldream_smart_card_login %}
   {% if openssh_github -%}
-    Host github.com
-    PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+  Host github.com
+  PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
   {% endif %}
 {% endif %}
 {% endif %}
 
 {% if ssh_hosts is defined -%}
   {% for host in ssh_hosts -%}
-    Host {{ host.name }}
-    {% for option in host.options %}
-      {{ option }}
-    {% endfor %}
+  Host {{ host.name }}
+  {% for option in host.options -%}
+    {{ option }}
+  {% endfor %}
   {% endfor %}
 {% endif %}
+
+{# Host * #}
+{#   CanonicalizeHostname yes #}
+{#   CanonicalDomains {{ rebeldream_root_domain }} #}
+{#   CanonicalizeMaxDots 2 #}
