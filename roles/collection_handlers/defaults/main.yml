@@ -323,6 +323,12 @@ samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
 #
 # ==================================================================================================
 # SSH
+sshca_domain_list: "{{ rebeldream_domain_list }}"
+sshca_cert_identity: "{{ rebeldream_domain_list | join('_') }}"
+
+sshca_domain: "{{ sshca_cert_identity }}"
+sshca_host_key_type: "ed25519"
+sshca_user_key_type: "ed25519"
 sshca_host_keyfile: "{{ sshca_domain }}_host_key"
 sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"
 sshca_hostca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_host_pubfile }}"
@@ -335,9 +341,7 @@ sshca_user_certificate_file: "{{ ssh_config_dir }}/ssh_user_ed25519_key-cert.pub
 sshca_authorized_keys: "authorized_keys"
 sshca_authorized_principals: "%u"
 
-sshca_cert_identity: "{{ rebeldream_domain_list | join('_') }}"
-sshca_domain_list: "{{ rebeldream_domain_list }}"
-sshca_domain: "{{ sshca_cert_identity }}"
+
 
 
 # ==================================================================================================

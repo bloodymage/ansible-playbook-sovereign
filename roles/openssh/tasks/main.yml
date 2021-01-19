@@ -82,6 +82,17 @@
     - openssh_debug
     - openssh-debug
 
+- name: "Get Host CA public key"
+  ansible.builtin.set_fact:
+    __openssh_host_ca_public_key: "{{ lookup('file', sshca_key_directory + '/' + sshca_host_pubfile) }}"
+  delegate_to: localhost
+  run_once: yes
+  become: no
+  tags:
+    - openssh
+    - openssh_debug
+    - openssh-debug
+
 - name: "Install Configuration files"
   ansible.builtin.template:
     src: "{{ item.name }}.j2"

@@ -15,14 +15,16 @@ openssh_config_files:
     mode: "0600"
     validate: "/usr/sbin/sshd -t -f %s"
   - name: ssh_config
-  - name: known_hosts
+  - name: ssh_known_hosts
 
 # SSHD_Config options
 openssh_port: "22"
 openssh_addrfamily: "any"
 openssh_listen_ipv4: "0.0.0.0"
 openssh_listen_ipv6: "::"
-openssh_host_key: "{{ ssh_config_dir }}/ssh_host_ed25519_key"
+
+openssh_host_key: "{{ ssh_config_dir }}/ssh_host_{{ sshca_host_key_type }}_key"
+openssh_host_pubkey: "{{ openssh_host_key }}.pub"
 
 openssh_password_authentication: "yes"
 openssh_permit_empty_passwords: "no"
@@ -39,3 +41,6 @@ openssh_gssapi_cleanup_credentials: "no"
 openssh_gssapi_key_exchange: "no"
 openssh_gssapi_store_credentials_on_rekey: "no"
 #openssh_gssapi_strict_accept_or_check:
+
+# SSH_Config options
+openssh_github: no
