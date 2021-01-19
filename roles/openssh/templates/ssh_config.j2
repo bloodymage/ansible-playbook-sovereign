@@ -19,19 +19,23 @@
 {# ssh_config(5) man page.                                                                        #}
 {#                                                                                                #}
 {# ============================================================================================== #}
-Host *.{{ rebeldream_domain }}
-{% if rebeldream_smart_card_login and inventory_hostname in groups['internal_zone'] %}
+Host *.{{ rebeldream_root_domain }}
+{% if inventory_hostname in groups['workstations'] %}
+{% if rebeldream_smart_card_login %}
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
 {% else %}
   GSSAPIDelegateCredentials yes
 {% endif %}
+{% endif %}
   CertificateFile ~/.ssh/%u-cert.pub
 
+{% if inventory_hostname in groups['workstations'] %}
 {% if rebeldream_smart_card_login %}
   {% if openssh_github -%}
     Host github.com
     PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
   {% endif %}
+{% endif %}
 {% endif %}
 
 {% if ssh_hosts is defined -%}

@@ -139,7 +139,7 @@
 - name: Create SSH Principals file for users
   ansible.builtin.template:
     src: "ssh_principals.j2"
-    dest: "/etc/ssh/auth_principals/{{ item.username }}"
+    dest: "/etc/ssh/auth_principals/{{ rebeldream_org_unit_name | upper }}\\{{ item.username }}"
     owner: root
     group: root
     mode: '0644'
