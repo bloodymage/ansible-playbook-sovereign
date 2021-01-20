@@ -67,6 +67,9 @@
     - role: bloodymage.rebeldream.sshca_host_certs
     - role: bloodymage.rebeldream.openssh
     - role: bloodymage.rebeldream.ntp
+    - role: bloodymage.rebeldream.unattended_upgrades
+      tags:
+        - unattended-upgrades
     - role: bloodymage.rebeldream.global_packages
     - role: bloodymage.rebeldream.sudo
     - role: bloodymage.rebeldream.skel

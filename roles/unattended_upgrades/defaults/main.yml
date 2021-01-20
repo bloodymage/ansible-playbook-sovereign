@@ -1,0 +1,20 @@
+---
+# defaults file for unattended_upgrades
+packages:
+  - unattended-upgrades
+
+unattended_upgrades_config_dir: "/etc/apt/apt.conf.d"
+unattended_upgrades_config_files:
+  - name: 50unattended-upgrades
+
+unattended_upgrades_mail_to: "{{ __unattended_upgrades_mail_to }}"
+unattended_upgrades_mail_report: "{{ __unattended_upgrades_mail_report }}"
+unattended_upgrades_blacklist: []
+
+# ==================================================================================================
+#
+# App default settings
+#
+# ==================================================================================================
+__unattended_upgrades_mail_to: ""
+__unattended_upgrades_mail_report: "on-change"

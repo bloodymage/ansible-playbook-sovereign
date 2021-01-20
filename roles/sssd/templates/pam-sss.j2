@@ -6,7 +6,7 @@ Auth-Type: Primary
 Auth:
 	[success=end default=ignore]	pam_sss.so use_first_pass
 Auth-Initial:
-	[success=end default=ignore]	pam_sss.so try_cert_auth
+[success=end default=ignore]	pam_sss.so try_cert_auth forward_pass
 Auth-Final:
   sufficent       pam_sss.so allow_missing_name
 Account-Type: Additional
