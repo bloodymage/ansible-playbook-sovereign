@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Configure unattended-upgrades
+  description: Installs miscilanious packages
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
@@ -22,7 +22,7 @@ galaxy_info:
 
   galaxy_tags:
     - bloodymage
-    - openssh
+    - packages
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers
