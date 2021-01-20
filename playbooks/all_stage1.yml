@@ -82,6 +82,9 @@
     - role: bloodymage.rebeldream.rsync
       tags:
         - rsync
+    - role: bloodymage.rebeldream.fail2ban
+      tags:
+        - fail2ban
 
 # ==================================================================================================
 #

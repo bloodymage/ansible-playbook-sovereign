@@ -1,6 +1,5 @@
 ---
 packages:
-  - aptitude
   - bash-completion
   - curl
   - git
@@ -11,5 +10,4 @@ packages:
   - man
   - members
   - rename
-  - rsync
   - trash-cli
