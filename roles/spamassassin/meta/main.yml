@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Installs Postfix MTA
+  description: Install Spamassassin
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
@@ -22,9 +22,7 @@ galaxy_info:
 
   galaxy_tags:
     - bloodymage
-    - postfix
-    - mta
+    - openssh
 
 dependencies:
   - role: bloodymage.rebeldream.collection_handlers
-  #- role: bloodymage.rebeldream.krb5_client_config
