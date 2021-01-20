@@ -1,2 +1,4 @@
 ---
 # defaults file for fail2ban
+packages:
+  - fail2ban
