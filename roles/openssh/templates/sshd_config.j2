@@ -1,24 +1,17 @@
-#	$OpenBSD: sshd_config,v 1.101 2017/03/14 07:19:07 djm Exp $
-
 # {{ ansible_managed }}
+{# For clarity, we only generate a configuration file with settings that are different from       #}
+{# the default settings. (Work in Progress)                                                       #}
 
-{# =================================================================================================
-#
-# This is the sshd server system-wide configuration file.  See
-# sshd_config(5) for more information.
-#
-# This sshd was compiled with PATH=/usr/bin:/bin:/usr/sbin:/sbin
-#
-# The strategy used for options in the default sshd_config shipped with
-# OpenSSH is to specify options with their default value where
-# possible, but leave them commented.  Uncommented options override the
-# default value.
-#
-# ================================================================================================== #}
-Port "{{ openssh_port }}"
+{% if openssh_port != __openssh_port -%}
+  Port "{{ openssh_port }}"
+{% endif %}
 AddressFamily "{{ openssh_addrfamily }}"
-#ListenAddress {{ openssh_listen_ipv4 }}
-#ListenAddress {{ openssh_listen_ipv6 }}
+{% if openssh_listen_ipv4 != __openssh_listen_ipv4 -%}
+  #ListenAddress {{ openssh_listen_ipv4 }}
+{% endif %}
+{% if openssh_listen_ipv6 != __openssh_listen_ipv6 -%}
+  #ListenAddress {{ openssh_listen_ipv6 }}
+{% endif %}
 
 HostKey {{ openssh_host_key }}
 HostCertificate  {{ sshca_host_certificate_file }}
@@ -32,7 +25,9 @@ HostCertificate  {{ sshca_host_certificate_file }}
 
 {# Authentication #}
 #LoginGraceTime 2m
-PermitRootLogin {{ openssh_permit_root_login }}
+{% if openssh_permit_root_login != __openssh_permit_root_login -%}
+  PermitRootLogin {{ openssh_permit_root_login }}
+{% endif %}
 #StrictModes yes
 #MaxAuthTries 6
 #MaxSessions 10
@@ -45,34 +40,34 @@ TrustedUserCAKeys {{ sshca_userca_certificate }}
 #AuthorizedKeysCommand none
 #AuthorizedKeysCommandUser nobody
 
-{# =================================================================================================
-#
-# For this to work you will also need host keys in /etc/ssh/openssh_known_hosts
-# Change to yes if you don't trust ~/.ssh/known_hosts for
-#
-# ================================================================================================== #}
 {% if openssh_host_based_authentication is defined -%}
   HostbasedAuthentication {{ openssh_host_based_authentication }}
 {% endif %}
 {% if openssh_ignore_user_known_hosts is defined -%}
   IgnoreUserKnownHosts {{ openssh_ignore_user_known_hosts }}
 {% endif %}
-{# Don't read the user's ~/.rhosts and ~/.shosts files #}
 {% if openssh_ignore_rhosts is defined -%}
   IgnoreRhosts {{ openssh_ignore_rhosts }}
 {% endif %}
 
 {# To disable tunneled clear text passwords, change to no here! #}
-PasswordAuthentication {{ openssh_password_authentication }}
-PermitEmptyPasswords {{ openssh_permit_empty_passwords }}
+{% if openssh_password_authentication != __openssh_password_authentication -%}
+  PasswordAuthentication {{ openssh_password_authentication }}
+{% endif %}
+{% if openssh_permit_empty_passwords != __openssh_permit_empty_passwords- %}
+  PermitEmptyPasswords {{ openssh_permit_empty_passwords }}
+{% endif %}
 
 {# =================================================================================================
 #
 # Change to yes to enable challenge-response passwords (beware issues with
 # some PAM modules and threads)
 #
+#
 # ================================================================================================== #}
-ChallengeResponseAuthentication {{ openssh_challenge_response_auth }}
+{% if openssh_challenge_response_auth != __openssh_challenge_response_auth -%}
+  ChallengeResponseAuthentication {{ openssh_challenge_response_auth }}
+{% endif %}
 
 {# Kerberos options #}
 {% if openssh_kerberos_authentication is defined -%}
@@ -85,11 +80,23 @@ ChallengeResponseAuthentication {{ openssh_challenge_response_auth }}
 #KerberosGetAFSToken no
 
 {# GSSAPI options #}
-GSSAPIAuthentication {{ openssh_gssapi_authentication }}
-GSSAPICleanupCredentials {{ openssh_gssapi_cleanup_credentials }}
-GSSAPIKeyExchange {{ openssh_gssapi_key_exchange }}
-GSSAPIStoreCredentialsOnRekey {{ openssh_gssapi_store_credentials_on_rekey }}
-{# GSSAPIStrictAcceptorCheck {{ openssh_gssapi_strict_accept_or_check }}  #}
+{% if not rebeldream_smart_card %}
+{% if openssh_gssapi_authentication != __openssh_gssapi_authentication -%}
+  GSSAPIAuthentication {{ openssh_gssapi_authentication }}
+{% endif %}
+{% if openssh_gssapi_cleanup_credentials != __openssh_gssapi_cleanup_credentials -%}
+  GSSAPICleanupCredentials {{ openssh_gssapi_cleanup_credentials }}
+{% endif %}
+{% if openssh_gssapi_key_exchange != __openssh_gssapi_key_exchange -%}
+  GSSAPIKeyExchange {{ openssh_gssapi_key_exchange }}
+{% endif %}
+{% if openssh_gssapi_store_credentials_on_rekey != __openssh_gssapi_store_credentials_on_rekey -%}
+  GSSAPIStoreCredentialsOnRekey {{ openssh_gssapi_store_credentials_on_rekey }}
+{% endif %}
+{% if openssh_gssapi_strict_accept_or_check != __openssh_gssapi_strict_accept_or_check -%}
+  GSSAPIStrictAcceptorCheck {{ openssh_gssapi_strict_accept_or_check }}
+{% endif %}
+{% endif %}
 
 {# ================================================================================================= 
 # 
@@ -103,25 +110,33 @@ GSSAPIStoreCredentialsOnRekey {{ openssh_gssapi_store_credentials_on_rekey }}
 # PAM authentication, then enable this but set PasswordAuthentication 
 # and ChallengeResponseAuthentication to 'no'. 
 # 
-# ================================================================================================== #} 
-UsePAM {{ openssh_use_pam }} 
+# ================================================================================================== #}
+{% if openssh_use_pam != __openssh_use_pam -%}
+  UsePAM {{ openssh_use_pam }}
+{% endif %}
 
 #AllowAgentForwarding yes 
 #AllowTcpForwarding yes 
-#GatewayPorts no 
-X11Forwarding {{ openssh_x11_forwarding }} 
+#GatewayPorts no
+{% if openssh_x11_forwarding != __openssh_x11_forwarding -%}
+  X11Forwarding {{ openssh_x11_forwarding }}
+{% endif %}
 #X11DisplayOffset 10 
 #X11UseLocalhost yes 
-#PermitTTY yes 
-PrintMotd {{ openssh_print_motd }} 
+#PermitTTY yes
+{% if openssh_print_motd != __openssh_print_motd -%}
+  PrintMotd {{ openssh_print_motd }}
+{% endif %}
 #PrintLastLog yes 
 #TCPKeepAlive yes 
 #UseLogin no 
 #PermitUserEnvironment no 
 #Compression delayed 
 #ClientAliveInterval 0 
-#ClientAliveCountMax 3 
-#UseDNS {{ openssh_use_dns }} 
+#ClientAliveCountMax 3
+{% if openssh_use_dns != __openssh_use_dns -%}
+  UseDNS {{ openssh_use_dns }}
+{% endif %}
 #PidFile /var/run/sshd.pid 
 #MaxStartups 10:30:100 
 #PermitTunnel no 

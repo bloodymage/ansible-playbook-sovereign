@@ -2,12 +2,14 @@
 packages:
   - expect
   - python3-pexpect
- 
-# ======================================================================
+  - openssh-client
+  - openssh-server
+
+# ==================================================================================================
 #
 # Files and Directories
 #
-# ======================================================================
+# ==================================================================================================
 openssh_authorized_keys: "authorized_keys"
 openssh_authorized_principals: "%u"
 openssh_config_files:
@@ -18,29 +20,71 @@ openssh_config_files:
   - name: ssh_known_hosts
 
 # SSHD_Config options
-openssh_port: "22"
 openssh_addrfamily: "any"
-openssh_listen_ipv4: "0.0.0.0"
-openssh_listen_ipv6: "::"
 
 openssh_host_key: "{{ ssh_config_dir }}/ssh_host_{{ sshca_host_key_type }}_key"
 openssh_host_pubkey: "{{ openssh_host_key }}.pub"
 
-openssh_password_authentication: "yes"
-openssh_permit_empty_passwords: "no"
-openssh_challenge_response_auth: "no"
-openssh_permit_root_login: "no"
-openssh_use_pam: "yes"
-openssh_x11_forwarding: "no"
-openssh_print_motd: "no"
-openssh_use_dns: "no"
-
-# GSSAPI options
-openssh_gssapi_authentication: "no"
-openssh_gssapi_cleanup_credentials: "no"
-openssh_gssapi_key_exchange: "no"
-openssh_gssapi_store_credentials_on_rekey: "no"
-#openssh_gssapi_strict_accept_or_check:
-
 # SSH_Config options
 openssh_github: no
+
+
+# ==================================================================================================
+#
+# sshd_config options
+#
+# ==================================================================================================
+# Options we are changing from defaults
+openssh_host_keys:
+  - ed25519
+
+openssh_listen_ipv4: "{{ ansible_host }}"
+openssh_permit_root_login: "no"
+openssh_use_pam: "yes"
+openssh_challenge_response_auth: "no"
+openssh_print_motd: "no"
+
+# Options set to default configuration
+openssh_listen_ipv6: "{{ __openssh_listen_ipv6 }}"
+openssh_port: "{{ __openssh_port }}"
+openssh_password_authentication: "{{ __openssh_password_authentication }}"
+openssh_permit_empty_passwords: "{{ __openssh_permit_empty_password }}"
+openssh_gssapi_authentication: "{{ __openssh_gssapi_authentication }}"
+openssh_gssapi_cleanup_credentials: "{{ __openssh_gssapi_cleanup_credentials }}"
+openssh_gssapi_key_exchange: "{{ __openssh_gssapi_key_exchange }}"
+openssh_gssapi_store_credentials_on_rekey: "{{ __openssh_gssapi_store_credentials_on_rekey }}"
+openssh_gssapi_strict_accept_or_check: "{{ __openssh_gssapi_strict_accept_or_check }}"
+openssh_use_dns: "{{ __openssh_use_dns }}"
+openssh_x11_forwarding: "{{ __openssh_x11_forwarding }}"
+# ==================================================================================================
+#
+# ssh_config options
+#
+# ==================================================================================================
+
+# ==================================================================================================
+#
+# Default sshd_config options
+#
+# ==================================================================================================
+__openssh_challenge_response_auth: "yes"
+__openssh_gssapi_authentication: "no"
+__openssh_gssapi_cleanup_credentials: "yes"
+__openssh_gssapi_key_exchange: "yes"
+__openssh_gssapi_store_credentials_on_rekey: "no"
+__openssh_gssapi_strict_accept_or_check: "yes"
+__openssh_password_authentication: "yes"
+__openssh_permit_empty_passwords: "no"
+__openssh_permit_root_login: "prohibit-password"
+__openssh_print_motd: "yes"
+__openssh_use_dns: "no"
+__openssh_use_pam: "no"
+__openssh_x11_forwarding: "no"
+__openssh_port: "22"
+__openssh_listen_ipv4: "0.0.0.0"
+__openssh_listen_ipv6: "::"
+# ==================================================================================================
+#
+# Default ssh_config options
+#
+# ==================================================================================================
