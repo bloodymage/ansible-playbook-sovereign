@@ -66,6 +66,8 @@
   roles:
     - role: bloodymage.rebeldream.sshca_host_certs
     - role: bloodymage.rebeldream.openssh
+      tags:
+        - openssh
     - role: bloodymage.rebeldream.ntp
     - role: bloodymage.rebeldream.unattended_upgrades
       tags:
