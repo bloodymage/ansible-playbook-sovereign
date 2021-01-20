@@ -333,8 +333,8 @@
     groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
-    system: no                         # Defaults to no
-    create_home: yes                   # Defaults to yes
+    system: "{{ item.system | default('no') }}"          # Defaults to no
+    create_home: yes                                     # Defaults to yes
     comment: "{{ item['name'] | default(none) }}"
     home: "{{ item['unix_home'] | default('/nonexistent') }}"
     move_home: yes

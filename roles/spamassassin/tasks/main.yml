@@ -1,12 +1,42 @@
-# - name: Update SpamAssassin
-#   command: "sa-update"
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
   
-- name: Set permissions on /var/lib/spamassassin/sa-update-keys
-  file:
-    path: /var/lib/spamassassin/sa-update-keys
+- name: "Ensure spamassasin directories exist with proper permissions"
+  ansible.builtin.file:
+    path: "{{ item.name }}"
     state: directory
-    owner: spamd
-    group: spamd
-    mode: "0700"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
   become: yes
+  loop: "{{ spamassassin_directories }}"
   
+- name: "Install defaults"
+  ansible.builtin.template:
+    src: "default_{{ item }}.j2"
+    dest: "/etc/default/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ spamassassin_default_files }}"
