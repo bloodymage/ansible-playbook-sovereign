@@ -79,6 +79,9 @@
     - role: bloodymage.rebeldream.etckeeper
     - role: bloodymage.rebeldream.polkit
     - role: bloodymage.rebeldream.screen
+    - role: bloodymage.rebeldream.rsync
+      tags:
+        - rsync
 
 # ==================================================================================================
 #
