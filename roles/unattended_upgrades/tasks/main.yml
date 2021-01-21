@@ -23,14 +23,15 @@
         state: present
       become: yes
 
-# - name: "Install Configuration files"
-#   ansible.builtin.template:
-#     src: "{{ item.name }}.j2"
-#     dest: "{{ unattended_upgrades_config_dir }}/{{ item.name }}"
-#     owner: root
-#     group: root
-#     mode: "{{ item.mode | default('0644') }}"
-#     validate: "{{ item.validate | default(none) }}"
-#     backup: yes
-#   become: yes
-#   loop: "{{ unattended_upgrade_config_files }}"
+- name: "Install Configuration files"
+  ansible.builtin.template:
+    src: "{{ item.name }}.j2"
+    dest: "{{ unattended_upgrades_config_dir }}/{{ item.name }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode | default('0644') }}"
+    validate: "{{ item.validate | default(none) }}"
+    backup: yes
+  become: yes
+  loop: "{{ unattended_upgrades_config_files }}"
+  notify: restart unattended-upgrades

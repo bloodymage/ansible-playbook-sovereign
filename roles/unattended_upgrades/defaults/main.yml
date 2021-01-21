@@ -7,6 +7,15 @@ unattended_upgrades_config_dir: "/etc/apt/apt.conf.d"
 unattended_upgrades_config_files:
   - name: 50unattended-upgrades
 
+unattended_upgrades_automatic_reboot: "true"
+unattended_upgrades_automatic_reboot_with_users: "false"
+unattended_upgrades_automatic_reboot_time: "02:00"
+unattended_upgrades_syslog_enable: "true"
+
+unattended_upgrades_remove_unused_kernel_packages: "{{ __unattended_upgrades_remove_unused_kernel_packages }}" 
+unattended_upgrades_remove_new_unused_dependencies: "{{ __unattended_upgrades_remove_new_unused_dependencies }}"
+unattended_upgrades_remove_unused_dependencies: "{{ __unattended_upgrades_remove_unused_dependencies }}"
+unattended_upgrades_syslog_facility: "{{ __unattended_upgrades_syslog_facility }}"
 unattended_upgrades_mail_to: "{{ __unattended_upgrades_mail_to }}"
 unattended_upgrades_mail_report: "{{ __unattended_upgrades_mail_report }}"
 unattended_upgrades_blacklist: []
@@ -18,3 +27,11 @@ unattended_upgrades_blacklist: []
 # ==================================================================================================
 __unattended_upgrades_mail_to: ""
 __unattended_upgrades_mail_report: "on-change"
+__unattended_upgrades_automatic_reboot: "false"
+__unattended_upgrades_automatic_reboot_with_users: "true"
+__unattended_upgrades_automatic_reboot_time: "now"
+__unattended_upgrades_syslog_enable: "false"
+__unattended_upgrades_syslog_facility: "daemon"
+__unattended_upgrades_remove_unused_dependencies: "false"
+__unattended_upgrades_remove_new_unused_dependencies: "true"
+__unattended_upgrades_remove_unused_kernel_packages: "true"
