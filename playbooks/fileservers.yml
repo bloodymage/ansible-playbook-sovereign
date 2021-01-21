@@ -1,4 +1,5 @@
 - hosts: samba_file_servers
   roles:
     - role: bloodymage.rebeldream.samba_file_server
+    - role: bloodymage.rebeldream.cups
 
