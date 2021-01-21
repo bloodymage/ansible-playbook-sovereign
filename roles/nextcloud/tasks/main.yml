@@ -45,50 +45,6 @@
 #
 #
 # ==================================================================================================
-- name: "Download Nextcloud Sources"
-  ansible.builtin.get_url:
-    url: "{{ item.source }}"
-    dest: "/tmp/{{ item.file }}"
-    checksum: "sha256:{{ item.checksum }}"
-    mode: '0644'
-  loop: "{{ nextcloud_source_url }}"
-  become: no
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
-    - download-sources
-
-- name: Extract Sources
-  ansible.builtin.unarchive:
-    src: "/tmp/{{ nextcloud_source_url[0].file }}"
-    dest: "/srv/www/{{ item.name }}"
-    remote_src: yes
-    owner: www-data
-    group: www-data
-    extra_opts: [--strip-components=1]
-    creates: "/srv/www/{{ item.name }}/public.php"
-  loop: "{{ virtual_hosts }}"
-  become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
-
 - name: Install Apache site.conf
   ansible.builtin.template:
     src: "apache-site.conf.j2"
@@ -111,73 +67,11 @@
     - nextcloud-debug
     - websites
 
-- name: "Enable Apache modules"
-  community.general.apache2_module:
-    state: present
-    name: "{{ item }}"
-  loop:
-    - rewrite
-    - headers
-    - env
-    - dir
-    - mime
-  notify: reload apache
-  become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
-
-- name: Determine New Data Directory
-  ansible.builtin.set_fact:
-    nextcloud_data_directory: "/srv/www-data/{{ item.name }}/data"
-  loop: "{{ virtual_hosts }}"
-  become: no
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
-
-- name: Create Data Directory
-  ansible.builtin.file:
-    path: "{{ nextcloud_data_directory }}"
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: "0755"
-  loop: "{{ virtual_hosts }}"
-  become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
-
-- name: Check If Data Directory in default location
+- name: Check If this is a new install
   ansible.builtin.stat:
-    path: "/srv/www/{{ item.name }}/data"
+    path: "/srv/www/{{ item.name }}/config/config.php"
   loop: "{{ virtual_hosts }}"
-  register: dir_stat
+  register: install_status
   become: no
   when:
     - virtual_hosts is defined
@@ -191,51 +85,38 @@
     - nextcloud-debug
     - websites
 
-- name: Print dir_stat
-  ansible.builtin.debug:
-    msg:
-      - "{{ item.stat.path | default('Not Applicable') }}"
-      - "{{ item.stat.exists }}"
-    verbosity: 1
-  loop: "{{ dir_stat.results }}"
-  become: no
+- name: "Ensure we have a password for the nextcloud admin user"
+  ansible.builtin.set_fact:
+    nextcloud_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/nextcloud_admin_password"
+    __password_length: "length={{ nextcloud_password_legnth }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  delegate_to: localhost
   when:
-    - item.stat is defined
-  tags:
-    - never
-    - nextcloud_debug
-    - nextcloud-debug
-
-- name: Move Data Directory
-  ansible.builtin.copy:
-      src: "{{ item.msg.stat.path }}"
-      dest: "{{ nextcloud_data_directory }}"
-      remote_src: yes
-      owner: www-data
-      group: www-data
-      directory_mode: "0755"
-      mode: "0644"
-  loop: "{{ dir_stat.results }}"
-  become: yes
-  when:
-    - item.stat is defined
-    - item.stat.exists
+    - virtual_hosts is defined
+    - nextcloud_admin_password == "password"
   tags:
     - nextcloud
     - nextcloud_debug
     - nextcloud-debug
     - websites
 
-- name: Delete old Data directory
-  ansible.builtin.file:
-    path: "{{ item.stat.path }}"
-    state: absent
-  loop: "{{ dir_stat.results }}"
-  become: yes
+- name: "Complete fresh install"
+  include: nextcloud_install.yml
+  loop: "{{ virtual_hosts }}"
+  loop_control:
+    loop_var: host
   when:
-    - item.stat is defined
-    - item.stat.exists
-  notify: restart apache2
+    - virtual_hosts is defined
+    - host.content is defined
+    - host.content == "nextcloud"
+    - item.installed is defined
+    - install_status.results.item.exists is defined
+    - install_status.results.item.exists is false
   tags:
     - nextcloud
     - nextcloud_debug
@@ -271,25 +152,6 @@
 # - ansible.builtin.command
 #
 # ==================================================================================================
-- name: "Ensure we have a password for the nextcloud admin user"
-  ansible.builtin.set_fact:
-    nextcloud_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/nextcloud_admin_password"
-    __password_length: "length={{ nextcloud_password_legnth }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  delegate_to: localhost
-  when:
-    - virtual_hosts is defined
-    - nextcloud_admin_password == "password"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: "Ensure we have a password for the nextcloud ldap lookup user"
   ansible.builtin.set_fact:
@@ -309,31 +171,6 @@
     - nextcloud
     - nextcloud_debug
     - nextcloud-debug
-    - websites
-
-- name: Install Nextcloud
-  command:
-    cmd: >
-      php occ  maintenance:install
-      --database '{{ item.database }}'
-      --database-name '{{ item.db_name }}'
-      --database-user '{{ item.db_user }}'
-      --database-pass '{{ item.db_password }}'
-      --admin-user '{{ nextcloud_admin_user }}'
-      --admin-pass '{{ nextcloud_admin_password }}'
-    chdir: "/srv/www/{{ item.name }}"
-    creates: "/srv/www/{{ item.name }}/config/config.php"
-  become: yes
-  become_user: www-data
-  loop: "{{ virtual_hosts }}"
-  when:
-    - item.database is defined
-    - item.content == "nextcloud"
-  tags:
-    - never
-    - nextcloud_debug
-    - nextcloud-debug
-    - nextcloud
     - websites
 
 - name: Update nextcloud config
@@ -373,7 +210,7 @@
     - websites
 
 - name: "Ensure we have a clean nextcloud state before we do anything else"
-  command:
+  ansible.builtin.command:
     cmd: >
       php occ upgrade
     chdir: "/srv/www/{{ item.name }}"
