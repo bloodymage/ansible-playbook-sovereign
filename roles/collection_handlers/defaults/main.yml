@@ -30,6 +30,11 @@ rebeldream_password_length: "42"
 #
 # ==================================================================================================
 # Domain Information
+rebeldream_root_domain: "example.com"
+rebeldream_internal_zone_name: "internal"
+rebeldream_dmz_zone_name: "dmz"
+
+
 rebeldream_default_domain: "internal.example.com"
 rebeldream_domain: "{{ ansible_domain | default(rebeldream_default_domain) }}"
 rebeldream_realm: "{{ rebeldream_domain | upper }}"
@@ -352,10 +357,10 @@ domain_user_vmail:
   username: "vmail"
   spns:
     - spn: "imap"
-      host: "iris.olympus.drbr.org"
+      host: "{{ internal_mail_host }}"
       keytab_file: "/etc/dovecot/dovecot.keytab"
     - spn: "smtp"
-      host: "iris.olympus.drbr.org"
+      host: "{{ internal_mail_host }}"
       keytab_file: "/etc/dovecot/dovecot.keytab"
   account_expire: "--noexpiry"
 
@@ -363,7 +368,7 @@ domain_user_mediawiki:
   username: "mediawiki"
   spns:
     - spn: "HTTP"
-      host: "mnemosyne.olympus.drbr.org"
+      host: "{{ internal_www_host }}"
       keytab_file: "/etc/apache2/wiki.{{ rebeldream_domain }}.keytab"
   account_expire: "--noexpiry"
 
@@ -371,10 +376,10 @@ domain_user_keycloak:
   username: "keycloak"
   spns:
     - spn: "HTTP"
-      host: "selene.olympus.drbr.org"
+      host: "{{ internal_keycloak_host }}"
       keytab_file: "/opt/keycloak/standalone/configuration/keycloak.keytab"
     - spn: "HTTP"
-      host: "warspite.swg.drbr.org"
+      host: "{{ dmz_keycloak_host }}"
       keytab_file: "/opt/keycloak/standalone/configuration/keycloak.keytab"
   account_expire: "--noexpiry"
 
@@ -382,7 +387,7 @@ domain_user_nextcloud:
   username: "nextcloud"
   spns:
     - spn: "HTTP"
-      host: "independence.swg.drbr.org"
+      host: "{{ dmz_www_host }}"
   account_expire: "--noexpiry"
 
 
@@ -411,6 +416,12 @@ __domain_system_users:
   - "{{ domain_user_mediawiki }}"
   - "{{ domain_user_keycloak }}"
   - "{{ domain_user_nextcloud }}"
+
+__rebeldream_zones:
+  - name: "{{ rebeldream_internal_zone_name }}"
+    zone: internal
+  - name: "{{ rebeldream_dmz_zone_name }}"
+    zone: dmz
 
 # ==================================================================================================
 #

@@ -24,7 +24,7 @@
     - item[0].id_number is defined
     - item[1].name == "authentication"
 
-- name: "Copy user certificates to domain schema master."
+- name: "Copy user ldif updates to domain schema master."
   ansible.builtin.template:
     src: "schema.ldif.j2"
     dest: "/tmp/{{ item[0].username }}_{{ item[1].name }}.ldif"

@@ -216,4 +216,3 @@
     - role: bloodymage.rebeldream.samba_domain_user_certs
       tags:
         - samba-domain-user-certs
-
