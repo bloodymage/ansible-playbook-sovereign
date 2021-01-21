@@ -3,7 +3,6 @@ packages:
   - bash-completion
   - global
   - ispell
-  - keychain
   - make
   - man
   - members
