@@ -51,6 +51,9 @@
     - role: bloodymage.rebeldream.fail2ban
       tags:
         - fail2ban
+    - role: bloodymage.rebeldream.curl
+      tags:
+        - curl
     - role: bloodymage.rebeldream.git
       tags:
         - git
