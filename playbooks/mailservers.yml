@@ -6,9 +6,6 @@
 
 - hosts: postfix_servers:!public_zone
   roles:
-    - role: bloodymage.rebeldream.spamassassin
-      tags:
-        - spamassassin
     - role: bloodymage.rebeldream.postfix
       tags:
         - postfix

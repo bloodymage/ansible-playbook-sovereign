@@ -16,6 +16,6 @@ spamassassin_directories:
     group: "{{ spamassassin_spamd_user }}"
     mode: "0700"
 
-spamassasin_default_files:
-  - spamassasin
+spamassassin_default_files:
+  - spamassassin
   - spamass-milter

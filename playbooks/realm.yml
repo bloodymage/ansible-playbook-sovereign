@@ -1,31 +1,9 @@
 - name: "Prepare playbook environment"
   hosts: all:!public_zone
   ignore_unreachable: yes
+  roles:
+    - bloodymage.rebeldream.config_environment
   tasks:
-    - name: "Create groups based on the Network OS"
-      group_by:
-        key: "{{ ansible_network_os.split('.')[2] | lower }}"
-      when:
-        - ansible_network_os is defined
-      tags:
-        - always
-
-    - name: "Create groups based on the OS Family"
-      group_by:
-        key: "{{ ansible_os_family | lower }}"
-      when:
-        - ansible_os_family is defined
-      tags:
-        - always
-
-    - name: "Create groups based on the System"
-      group_by:
-        key: "{{ ansible_system | lower }}"
-      when:
-        - ansible_system is defined
-      tags:
-        - always
-
     - name: "Set default domain recreation"
       ansible.builtin.set_fact:
         __samba_recreate_realm: no
@@ -131,13 +109,6 @@
 
 - hosts: samba_domain_controllers
   tasks:
-    - name: "Set Default Samba Schema Master"
-      ansible.builtin.set_fact:
-        __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
-      become: no
-      tags:
-        - always
-
     - name: "Set Samba Schema Master to Running Schema Master (Only if not regenerating realm)"
       command:
         cmd: "samba-tool fsmo show"

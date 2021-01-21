@@ -204,6 +204,14 @@
   listen:
     - "restart all"
 
+- name: restart spamassassin
+  ansible.builtin.service:
+    name: spamassassin
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+
 # ==================================================================================================
 #
 # Reload Handlers

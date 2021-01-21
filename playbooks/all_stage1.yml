@@ -5,41 +5,8 @@
 # ==================================================================================================
 - hosts: all:!public_zone
   ignore_unreachable: yes
-  pre_tasks:
-    - name: "Create groups based on the Network OS"
-      group_by:
-        key: "{{ ansible_network_os.split('.')[2] | lower }}"
-      when:
-        - ansible_network_os is defined
-      tags:
-        - always
-
-    - name: "Create groups based on the OS Family"
-      group_by:
-        key: "{{ ansible_os_family | lower }}"
-      when:
-        - ansible_os_family is defined
-      tags:
-        - always
-
-    - name: "Create groups based on the System"
-      group_by:
-        key: "{{ ansible_system | lower }}"
-      when:
-        - ansible_system is defined
-      tags:
-        - always
-
-#     - name: Check if we are using debug mode
-#       ansible.builtin.set_fact:
-#         __debug_mode: yes
-#         __free_strategy: "debug"
-#         __linear_strategy: "debug"
-#       become: no
-#       tags:
-#         - never
-#         - debug
-#         - debug-mode
+  roles:
+    - bloodymage.rebeldream.config_environment
 
 # ==================================================================================================
 #
@@ -51,7 +18,6 @@
   roles:
     - role: bloodymage.rebeldream.hostname
     - role: bloodymage.rebeldream.hosts
-    - role: bloodymage.rebeldream.system_upgrade
     - role: bloodymage.rebeldream.users
 
 # ==================================================================================================
