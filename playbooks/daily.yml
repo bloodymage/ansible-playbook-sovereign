@@ -12,7 +12,10 @@
   roles:
     - role: bloodymage.rebeldream.dns_reversezones
 
-- hosts: all:!localhost
+- hosts: all:!localhost:!public
   roles:
     - role: bloodymage.rebeldream.system_upgrade
+
+- hosts: all:!localhost:!public:!routeros
+  roles:
     - role: bloodymage.rebeldream.dotfiles
