@@ -1,7 +1,10 @@
 # {{ ansible_managed }}
-{# For clarity, we only generate a configuration file with settings that are different from       #}
-{# the default settings. (Work in Progress)                                                       #}
-
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# For clarity with the final configuration file, we only generate a configuration file with      #}
+{# settings that are different from the default settings. (Work in Progress)                      #}
+{#                                                                                                #}
+{# ============================================================================================== #}
 {% if openssh_port != __openssh_port -%}
   Port "{{ openssh_port }}"
 {% endif %}
@@ -24,14 +27,6 @@ HostCertificate  {{ sshca_host_certificate_file }}
 #LogLevel INFO
 
 {# Authentication #}
-#LoginGraceTime 2m
-{% if openssh_permit_root_login != __openssh_permit_root_login -%}
-  PermitRootLogin {{ openssh_permit_root_login }}
-{% endif %}
-#StrictModes yes
-#MaxAuthTries 6
-#MaxSessions 10
-#PubkeyAuthentication yes
 AuthorizedPrincipalsFile /etc/ssh/auth_principals/%u
 TrustedUserCAKeys {{ sshca_userca_certificate }}
 {% if openssh_authorized_keys_file is defined -%}
@@ -39,7 +34,43 @@ TrustedUserCAKeys {{ sshca_userca_certificate }}
 {% endif %}
 #AuthorizedKeysCommand none
 #AuthorizedKeysCommandUser nobody
-
+{% if openssh_permit_empty_passwords != __openssh_permit_empty_passwords -%}
+  PermitEmptyPasswords {{ openssh_permit_empty_passwords }}
+{% endif %}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# Change to yes to enable challenge-response passwords (beware issues with                       #}
+{# some PAM modules and threads)                                                                  #}
+{#                                                                                                #}
+{# Set this to 'yes' to enable PAM authentication, account processing,                            #}
+{# and session processing. If this is enabled, PAM authentication will                            #}
+{# be allowed through the ChallengeResponseAuthentication and                                     #}
+{# PasswordAuthentication.  Depending on your PAM configuration,                                  #}
+{# PAM authentication via ChallengeResponseAuthentication may bypass                              #}
+{# the setting of "PermitRootLogin without-password".                                             #}
+{# If you just want the PAM account and session checks to run without                             #}
+{# PAM authentication, then enable this but set PasswordAuthentication                            #}
+{# and ChallengeResponseAuthentication to 'no'.                                                   #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if openssh_use_pam != __openssh_use_pam -%}
+  UsePAM {{ openssh_use_pam }}
+{% endif %}
+{# To disable tunneled clear text passwords, change to no here! #}
+{% if openssh_password_authentication != __openssh_password_authentication -%}
+  PasswordAuthentication {{ openssh_password_authentication }}
+{% endif %}
+{% if openssh_challenge_response_auth != __openssh_challenge_response_auth -%}
+  ChallengeResponseAuthentication {{ openssh_challenge_response_auth }}
+{% endif %}
+{% if openssh_permit_root_login != __openssh_permit_root_login -%}
+  PermitRootLogin {{ openssh_permit_root_login }}
+{% endif %}
+#LoginGraceTime 2m
+#StrictModes yes
+#MaxAuthTries 6
+#MaxSessions 10
+#PubkeyAuthentication yes
 {% if openssh_host_based_authentication is defined -%}
   HostbasedAuthentication {{ openssh_host_based_authentication }}
 {% endif %}
@@ -48,25 +79,6 @@ TrustedUserCAKeys {{ sshca_userca_certificate }}
 {% endif %}
 {% if openssh_ignore_rhosts is defined -%}
   IgnoreRhosts {{ openssh_ignore_rhosts }}
-{% endif %}
-
-{# To disable tunneled clear text passwords, change to no here! #}
-{% if openssh_password_authentication != __openssh_password_authentication -%}
-  PasswordAuthentication {{ openssh_password_authentication }}
-{% endif %}
-{% if openssh_permit_empty_passwords != __openssh_permit_empty_passwords- %}
-  PermitEmptyPasswords {{ openssh_permit_empty_passwords }}
-{% endif %}
-
-{# =================================================================================================
-#
-# Change to yes to enable challenge-response passwords (beware issues with
-# some PAM modules and threads)
-#
-#
-# ================================================================================================== #}
-{% if openssh_challenge_response_auth != __openssh_challenge_response_auth -%}
-  ChallengeResponseAuthentication {{ openssh_challenge_response_auth }}
 {% endif %}
 
 {# Kerberos options #}
@@ -79,8 +91,15 @@ TrustedUserCAKeys {{ sshca_userca_certificate }}
 #KerberosTicketCleanup yes
 #KerberosGetAFSToken no
 
-{# GSSAPI options #}
-{% if not rebeldream_smart_card %}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# GSSAPI options                                                                                 #}
+{#                                                                                                #}
+{# If we are in a smart card environment, we want to use the smart card public key authentication #}
+{# instead.                                                                                       #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if not rebeldream_smart_card_login %}
 {% if openssh_gssapi_authentication != __openssh_gssapi_authentication -%}
   GSSAPIAuthentication {{ openssh_gssapi_authentication }}
 {% endif %}
@@ -98,49 +117,32 @@ TrustedUserCAKeys {{ sshca_userca_certificate }}
 {% endif %}
 {% endif %}
 
-{# ================================================================================================= 
-# 
-# Set this to 'yes' to enable PAM authentication, account processing, 
-# and session processing. If this is enabled, PAM authentication will 
-# be allowed through the ChallengeResponseAuthentication and 
-# PasswordAuthentication.  Depending on your PAM configuration, 
-# PAM authentication via ChallengeResponseAuthentication may bypass 
-# the setting of "PermitRootLogin without-password". 
-# If you just want the PAM account and session checks to run without 
-# PAM authentication, then enable this but set PasswordAuthentication 
-# and ChallengeResponseAuthentication to 'no'. 
-# 
-# ================================================================================================== #}
-{% if openssh_use_pam != __openssh_use_pam -%}
-  UsePAM {{ openssh_use_pam }}
-{% endif %}
-
-#AllowAgentForwarding yes 
-#AllowTcpForwarding yes 
+#AllowAgentForwarding yes
+#AllowTcpForwarding yes
 #GatewayPorts no
 {% if openssh_x11_forwarding != __openssh_x11_forwarding -%}
   X11Forwarding {{ openssh_x11_forwarding }}
 {% endif %}
-#X11DisplayOffset 10 
-#X11UseLocalhost yes 
+#X11DisplayOffset 10
+#X11UseLocalhost yes
 #PermitTTY yes
 {% if openssh_print_motd != __openssh_print_motd -%}
   PrintMotd {{ openssh_print_motd }}
 {% endif %}
-#PrintLastLog yes 
-#TCPKeepAlive yes 
-#UseLogin no 
-#PermitUserEnvironment no 
-#Compression delayed 
-#ClientAliveInterval 0 
+#PrintLastLog yes
+#TCPKeepAlive yes
+#UseLogin no
+#PermitUserEnvironment no
+#Compression delayed
+#ClientAliveInterval 0
 #ClientAliveCountMax 3
 {% if openssh_use_dns != __openssh_use_dns -%}
   UseDNS {{ openssh_use_dns }}
 {% endif %}
-#PidFile /var/run/sshd.pid 
-#MaxStartups 10:30:100 
-#PermitTunnel no 
-#ChrootDirectory none 
+#PidFile /var/run/sshd.pid
+#MaxStartups 10:30:100
+#PermitTunnel no
+#ChrootDirectory none
 #VersionAddendum none
 
 {# no default banner path #}

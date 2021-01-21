@@ -341,6 +341,49 @@ sshca_user_certificate_file: "{{ ssh_config_dir }}/ssh_user_ed25519_key-cert.pub
 sshca_authorized_keys: "authorized_keys"
 sshca_authorized_principals: "%u"
 
+# ==================================================================================================
+#
+# Service user definitions
+#
+# These are users required by services available on our network.
+#
+# ==================================================================================================
+domain_user_vmail:
+  username: "vmail"
+  spns:
+    - spn: "imap"
+      host: "iris.olympus.drbr.org"
+      keytab_file: "/etc/dovecot/dovecot.keytab"
+    - spn: "smtp"
+      host: "iris.olympus.drbr.org"
+      keytab_file: "/etc/dovecot/dovecot.keytab"
+  account_expire: "--noexpiry"
+
+domain_user_mediawiki:
+  username: "mediawiki"
+  spns:
+    - spn: "HTTP"
+      host: "mnemosyne.olympus.drbr.org"
+      keytab_file: "/etc/apache2/wiki.{{ rebeldream_domain }}.keytab"
+  account_expire: "--noexpiry"
+
+domain_user_keycloak:
+  username: "keycloak"
+  spns:
+    - spn: "HTTP"
+      host: "selene.olympus.drbr.org"
+      keytab_file: "/opt/keycloak/standalone/configuration/keycloak.keytab"
+    - spn: "HTTP"
+      host: "warspite.swg.drbr.org"
+      keytab_file: "/opt/keycloak/standalone/configuration/keycloak.keytab"
+  account_expire: "--noexpiry"
+
+domain_user_nextcloud:
+  username: "nextcloud"
+  spns:
+    - spn: "HTTP"
+      host: "independence.swg.drbr.org"
+  account_expire: "--noexpiry"
 
 
 
@@ -362,6 +405,12 @@ __ownca_regenerate_csr: no
 # Samba
 __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
 __samba_recreate_realm: no
+
+__domain_system_users:
+  - "{{ domain_user_vmail }}"
+  - "{{ domain_user_mediawiki }}"
+  - "{{ domain_user_keycloak }}"
+  - "{{ domain_user_nextcloud }}"
 
 # ==================================================================================================
 #

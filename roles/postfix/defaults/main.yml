@@ -99,6 +99,7 @@ postfix_canonical_maps:
 postfix_compatibility_level: "2"
 
 postfix_home_mailbox: "Maildir/"
+postfix_line_length_limit: "6144"
 postfix_mailbox_size_limit: "0"
 postfix_mydestination:
   - "$myhostname"
@@ -271,6 +272,7 @@ __postfix_disable_vrfy_command: "no"
 __postfix_home_mailbox: ""
 __postfix_inet_interfaces: "all"
 __postfix_inet_protocols: "all"
+__postfix_line_length_limit: "2048"
 __postfix_local_recipient_maps:
   - "proxy:unix:passwd.byname $alias_maps"
 __postfix_mailbox_size_limit: 0

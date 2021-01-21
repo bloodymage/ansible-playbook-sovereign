@@ -82,6 +82,11 @@
     - openssh_debug
     - openssh-debug
 
+# ==================================================================================================
+#
+# This variable is needed for generating /etc/ssh/ssh_known_hosts
+#
+# ==================================================================================================
 - name: "Get Host CA public key"
   ansible.builtin.set_fact:
     __openssh_host_ca_public_key: "{{ lookup('file', sshca_key_directory + '/' + sshca_host_pubfile) }}"
