@@ -1,7 +1,6 @@
 ---
 packages:
   - bash-completion
-  - git
   - global
   - ispell
   - keychain
