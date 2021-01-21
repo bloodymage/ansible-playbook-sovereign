@@ -7,3 +7,8 @@
     - role: bloodymage.rebeldream.libnss3_tools
     - role: bloodymage.rebeldream.evolution
     - role: bloodymage.rebeldream.firefox
+      tags:
+        - firefox
+    - role: bloodymage.rebeldream.chromium
+      tags:
+        - chromium
