@@ -60,6 +60,9 @@
     - role: bloodymage.rebeldream.keychain
       tags:
         - keychain
+    - role: bloodymage.rebeldream.man
+      tags:
+        - man
 
 # ==================================================================================================
 #
