@@ -1,0 +1,5 @@
+---
+# defaults file for linux-pam
+packages:
+  - libpam-runtime
+  - libpam-modules
