@@ -28,7 +28,6 @@ openssh_host_pubkey: "{{ openssh_host_key }}.pub"
 # SSH_Config options
 openssh_github: no
 
-
 # ==================================================================================================
 #
 # sshd_config options
@@ -48,7 +47,7 @@ openssh_print_motd: "no"
 openssh_listen_ipv6: "{{ __openssh_listen_ipv6 }}"
 openssh_port: "{{ __openssh_port }}"
 openssh_password_authentication: "{{ __openssh_password_authentication }}"
-openssh_permit_empty_passwords: "{{ __openssh_permit_empty_password }}"
+openssh_permit_empty_passwords: "{{ __openssh_permit_empty_passwords }}"
 openssh_gssapi_authentication: "{{ __openssh_gssapi_authentication }}"
 openssh_gssapi_cleanup_credentials: "{{ __openssh_gssapi_cleanup_credentials }}"
 openssh_gssapi_key_exchange: "{{ __openssh_gssapi_key_exchange }}"
