@@ -19,7 +19,7 @@
 
 - name: "Install /etc/clamav config files"
   ansible.builtin.template:
-    src: "{{ item }}.j2"
+    src: "etc/clamav/{{ item }}.j2"
     dest: "/etc/clamav/{{ item }}"
     owner: root
     group: root
@@ -31,8 +31,8 @@
 - name: "Create milter socket directory"
   ansible.builtin.file:
     path: /var/spool/postfix/clamav
+    state: directory
     owner: clamav
     group: root
     mode: "0755"
   become: yes
-
