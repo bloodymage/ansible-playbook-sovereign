@@ -26,4 +26,4 @@ galaxy_info:
     - certificates
 
 dependencies:
-  - role: bloodymage.rebeldream.collection_handlers
+  - role: bloodymage.rebeldream.config_defaults

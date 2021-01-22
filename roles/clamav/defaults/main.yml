@@ -1,0 +1,27 @@
+---
+# defaults file for clamav
+packages:
+  #- lha
+  #- rar
+  #- unrar
+  - arj
+  - bzip2
+  - cabextract
+  - clamav
+  - clamav-milter
+  - clamav-milter
+  - cpio
+  - file
+  - gzip
+  - lzop
+  - nomarch
+  - p7zip
+  - pax
+  - rpm
+  - unzip
+  - zip
+  - zoo
+
+clamav_milter_socket: "/var/spool/postfix/clamav/clamav-milter.ctl"
+clamav_on_infected: "Quarantine"
+clamav_log_facilitiy: "LOG_MAIL"
