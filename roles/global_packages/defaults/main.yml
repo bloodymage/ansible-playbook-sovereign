@@ -1,5 +1,4 @@
 ---
 packages:
   - global
-  - make
   - trash-cli
