@@ -1,6 +1,5 @@
 ---
 # defaults file for collection_handlers
-
 # Decisions
 rebeldream_realm_identity_management_system: ""
 rebeldream_smart_card_login: no
@@ -30,7 +29,7 @@ rebeldream_password_length: "42"
 #
 # ==================================================================================================
 # Domain Information
-rebeldream_root_domain: "example.com"
+#rebeldream_root_domain: "example.com"
 rebeldream_internal_zone_name: "internal"
 rebeldream_dmz_zone_name: "dmz"
 

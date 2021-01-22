@@ -1,3 +1,9 @@
+- hosts: mail_servers:!public_zone
+  roles:
+    - role: bloodymage.rebeldream.spamassassin
+      tags:
+        - spamassassin
+
 - hosts: imap_servers:!public_zone
   roles:
     - role: bloodymage.rebeldream.dovecot

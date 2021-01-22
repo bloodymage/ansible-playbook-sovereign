@@ -14,10 +14,11 @@
 #
 # ==================================================================================================
 - hosts: all:!localhost:!tpeap:!printers:!public_zone
-  strategy: free
+  strategy: linear
   roles:
     - role: bloodymage.rebeldream.hostname
     - role: bloodymage.rebeldream.hosts
+    - role: bloodymage.rebeldream.system_upgrade
     - role: bloodymage.rebeldream.users
 
 # ==================================================================================================
