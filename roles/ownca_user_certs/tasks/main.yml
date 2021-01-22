@@ -157,10 +157,11 @@
     __user_csr_dir: "{{ __user_home_dir }}/{{ ownca_user_csr_dir }}"
     __id_number: "{{ item[0].id_number }}"
     __user_principal_name: "{{ item[0].username }}@{{ rebeldream_domain }}"
-    __email: "{% if item[1].name == 'authentication' %}{{ __user_principal_name }}{% else %}{{ __public_email }}{%endif %}"
+    #__email: "{% if item[1].name == 'authentication' %}{{ __user_principal_name }}{% else %}{{ __public_email }}{%endif %}"
+    __email: "{{ __public_email }}"
     __san_auth: "otherName:{{ msupn }};UTF8:{{ __user_principal_name }}"
     __san_email: "email:{{ __email }}"
-    __san: "{% if item[1].name == 'authentication' %}{{ __san_auth }}{% else %}{{ __san_email }}{%endif %}"
+    __san: "{{ __san_email }}{% if item[1].name == 'authentication' %},{{ __san_auth }}{%endif %}"
     __crl_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
   when:
     - item[0].id_number is defined
