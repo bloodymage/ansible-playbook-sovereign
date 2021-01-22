@@ -21,3 +21,7 @@ packages:
   - unzip
   - zip
   - zoo
+
+clamav_milter_socket: "/var/spool/postfix/clamav/clamav-milter.ctl"
+clamav_on_infected: "Quarantine"
+clamav_log_facilitiy: "LOG_MAIL"

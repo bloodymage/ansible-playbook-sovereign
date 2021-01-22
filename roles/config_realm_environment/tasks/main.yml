@@ -79,7 +79,7 @@
   become: yes
   when:
     - not __samba_recreate_realm
-    - inventory_hostname in group['samba_domain_controllers']
+    - inventory_hostname in groups['samba_domain_controllers']
   tags:
     - always
 
