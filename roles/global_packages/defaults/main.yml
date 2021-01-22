@@ -1,6 +1,5 @@
 ---
 packages:
-  - bash-completion
   - global
   - ispell
   - make
