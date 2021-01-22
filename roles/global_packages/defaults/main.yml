@@ -5,5 +5,4 @@ packages:
   - ispell
   - make
   - members
-  - rename
   - trash-cli

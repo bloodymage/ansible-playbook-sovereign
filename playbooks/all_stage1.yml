@@ -64,6 +64,9 @@
     - role: bloodymage.rebeldream.man
       tags:
         - man
+    - role: bloodymage.rebeldream.rename
+      tags:
+        - rename
 
 # ==================================================================================================
 #
