@@ -72,6 +72,9 @@
     - role: bloodymage.rebeldream.members
       tags:
         - members
+    - role: bloodymage.rebeldream.bash_completion
+      tags:
+        - bash-completion
     - role: bloodymage.rebeldream.ispell
       tags:
         - ispell

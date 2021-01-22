@@ -1,0 +1,6 @@
+---
+packages:
+  - global
+  - ispell
+  - make
+  - trash-cli
