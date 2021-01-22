@@ -3,9 +3,9 @@
     - role: bloodymage.rebeldream.spamassassin
       tags:
         - spamassassin
-    - role: bloodymage.rebeldream.clamav
-      tags:
-        - clamav
+    #- role: bloodymage.rebeldream.clamav
+    #  tags:
+    #    - clamav
 
 - hosts: imap_servers:!public_zone
   roles:

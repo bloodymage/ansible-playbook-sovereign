@@ -4,5 +4,4 @@ packages:
   - global
   - ispell
   - make
-  - members
   - trash-cli
