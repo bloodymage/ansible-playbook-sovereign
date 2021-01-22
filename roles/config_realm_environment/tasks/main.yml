@@ -1,5 +1,12 @@
 ---
 # tasks file for config_realm_environment
+- name: "Set default domain recreation variable to 'no'"
+  ansible.builtin.set_fact:
+    __samba_recreate_realm: no
+  become: no
+  tags:
+    - always
+
 - name: "Determine whether to force domain recreation"
   ansible.builtin.set_fact:
     __samba_recreate_realm: yes

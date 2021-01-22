@@ -2,8 +2,8 @@
   hosts: all:!public_zone
   ignore_unreachable: yes
   roles:
-    - bloodymage.rebeldream.config_environment
-    - bloodymage.rebeldream.config_realm_environment
+    - role: bloodymage.rebeldream.config_environment
+    - role: bloodymage.rebeldream.config_realm_environment
 
 - name: "Configure baseline Kerberos"
   hosts: internal_network:!routeros
@@ -77,12 +77,12 @@
       tags:
         - keycloak
 
-- hosts: samba_file_servers:workstations:&linux
-  roles:
-    - role: bloodymage.rebeldream.dotfiles
-      vars:
-        dotfiles_users: "{{ domain_users }}"
-        dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
+# - hosts: samba_file_servers:workstations:&linux
+#   roles:
+#     - role: bloodymage.rebeldream.dotfiles
+#       vars:
+#         dotfiles_users: "{{ domain_users }}"
+#         dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
 
 - hosts: samba_ownca_user_hosts
   roles:
