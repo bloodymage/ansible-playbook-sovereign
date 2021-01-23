@@ -254,7 +254,7 @@
 - name: Generate PKCS#12 files
   community.crypto.openssl_pkcs12:
     action: export
-    friendly_name: "{{ __given_name }}{{ __surname }}({{ item[1].name | title }})"
+    friendly_name: "{{ __given_name }}{{ __surname }} ({{ item[1].name | title }})"
     path: "{{ __pki_pkcs12_file }}"
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
@@ -276,7 +276,7 @@
     __username: "{{ item[0].username }}"
     __id_number: "{{ item[0].id_number }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"
-    __surname: "{% if item[0].surname is defined %} {{ item[0].surname }} {% else %}{% endif %}"
+    __surname: "{% if item[0].surname is defined %} {{ item[0].surname }}{% else %}{% endif %}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
     __user_cert_dir: "{{ __user_home_dir }}/{{ ownca_user_cert_dir }}"
     __pki_cert_file: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
@@ -298,7 +298,7 @@
       -out "{{ item[0].username }}_{{ __cert_purpose }}.der"
       -outform DER
     chdir: "{{ __pki_cert_dir }}"
-    creates: "{{ item[0].username }}_{{ __cert_purpose }}.der"
+    #creates: "{{ item[0].username }}_{{ __cert_purpose }}.der"
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
     __pki_cert_dir: "{{ ownca_directory }}/users/certs"

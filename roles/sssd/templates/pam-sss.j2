@@ -1,14 +1,12 @@
 Name: SSS SmartCard authentication
-Default: no
-Priority: 900
+Default: {{ sssd_pam_default }}
+Priority: {{ sssd_pam_priority }}
 
 Auth-Type: Primary
 Auth:
 	[success=end default=ignore]	pam_sss.so use_first_pass
 Auth-Initial:
-[success=end default=ignore]	pam_sss.so try_cert_auth forward_pass
-Auth-Final:
-  sufficent       pam_sss.so allow_missing_name
+[success=end default=ignore]	{{ sssd_pam_auth_initial }}
 Account-Type: Additional
 Account:
 	sufficient			pam_localuser.so
