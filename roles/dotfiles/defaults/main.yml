@@ -24,3 +24,6 @@ dotfiles_gpg_list_options:
   - show-std-notations
   - show-user-notations
 dotfiles_gpg_keyid_format: "0xlong"
+dotfiles_users: "{{ users }}"
+dotfiles_home: "/home"
+dotfiles_mode: "0700"

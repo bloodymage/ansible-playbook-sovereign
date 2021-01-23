@@ -1,0 +1,28 @@
+galaxy_info:
+  author: G Derber
+  description: Installs Fail2ban
+  company: Bloodymage
+
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+
+  license: MIT
+
+  min_ansible_version: 2.10
+
+  platforms:
+    - name: Rasbian
+      versions:
+        - 10
+    - name: Debian
+      versions:
+        - 10
+    - name: Ubuntu
+      versions:
+        - 18.04
+
+  galaxy_tags:
+    - bloodymage
+    - openssh
+
+dependencies:
+  - role: bloodymage.rebeldream.collection_handlers

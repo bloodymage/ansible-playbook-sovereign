@@ -1,0 +1,7 @@
+dn: olcDatabase={{ item.type }},cn=config
+objectClass: olc{{ item.type | title }}Config
+olcDatabase: {{ item.type }}
+olcDbDirectory: /var/lib/ldap/
+olcDbURI: {{ item.uri }}
+olcSuffix: {{ openldap_basedn }}
+olcDbProtocolVersion: {{ item.protocol_version }}

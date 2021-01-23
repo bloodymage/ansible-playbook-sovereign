@@ -6,13 +6,16 @@
 # ==================================================================================================
 - name: Ensure User Home directory exists
   ansible.builtin.file:
-    dest: "{{ item.unix_home }}"
+    dest: "{{ __dotfiles_home }}"
     state: directory
     owner: "{{ item.username }}"
     group: "{{ item.username }}"
-    mode: "0700"
-  loop: "{{ users }}"
+    mode: "{{ __mode }}"
+  loop: "{{ dotfiles_users }}"
   become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __mode: "{{ dotfiles_mode }}"
   when:
     - users is defined
     - item.unix_home is defined
@@ -25,12 +28,14 @@
 - name: Install User gitconfig
   ansible.builtin.template:
     src: "gitconfig.j2"
-    dest: "{{ item.unix_home }}/.gitconfig"
+    dest: "{{ __dotfiles_home }}/.gitconfig"
     owner: "{{ item.username }}"
     group: "{{ item.username }}"
     mode: "0644"
   loop: "{{ users }}"
   become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
   when:
     - users is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
@@ -41,13 +46,15 @@
 
 - name: Ensure user .gnupg folder exists
   ansible.builtin.file:
-    path: "{{ item.unix_home }}/.gnupg"
+    path: "{{ __dotfiles_home }}/.gnupg"
     state: directory
     owner: "{{ item.username }}"
     group: "{{ item.username }}"
     mode: "0700"
   loop: "{{ users }}"
   become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
   when:
     - users is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
@@ -59,12 +66,14 @@
 - name: Install gpg.conf
   ansible.builtin.template:
     src: "gpg.conf.j2"
-    dest: "{{ item.unix_home }}/.gnupg/gpg.conf"
+    dest: "{{ __dotfiles_home }}/.gnupg/gpg.conf"
     owner: "{{ item.username }}"
     group: "{{ item.username }}"
     mode: "0644"
   loop: "{{ users }}"
   become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
   when:
     - users is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
@@ -76,11 +85,13 @@
 - name: Install gpg-agent.conf
   ansible.builtin.template:
     src: "gpg-agent.conf.j2"
-    dest: "{{ item.unix_home }}/.gnupg/gpg-agent.conf"
+    dest: "{{ __dotfiles_home }}/.gnupg/gpg-agent.conf"
     owner: "{{ item.username }}"
     group: "{{ item.username }}"
     mode: "0644"
   loop: "{{ users }}"
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
   become: yes
   when:
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")

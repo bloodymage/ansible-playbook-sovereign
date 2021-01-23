@@ -119,13 +119,13 @@
     organization_name: "{{ rebeldream_org_name }}"
     organizational_unit_name: "{{ rebeldream_org_unit_name }}"
     common_name: "{{ __given_name }}{{ __surname }}"
-    email_address: "{{ __username }}@{{ rebeldream_domain }}"
+    email_address: "{{ __email }}"
     key_usage: "{{ item[1].key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ item[1].extended_key_usage }}"
     privatekey_path: "{{ __user_private_dir }}/{{ __username }}.key"
     privatekey_passphrase: "{{ __password }}"
-    subject_alt_name: "otherName:{{ msupn }};UTF8:{{ __user_principal_name }}"
+    subject_alt_name: "{{ __san }}"
     crl_distribution_points:
       - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ __crl_file }}"
         reasons:
@@ -149,6 +149,7 @@
     __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item[0].username }}/password"
     __password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     __username: "{{ item[0].username }}"
+    __public_email: "{{ item[0].username }}@{{ rebeldream_root_domain }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"
     __surname: "{% if item[0].surname is defined %} {{ item[0].surname }}{% else %}{% endif %}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
@@ -156,6 +157,11 @@
     __user_csr_dir: "{{ __user_home_dir }}/{{ ownca_user_csr_dir }}"
     __id_number: "{{ item[0].id_number }}"
     __user_principal_name: "{{ item[0].username }}@{{ rebeldream_domain }}"
+    #__email: "{% if item[1].name == 'authentication' %}{{ __user_principal_name }}{% else %}{{ __public_email }}{%endif %}"
+    __email: "{{ __public_email }}"
+    __san_auth: "otherName:{{ msupn }};UTF8:{{ __user_principal_name }}"
+    __san_email: "email:{{ __email }}"
+    __san: "{{ __san_email }}{% if item[1].name == 'authentication' %},{{ __san_auth }}{%endif %}"
     __crl_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
   when:
     - item[0].id_number is defined
@@ -248,7 +254,7 @@
 - name: Generate PKCS#12 files
   community.crypto.openssl_pkcs12:
     action: export
-    friendly_name: "{{ __given_name }}{{ __surname }}({{ item[1].name | title }})"
+    friendly_name: "{{ __given_name }}{{ __surname }} ({{ item[1].name | title }})"
     path: "{{ __pki_pkcs12_file }}"
     privatekey_path: "{{ __pki_privatekey_file }}"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
@@ -270,7 +276,7 @@
     __username: "{{ item[0].username }}"
     __id_number: "{{ item[0].id_number }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"
-    __surname: "{% if item[0].surname is defined %} {{ item[0].surname }} {% else %}{% endif %}"
+    __surname: "{% if item[0].surname is defined %} {{ item[0].surname }}{% else %}{% endif %}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
     __user_cert_dir: "{{ __user_home_dir }}/{{ ownca_user_cert_dir }}"
     __pki_cert_file: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
@@ -292,7 +298,7 @@
       -out "{{ item[0].username }}_{{ __cert_purpose }}.der"
       -outform DER
     chdir: "{{ __pki_cert_dir }}"
-    creates: "{{ item[0].username }}_{{ __cert_purpose }}.der"
+    #creates: "{{ item[0].username }}_{{ __cert_purpose }}.der"
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
     __pki_cert_dir: "{{ ownca_directory }}/users/certs"

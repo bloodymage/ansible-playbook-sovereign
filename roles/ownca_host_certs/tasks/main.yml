@@ -235,6 +235,7 @@
   become: yes
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
+    - item.name != "root"
   tags:
     - ownca_host_certs
     - ownca-host-certs

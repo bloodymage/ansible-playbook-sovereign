@@ -100,7 +100,6 @@ user_odoo:
   ssh_access_cert:
     - root-everywhere
 
-
 user_root: "{{ __user_root }}"
 
 user_mythtv_group:

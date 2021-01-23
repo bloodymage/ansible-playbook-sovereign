@@ -17,7 +17,7 @@
 #
 # ==================================================================================================
 # TODO: Really check if already joined
-- name: "Determine if host is already joined as a domain controller"
+- name: "Determine if host is already joined as a domain controller."
   ansible.builtin.set_fact:
     __samba_joined_as_domain_controller: yes
   become: no
@@ -39,14 +39,7 @@
     - samba_administrator_password == "password"
   no_log: yes
 
-- name: "Check Ansible Facts Password (WARNING: This will log the password)"
-  ansible.builtin.debug:
-    msg:
-      - "{{ samba_administrator_password }}"
-    verbosity: 1
-  become: no
-
-- name: Include OS-specific variables.
+- name: "Include OS-specific variables."
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
@@ -61,43 +54,30 @@
     state: present
   become: yes
 
-- name: "If we are regenerating the realm: include regeneration tasks"
-  include: "recreate_realm.yml"
+- name: "Initialize the domain"
+  include: "create_domain.yml"
   become: no
   when:
     - __samba_recreate_realm
-
-# ==================================================================================================
-#
-# Provision First Active Directory Domain Controller
-#
-# TODO: This also needs to happen if the realm does not exist
-#
-# ==================================================================================================
-- name: Provision First Active Directory Domain Controller
-  ansible.builtin.command:
-    cmd: >
-      samba-tool domain provision
-      --server-role=dc
-      --use-rfc2307
-      --dns-backend="{{ samba_dns_backend }}"
-      --realm="{{ rebeldream_domain | upper }}"
-      --domain="{{ rebeldream_org_unit_name | upper }}"
-      --adminpass="{{ samba_administrator_password }}"
-  register: samba_ad_created
-  become: yes
-  when:
-    - __samba_recreate_realm
     - rebeldream_fqdn == __samba_schema_master
 
-- name: Restart bind
-  service:
-    name: bind9
-    state: restarted
-  become: yes
+- name: "Precheck domain prior to provisioning new domain controllers"
+  include: "precheck.yml"
+  become: no
   when:
-    - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
+    - not __samba_joined_as_domain_controller
+
+- name: "Provision additional domain controllers"
+  include: "provision_additional_controllers.yml"
+  become: no
+  when:
+    - not __samba_joined_as_domain_controller
+
+- name: "Provision additional domain controllers"
+  include: "test_controllers.yml"
+  become: no
+  when:
+    - not __samba_joined_as_domain_controller
 
 - name: "Configure smb.conf file"
   ansible.builtin.template:
@@ -116,25 +96,15 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: "start samba-ad-dc"
-  ansible.builtin.service:
-    name: samba-ad-dc
-    state: started
+- name: "Configure user.map file"
+  ansible.builtin.template:
+    src: "user_map.j2"
+    dest: /etc/samba/user.map
+    owner: root
+    group: root
+    mode: 0644
   become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: "Create Reverse Zone"
-  ansible.builtin.command:
-    cmd: >
-      samba-tool dns zonecreate localhost
-      "{{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa"
-      -U administrator
-      --password="{{ samba_administrator_password }}"
-  become: yes
-  ignore_errors: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
+  notify: restart samba-ad-dc
 
 - name: "Add Domain Controller to Reverse Zone"
   ansible.builtin.command:
@@ -147,275 +117,6 @@
       --password="{{ samba_administrator_password }}"
   become: yes
   ignore_errors: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-# ==================================================================================================
-#
-# Test Active Directory Domain Controller
-#
-# ==================================================================================================
-- name: "(Tests) List all shares provided by the DC"
-  ansible.builtin.command:
-    cmd: "smbclient -L localhost -U%"
-  register: shares
-  become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-# - name: Verify SMB Authentication
-#   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
-#   register: success
-#   become: yes
-#   when: rebeldream_fqdn == __samba_schema_master
-#   ignore_errors: yes
-
-#- debug:
-#    var: success
-#    verbosity: 2
-
-- name: "(Tests) Tcp-based _ldap SRV record in the domain"
-  ansible.builtin.command:
-    cmd: "host -t SRV _ldap._tcp.{{ rebeldream_domain }}."
-  register: success
-  become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: "(Tests) udp-based _kerberos SRV resource record in the domain"
-  ansible.builtin.command:
-    cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
-  register: success
-  become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: "(Tests) The A record of the domain controller"
-  ansible.builtin.command:
-    cmd: "host -t A {{ ansible_fqdn }}."
-  register: success
-  become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: "Test Active Directory Domain Controller"
-  expect:
-    command: kinit administrator
-    responses:
-      (?i)password: "{{ samba_administrator_password }}"
-  no_log: true
-  become: no
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: "Test Active Directory Domain Controller"
-  ansible.builtin.command:
-    cmd: "klist"
-  register: success
-  become: no
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: "(Tests) The PTR record of the domain controller"
-  ansible.builtin.command:
-    cmd: "host -t PTR {{ ansible_host }}"
-  register: success
-  become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: "Print Success"
-  ansible.builtin.debug:
-    msg: "{{ success }}"
-    verbosity: 1
-  become: no
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-# ==================================================================================================
-#
-# Add a little hardening
-#
-# https://fy.blackhats.net.au/blog/html/2018/04/18/making_samba_4_the_default_ldap_server.html
-#
-# ==================================================================================================
-# - name: "Disallow any user to join host to AD"
-#   shell: "{{ item }}"
-#   register: success
-#   become: yes
-#   loop:
-#     - "samba-tool domain settings account_machine_join_quota 0"
-#   when: rebeldream_fqdn == __samba_schema_master
-#   ignore_errors: yes
-
-- name: "Disable Guest Account"
-  ansible.builtin.command:
-    cmd: "{{ item }}"
-  register: success
-  become: yes
-  loop:
-    - "samba-tool user disable Guest"
-  ignore_errors: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-# ==================================================================================================
-#
-# Modify Password Policy: these should only be changed if we have a reason to suspect they are comprimised.
-#
-# https://dev.tranquil.it/samba/en/samba_advanced_methods/samba_password_policies.html
-# https://oitibs.com/samba4-domain-password-policy/
-#
-# ==================================================================================================
-- name: "Set Password Expiration"
-  ansible.builtin.command:
-    cmd: "samba-tool domain passwordsettings set --max-pwd-age={{ samba_domain_password_expiration }}"
-  register: success
-  become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-  ignore_errors: yes
-
-# ==================================================================================================
-#
-# Test Kerberos
-#
-# ==================================================================================================
-- name: "Test Kerberos Logon to Active Directory Domain Controller"
-  expect:
-    command: kinit administrator
-    responses:
-      (?i)password: "{{ samba_administrator_password }}"
-  no_log: true
-  become: no
-  when:
-    - rebeldream_fqdn != __samba_schema_master
-
-- name: "Test Kerberos Ticket from Active Directory Domain Controller"
-  ansible.builtin.command:
-    cmd: "klist"
-  register: success
-  become: no
-  when:
-    - rebeldream_fqdn != __samba_schema_master
-
-- name: Print Success
-  ansible.builtin.debug:
-    msg: "{{ success }}"
-    verbosity: 1
-  when:
-    - rebeldream_fqdn != __samba_schema_master
-
-# ==================================================================================================
-#
-# Provision Active Directory Domain Controllers
-#
-# ==================================================================================================
-- name: "Provision Subsequent Active Directory Domain Controller"
-  ansible.builtin.command:
-    cmd: >
-      samba-tool domain join {{ rebeldream_domain }} DC
-      --dns-backend=BIND9_DLZ
-      -U'{{ rebeldream_org_unit_name | upper }}\administrator'
-      --password={{ samba_administrator_password }}
-  register: samba_ad_created
-  become: yes
-  notify: Update krb5
-  when:
-    - not __samba_joined_as_domain_controller
-    - rebeldream_fqdn != __samba_schema_master
-
-# ==================================================================================================
-#
-# Find idmap.ldb
-#
-# ==================================================================================================
-# - name: Find idmap.ldb
-#   find:
-#     path: "/var"
-#     pattern: idmap.ldb
-#     recurse: yes
-#   register: idmap_file
-#   when: rebeldream_fqdn == __samba_schema_master
-
-- name: Backup idmap.ldb
-  command:
-    cmd: "tdbbackup -s .bak /var/lib/samba/private/idmap.ldb"
-  become: yes
-  when:
-    - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: Fetch idmap.ldb
-  ansible.builtin.fetch:
-    src: "/var/lib/samba/private/idmap.ldb.bak"
-    dest: "/tmp/idmap.ldb"
-    flat: yes
-  become: yes
-  when:
-    - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
-
-- name: Copy idmap.ldb to New Servers
-  ansible.builtin.copy:
-    src: "/tmp/idmap.ldb"
-    dest: "/var/lib/samba/private/idmap.ldb"
-  become: yes
-  when:
-    - __samba_recreate_realm
-    - rebeldream_fqdn != __samba_schema_master
-
-- name: Flush Net Cache on New DC
-  command:
-    cmd: "net cache flush"
-  become: yes
-  when:
-    - __samba_recreate_realm
-    - rebeldream_fqdn != __samba_schema_master
-
-# ==================================================================================================
-#
-# Syncronize Sysvol to New Servers
-#
-# Command Equivalent:
-# - /usr/bin/rsync -XAavz --delete-after -f"+ */" -f"- *"  /var/lib/samba/sysvol root@DC2:/var/lib/samba
-#
-# References:
-# - https://wiki.samba.org/index.php/Bidirectional_Rsync/Unison_based_SysVol_replication_workaround
-#
-# ==================================================================================================
-# - name: "Sync Sysvol to new servers"
-#   synchronize:
-#     src: "/var/lib/samba/sysvol"
-#     dest: "/var/lib/samba"
-#     archive: yes
-#     compress: yes
-#     rsync_opts:
-#       - "--xattrs"
-#       - "--acls"
-#       - "--delete-after"
-#       - '--filter="+ */"'
-#       - '--filter="- *"'
-#   delegate_to: "{{ __samba_schema_master }}"
-#   when: rebeldream_fqdn != __samba_schema_master
-
-- name: "Reset Samba ACLs on Sysvol for New Controller"
-  ansible.builtin.command:
-    cmd: "samba-tool ntacl sysvolreset"
-  become: yes
-  when:
-    - __samba_recreate_realm
-    - rebeldream_fqdn != __samba_schema_master
-
-- name: "Configure user.map file"
-  ansible.builtin.template:
-    src: "user_map.j2"
-    dest: /etc/samba/user.map
-    owner: root
-    group: root
-    mode: 0644
-  become: yes
-  notify: restart samba-ad-dc
 
 - name: "Start Samba Domain Controller"
   service:
@@ -423,82 +124,11 @@
     state: started
   become: yes
 
-# ==================================================================================================
-#
-# Test Active Directory Domain Controllers
-#
-# - Verify Samba Sysvol Replication
-#   Reference: https://wiki.samba.org/index.php/Verifying_the_Directory_Replication_Statuses
-#
-# Note: These check that the command ran successfully, we really need to do a further check that
-# the results were what we expected
-#
-# ==================================================================================================
-- name: "(Tests) Verify Sysvol Replication"
-  ansible.builtin.command:
-    cmd: "samba-tool drs showrepl"
-  become: yes
-  when:
-    - rebeldream_fqdn != __samba_schema_master
-  notify: restart bind
-
-- name: "(Tests) List all shares provided by the Domain Controller"
-  ansible.builtin.command:
-    cmd: "smbclient -L localhost -U%"
-  register: shares
-  become: yes
-  when:
-    - rebeldream_fqdn != __samba_schema_master
-
-# - name: Verify SMB Authentication
-#   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
-#   register: success
-#   become: yes
-#   when: rebeldream_fqdn != __samba_schema_master
-#   ignore_errors: yes
-
-#- debug:
-#    var: success
-#    verbosity: 2
-
-- name: "(Tests) The A record of the domain controller"
-  ansible.builtin.command:
-    cmd: "host -t A {{ ansible_fqdn }}."
-  register: success
-  become: yes
-
-- name: "(Tests) udp-based _kerberos SRV resource record in the domain"
-  ansible.builtin.command:
-    cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
-  register: success
-  become: yes
-
-- name: Test Active Directory Domain Controller
-  expect:
-    command: kinit administrator
-    responses:
-      (?i)password: "{{ samba_administrator_password }}"
-  no_log: true
+- name: "Harden domain"
+  include: "hardening.yml"
   become: no
   when:
-    - rebeldream_fqdn != __samba_schema_master
-
-- name: Test Active Directory Domain Controller
-  ansible.builtin.command:
-    cmd: "klist"
-  register: success
-  become: no
-  when:
-    - rebeldream_fqdn != __samba_schema_master
-
-- name: Print Success
-  ansible.builtin.debug:
-    msg:
-      - "{{ success }}"
-    verbosity: 1
-  become: no
-  when:
-    - rebeldream_fqdn != __samba_schema_master
+    - rebeldream_fqdn == __samba_schema_master
 
 # ==================================================================================================
 #
@@ -509,7 +139,7 @@
 #   - https://wiki.samba.org/index.php/Bidirectional_Rsync/Unison_based_SysVol_replication_workaround
 #
 # ==================================================================================================
-- name: Make Control Directory
+- name: "Make SSH Control Directory"
   ansible.builtin.file:
     path: "~/.ssh/ctl"
     state: directory
@@ -518,7 +148,7 @@
     mode: "0755"
   become: yes
 
-- name: Create SSH Control Configuration
+- name: "Create SSH Control Configuration"
   ansible.builtin.template:
     src: "control_ssh.j2"
     dest: "~/.ssh/ctl/config"
@@ -527,7 +157,7 @@
     mode: "0644"
   become: yes
 
-- name: Create Log File
+- name: "Create Log File"
   ansible.builtin.file:
     path: "/var/log/sysvol-sync.log"
     state: touch
@@ -536,7 +166,7 @@
     mode: "0640"
   become: yes
 
-- name: Ensure unison configuration directory exists
+- name: "Ensure unison configuration directory exists"
   ansible.builtin.file:
     path: "~/.unison"
     state: directory
@@ -582,33 +212,8 @@
   when:
     - rebeldream_fqdn == __samba_schema_master
 
-- name: Copy schema extensions to schema master
-  ansible.builtin.template:
-    src: "schema.ldif.j2"
-    dest: "/tmp/{{ item.name }}"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-  loop: "{{ samba_schema_extensions }}"
-  become: yes
-  when:
-    - rebeldream_fqdn == __samba_schema_master
-
-# ==================================================================================================
-#
-# Currently, this gives an error if already installed, what is really needed is a way to test if
-# installed, and if so, don't install again.
-#
-# ==================================================================================================
-- name: Install schema extensions
-  ansible.builtin.command:
-    cmd: >
-      ldbmodify
-      -H /var/lib/samba/private/sam.ldb
-      "/tmp/{{ item.name }}"
-      --option='dsdb:schema update allowed'=true
-  loop: "{{ samba_schema_extensions }}"
-  become: yes
-  ignore_errors: yes
+- name: "Update Schema"
+  include: "schema_updates.yml"
+  become: no
   when:
     - rebeldream_fqdn == __samba_schema_master

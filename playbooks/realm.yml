@@ -1,109 +1,16 @@
 - name: "Prepare playbook environment"
   hosts: all:!public_zone
   ignore_unreachable: yes
-  tasks:
-    - name: "Create groups based on the Network OS"
-      group_by:
-        key: "{{ ansible_network_os.split('.')[2] | lower }}"
-      when:
-        - ansible_network_os is defined
+  roles:
+    - role: bloodymage.rebeldream.config_environment
+      tags:
+        - always
+    - role: bloodymage.rebeldream.config_realm_environment
       tags:
         - always
 
-    - name: "Create groups based on the OS Family"
-      group_by:
-        key: "{{ ansible_os_family | lower }}"
-      when:
-        - ansible_os_family is defined
-      tags:
-        - always
-
-    - name: "Create groups based on the System"
-      group_by:
-        key: "{{ ansible_system | lower }}"
-      when:
-        - ansible_system is defined
-      tags:
-        - always
-
-    - name: "Set default domain recreation"
-      ansible.builtin.set_fact:
-        __samba_recreate_realm: no
-      become: no
-
-    - name: "Determine whether to force domain recreation"
-      ansible.builtin.set_fact:
-        __samba_recreate_realm: yes
-      become: no
-      tags:
-        - never
-        - recreate-realm
-
-    - name: Print Samba Schema Master Role
-      debug:
-        msg:
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] }}"
-        verbosity: 1
-      become: no
-      when:
-        - __samba_schema_master_role is defined
-      tags:
-        - never
-        - debug
-
-    - name: Print Variables
-      debug:
-        msg:
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[0] }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[1] }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[2] }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3] }}"
-        verbosity: 2
-      become: no
-      when:
-        - __samba_schema_master_role is defined
-      tags:
-        - never
-        - debug
-
-    - name: Print Variables
-      debug:
-        var: __samba_schema_master_role.stdout_lines[0]
-        verbosity: 3
-      become: no
-      when:
-        - __samba_schema_master_role is defined
-      tags:
-        - never
-        - debug
-
-    - name: Print Variables
-      debug:
-        var: __samba_schema_master_role.stdout_lines
-        verbosity: 4
-      become: no
-      when:
-        - __samba_schema_master_role is defined
-      tags:
-        - never
-        - debug
-
-    - name: Print Variables
-      debug:
-        var: __samba_schema_master_role
-        verbosity: 4
-      become: no
-      when:
-        - __samba_schema_master_role is defined
-      tags:
-        - never
-        - debug
-
-- hosts: internal_network:!routeros
-  name: "Configure baseline Kerberos"
+- name: "Configure baseline Kerberos"
+  hosts: internal_network:!routeros
   roles:
     - role: bloodymage.rebeldream.krb5_client_config
 
@@ -115,64 +22,25 @@
 # 3. Configure all subesquent domain controller hosts
 #
 # ==================================================================================================
-# - hosts: samba_domain_controllers
-#   roles:
-#     - role: bloodymage.rebeldream.samba_domain_clean_environment
-#       tags:
-#         - samba_domain_controller
-#         - samba-domain-controller
-
-# - hosts: samba_schema_master
-#   roles:
-#     - role: bloodymage.rebeldream.samba_domain_controller
-#       tags:
-#         - samba_domain_controller
-#         - samba-domain-controller
-
 - hosts: samba_domain_controllers
   tasks:
-    - name: "Set Default Samba Schema Master"
-      ansible.builtin.set_fact:
-        __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
-      become: no
-      tags:
-        - always
-
-    - name: "Set Samba Schema Master to Running Schema Master (Only if not regenerating realm)"
-      command:
-        cmd: "samba-tool fsmo show"
-      register: __samba_schema_master_role
-      run_once: yes
-      become: yes
+    - name: "Reset Realm"
+      ansible.builtin.include_role:
+        name: bloodymage.rebeldream.samba_domain_clean_environment
       when:
-        - not __samba_recreate_realm
+        - __samba_recreate_realm
       tags:
-        - always
+        - samba_domain_controller
+        - samba-domain-controller
 
-    - name: Set Samba Schema Master if domain exists
-      ansible.builtin.set_fact:
-        __samba_schema_master: "{{ __samba_schema_master_list | join('.') }}"
-      become: no
-      vars:
-        __samba_schema_master_list:
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] | lower }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] | lower }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] | lower }}"
-          - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] | lower }}"
-      when:
-        - __samba_schema_master_role is defined
-        - __samba_schema_master_role.stdout_lines is defined
+- hosts: samba_schema_master
+  roles:
+    - role: bloodymage.rebeldream.samba_domain_controller
       tags:
-        - always
+        - samba_domain_controller
+        - samba-domain-controller
 
-    - name: "Create Samba Schema Master Group"
-      add_host:
-        name: "{{ __samba_schema_master }}"
-        groups:
-          - samba_schema_master
-      tags:
-        - always
-
+- hosts: samba_domain_controllers
   roles:
     - role: bloodymage.rebeldream.samba_domain_controller
       tags:
@@ -180,16 +48,8 @@
         - samba-domain-controller
 
 - hosts: samba_schema_master
-  pre_tasks:
-    - name: Check if we are regenerating all ownca certs
-      ansible.builtin.set_fact:
-        __ownca_regenerate: yes
-      become: no
-      changed_when: __ownca_regenerate
-      tags:
-        - never
-        - regenerate-ownca
   roles:
+    - role: bloodymage.rebeldream.config_ownca_environment
     - role: bloodymage.rebeldream.samba_domain_users
       tags:
         - samba_domain_users
@@ -221,9 +81,12 @@
       tags:
         - keycloak
 
-# - hosts: samba_dotfiles
+# - hosts: samba_file_servers:workstations:&linux
 #   roles:
 #     - role: bloodymage.rebeldream.dotfiles
+#       vars:
+#         dotfiles_users: "{{ domain_users }}"
+#         dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
 
 - hosts: samba_ownca_user_hosts
   roles:
@@ -233,6 +96,9 @@
         - ownca-user-certs
         - ownca_user_certs_debug
         - ownca-user-certs-debug
+
+- hosts: samba_ownca_user_hosts:workstations:&linux
+  roles:
     - role: bloodymage.rebeldream.sshca_user_certs
       tags:
         - sshca-user-certs
@@ -242,3 +108,7 @@
     - role: bloodymage.rebeldream.samba_domain_user_certs
       tags:
         - samba-domain-user-certs
+
+- hosts: freeradius_servers
+  roles:
+    - role: bloodymage.rebeldream.freeradius

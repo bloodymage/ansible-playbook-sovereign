@@ -146,3 +146,22 @@
   notify: restart sssd
   when:
     - rebeldream_smart_card_login
+
+- name: "Set variables for pam sss config"
+  ansible.builtin.set_fact:
+    sssd_pam_priority: "900"
+    sssd_pam_auth_initial: "pam_sss.so allow_missing_name try_cert_auth forward_pass"
+  become: no
+  when:
+    - rebeldream_smart_card_login
+    - inventory_hostname in groups['workstations']
+
+- name: "Install /usr/share/pam-configs/sss"
+  ansible.builtin.template:
+    src: "pam-sss.j2"
+    dest: "/usr/share/pam-configs/sss"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  #notify: pam-auth-update

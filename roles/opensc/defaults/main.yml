@@ -1,0 +1,4 @@
+---
+packages:
+  - opensc
+  - opensc-pkcs11

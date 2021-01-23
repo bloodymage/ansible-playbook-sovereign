@@ -1,0 +1,24 @@
+Name: SSS SmartCard authentication
+Default: no
+Priority: 900
+
+Auth-Type: Primary
+Auth:
+	[success=end default=ignore]	pam_sss.so use_first_pass
+Auth-Initial:
+	[success=end default=ignore]	pam_sss.so try_cert_auth
+Auth-Final:
+  sufficent       pam_sss.so allow_missing_name
+Account-Type: Additional
+Account:
+	sufficient			pam_localuser.so
+	[default=bad success=ok user_unknown=ignore]	pam_sss.so
+Session-Type: Additional
+Session-Interactive-Only: yes
+Session:
+	optional			pam_sss.so
+Password-Type: Primary
+Password:
+	sufficient			pam_sss.so use_authtok
+Password-Initial:
+	sufficient			pam_sss.so
