@@ -1,0 +1,20 @@
+---
+# defaults file for nftables
+packages:
+  - nftables
+
+# ==================================================================================================
+#
+#
+
+linux_ports:
+  - 22
+
+apache_ports:
+  - 80
+  - 443
+
+samba_ad_dc_ports:
+  - 389
+
+

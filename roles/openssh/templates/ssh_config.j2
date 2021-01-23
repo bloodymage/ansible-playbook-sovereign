@@ -1,27 +1,53 @@
 # {{ ansible_managed }}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# This is the ssh client system-wide configuration file.  See                                    #}
+{# ssh_config(5) for more information.  This file provides defaults for                           #}
+{# users, and the values can be changed in per-user configuration files                           #}
+{# or on the command line.                                                                        #}
+{#                                                                                                #}
+{# Configuration data is parsed as follows:                                                       #}
+{#  1. command line options                                                                       #}
+{#  2. user-specific file                                                                         #}
+{#  3. system-wide file                                                                           #}
+{# Any configuration value is only changed the first time it is set.                              #}
+{# Thus, host-specific definitions should be at the beginning of the                              #}
+{# configuration file, and defaults at the end.                                                   #}
+{#                                                                                                #}
+{# Site-wide defaults for some commonly used options.  For a comprehensive                        #}
+{# list of available options, their meanings and defaults, please see the                         #}
+{# ssh_config(5) man page.                                                                        #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+Host *.{{ rebeldream_root_domain }}
+{% if inventory_hostname in groups['workstations'] %}
+{% if rebeldream_smart_card_login %}
+  PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+{% else %}
+  GSSAPIDelegateCredentials yes
+{% endif %}
+{% endif %}
+  CertificateFile ~/.ssh/%u-cert.pub
 
-# This is the ssh client system-wide configuration file.  See
-# ssh_config(5) for more information.  This file provides defaults for
-# users, and the values can be changed in per-user configuration files
-# or on the command line.
-
-# Configuration data is parsed as follows:
-#  1. command line options
-#  2. user-specific file
-#  3. system-wide file
-# Any configuration value is only changed the first time it is set.
-# Thus, host-specific definitions should be at the beginning of the
-# configuration file, and defaults at the end.
-
-# Site-wide defaults for some commonly used options.  For a comprehensive
-# list of available options, their meanings and defaults, please see the
-# ssh_config(5) man page.
+{% if inventory_hostname in groups['workstations'] %}
+{% if rebeldream_smart_card_login %}
+  {% if openssh_github -%}
+  Host github.com
+  PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+  {% endif %}
+{% endif %}
+{% endif %}
 
 {% if ssh_hosts is defined -%}
   {% for host in ssh_hosts -%}
-    Host {{ host.name }}
-    {% for option in host.options %}
-      {{ option }}
-    {% endfor %}
+  Host {{ host.name }}
+  {% for option in host.options -%}
+    {{ option }}
+  {% endfor %}
   {% endfor %}
 {% endif %}
+
+{# Host * #}
+{#   CanonicalizeHostname yes #}
+{#   CanonicalDomains {{ rebeldream_root_domain }} #}
+{#   CanonicalizeMaxDots 2 #}

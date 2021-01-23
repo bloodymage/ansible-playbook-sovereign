@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+
+MilterSocket {{ clamav_milter_socket }}
+FixStaleSocket true
+User clamav
+ReadTimeout 120
+Foreground false
+PidFile /var/run/clamav/clamav-milter.pid
+ClamdSocket unix:/var/spool/postfix/clamav/clamav-milter.ctl
+OnClean Accept
+#OnInfected Quarantine
+OnInfected {{ clamav_on_infected }}
+OnFail Defer
+AddHeader Replace
+LogSyslog false
+LogFacility {{ clamav_log_facility }}
+LogVerbose false
+LogInfected Off
+LogClean Off
+LogRotate true
+MaxFileSize 25M
+SupportMultipleRecipients false
+TemporaryDirectory /tmp
+LogFile /var/log/clamav/clamav-milter.log
+LogTime true
+LogFileUnlock false
+LogFileMaxSize 1M
+MilterSocketGroup postfix
+MilterSocketMode 666

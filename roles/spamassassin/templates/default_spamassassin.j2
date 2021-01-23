@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+
+SAHOME="/var/lib/spamassassin"
+SAGLOBALCFGPATH="/etc/spamassassin"
+
+SAUSER="{{ spamassassin_spamd_user }}"
+SAGROUP="{{ spamassassin_spamd_user }}"
+
+# Change to one to enable spamd
+ENABLED=1
+
+# Options
+# See man spamd for possible options. The -d option is automatically added.
+OPTIONS="-x --max-children 5 --helper-home-dir ${SAHOME}"
+OPTIONS="${OPTIONS} -u ${SAUSER} -g ${SAGROUP} --siteconfigpath ${SAGLOBALCFGPATH}"
+OPTIONS="${OPTIONS} --socketpath=/var/spool/postfix/spamassassin/spamd.sock"
+OPTIONS="${OPTIONS} --socketowner=${SAUSER} --socketgroup=${SAGROUP} --socketmode=0660"
+
+# Pid file
+# Where should spamd write its PID to file? If you use the -u or
+# --username option above, this needs to be writable by that user.
+# Otherwise, the init script will not be able to shut spamd down.
+PIDFILE="/var/run/spamd.pid"
+
+# Cronjob
+# Set to anything but 0 to enable the cron job to automatically update
+# spamassassin's rules on a nightly basis
+CRON=1

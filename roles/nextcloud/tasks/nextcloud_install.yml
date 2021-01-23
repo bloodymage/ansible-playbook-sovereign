@@ -1,0 +1,199 @@
+- name: "Download Nextcloud Sources"
+  ansible.builtin.get_url:
+    url: "{{ item.source }}"
+    dest: "/tmp/{{ item.file }}"
+    checksum: "sha256:{{ item.checksum }}"
+    mode: '0644'
+  loop: "{{ nextcloud_source_url }}"
+  become: no
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+    - download-sources
+
+- name: Extract Sources
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ nextcloud_source_url[0].file }}"
+    dest: "/srv/www/{{ item.name }}"
+    remote_src: yes
+    owner: www-data
+    group: www-data
+    extra_opts: [--strip-components=1]
+    creates: "/srv/www/{{ item.name }}/public.php"
+  loop: "{{ virtual_hosts }}"
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+- name: "Enable Apache modules"
+  community.general.apache2_module:
+    state: present
+    name: "{{ item }}"
+  loop:
+    - rewrite
+    - headers
+    - env
+    - dir
+    - mime
+  notify: reload apache
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+- name: Determine New Data Directory
+  ansible.builtin.set_fact:
+    nextcloud_data_directory: "/srv/www-data/{{ item.name }}/data"
+  loop: "{{ virtual_hosts }}"
+  become: no
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+- name: Create Data Directory
+  ansible.builtin.file:
+    path: "{{ nextcloud_data_directory }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+  loop: "{{ virtual_hosts }}"
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+- name: Check If Data Directory in default location
+  ansible.builtin.stat:
+    path: "/srv/www/{{ item.name }}/data"
+  loop: "{{ virtual_hosts }}"
+  register: dir_stat
+  become: no
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "nextcloud"
+    - item.enabled is defined
+    - item.enabled
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+- name: Print dir_stat
+  ansible.builtin.debug:
+    msg:
+      - "{{ item.stat.path | default('Not Applicable') }}"
+      - "{{ item.stat.exists }}"
+    verbosity: 1
+  loop: "{{ dir_stat.results }}"
+  become: no
+  when:
+    - item.stat is defined
+  tags:
+    - never
+    - nextcloud_debug
+    - nextcloud-debug
+
+- name: Move Data Directory
+  ansible.builtin.copy:
+      src: "{{ item.msg.stat.path }}"
+      dest: "{{ nextcloud_data_directory }}"
+      remote_src: yes
+      owner: www-data
+      group: www-data
+      directory_mode: "0755"
+      mode: "0644"
+  loop: "{{ dir_stat.results }}"
+  become: yes
+  when:
+    - item.stat is defined
+    - item.stat.exists
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+  
+- name: Delete old Data directory
+  ansible.builtin.file:
+    path: "{{ item.stat.path }}"
+    state: absent
+  loop: "{{ dir_stat.results }}"
+  become: yes
+  when:
+    - item.stat is defined
+    - item.stat.exists
+  notify: restart apache2
+  tags:
+    - nextcloud
+    - nextcloud_debug
+    - nextcloud-debug
+    - websites
+
+- name: Install Nextcloud
+  ansible.builtin.command:
+    cmd: >
+      php occ  maintenance:install
+      --database '{{ item.database }}'
+      --database-name '{{ item.db_name }}'
+      --database-user '{{ item.db_user }}'
+      --database-pass '{{ item.db_password }}'
+      --admin-user '{{ nextcloud_admin_user }}'
+      --admin-pass '{{ nextcloud_admin_password }}'
+    chdir: "/srv/www/{{ item.name }}"
+    creates: "/srv/www/{{ item.name }}/config/config.php"
+  become: yes
+  become_user: www-data
+  loop: "{{ virtual_hosts }}"
+  when:
+    - item.database is defined
+    - item.content == "nextcloud"
+  tags:
+    - never
+    - nextcloud_debug
+    - nextcloud-debug
+    - nextcloud
+    - websites

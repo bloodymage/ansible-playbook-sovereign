@@ -1,10 +1,6 @@
 - hosts: all
-  pre_tasks:
-    - name: Create groups based on the OS
-      group_by:
-        key: "{{ ansible_network_os.split('.')[2] | lower }}"
-      when:
-        - ansible_network_os is defined
+  roles:
+    - role: bloodymage.rebeldream.config_environment
         
 - hosts: all:!localhost
   ignore_unreachable: true
@@ -16,7 +12,10 @@
   roles:
     - role: bloodymage.rebeldream.dns_reversezones
 
-- hosts: all:!localhost
+- hosts: all:!localhost:!public_zone
   roles:
     - role: bloodymage.rebeldream.system_upgrade
+
+- hosts: all:!localhost:!public_zone:!routeros
+  roles:
     - role: bloodymage.rebeldream.dotfiles

@@ -56,7 +56,7 @@
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users }}"
+  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
   when:
     - item.groupname is defined
     - item.id_number is defined
@@ -75,7 +75,7 @@
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users }}"
+  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
   when:
     - item.groupname is defined
     - item.id_number is defined
@@ -93,7 +93,7 @@
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users }}"
+  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
@@ -109,7 +109,7 @@
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users }}"
+  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
@@ -139,7 +139,7 @@
       --username Administrator
       --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_users }}"
+  loop: "{{ domain_users + __domain_system_users }}"
   vars:
     __username: "{{ item.username }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
@@ -173,7 +173,7 @@
     --username Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_users }}"
+  loop: "{{ domain_users + __domain_system_users }}"
   vars:
     __username: "{{ item.username }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
@@ -207,7 +207,7 @@
     samba-tool user create "{{ __username }}" "{{ __password }}"
     --username Administrator
     --password {{ samba_administrator_password }}
-  loop: "{{ domain_users }}"
+  loop: "{{ domain_users + __domain_system_users }}"
   ignore_errors: yes
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
@@ -232,7 +232,7 @@
       --username Administrator
       --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_users }}"
+  loop: "{{ domain_users + __domain_system_users }}"
   when:
     - inventory_hostname == __samba_schema_master
     - item.account_expire is defined

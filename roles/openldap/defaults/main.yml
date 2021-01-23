@@ -1,0 +1,15 @@
+---
+# defaults file for openldap
+packages:
+  - slapd
+  - ldap-utils
+  - nslcd
+
+openldap_basedn: "dc={{ ansible_domain.split('.')[0] }},dc={{ ansible_domain.split('.')[1] }},dc={{ ansible_domain.split('.')[2] }}"
+
+openldap_backends:
+  - name: default
+    type: dbd
+
+openldap_modules:
+  - rwm

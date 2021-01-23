@@ -1,0 +1,11 @@
+
+dn: cn=config
+changetype: modify
+add: olcTLSCACertificateFile
+olcTLSCACertificateFile: /etc/ssl/certs/{{ ansible_domain.split('.')[1] }}-{{ ansible_domain.split('.')[0] }}-component-ca-chain.pem
+-
+add: olcTLSCertificateFile
+olcTLSCertificateFile: /etc/ssl/certs/{{ inventory_hostname }}.pem
+-
+add: olcTLSCertificateKeyFile
+olcTLSCertificateKeyFile: /etc/ssl/private/{{ inventory_hostname }}.key

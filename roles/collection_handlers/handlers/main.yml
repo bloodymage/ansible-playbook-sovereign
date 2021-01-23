@@ -196,6 +196,22 @@
   when:
     - inventory_hostname in groups['sssd']
 
+- name: restart unattended-upgrades
+  ansible.builtin.service:
+    name: unattended-upgrades
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+
+- name: restart spamassassin
+  ansible.builtin.service:
+    name: spamassassin
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+
 # ==================================================================================================
 #
 # Reload Handlers

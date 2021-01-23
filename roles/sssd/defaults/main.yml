@@ -15,3 +15,8 @@ sssd_debug_level: 0x4000
 # Really need a way to test for this
 sssd_systemd: no
 sssd_services: "nss, pam"
+
+# settings for /usr/share/pam-configs/sss"
+sssd_pam_default: "yes"
+sssd_pam_priority: "128"
+sssd_pam_auth_initial: "pam_sss.so forward_pass"

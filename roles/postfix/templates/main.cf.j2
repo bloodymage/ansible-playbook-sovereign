@@ -263,6 +263,23 @@ mailbox_transport = {{ postfix_mailbox_transport }}
 {% if postfix_message_size_limit != __postfix_message_size_limit -%}
   message_size_limit = {{ postfix_message_size_limit }}
 {% endif %}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# I really need to investigate this more.  Postfix needs:                                        #}
+{# line_length_limit = 4096 (maybe larger, how is this related to the size of the user's smart    #}
+{# card keys?)                                                                                    #}
+{#                                                                                                #}
+{# Other configuration changes may negate this.                                                   #}
+{#                                                                                                #}
+{# Refs:                                                                                          #}
+{# http://postfix.1071664.n5.nabble.com/GSSAPI-and-Success-as-a-error-code-td97224.html#a97241    #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if rebeldream_smart_card_login and inventory_hostname in groups['internal_zone'] %}
+{% if postfix_line_length_limit != __postfix_line_length_limit -%}
+  line_length_limit = {{ postfix_line_length_limit }}
+{% endif %}
+{% endif %}
 
 # Misc
 {% if postfix_virtual_transport != __postfix_virtual_transport %}
