@@ -1,0 +1,29 @@
+{{ ansible_managed | comment }}
+
+# Unison preferences file
+# Roots of the synchronization
+#
+# copymax & maxthreads params were set to 1 for easier troubleshooting.
+# Have to experiment to see if they can be increased again.
+root = /var/lib/samba
+# Note that 2 x / behind DC2, it is required
+root = ssh://root@hera//var/lib/samba
+#
+# Paths to synchronize
+path = sysvol
+#
+#ignore = Path stats    ## ignores /var/www/stats
+auto=true
+batch=true
+perms=0
+rsync=true
+maxthreads=1
+retry=3
+confirmbigdeletes=false
+servercmd=/usr/bin/unison
+copythreshold=0
+copyprog = /usr/bin/rsync -XAavz --rsh='ssh -p 22' --inplace --compress
+copyprogrest = /usr/bin/rsync -XAavz --rsh='ssh -p 22' --partial --inplace --compress
+copyquoterem = true
+copymax = 1
+logfile = /var/log/sysvol-sync.log

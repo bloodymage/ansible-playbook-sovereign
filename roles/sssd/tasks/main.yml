@@ -5,6 +5,13 @@
 # Task: Install apps
 #
 # ==================================================================================================
+# - name: "Set default domain recreation variable to 'no'"
+#   ansible.builtin.set_fact:
+#     __samba_recreate_realm: yes
+#   become: no
+#   tags:
+#     - always
+
 - name: Include OS-specific variables.
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
@@ -34,7 +41,7 @@
 
   # Check for existing AD
 - name: Checking to see if system is already joined to AD
-  command: /bin/bash -c "/usr/sbin/realm list"
+  ansible.builtin.command: /bin/bash -c "/usr/sbin/realm list"
   register: realm_list_results
 
 - name: Debug realm_list_results
