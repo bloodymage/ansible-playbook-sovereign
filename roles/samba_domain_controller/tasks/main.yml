@@ -54,12 +54,12 @@
     state: present
   become: yes
 
-- name: "Initialize the domain"
-  include: "create_domain.yml"
-  become: no
-  when:
-    - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
+# - name: "Initialize the domain"
+#   include: "create_domain.yml"
+#   become: no
+#   when:
+#     - __samba_recreate_realm
+#     - rebeldream_fqdn == __samba_schema_master
 
 - name: "Precheck domain prior to provisioning new domain controllers"
   include: "precheck.yml"
@@ -201,7 +201,7 @@
 #     - rebeldream_fqdn == __samba_schema_master
 
 - name: Create Cron Sync
-  cron:
+  ansible.builtin.cron:
     name: "Syncronize SysVol Directories"
     minute: "*/5"
     hour: "*"
@@ -209,6 +209,8 @@
     weekday: "*"
     month: "*"
     job: "/usr/bin/unison -silent"
+    user: "root"
+  become: yes
   when:
     - rebeldream_fqdn == __samba_schema_master
 
