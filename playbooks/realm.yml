@@ -22,23 +22,23 @@
 # 3. Configure all subesquent domain controller hosts
 #
 # ==================================================================================================
-- hosts: samba_domain_controllers
-  tasks:
-    - name: "Reset Realm"
-      ansible.builtin.include_role:
-        name: bloodymage.rebeldream.samba_domain_clean_environment
-      when:
-        - __samba_recreate_realm
-      tags:
-        - samba_domain_controller
-        - samba-domain-controller
+# - hosts: samba_domain_controllers
+#   tasks:
+#     - name: "Reset Realm"
+#       ansible.builtin.include_role:
+#         name: bloodymage.rebeldream.samba_domain_clean_environment
+#       when:
+#         - __samba_recreate_realm
+#       tags:
+#         - samba_domain_controller
+#         - samba-domain-controller
 
-- hosts: samba_schema_master
-  roles:
-    - role: bloodymage.rebeldream.samba_domain_controller
-      tags:
-        - samba_domain_controller
-        - samba-domain-controller
+# - hosts: samba_schema_master
+#   roles:
+#     - role: bloodymage.rebeldream.samba_domain_controller
+#       tags:
+#         - samba_domain_controller
+#         - samba-domain-controller
 
 - hosts: samba_domain_controllers
   roles:

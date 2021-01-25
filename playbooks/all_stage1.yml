@@ -6,7 +6,9 @@
 - hosts: all:!public_zone
   ignore_unreachable: yes
   roles:
-    - bloodymage.rebeldream.config_environment
+    - role: bloodymage.rebeldream.config_environment
+      tags:
+        - always
 
 # ==================================================================================================
 #
@@ -17,9 +19,18 @@
   strategy: linear
   roles:
     - role: bloodymage.rebeldream.hostname
+      tags:
+        - hostname
     - role: bloodymage.rebeldream.hosts
+      tags:
+        - hosts
     - role: bloodymage.rebeldream.system_upgrade
+      tags:
+        - system_upgrade
+        - system-upgrade
     - role: bloodymage.rebeldream.users
+      tags:
+        - users
 
 # ==================================================================================================
 #
@@ -36,15 +47,29 @@
       tags:
         - openssh
     - role: bloodymage.rebeldream.ntp
+      tags:
+        - ntp
     - role: bloodymage.rebeldream.unattended_upgrades
       tags:
         - unattended-upgrades
     - role: bloodymage.rebeldream.sudo
+      tags:
+        - sudo
     - role: bloodymage.rebeldream.skel
+      tags:
+        - skel
     - role: bloodymage.rebeldream.dotfiles
+      tags:
+        - dotfiles
     - role: bloodymage.rebeldream.etckeeper
+      tags:
+        - etckeeper
     - role: bloodymage.rebeldream.polkit
+      tags:
+        - polkit
     - role: bloodymage.rebeldream.screen
+      tags:
+        - screen
     - role: bloodymage.rebeldream.global
       tags:
         - global
@@ -95,3 +120,5 @@
 - hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone
   roles:
     - role: bloodymage.rebeldream.aptitude
+      tags:
+        - aptitude
