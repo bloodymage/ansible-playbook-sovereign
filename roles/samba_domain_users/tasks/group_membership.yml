@@ -4,8 +4,8 @@
 # Set Group membership
 #
 # ==================================================================================================
-- name: "Get Group Membership"
-  command:
+- name: "Get Group Membership for {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+  ansible.builtin.command:
     cmd: >
       samba-tool group listmembers "{{ group.groupname }}"
   register: existing_group_list
@@ -15,8 +15,8 @@
   when:
     - group.groupname is defined
 
-- name: "Add new groups"
-  command:
+- name: "Add new members to {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+  ansible.builtin.command:
     cmd: >
       samba-tool group addmembers "{{ group.groupname }}" "{{ item }}"
       --username Administrator
@@ -28,14 +28,14 @@
   when:
     - item not in existing_group_list.stdout_lines
 
-- name: "Determine removed group members"
+- name: "Identify members no longer part of {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
   ansible.builtin.set_fact:
     removed_members: "{{ existing_group_list.stdout_lines | difference(group.group_members) }}"
   delegate_to: "{{ __samba_schema_master }}"
   become: no
   run_once: yes
 
-- name: "List removed group members"
+- name: "List members no longer part of {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
   ansible.builtin.debug:
     msg:
       - "{{ item }}"
@@ -48,8 +48,8 @@
     - never
     - debug
 
-- name: "Delete removed group members"
-  command:
+- name: "Remove members from group {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+  ansible.builtin.command:
     cmd: >
       samba-tool group removemembers "{{ group.groupname }}" "{{ item }}"
       --username Administrator

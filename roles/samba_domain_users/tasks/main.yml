@@ -244,6 +244,7 @@
   loop: "{{ domain_groups }}"
   loop_control:
     loop_var: group
+    index_var: group_index
   when:
     - __samba_schema_master is defined
     - inventory_hostname == __samba_schema_master
