@@ -202,3 +202,18 @@
     __realm: "{% if inventory_hostname not in groups['sssd'] %}{{ rebeldream_org_unit_name | upper }}\\{% else %}{% endif %}"
   when:
     - item.id_number is defined
+
+# This fails miserably.  Disabled for now.
+# - name: Authorize key with GitHub
+#   ansible.builtin.github_key:
+#     name: "{{ item.username | title }}"
+#     token: '{{ rebeldream_github_oauth_token }}'
+#     pubkey: "{{ lookup('file', __ssh_pubkey) }}"
+#     state: present
+#   loop: "{{ domain_users }}"
+#   delegate_to: localhost
+#   vars:
+#     __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
+#   when:
+#     - item.id_number is defined
+#     - item.username in rebeldream_github_users

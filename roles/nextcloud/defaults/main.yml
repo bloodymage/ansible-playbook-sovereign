@@ -259,3 +259,6 @@ nextcloud_default_apps:
   - viewer
   - weather_status
   - workflowengine
+
+__nextcloud_mandatory_apps:
+  - federatedfilesharing
