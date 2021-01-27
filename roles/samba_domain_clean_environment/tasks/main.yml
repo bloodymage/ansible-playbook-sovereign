@@ -22,7 +22,7 @@
     executable: "/bin/bash"
   register: running_processes
   failed_when:
-    - running_processes.stderr != ''
+    - running_processes.stderr is truthy
   become: yes
   when:
     - __samba_recreate_realm
