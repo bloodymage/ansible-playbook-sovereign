@@ -14,85 +14,85 @@ jobs:
         with:
           targets: |
             playbooks/site.yml
-            roles/acmeca_challenge_site
-            roles/acmeca_host_certs
-            roles/apache
-            roles/aptitude
-            roles/bash_completion
-            roles/bind
-            roles/chromium
-            roles/clamav
-            roles/collection_handlers
-            roles/config_defaults
-            roles/config_environment
-            roles/config_ownca_environment
-            roles/config_realm_environment
-            roles/cups
-            roles/curl
-            roles/ddclient
-            roles/dns_forwardzones
-            roles/dns_reversezones
-            roles/dotfiles
-            roles/dovecot
-            roles/etckeeper
-            roles/evolution
-            roles/fail2ban
-            roles/firefox
-            roles/freeradius
-            roles/git
-            roles/global
-            roles/gnupg
-            roles/hostname
-            roles/hosts
-            roles/ispell
-            roles/keychain
-            roles/keycloak
-            roles/krb5_client_config
-            roles/libnss3_tools
-            roles/linux_pam
-            roles/make
-            roles/man
-            roles/mariadb
-            roles/mediawiki
-            roles/members
-            roles/mysql_databases
-            roles/nextcloud
-            roles/nftables
-            roles/ntp
-            roles/openldap
-            roles/opensc
-            roles/openssh
-            roles/ownca
-            roles/ownca_crl
-            roles/ownca_crl_distribution_points
-            roles/ownca_host_certs
-            roles/ownca_host_dhparams
-            roles/ownca_user_certs
-            roles/password_store
-            roles/polkit
-            roles/postfix
-            roles/redis
-            roles/rename
-            roles/rsync
-            roles/samba_domain_clean_environment
-            roles/samba_domain_controller
-            roles/samba_domain_initial_controller
-            roles/samba_domain_keytabs
-            roles/samba_domain_user_certs
-            roles/samba_domain_users
-            roles/samba_file_server
-            roles/screen
-            roles/skel
-            roles/spamassassin
-            roles/sshca
-            roles/sshca_host_certs
-            roles/sshca_user_certs
-            roles/sssd
-            roles/sudo
-            roles/system_upgrade
-            roles/trash_cli
-            roles/unattended_upgrades
-            roles/users
+            # roles/acmeca_challenge_site
+            # roles/acmeca_host_certs
+            # roles/apache
+            # roles/aptitude
+            # roles/bash_completion
+            # roles/bind
+            # roles/chromium
+            # roles/clamav
+            # roles/collection_handlers
+            # roles/config_defaults
+            # roles/config_environment
+            # roles/config_ownca_environment
+            # roles/config_realm_environment
+            # roles/cups
+            # roles/curl
+            # roles/ddclient
+            # roles/dns_forwardzones
+            # roles/dns_reversezones
+            # roles/dotfiles
+            # roles/dovecot
+            # roles/etckeeper
+            # roles/evolution
+            # roles/fail2ban
+            # roles/firefox
+            # roles/freeradius
+            # roles/git
+            # roles/global
+            # roles/gnupg
+            # roles/hostname
+            # roles/hosts
+            # roles/ispell
+            # roles/keychain
+            # roles/keycloak
+            # roles/krb5_client_config
+            # roles/libnss3_tools
+            # roles/linux_pam
+            # roles/make
+            # roles/man
+            # roles/mariadb
+            # roles/mediawiki
+            # roles/members
+            # roles/mysql_databases
+            # roles/nextcloud
+            # roles/nftables
+            # roles/ntp
+            # roles/openldap
+            # roles/opensc
+            # roles/openssh
+            # roles/ownca
+            # roles/ownca_crl
+            # roles/ownca_crl_distribution_points
+            # roles/ownca_host_certs
+            # roles/ownca_host_dhparams
+            # roles/ownca_user_certs
+            # roles/password_store
+            # roles/polkit
+            # roles/postfix
+            # roles/redis
+            # roles/rename
+            # roles/rsync
+            # roles/samba_domain_clean_environment
+            # roles/samba_domain_controller
+            # roles/samba_domain_initial_controller
+            # roles/samba_domain_keytabs
+            # roles/samba_domain_user_certs
+            # roles/samba_domain_users
+            # roles/samba_file_server
+            # roles/screen
+            # roles/skel
+            # roles/spamassassin
+            # roles/sshca
+            # roles/sshca_host_certs
+            # roles/sshca_user_certs
+            # roles/sssd
+            # roles/sudo
+            # roles/system_upgrade
+            # roles/trash_cli
+            # roles/unattended_upgrades
+            # roles/users
           override-deps: |
             ansible==2.10
             ansible-lint==4.2.0
