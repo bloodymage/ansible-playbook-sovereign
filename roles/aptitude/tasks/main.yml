@@ -30,7 +30,7 @@
         - aptitude
         - aptitude_debug
         - aptitude-debug
-    
+
     - name: "Ensure sources.list is current"
       ansible.builtin.template:
         src: "sources.list.j2"

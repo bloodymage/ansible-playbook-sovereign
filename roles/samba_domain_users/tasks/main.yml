@@ -1,7 +1,7 @@
 ---
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
-    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"    
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
@@ -9,25 +9,8 @@
   when:
     - samba_administrator_password == "password"
 
-- name: Get Samba Groups
-  command:
-    cmd: "samba-tool group list"
-  register: existing_group_list
-  delegate_to: "{{ __samba_schema_master }}"
-  become: yes
-  run_once: yes
-
-- name: Print Existing Groups
-  ansible.builtin.debug:
-    var: existing_group_list.stdout_lines
-    verbosity: 1
-  become: no
-  tags:
-    - never
-    - debug
-
 - name: Get Samba Users
-  command:
+  ansible.builtin.command:
     cmd: "samba-tool user list"
   register: existing_user_list
   delegate_to: "{{ __samba_schema_master }}"
@@ -49,7 +32,7 @@
 #
 # ==================================================================================================
 - name: "Add Unix Samba Groups (Without email address)"
-  shell: >
+  ansible.builtin.shell: >
     samba-tool group add "{{ __groupname }}"
     --gid-number {{ item.id_number }}
     --nis-domain "{{ rebeldream_org_unit_name | upper }}"
@@ -60,16 +43,17 @@
   vars:
     __username: "{{ item.username | default(item.groupname) }}_g"
     __groupname: "{{ item.groupname | default(__username) }}"
+    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.id_number is defined
     - inventory_hostname == __samba_schema_master
-    - __groupname not in existing_group_list.stdout_lines
+    - __groupname not in _existing_groups
     - item.mail_address is not defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
 - name: Add Unix Samba Groups (With email address)
-  shell: >
+  ansible.builtin.shell: >
     samba-tool group add "{{ __groupname }}"
     --gid-number {{ item.id_number }}
     --nis-domain "{{ rebeldream_org_unit_name | upper }}"
@@ -81,43 +65,48 @@
   vars:
     __username: "{{ item.username | default(item.groupname) }}_g"
     __groupname: "{{ item.groupname | default(__username) }}"
+    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.id_number is defined
     - inventory_hostname == __samba_schema_master
-    - __groupname not in existing_group_list.stdout_lines
+    - __groupname not in __existing_groups
     - item.mail_address is defined
     - item.id_number is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
 - name: Add Non-Unix Samba Groups (with Email Address)
-  shell: >
+  ansible.builtin.shell: >
     samba-tool group add "{{ item.groupname }}"
     --mail-address {{ item.mail_address }}
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
   loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  delegate_to: "{{ __samba_schema_master }}"
+  run_once: yes
+  vars:
+    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
-    - item.groupname not in existing_group_list.stdout_lines
+    - item.groupname not in __existing_groups
     - item.mail_address is defined
     - item.id_number is not defined
-  delegate_to: "{{ __samba_schema_master }}"
-  run_once: yes
 
 - name: Add Non-Unix Samba Groups (without Email Address)
-  shell: >
+  ansible.builtin.shell: >
     samba-tool group add "{{ item.groupname }}"
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
   loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  vars:
+    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
-    - item.groupname not in existing_group_list.stdout_lines
+    - item.groupname not in __existing_groups
     - item.mail_address is not defined
     - item.id_number is not defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -129,7 +118,7 @@
 #
 # ==================================================================================================
 - name: Add Samba Users
-  command:
+  ansible.builtin.command:
     cmd: >
       samba-tool user create "{{ __username }}" "{{ __password }}"
       --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
@@ -156,16 +145,17 @@
     __id_number: "{{ item.id_number }}"
     __uid_number: "--uid-number '{{ item.id_number }}'"
     __gid_number: "--gid-number '{{ item.id_number }}'"
+    __existing_users: "{{ lookup('pipe', 'samba-tool user list') }}"
   when:
     - item.given_name is defined
     - item.surname is defined
     - item.id_number is defined
-    - __username not in existing_user_list.stdout_lines
+    - __username not in __existing_users
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
 - name: Add Samba Users
-  shell: >
+  ansible.builtin.shell: >
     samba-tool user create "{{ __username }}" "{{ __password }}"
     --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
     --uid-number "{{ item.id_number }}"
@@ -190,10 +180,11 @@
     __id_number: "{{ item.id_number }}"
     __uid_number: "--uid-number '{{ item.id_number }}'"
     __gid_number: "--gid-number '{{ item.id_number }}'"
+    __existing_users: "{{ lookup('pipe', 'samba-tool user list') }}"
   when:
     - item.given_name is defined
     - item.surname is not defined
-    - item.username not in existing_user_list.stdout_lines
+    - item.username not in __existing_users
     - item.id_number is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
@@ -225,8 +216,9 @@
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __existing_users: "{{ lookup('pipe', 'samba-tool user list') }}"
   when:
-    - item.username not in existing_user_list.stdout_lines
+    - item.username not in __existing_users
     - item.id_number is not defined
 
 - name: "Set expiry for Samba Users"

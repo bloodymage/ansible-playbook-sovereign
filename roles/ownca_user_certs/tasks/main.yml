@@ -72,7 +72,7 @@
     __username: "{{ item[0].username }}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
     __user_pki_dir: "{{ __user_home_dir }}/{{ ownca_user_pki_dir }}"
-    __id_number: "{{ item[0].id_number }}" 
+    __id_number: "{{ item[0].id_number }}"
   when:
     - item[0].id_number is defined
     - item[0].spns is not defined
@@ -101,7 +101,7 @@
     __username: "{{ item.username }}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ item.username }}"
     __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
-    __id_number: "{{ item.id_number }}" 
+    __id_number: "{{ item.id_number }}"
   when:
     - item.id_number is defined
     - item.spns is not defined

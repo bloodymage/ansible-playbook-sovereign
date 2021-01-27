@@ -123,7 +123,9 @@
 
 - name: "Set SeDiskOperatorPrivilege for unixadmins so they can set ACLs"
   ansible.builtin.expect:
-    command: "net rpc rights grant '{{ rebeldream_org_unit_name | upper }}\\unixadmins' SeDiskOperatorPrivilege -U '{{ rebeldream_org_unit_name | upper }}\\administrator'"
+    command: >
+      net rpc rights grant '{{ rebeldream_org_unit_name | upper }}\\unixadmins'
+      SeDiskOperatorPrivilege -U '{{ rebeldream_org_unit_name | upper }}\\administrator'
     responses:
       (?i)password: "{{ samba_administrator_password }}"
   become: yes

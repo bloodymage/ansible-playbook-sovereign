@@ -165,7 +165,7 @@
 #
 # ==================================================================================================
 - name: Compare certificates.
-  shell: diff <(ssh-keygen -L -f "{{ item.path }}" |
+  ansible.builtin.shell: set -o pipefail && diff <(ssh-keygen -L -f "{{ item.path }}" |
            tail -n +2) <(ssh-keygen -L -f "{{ __existing_cert_path }}" | tail -n +2)
   args:
     executable: "/bin/bash"
