@@ -48,7 +48,7 @@
   register: success
   become: yes
 
-- name: Test Active Directory Domain Controller
+- name: "(Tests) KDC get tickets"
   expect:
     command: kinit administrator
     responses:
@@ -58,7 +58,7 @@
   when:
     - rebeldream_fqdn != __samba_schema_master
 
-- name: Test Active Directory Domain Controller
+- name: "(Tests) KDC list tickets"
   ansible.builtin.command:
     cmd: "klist"
   register: success

@@ -3,18 +3,122 @@
 packages:
   - nftables
 
+nftables_families:
+  - name: "inet"
+    table_name: "filter"
+    chain:
+      - name: "input"
+        policy: "drop"
+        rules:
+          - iif lo accept comment "Accept any localhost traffic"
+          - ct state invalid drop comment "Drop invalid connections"
+          - ct state established,related accept comment "Accept traffic originated from us"
+          - meta l4proto ipv6-icmp icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem, mld-listener-query, mld-listener-report, mld-listener-reduction, nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert, mld2-listener-report } accept comment "Accept ICMPv6"
+          - meta l4proto icmp icmp type { destination-unreachable, router-solicitation, router-advertisement, time-exceeded, parameter-problem } accept comment "Accept ICMP"
+          - ip protocol igmp accept comment "Accept IGMP"
+          - udp dport mdns ip6 daddr ff02::fb accept comment "Accept mDNS"
+          - udp dport mdns ip daddr 224.0.0.251 accept comment "Accept mDNS"
+          - udp sport 1900 udp dport >= 1024 ip6 saddr { fd00::/8, fe80::/10 } meta pkttype unicast limit rate 4/second burst 20 packets accept comment "Accept UPnP IGD port mapping reply"
+          - udp sport 1900 udp dport >= 1024 meta pkttype unicast ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 } accept comment "Accept Samba Workgroup browsing replies"
+          - counter comment "Count any other traffic"
+      - name: "forward"
+        policy: "drop"
+      - name: "output"
+        policy: "drop"
+
 # ==================================================================================================
 #
 #
-
+# ==================================================================================================
 linux_ports:
-  - 22
+  - "{{ ssh_port }}"
 
 apache_ports:
   - 80
   - 443
 
 samba_ad_dc_ports:
-  - 389
+  - "{{ dns_port }}"
+  - "{{ kerberos_port }}"
+  - "{{ kpasswd5_port }}"
+  - "{{ ldap_port }}"
+  - "{{ ldapssl_port }}"
+  - "{{ microsoft_ds_port }}"
+  - "{{ msrpc_port }}"
+  - "{{ netbios_port }}"
 
+samba_file_server_ports:
+  - "{{ rpcbind_port }}"
+  - "{{ netbios_ssn_port }}"
+  - "{{ microsoft_ds_port }}"
 
+nfs_server_ports:
+  - "{{ nfs_port }}"
+
+smtp_server_ports:
+  - "{{ smtp_port }}"
+  - "{{ smtps_port }}"
+  - "{{ submission_port }}"
+
+imap_server_ports:
+  - "{{ imap_port }}"
+  - "{{ imaps_port }}"
+
+printer_ports:
+  - "{{ printer_port }}"
+  - "{{ ipp_port }}"
+  - "{{ jetdirect_port }}"
+
+home_assistant_ports:
+  - "{{ polipo_port }}"
+
+vnc_ports:
+  - "{{ vnc_port }}"
+
+mosquitto_ports:
+  - "{{ mqtt_port }}"
+  - "{{ mqtts_port }}"
+
+mythtv_backend_server_ports:
+  - "{{ mythtv_backend_port }}"
+  - "{{ mythtv_api_port }}"
+
+readydlna_ports:
+  - "{{ trivnet_port }}"
+  - "{{ ssdp_port }}"
+
+dns_port: 53
+globalcatLDAP_port: 3268
+globalcatLDAPssl_port: 3269
+http_port: 80
+http_proxy_port: 8080
+https_alt: 8443
+https_port: 443
+imap_port: 143
+imaps_port: 993
+ipp_port: 631
+jetdirect_port: 9100
+kerberos_port: 88
+kpasswd5_port: 464
+ldap_port: 389
+ldapssl_port: 636
+microsoft_ds_port: 445
+mqtt_port: 1883
+mqtts_port: 8883
+msrpc_port: 135
+mysql_port: 3306
+mythtv_api_port: 6544
+mythtv_backend_port: 6543
+netbios_ssn_port: 139
+nfs_port: 2049
+polipo_port: 8123
+printer_port: 515
+radan_http_port: 8088
+rpcbind_port: 111
+smtp_port: 25
+smtps_port: 465
+ssdp_port: 1900
+ssh_port: 22
+submission_port: 587
+trivnet_port: 8200
+vnc_port: 5900

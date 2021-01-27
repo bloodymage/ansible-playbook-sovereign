@@ -17,8 +17,10 @@ bind_auth_file: "{{ bind_conf_dir }}/{{ auth_file }}"
 # Main config file
 bind_config: "{{ bind_conf_dir }}/named.conf"
 
-bind_default_zone_files: "{{ bind_conf_dir }}/named.conf.default-zones"
+bind_default_zone_file: "{{ bind_conf_dir }}/named.conf.default-zones"
 bind_options_file: "{{ bind_conf_dir }}/named.conf.options"
+bind_local_file: "{{ bind_conf_dir }}/named.conf.local"
+bind_rpz_file: "{{ bind_conf_dir }}/named.conf.rpz"
 
 bind_owner: root
 bind_group: bind
@@ -144,3 +146,7 @@ bind_extra_include_files: []
 
 # File mode for master zone files (needs to be something like 0660 for dynamic updates)
 bind_zone_file_mode: "0640"
+
+bind_rpc_policies:
+  - "zone 'accept.{{ rebeldream_root_domain }}' policy passthru;"
+  - "zone 'block.{{ rebeldream_root_domain }}';"

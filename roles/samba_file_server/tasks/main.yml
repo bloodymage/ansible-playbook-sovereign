@@ -1,14 +1,5 @@
 ---
 # tasks file for samba-domain-member
-- name: Determine whether to force domain recreation
-  ansible.builtin.set_fact:
-    __samba_recreate_realm: yes
-  become: no
-  tags:
-    - never
-    - recreate-realm
-    - recreate-realm-debug
-
 - name: Determine if host is already joined as a domain member
   ansible.builtin.set_fact:
     __samba_joined_as_domain_member: yes
@@ -53,194 +44,6 @@
         - recreate-realm
         - recreate-realm-debug
 
-# ==================================================================================================
-#
-# Ensure samba is not currently running on the host system.
-#
-# Steps:
-#   1. Identify the processes
-#
-# Ref: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
-# ==================================================================================================
-- name: Get running processes
-  shell: >
-    ps -ef |
-    grep -v grep |
-    egrep 'samba|smbd|nmbd|winbindd' |
-    awk '{print $2}'
-  register: running_processes
-  become: yes
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Kill running processes
-  command:
-    cmd: "kill {{ item }}"
-  loop: "{{ running_processes.stdout_lines }}"
-  become: yes
-  ignore_errors: yes
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Wait for all processes to be killed
-  wait_for:
-    path: "/proc/{{ item }}/status"
-    state: absent
-  loop: "{{ running_processes.stdout_lines }}"
-  ignore_errors: yes
-  register: killed_processes
-  become: yes
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Force kill stuck processes
-  command:
-    cmd: "kill -9 {{ item }}"
-  loop: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
-  become: yes
-  ignore_errors: yes
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-# ==================================================================================================
-#
-# Ensure config file does not already exists
-#
-# ==================================================================================================
-- name: Identify config file if it exists
-  shell: >
-    smbd -b |
-    grep 'CONFIGFILE' |
-    cut -d: -f2 |
-    tr -s "[:blank:]"
-  register: config_file
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-- name: Print Variables
-  ansible.builtin.debug:
-    var: config_file
-    verbosity: 2
-  become: no
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm-debug
-
-- name: Remove config file
-  ansible.builtin.file:
-    path: "{{ config_file }}"
-    state: absent
-  become: yes
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
-# ==================================================================================================
-#
-# Ensure Samba databases do not exists
-#
-# ==================================================================================================
-#- name: Identify samba database directories
-#  shell: "smbd -b | egrep 'LOCKDIR|STATEDIR|CACHEDIR|PR0IVATE_DIR'|cut -d: -f2| sed -e 's/^[[:space:]]*//'"
-#  register: database_directories
-
-# - name: Identify samba database files
-#   find:
-#     path: "{{ item }}"
-#     pattern: "*.tdb, *.ldb"
-#   loop:
-#     - "/var/run/samba"
-#     - "/var/lib/samba"
-#     - "/var/cache/samba"
-#     - "/var/lib/samba/private"
-#   become: yes
-#   register: find_logs
-
-# - name: List tdb files
-#   debug:
-#     var: "{{ item.path }}"
-#     verbosity: 1
-#   loop: "{{ find_logs.files }}"
-
-# - name: Remove database files
-#   file:
-#     path: "{{ item.path }}"
-#     state: absent
-#   loop: "{{ find_logs.files }}"
-
-- name: Remove database files
-  command:
-    cmd: "rm *.tdb *.ldb"
-    chdir: "{{ item }}"
-  loop:
-    - "/var/run/samba"
-    - "/var/lib/samba"
-    - "/var/cache/samba"
-    - "/var/lib/samba/private"
-  become: yes
-  ignore_errors: yes
-  when:
-    - samba_create_domain is defined
-    - samba_create_domain
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
-
 # Create Config File
 - name: Install smb.conf configuration file
   ansible.builtin.template:
@@ -282,16 +85,48 @@
 # Join Domain
 #
 # ==================================================================================================
+- name: "Ensure we have a password for the Samba Administrator account"
+  ansible.builtin.set_fact:
+    samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  become: no
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  when:
+    - samba_administrator_password == "password"
+  no_log: yes
+
 # - name: Test if host is already join to domain
+#   ansible.builtin.command:
+#     cmd: "net ads testjoin"
 
 - name: Join Domain
-  command:
-    cmd: "net ads join -U administrator -w {{ samba_administrator_password }}"
+  ansible.builtin.expect:
+    command: "net ads join -U administrator"
+    responses:
+      (?i)password: "{{ samba_administrator_password }}"
   become: yes
   notify: start samba-domain-member
   when:
-    - __samba_recreate_realm
     - not __samba_joined_as_domain_member
+  tags:
+    - samba_file_server
+    - samba-file-server
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+- name: "Set SeDiskOperatorPrivilege for unixadmins so they can set ACLs"
+  ansible.builtin.expect:
+    command: "net rpc rights grant '{{ rebeldream_org_unit_name | upper }}\\unixadmins' SeDiskOperatorPrivilege -U '{{ rebeldream_org_unit_name | upper }}\\administrator'"
+    responses:
+      (?i)password: "{{ samba_administrator_password }}"
+  become: yes
   tags:
     - samba_file_server
     - samba-file-server

@@ -42,7 +42,31 @@
 # Currently, this gives an error if already installed, what is really needed is a way to test if
 # installed, and if so, don't install again.
 #
+# This also gives an error if a old cert is installed.  So for now, we delete the old one every
+# time.
+#
+# Is it possible to use the ldap_attrs to update a 'binary' definition?  How would that work?
+#
 # ==================================================================================================
+- name: "Delete old cert"
+  community.general.ldap_attrs:
+    dn: "CN={{ __dn }},{{ rebeldream_user_dn }}"
+    attributes:
+      userCertificate: []
+    state: exact
+    bind_dn: "cn=administrator,{{ rebeldream_user_dn }}"
+    bind_pw: "{{ samba_administrator_password }}"
+    start_tls: yes
+    server_uri: "ldap://{{ rebeldream_fqdn }}"
+  loop: "{{ domain_users }}"
+  vars:
+    __given_name: "{{ item.given_name  | default(item.username) }}"
+    __surname: "{{ item.surname | default(none) }}"
+    __sn: "{% if item.surname is defined %}cn: {{ item.surname }}{% endif %}"
+    __dn: "{{ __given_name }}{% if item.surname is defined %} {{ __surname }}{% endif %}"
+  when:
+    - item.id_number is defined
+
 - name: "Install user certificates into ldap attributes."
   ansible.builtin.command:
     cmd: >
