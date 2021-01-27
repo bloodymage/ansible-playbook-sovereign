@@ -25,5 +25,6 @@ galaxy_info:
     - openssh
 
 dependencies:
+  - role: bloodymage.rebeldream.config_defaults
   - role: bloodymage.rebeldream.collection_handlers
   #- role: bloodymage.rebeldream.system_upgrade

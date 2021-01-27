@@ -14,8 +14,8 @@
 #
 # If we are recreating the realm, we need to:
 # 1. Remove all old files from previous iteration on all domain controller hosts
-# 2. Create the realm on the schema master host
-# 3. Configure all subesquent domain controller hosts
+# 2. Create the realm on an initial controller
+# 3. Join subesquent domain controller to domain as domain controllers
 #
 # ==================================================================================================
 - hosts: samba_domain_controllers:samba_file_servers

@@ -46,6 +46,12 @@
     - role: bloodymage.rebeldream.openssh
       tags:
         - openssh
+    - role: bloodymage.rebeldream.nftables
+      tags:
+        - nftables
+    - role: bloodymage.rebeldream.fail2ban
+      tags:
+        - fail2ban
     - role: bloodymage.rebeldream.ntp
       tags:
         - ntp
@@ -76,9 +82,6 @@
     - role: bloodymage.rebeldream.rsync
       tags:
         - rsync
-    - role: bloodymage.rebeldream.fail2ban
-      tags:
-        - fail2ban
     - role: bloodymage.rebeldream.curl
       tags:
         - curl

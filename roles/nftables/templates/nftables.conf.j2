@@ -1,15 +1,19 @@
 #!/usr/sbin/nft -f
 
+# {{ ansible_managed }}
+
 flush ruleset
 
-table inet filter {
-	chain input {
-		type filter hook input priority 0;
-	}
-	chain forward {
-		type filter hook forward priority 0;
-	}
-	chain output {
-		type filter hook output priority 0;
-	}
-}
+{% for family in nftables_families %}
+  table {{ family.name }} {{ family.table_name }} {
+  {% for chain in family.chains %}
+	chain {{ chain.name }} {
+    type {{ family.table_name }} hook input priority 0; policy {{ chain.policy }};
+
+    {% if chain.rules is defined %}
+    {% for rule in chain.rules %}
+      {{ rule }}
+    {% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
