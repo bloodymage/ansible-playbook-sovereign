@@ -6,7 +6,7 @@
 # Installs a set of common apps for all systems on the network
 #
 # ======================================================================
-- name: Include OS-specific variables.
+- name: "Include OS-specific variables."
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
@@ -30,7 +30,7 @@
     - apache-debug
     - install-packages
 
-- name: http service state
+- name: "http service state"
   service:
     name: apache2
     state: started
@@ -66,17 +66,20 @@
 #     persistent: yes
 #   when: sestatus.rc != 0
 
-- ansible.builtin.debug:
+- name: "Check virtual hosts"
+  ansible.builtin.debug:
     msg:
       - "{{ virtual_hosts }}"
     verbosity: 2
   become: no
+  when:
+    - virtual_hosts is defined
   tags:
     - never
     - apache_debug
     - apache-debug
 
-- name: Create file directories for each site
+- name: "Create file directories for each site"
   ansible.builtin.file:
     path: "/srv/www/{{ item.name }}"
     owner: www-data
@@ -99,7 +102,7 @@
 #
 #
 # ======================================================================
-- name: Ensure file directories have proper permissions
+- name: "Ensure file directories have proper permissions"
   ansible.builtin.file:
     path: "/srv/www"
     owner: www-data
@@ -120,7 +123,7 @@
     - apache-debug
     - websites
 
-- name: Create log directories for each site
+- name: "Create log directories for each site"
   ansible.builtin.file:
     path: "/var/log/apache2/{{ item.name }}"
     owner: root

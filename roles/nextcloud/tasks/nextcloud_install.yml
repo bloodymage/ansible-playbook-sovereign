@@ -156,7 +156,6 @@
     - nextcloud-debug
     - websites
 
-  
 - name: Delete old Data directory
   ansible.builtin.file:
     path: "{{ item.stat.path }}"
