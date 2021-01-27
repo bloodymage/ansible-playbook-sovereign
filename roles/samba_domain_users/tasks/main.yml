@@ -48,27 +48,29 @@
 #
 #
 # ==================================================================================================
-- name: Add Unix Samba Groups (Without email address)
+- name: "Add Unix Samba Groups (Without email address)"
   shell: >
-    samba-tool group add "{{ item.groupname }}"
+    samba-tool group add "{{ __groupname }}"
     --gid-number {{ item.id_number }}
     --nis-domain "{{ rebeldream_org_unit_name | upper }}"
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
   loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  vars:
+    __username: "{{ item.username | default(item.groupname) }}_g"
+    __groupname: "{{ item.groupname | default(__username) }}"
   when:
-    - item.groupname is defined
     - item.id_number is defined
     - inventory_hostname == __samba_schema_master
-    - item.groupname not in existing_group_list.stdout_lines
+    - __groupname not in existing_group_list.stdout_lines
     - item.mail_address is not defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
 - name: Add Unix Samba Groups (With email address)
   shell: >
-    samba-tool group add "{{ item.groupname }}"
+    samba-tool group add "{{ __groupname }}"
     --gid-number {{ item.id_number }}
     --nis-domain "{{ rebeldream_org_unit_name | upper }}"
     --mail-address {{ item.mail_address }}
@@ -76,11 +78,13 @@
     --password {{ samba_administrator_password }}
   become: yes
   loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  vars:
+    __username: "{{ item.username | default(item.groupname) }}_g"
+    __groupname: "{{ item.groupname | default(__username) }}"
   when:
-    - item.groupname is defined
     - item.id_number is defined
     - inventory_hostname == __samba_schema_master
-    - item.groupname not in existing_group_list.stdout_lines
+    - __groupname not in existing_group_list.stdout_lines
     - item.mail_address is defined
     - item.id_number is defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -141,7 +145,7 @@
   become: yes
   loop: "{{ domain_users + __domain_system_users }}"
   vars:
-    __username: "{{ item.username }}"
+    __username: "{{ item.username | default(item.given_name | lower) }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ __username }}/password"
     __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
@@ -156,7 +160,7 @@
     - item.given_name is defined
     - item.surname is defined
     - item.id_number is defined
-    - item.username not in existing_user_list.stdout_lines
+    - __username not in existing_user_list.stdout_lines
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
@@ -244,6 +248,7 @@
   loop: "{{ domain_groups }}"
   loop_control:
     loop_var: group
+    index_var: group_index
   when:
     - __samba_schema_master is defined
     - inventory_hostname == __samba_schema_master

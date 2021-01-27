@@ -3,11 +3,7 @@
   ignore_unreachable: yes
   roles:
     - role: bloodymage.rebeldream.config_environment
-      tags:
-        - always
     - role: bloodymage.rebeldream.config_realm_environment
-      tags:
-        - always
 
 - name: "Configure baseline Kerberos"
   hosts: internal_network:!routeros
@@ -18,27 +14,29 @@
 #
 # If we are recreating the realm, we need to:
 # 1. Remove all old files from previous iteration on all domain controller hosts
-# 2. Create the realm on the schema master host
-# 3. Configure all subesquent domain controller hosts
+# 2. Create the realm on an initial controller
+# 3. Join subesquent domain controller to domain as domain controllers
 #
 # ==================================================================================================
-- hosts: samba_domain_controllers
-  tasks:
-    - name: "Reset Realm"
-      ansible.builtin.include_role:
-        name: bloodymage.rebeldream.samba_domain_clean_environment
+- hosts: samba_domain_controllers:samba_file_servers
+  roles:
+    - role: bloodymage.rebeldream.samba_domain_clean_environment
       when:
         - __samba_recreate_realm
       tags:
         - samba_domain_controller
         - samba-domain-controller
+        - recreate-realm
 
 - hosts: samba_schema_master
   roles:
-    - role: bloodymage.rebeldream.samba_domain_controller
+    - role: bloodymage.rebeldream.samba_domain_initial_controller
+      when:
+        - __samba_recreate_realm
       tags:
         - samba_domain_controller
         - samba-domain-controller
+        - recreate-realm
 
 - hosts: samba_domain_controllers
   roles:
@@ -46,6 +44,7 @@
       tags:
         - samba_domain_controller
         - samba-domain-controller
+        - recreate-realm
 
 - hosts: samba_schema_master
   roles:
@@ -56,6 +55,7 @@
         - samba-domain-users
         - samba_domain_users_debug
         - samba-domain-users-debug
+        - recreate-realm
 
 # - hosts: freeipa_controllers
 
@@ -68,18 +68,21 @@
     - role: bloodymage.rebeldream.sssd
       tags:
         - sssd
+        - recreate-realm
 
 - hosts: keytabs
   roles:
     - role: bloodymage.rebeldream.samba_domain_keytabs
-  tags:
-    - samba-domain-keytabs
+      tags:
+        - samba-domain-keytabs
+        - recreate-realm
 
 - hosts: keycloak_servers:!public_zone
   roles:
     - role: bloodymage.rebeldream.keycloak
       tags:
         - keycloak
+        - recreate-realm
 
 # - hosts: samba_file_servers:workstations:&linux
 #   roles:
@@ -96,19 +99,22 @@
         - ownca-user-certs
         - ownca_user_certs_debug
         - ownca-user-certs-debug
+        - recreate-realm
 
 - hosts: samba_ownca_user_hosts:workstations:&linux
   roles:
     - role: bloodymage.rebeldream.sshca_user_certs
       tags:
         - sshca-user-certs
+        - recreate-realm
 
 - hosts: samba_schema_master
   roles:
     - role: bloodymage.rebeldream.samba_domain_user_certs
       tags:
         - samba-domain-user-certs
+        - recreate-realm
 
-- hosts: freeradius_servers
-  roles:
-    - role: bloodymage.rebeldream.freeradius
+# - hosts: freeradius_servers
+#   roles:
+#     - role: bloodymage.rebeldream.freeradius

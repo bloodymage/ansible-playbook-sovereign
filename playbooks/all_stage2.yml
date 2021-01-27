@@ -1,17 +1,11 @@
 - hosts: all:!localhost:!public_zone
   ignore_unreachable: yes
-  pre_tasks:
-    - name: Check if we are regenerating all ownca certs
-      ansible.builtin.set_fact:
-        __ownca_regenerate: yes
-      become: no
-      changed_when: __ownca_regenerate
-      tags:
-        - never
-        - regenerate-ownca
-
-- hosts: all:!localhost:!public_zone
-  ignore_unreachable: yes
   roles:
+    - role: bloodymage.rebeldream.config_ownca_environment
+      tags:
+        - always
     - role: bloodymage.rebeldream.ownca_host_certs
+      tags:
+        - ownca_host_certs
+        - ownca-host-certs
  

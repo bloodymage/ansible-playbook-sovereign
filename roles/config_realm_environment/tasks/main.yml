@@ -11,72 +11,27 @@
   ansible.builtin.set_fact:
     __samba_recreate_realm: yes
   become: no
+  changed_when: __samba_recreate_realm
   tags:
     - never
     - recreate-realm
 
-- name: "Print Samba Schema Master Role"
+- name: "Print __samba_recreate_realm"
   ansible.builtin.debug:
     msg:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[1].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[6].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[7].split('=')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3].split(',')[8].split('=')[1] }}"
+      - "Recreate realm: {{ __samba_recreate_realm }}"
     verbosity: 1
   become: no
-  when:
-    - __samba_schema_master_role is defined
   tags:
     - never
     - debug
 
-- name: "Print Variables"
-  ansible.builtin.debug:
-    msg:
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[0] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[1] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[2] }}"
-      - "{{ __samba_schema_master_role.stdout_lines[0].split(' ')[3] }}"
-    verbosity: 2
+- name: "Set default samba schema master role"
+  ansible.builtin.set_fact:
+    __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
   become: no
-  when:
-    - __samba_schema_master_role is defined
   tags:
-    - never
-    - debug
-
-- name: Print Variables
-  ansible.builtin.debug:
-    var: __samba_schema_master_role.stdout_lines[0]
-    verbosity: 3
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - debug
-
-- name: Print Variables
-  ansible.builtin.debug:
-    var: __samba_schema_master_role.stdout_lines
-    verbosity: 4
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - debug
-
-- name: Print Variables
-  ansible.builtin.debug:
-    var: __samba_schema_master_role
-    verbosity: 4
-  become: no
-  when:
-    - __samba_schema_master_role is defined
-  tags:
-    - never
-    - debug
+    - always
 
 - name: "Set Samba Schema Master to Running Schema Master (Only if not regenerating realm)"
   ansible.builtin.command:

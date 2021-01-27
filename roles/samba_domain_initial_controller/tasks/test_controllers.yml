@@ -1,0 +1,76 @@
+# ==================================================================================================
+#
+# Test Active Directory Domain Controllers
+#
+# - Verify Samba Sysvol Replication
+#   Reference: https://wiki.samba.org/index.php/Verifying_the_Directory_Replication_Statuses
+#
+# Note: These check that the command ran successfully, we really need to do a further check that
+# the results were what we expected
+#
+# ==================================================================================================
+- name: "(Tests) Verify Sysvol Replication"
+  ansible.builtin.command:
+    cmd: "samba-tool drs showrepl"
+  become: yes
+  when:
+    - rebeldream_fqdn != __samba_schema_master
+  notify: restart bind
+
+- name: "(Tests) List all shares provided by the Domain Controller"
+  ansible.builtin.command:
+    cmd: "smbclient -L localhost -U%"
+  register: shares
+  become: yes
+  when:
+    - rebeldream_fqdn != __samba_schema_master
+
+# - name: Verify SMB Authentication
+#   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
+#   register: success
+#   become: yes
+#   when: rebeldream_fqdn != __samba_schema_master
+#   ignore_errors: yes
+
+#- debug:
+#    var: success
+#    verbosity: 2
+
+- name: "(Tests) The A record of the domain controller"
+  ansible.builtin.command:
+    cmd: "host -t A {{ ansible_fqdn }}."
+  register: success
+  become: yes
+
+- name: "(Tests) udp-based _kerberos SRV resource record in the domain"
+  ansible.builtin.command:
+    cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
+  register: success
+  become: yes
+
+- name: Test Active Directory Domain Controller
+  expect:
+    command: kinit administrator
+    responses:
+      (?i)password: "{{ samba_administrator_password }}"
+  no_log: true
+  become: no
+  when:
+    - rebeldream_fqdn != __samba_schema_master
+
+- name: Test Active Directory Domain Controller
+  ansible.builtin.command:
+    cmd: "klist"
+  register: success
+  become: no
+  when:
+    - rebeldream_fqdn != __samba_schema_master
+
+- name: Print Success
+  ansible.builtin.debug:
+    msg:
+      - "{{ success }}"
+    verbosity: 1
+  become: no
+  when:
+    - rebeldream_fqdn != __samba_schema_master

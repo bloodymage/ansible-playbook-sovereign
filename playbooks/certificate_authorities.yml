@@ -1,16 +1,15 @@
 - hosts: certificate_authorities
-  pre_tasks:
-    - name: "Check if we are regenerating all ownca certs"
-      ansible.builtin.set_fact:
-        __ownca_regenerate: yes
-      become: no
+  roles:
+    - role: bloodymage.rebeldream.config_ownca_environment
       tags:
-        - never
-        - regenerate-ownca
-  roles:
+        - always
     - role: bloodymage.rebeldream.sshca
-
-- hosts: certificate_authorities
-  roles:
+      tags:
+        - sshca
     - role: bloodymage.rebeldream.ownca
+      tags:
+        - ownca
     - role: bloodymage.rebeldream.ownca_crl
+      tags:
+        - ownca_crl
+        - ownca-crl

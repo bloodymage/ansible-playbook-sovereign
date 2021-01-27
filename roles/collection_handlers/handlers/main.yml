@@ -24,7 +24,10 @@
   become: yes
   notify: reload postfix
   listen:
+    - "update system ca certificates"
     - "update ca-certificates"
+    - "restart tls"
+    - "reload tls"
   when:
     - inventory_hostname in groups['postfix_servers'] | default([])
 
@@ -33,7 +36,7 @@
 # Restart Service Handlers
 #
 # ==================================================================================================
-- name: restart apache
+- name: "restart apache"
   ansible.builtin.service:
     name: apache2
     state: restarted
@@ -46,7 +49,7 @@
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
 
-- name: Restart Bind9
+- name: "Restart Bind9"
   ansible.builtin.service:
     name: bind9
     state: restarted
@@ -59,7 +62,7 @@
   when:
     - inventory_hostname in groups['dns_servers'] | default([])
 
-- name: Restart Dovecot
+- name: "Restart Dovecot"
   ansible.builtin.service:
     name: dovecot
     state: restarted
@@ -71,7 +74,7 @@
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
 
-- name: Restart Keycloak
+- name: "Restart Keycloak"
   ansible.builtin.service:
     name: keycloak
     state: restarted
@@ -84,7 +87,7 @@
   when:
     - inventory_hostname in groups['keycloak_servers'] | default([])
 
-- name: Restart Mosquitto
+- name: "Restart Mosquitto"
   ansible.builtin.service:
     name: mosquitto
     state: restarted
@@ -95,7 +98,7 @@
   when:
     - inventory_hostname in groups['mosquitto_servers'] | default([])
 
-- name: Restart MySQL
+- name: "Restart MySQL"
   ansible.builtin.service:
     name: mysql
     state: restarted
@@ -106,7 +109,7 @@
   when:
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
 
-- name: Restart nginx
+- name: "Restart nginx"
   ansible.builtin.service:
     name: nginx
     state: restarted
@@ -117,7 +120,7 @@
   when:
     - inventory_hostname in groups ['nginx_servers'] | default([])
 
-- name: Restart Postfix
+- name: "Restart Postfix"
   ansible.builtin.service:
     name: postfix
     state: restarted
@@ -126,10 +129,11 @@
     - "restart all"
     - "restart tls"
     - "restart keytab"
+    - "restart postfix"
   when:
     - inventory_hostname in groups['postfix_servers'] | default([])
 
-- name: Restart Samba Domain Controller
+- name: "Restart Samba Domain Controller"
   ansible.builtin.service:
     name: samba-ad-dc
     state: restarted
@@ -141,7 +145,7 @@
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
 
-- name: Restart SMBD Server
+- name: "Restart SMBD Server"
   ansible.builtin.service:
     name: smbd
     state: restarted
@@ -153,7 +157,7 @@
   when:
     - inventory_hostname in groups['samba_file_servers']
 
-- name: Restart NMBD Server
+- name: "Restart NMBD Server"
   ansible.builtin.service:
     name: nmbd
     state: restarted
@@ -165,15 +169,16 @@
   when:
     - inventory_hostname in groups['samba_file_servers']
 
-- name: Restart SSH Server
+- name: "Restart SSH Server"
   ansible.builtin.service:
     name: ssh
     state: restarted
   become: yes
   listen:
     - "restart all"
+    - "restart ssh"
 
-- name: Restart Winbind Server
+- name: "Restart Winbind Server"
   ansible.builtin.service:
     name: winbind
     state: restarted
@@ -185,7 +190,7 @@
   when:
     - inventory_hostname in groups['samba_file_servers']
 
-- name: restart sssd
+- name: "restart sssd"
   ansible.builtin.service:
     name: sssd
     state: restarted
@@ -196,7 +201,7 @@
   when:
     - inventory_hostname in groups['sssd']
 
-- name: restart unattended-upgrades
+- name: "restart unattended-upgrades"
   ansible.builtin.service:
     name: unattended-upgrades
     state: restarted
@@ -204,20 +209,22 @@
   listen:
     - "restart all"
 
-- name: restart spamassassin
+- name: "restart spamassassin"
   ansible.builtin.service:
     name: spamassassin
     state: restarted
   become: yes
   listen:
     - "restart all"
+  when:
+    - inventory_hostname in groups['mail_servers']
 
 # ==================================================================================================
 #
 # Reload Handlers
 #
 # ==================================================================================================
-- name: reload apache
+- name: "reload apache"
   ansible.builtin.service:
     name: apache2
     state: reloaded
@@ -228,7 +235,7 @@
   when:
     - inventory_hostname in groups['apache_servers']
 
-- name: reload nginx
+- name: "reload nginx"
   ansible.builtin.service:
     name: nginx
     state: reloaded
@@ -268,7 +275,7 @@
 # Start Handlers
 #
 # ==================================================================================================
-- name: start sssd
+- name: "start sssd"
   ansible.builtin.service:
     name: sssd
     state: started
@@ -281,7 +288,7 @@
 # Enable Handlers
 #
 # ==================================================================================================
-- name: enable keycloak
+- name: "enable keycloak"
   ansible.builtin.service:
     name: "keycloak"
     state: "{{ item }}"

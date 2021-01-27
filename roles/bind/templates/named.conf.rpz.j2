@@ -1,0 +1,8 @@
+# {{ ansible_managed }}
+
+response-policy {
+{% for policy in bind9_rpc_policies %}
+  {{ policy }}
+{% endfor %}
+};   
+

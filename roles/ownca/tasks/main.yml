@@ -37,7 +37,7 @@
     - ownca-all
     - install-packages
 
-- name: Get IP geolocation data
+- name: "Get IP geolocation data"
   community.general.ipinfoio_facts:
   tags:
     - ownca
@@ -51,7 +51,7 @@
 # 
 #
 # ==================================================================================================
-- name: Create PKI Directory
+- name: "Create PKI Directory"
   ansible.builtin.file:
     path: '{{ ownca_ca_directory }}/{{ item }}'
     state: directory
@@ -271,7 +271,7 @@
     - ownca_debug
     - ownca-debug
 
-- name: If self signed certificate was regenerated; force regeneration of the remaining certificates
+- name: "If self signed certificate was regenerated; force regeneration of the remaining certificates"
   set_fact:
     __ownca_force_regeneration: yes
   become: no
@@ -334,7 +334,7 @@
     - ownca-bundles
     - ownca-all
 
-- name: Cert Chain (Name, Complete Chain)
+- name: "Cert Chain (Name, Complete Chain)"
   ansible.builtin.debug:
     msg:
       - "{{ item.item }}"
@@ -528,4 +528,3 @@
     - ownca_host_certs_debug
     - ownca-host-certs-debug
     - ownca-all
-

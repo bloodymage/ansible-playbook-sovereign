@@ -185,6 +185,24 @@
     - item[0].id_number is defined
     - item[0].spns is not defined
 
+# - name: "Get identity certificate information"
+#   community.crypto.x509_certificate_info:
+#     path: "{{ ownca_identity_ca_file }}"
+#   register: identity_cert
+
+# TODO: Check if the path even exists
+# - name: "Get old certificate information"
+#   community.crypto.x509_certificate_info:
+#     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
+#   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+#   register: certs
+#   when:
+#     - result.results is defined
+#     - item.backup_file is defined
+
+# TODO: Check if identity_cert serial_number matches the users authority_cert_serial_number.
+# If not, force regeneration.
+
 - name: "Generate User Certificates"
   community.crypto.x509_certificate:
     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
