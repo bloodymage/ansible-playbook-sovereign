@@ -20,4 +20,12 @@ $CONFIG = array (
   'dbpassword' => '{{ item.db_password }}',
   'installed' => true,
   'memcache.local' => '\\OC\\Memcache\\Redis',
+  'loglevel' >= 2,
+  'maintenance' => false,
+  'mail_from_address' => 'cloud',
+  'mail_smtpmode' => 'smtp',
+  'mail_sendmailmode' => 'smtp',
+  'mail_domain' => '{{ rebeldream_root_domain }}',
+  'mail_smtphost' => 'mail.{{ rebeldream_root_domain }}',
+  'mail_smtpport' => '25',
 );
