@@ -81,7 +81,7 @@ nextcloud_upload_max_filesize: "512M"
 nextcloud_memory_limit: "512M"
 nextcloud_hsts_max_age: 15552000
 
-nextcloud_data_directory: "/srv/www-data/nextcloud/"
+nextcloud_data_directory: "/srv/www-data/nextcloud"
 
 nextcloud_apps:
   - accessibility
@@ -213,7 +213,7 @@ nextcloud_saml_config:
 # These variables are not to be edited
 #
 # ==================================================================================================
-nextcloud_default_apps:
+__nextcloud_default_apps:
   - accessibility
   - activity
   - admin_audit
@@ -260,5 +260,16 @@ nextcloud_default_apps:
   - weather_status
   - workflowengine
 
+# These apps can not be disabled or removed
 __nextcloud_mandatory_apps:
+  - cloud_federation_api
+  - dav
   - federatedfilesharing
+  - files
+  - lookup_server_connector
+  - oauth2
+  - provisioning_api
+  - settings
+  - twofactor_backupcodes
+  - viewer
+  - workflowengine
