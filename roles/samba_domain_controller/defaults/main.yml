@@ -50,14 +50,12 @@ samba_schema_extensions:
     default_object_category: "cn=ldapPublicKey,{{ rebeldream_schema_dn }}"
     may_contain: "sshPublicKey"
     schema_id_guid: "+8nfq43rpkwtogbcccskqa=="
-  - name: sshldapmod
-    dn: "CN=User,{{ rebeldream_schema_dn }}"
-    change_type: "modify"
-    replace: "auxiliaryClass"
-    auxiliary_class:
-      - "ldapPublicKey"
-      - "posixAccount"
-      - "shadowAccount"
+  # - name: sshldapmod
+  #   dn: "CN=User,{{ rebeldream_schema_dn }}"
+  #   change_type: "modify"
+  #   replace: "auxiliaryClass"
+  #   auxiliary_class:
+  #     - "ldapPublicKey"
 
 __samba_smbd_bin: "/usr/sbin/smbd"
 __samba_joined_as_domain_controller: no
