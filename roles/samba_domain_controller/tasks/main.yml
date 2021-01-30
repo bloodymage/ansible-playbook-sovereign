@@ -209,8 +209,8 @@
   when:
     - rebeldream_fqdn == __samba_schema_master
 
-# - name: "Update Schema"
-#   include: "schema_updates.yml"
-#   become: no
-#   when:
-#     - rebeldream_fqdn == __samba_schema_master
+- name: "Update Schema"
+  include: "schema_updates.yml"
+  become: no
+  when:
+    - rebeldream_fqdn == __samba_schema_master

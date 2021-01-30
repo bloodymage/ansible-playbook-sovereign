@@ -9,6 +9,20 @@
   when:
     - samba_administrator_password == "password"
 
+# ==================================================================================================
+#
+# Get the info through 'ansible.builtin.command' and register variable.  Lookups only work on
+# localhost.
+#
+#===================================================================================================
+- name: Get Samba Groups
+  ansible.builtin.command:
+    cmd: "samba-tool group list"
+  register: existing_group_list
+  delegate_to: "{{ __samba_schema_master }}"
+  become: yes
+  run_once: yes
+
 - name: Get Samba Users
   ansible.builtin.command:
     cmd: "samba-tool user list"
@@ -16,15 +30,6 @@
   delegate_to: "{{ __samba_schema_master }}"
   become: yes
   run_once: yes
-
-- name: Print Existing Groups
-  ansible.builtin.debug:
-    var: existing_user_list.stdout_lines
-    verbosity: 1
-  become: no
-  tags:
-    - never
-    - debug
 
 # ==================================================================================================
 #
@@ -43,11 +48,10 @@
   vars:
     __username: "{{ item.username | default(item.groupname) }}_g"
     __groupname: "{{ item.groupname | default(__username) }}"
-    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.id_number is defined
     - inventory_hostname == __samba_schema_master
-    - __groupname not in _existing_groups
+    - __groupname not in existing_group_list.stdout_lines
     - item.mail_address is not defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
@@ -65,11 +69,10 @@
   vars:
     __username: "{{ item.username | default(item.groupname) }}_g"
     __groupname: "{{ item.groupname | default(__username) }}"
-    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.id_number is defined
     - inventory_hostname == __samba_schema_master
-    - __groupname not in __existing_groups
+    - __groupname not in existing_group_list.stdout_lines
     - item.mail_address is defined
     - item.id_number is defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -85,12 +88,10 @@
   loop: "{{ domain_groups + domain_users + __domain_system_users }}"
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
-  vars:
-    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
-    - item.groupname not in __existing_groups
+    - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is defined
     - item.id_number is not defined
 
@@ -101,12 +102,10 @@
     --password {{ samba_administrator_password }}
   become: yes
   loop: "{{ domain_groups + domain_users + __domain_system_users }}"
-  vars:
-    __existing_groups: "{{ lookup('pipe', 'samba-tool group list') }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
-    - item.groupname not in __existing_groups
+    - item.groupname not in existing_group_list.stdout_lines
     - item.mail_address is not defined
     - item.id_number is not defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -145,12 +144,11 @@
     __id_number: "{{ item.id_number }}"
     __uid_number: "--uid-number '{{ item.id_number }}'"
     __gid_number: "--gid-number '{{ item.id_number }}'"
-    __existing_users: "{{ lookup('pipe', 'samba-tool user list') }}"
   when:
     - item.given_name is defined
     - item.surname is defined
     - item.id_number is defined
-    - __username not in __existing_users
+    - __username not in existing_user_list.stdout_lines
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
@@ -180,11 +178,10 @@
     __id_number: "{{ item.id_number }}"
     __uid_number: "--uid-number '{{ item.id_number }}'"
     __gid_number: "--gid-number '{{ item.id_number }}'"
-    __existing_users: "{{ lookup('pipe', 'samba-tool user list') }}"
   when:
     - item.given_name is defined
     - item.surname is not defined
-    - item.username not in __existing_users
+    - item.username not in existing_user_list.stdout_lines
     - item.id_number is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
@@ -216,9 +213,8 @@
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __existing_users: "{{ lookup('pipe', 'samba-tool user list') }}"
   when:
-    - item.username not in __existing_users
+    - item.username not in existing_user_list.stdout_lines
     - item.id_number is not defined
 
 - name: "Set expiry for Samba Users"
@@ -256,34 +252,71 @@
 # attribute is defined for that user, and if yes, update it.  That's not very efficient though.
 #
 # ==================================================================================================
-# - name: "Insert User LDAP Attributes"
-#   community.general.ldap_attrs:
-#     dn: "CN={{ __dn }},{{ rebeldream_user_dn }}"
-#     attributes:
-#       #company: "{{ item.company | default(none) }}"
-#       #gidNumber: "{{ item.id_number | default(none) }}"
-#       #givenName: "{{ __given_name }}"
-#       #initials: "{{ __given_name[0] | default(none) }}{{ item.middle_name[0] | default(none) }}{{ item.surname[0] | default(none) }}"
-#       #mail: "{{ __mail }}"
-#       #mobile: "{{ item.mobile | default(none) }}"
-#       #sn: "{{ item.surname }}"
-#       #title: "{{ item.job_title | default(none) }}"
-#       #uidNumber: "{{ item.id_number | default(none) }}"
-#       #unixHomeDirectory: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}"
-#       userCertificate: []
-#       #wWWHomePage: "{{ item.internet_address | default(none) }}"
-#     state: exact
-#     bind_dn: "cn=administrator,{{ rebeldream_user_dn }}"
-#     bind_pw: "{{ samba_administrator_password }}"
-#     start_tls: yes
-#     server_uri: "ldap://{{ rebeldream_fqdn }}"
-#   loop: "{{ domain_users }}"
-#   vars:
-#     __default_mail: "{{ item.username }}@{{ rebeldream_root_domain }}"
-#     __mail: "{{ item.mail | default(__default_mail) }}"
-#     __given_name: "{{ item.given_name  | default(item.username) }}"
-#     __surname: "{{ item.surname | default(none) }}"
-#     __sn: "{% if item.surname is defined %}cn: {{ item.surname }}{% endif %}"
-#     __dn: "{{ __given_name }}{% if item.surname is defined %} {{ __surname }}{% endif %}"
-#   when:
-#     - item.id_number is defined
+- name: "Insert User LDAP Attributes"
+  community.general.ldap_attrs:
+    dn: "CN={{ __dn }},{{ rebeldream_user_dn }}"
+    attributes:
+      co: "{{ item.country | default(omit) }}"
+      # carLicense:
+      # homePhone:
+      # otherHomePhone:
+      # facsimileTelephoneNumber:
+      # otherFacsimile:
+      # ipPhone:
+      # otherIpPhone:
+      # info:
+      # employeeID:
+      # employeeType:
+      # employeeNumber:
+      # division:
+      # roomNumber:
+      # cn:
+      company: "{{ item.company | default(omit) }}"
+      # department:
+      # description:
+      # displayName: "{{ __dn }}"
+      gidNumber: "{{ item.id_number | default(omit) }}"
+      givenName: "{{ __given_name }}"
+      initials: "{{ __initials | default(omit) }}"
+      l: "{{ item.city | default(omit) }}"
+      mail: "{{ __mail }}"
+      mobile: "{{ item.mobile | default(omit) }}"
+      #o:
+      otherMailbox: "{{ item.email_aliases | default(omit) }}"
+      #otherMobile:
+      #otherPager:
+      #otherTelephone:
+      #ou:
+      #pager:
+      physicalDeliveryOfficeName: "{{ item.physical_delivery_office | default(omit) }}"
+      # postOfficeBox:
+      postalCode: "{{ item.zip_code | default(omit) }}"
+      # proxyAddresses:
+      sn: "{{ __surname | default(omit) }}"
+      st: "{{ item.state | default(omit) }}"
+      # streetAddress:
+      # telephoneNumber:
+      title: "{{ item.job_title | default(omit) }}"
+      uidNumber: "{{ item.id_number | default(omit) }}"
+      unixHomeDirectory: "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
+      url: "{{ item.urls | default(omit) }}"
+      userCertificate: []
+      wWWHomePage: "{{ item.internet_address | default(omit) }}"
+    state: exact
+    bind_dn: "cn=administrator,{{ rebeldream_user_dn }}"
+    bind_pw: "{{ samba_administrator_password }}"
+    start_tls: yes
+    server_uri: "ldap://{{ rebeldream_fqdn }}"
+  loop: "{{ domain_users }}"
+  vars:
+    __generated_username: "{{ __given_name[0] }}{{ __surname[0] | default(null) }}"
+    __username: "{{ item.username | default(__generated_username) }}"
+    __default_mail: "{{ item.username }}@{{ rebeldream_root_domain }}"
+    __mail: "{{ item.mail | default(__default_mail) }}"
+    __given_name: "{{ item.given_name  | default(item.username) }}"
+    __surname: "{{ item.surname | default(omit) }}"
+    #__initials: "{{ __given_name[0] | default(null) }}{{ item.middle_name[0] | default(null) }}{{ item.surname[0] | default(null) }}"
+    #__sn: "{% if item.surname is defined %}cn: {{ item.surname }}{% endif %}"
+    __dn: "{{ __given_name }}{% if item.surname is defined %} {{ __surname }}{% endif %}"
+  when:
+    - item.id_number is defined

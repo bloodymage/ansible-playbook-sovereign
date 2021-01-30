@@ -17,55 +17,57 @@ postfix_sasl_relay_files:
 
 postfix_local_user_maps:
   - username: webmaster
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: www
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: www-data
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: postmaster
-    email: postmaster@{{ rebeldream_root_domain }}
+    email: "postmaster@{{ rebeldream_root_domain }}"
   - username: mailer-daemon
-    email: postmaster@{{ rebeldream_root_domain }}
+    email: "postmaster@{{ rebeldream_root_domain }}"
   - username: abuse
-    email: abuse@{{ rebeldream_root_domain }}
+    email: "abuse@{{ rebeldream_root_domain }}"
   - username: nobody
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: hostmaster
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: usenet
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: news
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: ftp
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: noc
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: security
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
   - username: clamav
-    email: webmaster@{{ rebeldream_root_domain }}
+    email: "webmaster@{{ rebeldream_root_domain }}"
 
 postfix_virtual_mailbox_users:
-  - username: webmaster@{{ rebeldream_root_domain }}
-    email: webmaster@{{ rebeldream_root_domain }}
-  - username: postmaster@{{ rebeldream_root_domain }}
-    email: postmaster@{{ rebeldream_root_domain }}
-  - username: abuse@{{ rebeldream_root_domain }}
-    email: abuse@{{ rebeldream_root_domain }}
+  - username: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ rebeldream_root_domain }}"
+  - username: "postmaster@{{ rebeldream_root_domain }}"
+    email: "postmaster@{{ rebeldream_root_domain }}"
+  - username: "abuse@{{ rebeldream_root_domain }}"
+    email: "abuse@{{ rebeldream_root_domain }}"
 
 postfix_virtual_mailbox_user_aliases:
-  - alias: webmaster@{{ rebeldream_root_domain }}
-    email: webmaster@{{ rebeldream_root_domain }}
-  - alias: postmaster@{{ rebeldream_root_domain }}
-    email: postmaster@{{ rebeldream_root_domain }}
-  - alias: abuse@{{ rebeldream_root_domain }}
-    email: abuse@{{ rebeldream_root_domain }}
-  - alias: root@{{ rebeldream_root_domain }}
-    email: webmaster@{{ rebeldream_root_domain }}
-  - alias: root@mail.{{ rebeldream_root_domain }}
-    email: webmaster@{{ rebeldream_root_domain }}
-  - alias: hostmaster@{{ rebeldream_root_domain }}
-    email: webmaster@{{ rebeldream_root_domain }}
+  - alias: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ rebeldream_root_domain }}"
+  - alias: "postmaster@{{ rebeldream_root_domain }}"
+    email: "postmaster@{{ rebeldream_root_domain }}"
+  - alias: "abuse@{{ rebeldream_root_domain }}"
+    email: "abuse@{{ rebeldream_root_domain }}"
+  - alias: "root@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ rebeldream_root_domain }}"
+  - alias: "root@mail.{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ rebeldream_root_domain }}"
+  - alias: "hostmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ rebeldream_root_domain }}"
+  - alias: "@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ rebeldream_root_domain }}"
 
 postfix_canonical_mappings:
   - origin: "www-data@{{ rebeldream_fqdn }}"

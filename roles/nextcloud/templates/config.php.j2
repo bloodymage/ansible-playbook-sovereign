@@ -7,9 +7,9 @@ $CONFIG = array (
   array (
     0 => '{{ item.name }}',
   ),
-  'datadirectory' => '{{ nextcloud_data_directory }}',
+  'datadirectory' => '{{ nextcloud_data_directory }}/{{ item.name }}/data',
   'dbtype' => 'mysql',
-  'version' => '20.0.0.9',
+  'version' => '{{ nextcloud_version }}',
   'overwrite.cli.url' => 'https://{{ item.name }}',
   'dbname' => '{{ item.db_name }}',
   'dbhost' => '{{ item.db_server }}',
