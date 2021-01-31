@@ -386,7 +386,6 @@
   loop: "{{ users }}"
   become: yes
   when:
-    - item.ssh_access_cert is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
   tags:
     - users
