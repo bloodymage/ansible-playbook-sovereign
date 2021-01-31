@@ -5,3 +5,6 @@ packages:
   - freeradius-utils
 
 krb5_realm: "{{ ansible_domain | upper }}"
+
+freeradius_user: root
+freeradius_group: root

@@ -61,10 +61,10 @@
 # Note that there is NO 'Fall-Through' attribute, so the user will not
 # be given any additional resources.
 #
-#DEFAULT	Group == "disabled", Auth-Type := Reject
-#		Reply-Message = "Your account has been disabled."
-#
+DEFAULT	Group == "disabled", Auth-Type := Reject
+		Reply-Message = "Your account has been disabled."
 
+DEFAULT Auth-Type := PAM
 #
 # This is a complete entry for "steve". Note that there is no Fall-Through
 # entry so that no DEFAULT entry will be used, and the user will NOT

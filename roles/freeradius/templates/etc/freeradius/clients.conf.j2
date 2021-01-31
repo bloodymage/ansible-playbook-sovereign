@@ -1,0 +1,66 @@
+# {{ ansible_managed }}
+
+{% for client in freeradius_clients -%}
+  client {{ client.name }} {
+  ipaddr = {{ client.ip_address }}
+  {% if client.protocol is defined -%}
+    proto = {{ client.protocol }}
+  {% endif %}
+  nas_type = other
+  secret = {{ client.secret }}
+  }
+
+{% endfor %}
+
+
+client localhost {
+  ipaddr = 127.0.0.1
+  proto = *
+  require_message_authenticator = no
+  nas_type = other
+    secret = testing123
+
+  limit {
+    max_connections = 16
+          lifetime = 0
+          idle_timeout = 30
+              }
+    }
+
+client localhost_ipv6 {
+  ipv6addr = ::1
+    secret = testing123
+
+    }
+
+
+client cerberus {
+  ipaddr    = 10.0.0.1
+  nas_type = other
+    secret = 3AHzjIZX19kpZADUOiypLbwz59z3wEL17CJQ5N
+  }
+
+client aether {
+  ipaddr    = 10.0.0.41
+  nas_type = other
+    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
+  }
+
+client chaos {
+  ipaddr    = 10.0.0.42
+  nas_type = other
+    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
+  }
+
+client lelantos {
+  ipaddr    = 10.0.0.43
+  nas_type = other
+    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
+  }
+
+client uranus {
+  ipaddr    = 10.0.0.44
+  nas_type = other
+    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
+  }
+

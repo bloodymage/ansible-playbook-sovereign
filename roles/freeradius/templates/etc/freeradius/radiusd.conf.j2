@@ -1,0 +1,90 @@
+# {{ ansible_managed }}
+
+prefix = /usr
+exec_prefix = /usr
+sysconfdir = /etc
+localstatedir = /var
+sbindir = ${exec_prefix}/sbin
+logdir = /var/log/freeradius
+raddbdir = /etc/freeradius/3.0
+radacctdir = ${logdir}/radacct
+
+name = freeradius
+
+confdir = ${raddbdir}
+modconfdir = ${confdir}/mods-config
+certdir = ${confdir}/certs
+cadir   = ${confdir}/certs
+run_dir = ${localstatedir}/run/${name}
+db_dir = ${raddbdir}
+libdir = /usr/lib/freeradius
+pidfile = ${run_dir}/${name}.pid
+correct_escapes = true
+#panic_action = "gdb %e %p"
+#panic_action = "gdb -silent -x ${raddbdir}/panic.gdb %e %p 2>&1 | tee ${logdir}/gdb-${name}-%p.log"
+
+max_request_time = 30
+cleanup_delay = 5
+max_requests = 16384
+hostname_lookups = no
+
+log {
+destination = files
+colourise = yes
+file = ${logdir}/radius.log
+syslog_facility = daemon
+stripped_names = no
+auth = no
+auth_badpass = no
+auth_goodpass = no
+#	msg_goodpass = ""
+#	msg_badpass = ""
+msg_denied = "You are already logged in - access denied"
+}
+
+checkrad = ${sbindir}/checkrad
+
+security {
+#	chroot = /path/to/chroot/directory
+user = {{ freeradius_user }}
+group = {{ freeradius_group }}
+allow_core_dumps = no
+max_attributes = 200
+reject_delay = 1
+status_server = yes
+}
+
+proxy_requests  = yes
+$INCLUDE proxy.conf
+$INCLUDE clients.conf
+thread pool {
+start_servers = 5
+max_servers = 32
+min_spare_servers = 3
+max_spare_servers = 10
+#	max_queue_size = 65536
+max_requests_per_server = 0
+auto_limit_acct = no
+}
+
+#$INCLUDE trigger.conf
+modules {
+$INCLUDE mods-enabled/
+}
+
+instantiate {
+#	update reply {
+#		Filter-Id := "%{redundant_sql: ... }"
+#	}
+
+#redundant redundant_sql {
+#	sql1
+#	sql2
+#}
+}
+
+policy {
+$INCLUDE policy.d/
+}
+
+$INCLUDE sites-enabled/
