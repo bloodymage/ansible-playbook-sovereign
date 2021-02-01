@@ -1,66 +1,79 @@
 # {{ ansible_managed }}
 
-{% for client in freeradius_clients -%}
+{% if freeradius_test_clients %}
+{% for client in __freeradius_test_clients -%}
   client {{ client.name }} {
-  ipaddr = {{ client.ip_address }}
+  {% if client.ip_address is defined -%}
+    ipaddr = {{ client.ip_address }}
+  {% endif -%}
+  {% if client.ipv6_address is defined -%}
+    ipv6addr = {{ client.ipv6_address }}
+  {% endif -%}
   {% if client.protocol is defined -%}
     proto = {{ client.protocol }}
-  {% endif %}
-  nas_type = other
+  {% endif -%}
+  {% if client.require_message_authenticator is defined -%}
+    require_message_authenticator = {{ client.require_message_authenticator }}
+  {% endif -%}
+  {% if client.nas_type is defined -%}
+    nas_type = {{ client.nas_type }}
+  {% else -%}
+    nas_type = other
+  {% endif -%}
+  secret = {{ client.secret }}
+  {% if client.limits is defined -%}
+    limit {
+    {% for limit in client.limits -%}
+      {% if limit.max_connections is defined -%}
+        max_connections = {{ limit.max_connections }}
+      {% endif -%}
+      {% if limit.lifetime is defined -%}
+        lifetime = {{ limit.lifetime }}
+      {% endif -%}
+      {% if limit.idle_timeout is defined -%}
+        idle_timeout = {{ limit.idle_timeout }}
+      {% endif -%}
+    {%- endfor -%}
+    }
+    {% endif -%}
+  }
+
+{% endfor %}
+{% endif %}
+{% for client in freeradius_host_clients -%}
+  client {{ client.name }} {
+  {% if client.ip_address is defined -%}
+    ipaddr    = {{ client.ip_address }}
+  {% endif -%}
+  {% if client.ipv6_address is defined -%}
+    ipv6addr = {{ client.ipv6_address }}
+  {% endif -%}
+  {% if client.protocol is defined -%}
+    proto = {{ client.protocol }}
+  {% endif -%}
+  {% if client.nas_type is defined -%}
+    nas_type = {{ client.nas_type }}
+  {% else -%}
+    nas_type = other
+  {% endif -%}
   secret = {{ client.secret }}
   }
 
 {% endfor %}
-
-
-client localhost {
-  ipaddr = 127.0.0.1
-  proto = *
-  require_message_authenticator = no
-  nas_type = other
-    secret = testing123
-
-  limit {
-    max_connections = 16
-          lifetime = 0
-          idle_timeout = 30
-              }
-    }
-
-client localhost_ipv6 {
-  ipv6addr = ::1
-    secret = testing123
-
-    }
-
-
-client cerberus {
-  ipaddr    = 10.0.0.1
-  nas_type = other
-    secret = 3AHzjIZX19kpZADUOiypLbwz59z3wEL17CJQ5N
+{% if groups['wifi_access_points'] is defined -%}
+{% for client in groups['wifi_access_points'] -%}
+  client {{ client }} {
+  ipaddr    = {{ hostvars[client]['ansible_host'] }}
+  {% if hostvars[client]['ansible_default_ipv6'] is defined -%}
+    ipv6addr = {{ hostvars[client]['ansible_default_ipv6'] }}
+  {% endif -%}
+  {% if hostvars[client].nas_type is defined -%}
+    nas_type = {{ hostvars[client].nas_type }}
+  {% else -%}
+    nas_type = other
+  {% endif -%}
+  secret = {{ freeradius_wifi_eap_password }}
   }
 
-client aether {
-  ipaddr    = 10.0.0.41
-  nas_type = other
-    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
-  }
-
-client chaos {
-  ipaddr    = 10.0.0.42
-  nas_type = other
-    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
-  }
-
-client lelantos {
-  ipaddr    = 10.0.0.43
-  nas_type = other
-    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
-  }
-
-client uranus {
-  ipaddr    = 10.0.0.44
-  nas_type = other
-    secret = emFyKeigJYhDThOTPebIH90nyBJQPesQgHyrWR5h
-  }
-
+{% endfor %}
+{% endif %}

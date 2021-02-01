@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+
+{{ item.name }} {
+{% if item.options is defined %}
+{% for option in item.options %}
+  {{ option.name }} = {{ option.value }}
+{% endfor %}
+{% endif %}
+
+{% if item.options_group is defined %}
+{% for option in item.options_group %}
+  {{ option.name }} {
+  {% for key in option.options %}
+    {% if key.value_group is defined -%}
+      {{ key.name }} {
+      {% for key2 in key.value_group -%}
+        {{ key2.name }} = {{ key2.value }}
+      {% endfor %}
+      }
+    {% else -%}
+      {{ key.name }} = {{ key.value }}
+    {% endif -%}
+  {% endfor -%}
+  }
+
+{% endfor -%}
+{% endif -%}
+}
+

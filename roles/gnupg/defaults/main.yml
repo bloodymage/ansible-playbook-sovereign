@@ -3,3 +3,4 @@
 packages:
   - gnupg
   - parcimonie
+  - dirmngr

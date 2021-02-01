@@ -27,14 +27,47 @@
         state: present
       become: yes
       notify: restart freeradius
-      tags:
-        - freeradius
-        - freeradius_debug
-        - freeradius-debug
-        - install-packages
 
 # ==================================================================================================
 #
 # Task
 #
 # ==================================================================================================
+- name: "Ensure we have a password for Wifi EAP"
+  ansible.builtin.set_fact:
+    freeradius_wifi_eap_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ rebeldream_domain }}/services/freeradius/wifi_eap_password"
+    __password_length: "length={{ rebeldream_password_length }}"
+    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  become: no
+  #changed_when:
+  #  - freeradius_wifi_eap_password != "password"
+  when:
+    - freeradius_wifi_eap_password == "password"
+    - groups['wifi_access_points'] is defined
+
+- name: "Install mods-available configuration files"
+  ansible.builtin.template:
+    src: "etc/freeradius/mods-available/mods.j2"
+    dest: "/etc/freeradius/3.0/mods-available/{{ item.name }}"
+    owner: root
+    group: freerad
+    mode: "{{ item.mode | default('0640') }}"
+  become: yes
+  notify: restart freeradius
+  loop: "{{ freeradius_mods }}"
+
+- name: "Install main configuration files"
+  ansible.builtin.template:
+    src: "etc/freeradius/{{ item.name }}.j2"
+    dest: "/etc/freeradius/3.0/{{ item.name }}"
+    owner: root
+    group: freerad
+    mode: "{{ item.mode | default('0640') }}"
+  become: yes
+  notify: restart freeradius
+  loop: "{{ freeradius_conf_files }}"

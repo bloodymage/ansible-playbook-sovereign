@@ -8,3 +8,221 @@ krb5_realm: "{{ ansible_domain | upper }}"
 
 freeradius_user: root
 freeradius_group: root
+freeradius_test_clients: no
+
+freeradius_mods:
+  - name: eap
+    options:
+      - name: default_eap_type
+        value: "mschapv2"
+      - name: timer_expire
+        value: "60"
+      - name: ignore_unknown_eap_types
+        value: "no"
+      - name: cisco_accounting_username_bug
+        value: "no"
+      - name: max_sessions
+        value: "${max_requests}"
+    options_group:
+      - name: "md5"
+        options: []
+      # - name: "pwd"
+      #   options:
+      #     - name: "group"
+      #       value: 19
+      #     - name: "server_id"
+      #       value: "theserver@example.com"
+      #     - name: "fragment_size"
+      #       value: "1024"
+      #     - name: "virtual_server"
+      #       value: "inner-tunnel"
+      - name: "leap"
+        options: []
+      - name: "gtc"
+        options:
+          - name: "auth_type"
+            value: "PAP"
+      - name: "tls-config tls-common"
+        options:
+          #- name: "private_key_password"
+          #  value: "{{ tls_host_password }}"
+          - name: "private_key_file"
+            value: "/etc/ssl/private/{{ rebeldream_fqdn }}.key"
+          - name: certificate_file
+            value: "/etc/ssl/certs/{{ rebeldream_fqdn }}.pem"
+          - name: "ca_file"
+            value: "{{ rebeldream_component_ca_file }}"
+          # - name:	"auto_chain"
+          #   value:  "yes"
+          # - name:	"psk_identity"
+          #   value: "test"
+          # - name: "psk_hexphrase"
+          #   value: "036363823"
+          - name: "dh_file"
+            value: "/etc/ssl/dhparams/{{ rebeldream_fqdn }}.pem"
+          # - name: "random_file"
+          #   value: "/dev/urandom"
+          # - name: "fragment_size"
+          #   value: 1024
+          # - name: "include_length"
+          #   value: "yes"
+          # - name: "check_crl"
+          #   value: "yes"
+          # - name: "check_all_crl"
+          #   value: "yes"
+          - name: ca_path
+            value: "${cadir}"
+            #		allow_expired_crl = no
+            #	check_cert_issuer = "/C=GB/ST=Berkshire/L=Newbury/O=My Company Ltd"
+            #	check_cert_cn = %{User-Name}
+          - name: cipher_list
+            value: "DEFAULT"
+          - name: cipher_server_preference
+            value: "no"
+            #		disable_tlsv1_2 = no
+            #		disable_tlsv1_1 = no
+            #		disable_tlsv1 = no
+            #		tls_min_version = "1.0"
+            #		tls_max_version = "1.3"
+          - name: ecdh_curve
+            value: "prime256v1"
+          - name: "cache"
+            value_group:
+              - name: "lifetime"
+                value: "24"
+                #name = "EAP module"
+                #persist_dir = "${logdir}/tlscache"
+          - name: verify
+            value_group: []
+            #  - name: "skip_if_ocsp_okno"
+            #		 value: "no"
+            #	 - name: tmpdir
+            #    value: "/tmp/radiusd"
+            #	 - name: client
+            #    value: "/path/to/openssl verify -CApath ${..ca_path} %{TLS-Client-Cert-Filename}"
+          - name:	ocsp
+            value_group:
+              - name: enable
+                value: "no"
+              - name: override_cert_url
+                value: "yes"
+              # - name:	"url"
+              #   value: "http://127.0.0.1/ocsp/"
+              # - name: use_nonce
+              #   value: "yes"
+              # - name: "timeout"
+              #   value: "0"
+              # - name: "softfail"
+              #   value: "no"
+      - name: tls
+        options:
+          - name: tls
+            value: "tls-common"
+          # - name:	virtual_server
+          #   value: "check-eap-tls"
+      - name: "ttls"
+        options:
+          - name: "tls"
+            value: tls-common
+          - name: default_eap_type
+            value: md5
+          - name: copy_request_to_tunnel
+            value: "no"
+          - name: "use_tunneled_reply"
+            value: "no"
+          - name: virtual_server
+            value: "inner-tunnel"
+          # - name:	include_length
+          #   value: "yes"
+          # - name:	require_client_cert
+          #   value: yes
+      - name: "peap"
+        options:
+          - name: "tls"
+            value: "tls-common"
+          - name:	default_eap_type
+            value: "mschapv2"
+          - name:	copy_request_to_tunnel
+            value: "no"
+          # - name:	"proxy_tunneled_request_as_eap"
+          #   value: yes
+          - name:	virtual_server
+            value: "inner-tunnel"
+          # - name:	soh
+          #   value: "yes"
+          # - name: "soh_virtual_server"
+          #   value: "soh-server"
+          # - name: "require_client_cert"
+          #   value: "yes"
+      - name:	mschapv2
+        options: []
+          # - name: send_error
+          #   value: "no"
+          # - name:	"identity"
+          #   value: "FreeRADIUS"
+      # - name:	fast
+      #   options: []
+
+  - name: mschap
+    options:
+      - name: winbind_username
+        value: "%{mschap:User-Name}"
+      - name: winbind_domain
+        value: "%{mschap:NT-Domain}"
+    options_group:
+      - name: pool
+        options:
+          - name: start
+            value: "${thread[pool].start_servers}"
+          - name: min
+            value: "${thread[pool].min_spare_servers}"
+          - name: max
+            value: "${thread[pool].max_servers}"
+          - name: spare
+            value: "${thread[pool].max_spare_servers}"
+          - name: uses
+            value: "0"
+          - name: retry_delay
+            value: "30"
+          - name: lifetime
+            value: "86400"
+          - name: cleanup_interval
+            value: "300"
+      - name: passchange
+        options: []
+
+freeradius_wifi_eap_password: "password"
+freeradius_testing_password: "password"
+freeradius_host_password: "password"
+
+freeradius_host_clients: []
+
+__freeradius_test_clients:
+  - name: localhost_ipv4
+    ip_address: "127.0.0.1"
+    protocol: "*"
+    require_message_authenticator: "no"
+    nas_type: "other"
+    secret: "{{ freeradius_testing_password }}"
+    limits:
+      - max_connections: 16
+      - lifetime: 0
+      - idle_timeout: 30
+  - name: localhost_ipv6
+    ipv6_address: "::1"
+    secret: "{{ freeradius_testing_password }}"
+  # - name: localhost
+  #   ip_address: "127.0.0.1"
+  #   ipv6_address: "::1"
+  #   protocol: "*"
+  #   require_message_authenticator: "no"
+  #   nas_type: "other"
+  #   secret: "{{ freeradius_testing_password }}"
+  #   limits:
+  #     - max_connections: 16
+  #     - lifetime: 0
+  #     - idle_timeout: 30
+
+freeradius_conf_files:
+  - name: "radiusd.conf"
+  - name: "clients.conf"

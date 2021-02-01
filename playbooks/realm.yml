@@ -115,6 +115,8 @@
         - samba-domain-user-certs
         - recreate-realm
 
-# - hosts: freeradius_servers
-#   roles:
-#     - role: bloodymage.rebeldream.freeradius
+- hosts: freeradius_servers
+  roles:
+    - role: bloodymage.rebeldream.freeradius
+      tags:
+        - freeradius

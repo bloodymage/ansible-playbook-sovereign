@@ -74,6 +74,18 @@
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
 
+- name: "Restart Freeradius"
+  ansible.builtin.service:
+    name: freeradius
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+    - "restart tls"
+    - "restart freeradius"
+  when:
+    - inventory_hostname in groups['freeradius_servers'] | default([])
+
 - name: "Restart Keycloak"
   ansible.builtin.service:
     name: keycloak
