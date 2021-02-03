@@ -32,6 +32,16 @@ Some smaller goals that I have for this project is minimizing the variables I ha
 
 Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
 
+### Name
+
+In the spirit of freedom to control _your_ data I initially named this project "Rebel Dream" after the Star Wars [starship](https://starwars.fandom.com/wiki/Rebel_Dream) of the same name.
+
+I wanted the freedom to tinker and have my systems work the way I wanted. I was tired of systems and applications I used and liked being killed off. I wanted to be self sufficient. I felt that in a way, the name captures that feeling.
+
+Other names that feel appropriate: Sovereign, Self-Hosted, are either already in use, or while they clearly indicate what this project is, don't quite capture the spirit behind this project.
+
+That said, "Rebel dream" doesn't quite feel right either.
+
 ## Installation
 ### Ansible Galaxy
 ### Github
