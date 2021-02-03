@@ -40,7 +40,7 @@ I wanted the freedom to tinker and have my systems work the way I wanted. I was 
 
 Other names that feel appropriate: Sovereign, Self-Hosted, are either already in use, or while they clearly indicate what this project is, don't quite capture the spirit behind this project.
 
-That said, "Rebel dream" doesn't quite feel right either.
+That said, "Rebel dream" doesn't quite feel right either.  Looking for a new name: See issue [#238](https://github.com/bloodymage/ansible-collection-rebeldream/issues/238), feel free to comment.
 
 ## Installation
 ### Ansible Galaxy
