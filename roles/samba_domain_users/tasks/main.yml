@@ -101,7 +101,7 @@
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  loop: "{{ domain_groups + domain_users + __domain_system_users + __samba_domain_groups }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
@@ -230,6 +230,35 @@
     - item.account_expire is defined
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
+
+- name: "Get Group Membership for the ansiblemanaged group."
+  ansible.builtin.command:
+    cmd: >
+      samba-tool group listmembers ansiblemanaged
+  register: existing_group_list
+  delegate_to: "{{ __samba_schema_master }}"
+  become: yes
+  run_once: yes
+  when:
+    - group.groupname is defined
+
+- name: "Add new members to ansiblemanaged group."
+  ansible.builtin.command:
+    cmd: >
+      samba-tool group addmembers ansiblemanaged "{{ __username }}"
+      --username Administrator
+      --password "{{ samba_administrator_password }}"
+  loop: "{{ domain_users }}"
+  delegate_to: "{{ __samba_schema_master }}"
+  become: yes
+  run_once: yes
+  vars:
+    __username: "{{ item.username }}"
+  when:
+    - item.given_name is defined
+    - item.surname is defined
+    - item.id_number is defined
+    - __username not in existing_user_list.stdout_lines
 
 - name: "Set Group Membership"
   include: group_membership.yml
