@@ -1,0 +1,79 @@
+# {{ ansible_managed }}
+
+{% if freeradius_test_clients %}
+{% for client in __freeradius_test_clients -%}
+  client {{ client.name }} {
+  {% if client.ip_address is defined -%}
+    ipaddr = {{ client.ip_address }}
+  {% endif -%}
+  {% if client.ipv6_address is defined -%}
+    ipv6addr = {{ client.ipv6_address }}
+  {% endif -%}
+  {% if client.protocol is defined -%}
+    proto = {{ client.protocol }}
+  {% endif -%}
+  {% if client.require_message_authenticator is defined -%}
+    require_message_authenticator = {{ client.require_message_authenticator }}
+  {% endif -%}
+  {% if client.nas_type is defined -%}
+    nas_type = {{ client.nas_type }}
+  {% else -%}
+    nas_type = other
+  {% endif -%}
+  secret = {{ client.secret }}
+  {% if client.limits is defined -%}
+    limit {
+    {% for limit in client.limits -%}
+      {% if limit.max_connections is defined -%}
+        max_connections = {{ limit.max_connections }}
+      {% endif -%}
+      {% if limit.lifetime is defined -%}
+        lifetime = {{ limit.lifetime }}
+      {% endif -%}
+      {% if limit.idle_timeout is defined -%}
+        idle_timeout = {{ limit.idle_timeout }}
+      {% endif -%}
+    {%- endfor -%}
+    }
+    {% endif -%}
+  }
+
+{% endfor %}
+{% endif %}
+{% for client in freeradius_host_clients -%}
+  client {{ client.name }} {
+  {% if client.ip_address is defined -%}
+    ipaddr    = {{ client.ip_address }}
+  {% endif -%}
+  {% if client.ipv6_address is defined -%}
+    ipv6addr = {{ client.ipv6_address }}
+  {% endif -%}
+  {% if client.protocol is defined -%}
+    proto = {{ client.protocol }}
+  {% endif -%}
+  {% if client.nas_type is defined -%}
+    nas_type = {{ client.nas_type }}
+  {% else -%}
+    nas_type = other
+  {% endif -%}
+  secret = {{ client.secret }}
+  }
+
+{% endfor %}
+{% if groups['wifi_access_points'] is defined -%}
+{% for client in groups['wifi_access_points'] -%}
+  client {{ client }} {
+  ipaddr    = {{ hostvars[client]['ansible_host'] }}
+  {% if hostvars[client]['ansible_default_ipv6'] is defined -%}
+    ipv6addr = {{ hostvars[client]['ansible_default_ipv6'] }}
+  {% endif -%}
+  {% if hostvars[client].nas_type is defined -%}
+    nas_type = {{ hostvars[client].nas_type }}
+  {% else -%}
+    nas_type = other
+  {% endif -%}
+  secret = {{ freeradius_wifi_eap_password }}
+  }
+
+{% endfor %}
+{% endif %}

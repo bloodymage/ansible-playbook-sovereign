@@ -42,23 +42,23 @@ changetype: {{ item.change_type }}
 {% if item.object_category is defined -%}
   objectCategory: {{ item.object_category }}
 {% endif %}
-{% if item.default_object_category is defined -%} 
-  defaultObjectCategory: {{ item.default_object_category }}  
-{% endif %} 
-{% if item.search_flags is defined -%} 
-  searchFlags: {{ item.search_flags }} 
-{% endif %} 
-{% if item.may_contain is defined -%} 
-  mayContain: {{ item.may_contain }} 
-{% endif %} 
-{% if item.schema_id_guid is defined -%} 
-  schemaIDGUID:{{ item.schema_id_guid }} 
-{% endif %} 
-{% if item.replace is defined -%} 
-  replace: {{ item.replace }} 
-{% endif %} 
-{% if item.auxiliary_class is defined -%} 
-{% for class in item.auxiliary_class %} 
-auxiliaryClass: {{ class }} 
-{% endfor %} 
-{% endif %} 
+{% if item.default_object_category is defined -%}
+  defaultObjectCategory: {{ item.default_object_category }}
+{% endif %}
+{% if item.search_flags is defined -%}
+  searchFlags: {{ item.search_flags }}
+{% endif %}
+{% if item.may_contain is defined -%}
+  mayContain: {{ item.may_contain }}
+{% endif %}
+{% if item.schema_id_guid is defined -%}
+  schemaIDGUID:{{ item.schema_id_guid }}
+{% endif %}
+{% if item.replace is defined -%}
+  replace: {{ item.replace }}
+{% endif %}
+{% if item.auxiliary_class is defined -%}
+{% for class in item.auxiliary_class -%}
+auxiliaryClass: {{ class }}
+{% endfor %}
+{% endif %}

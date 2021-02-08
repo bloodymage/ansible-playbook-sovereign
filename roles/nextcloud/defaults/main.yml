@@ -64,7 +64,7 @@ packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __packages_
 # PHP module pcntl (enables command interruption by pressing ctrl-c)
 
 nextcloud_public_gpg_key: "https://nextcloud.com/nextcloud.asc"
-nextcloud_version: "20.0.3"
+nextcloud_version: "20.0.6.1"
 nextcloud_source_url:
   - source: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2"
     file: "nextcloud-{{ nextcloud_version }}.tar.bz2"
@@ -81,7 +81,7 @@ nextcloud_upload_max_filesize: "512M"
 nextcloud_memory_limit: "512M"
 nextcloud_hsts_max_age: 15552000
 
-nextcloud_data_directory: "/srv/www-data/nextcloud"
+nextcloud_data_directory: "/srv/www-data"
 
 nextcloud_apps:
   - accessibility

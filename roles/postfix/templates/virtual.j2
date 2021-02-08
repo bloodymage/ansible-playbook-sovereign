@@ -18,3 +18,9 @@
   {{ key.alias }} {{ key.email }}
 {% endif %}
 {% endfor %}
+{# {% if inventory_hostname in groups['internal_zone'] -%} #}
+{# {% if postfix_catchall_user_alias is defined -%} #}
+{#   {{ postfix_catchall_user_alias.alias }} {{ postfix_catchall_user_alias.email }} #}
+{# {% endif %} #}
+{# {% endif %} #}
+

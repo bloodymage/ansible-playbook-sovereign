@@ -1,0 +1,474 @@
+# {{ ansible_managed }}
+
+server default {
+listen {
+	type = auth
+	ipaddr = *
+	port = 0
+#	interface = eth0
+#	clients = per_socket_clients
+	limit {
+	      max_connections = 16
+	      lifetime = 0
+	      idle_timeout = 30
+	}
+}
+
+listen {
+	ipaddr = *
+#	ipv6addr = ::
+	port = 0
+	type = acct
+#	interface = eth0
+#	clients = per_socket_clients
+
+	limit {
+#		max_pps = 0
+#		idle_timeout = 0
+#		lifetime = 0
+#		max_connections = 0
+	}
+}
+
+# IPv6 versions of the above - read their full config to understand options
+listen {
+	type = auth
+	ipv6addr = ::	# any.  ::1 == localhost
+	port = 0
+#	interface = eth0
+#	clients = per_socket_clients
+	limit {
+	      max_connections = 16
+	      lifetime = 0
+	      idle_timeout = 30
+	}
+}
+
+listen {
+	ipv6addr = ::
+	port = 0
+	type = acct
+#	interface = eth0
+#	clients = per_socket_clients
+
+	limit {
+#		max_pps = 0
+#		idle_timeout = 0
+#		lifetime = 0
+#		max_connections = 0
+	}
+}
+
+authorize {
+	filter_username
+#	filter_password
+	preprocess
+#	operator-name
+#	cui
+#	auth_log
+	chap
+	mschap
+	digest
+#	wimax
+#	IPASS
+	suffix
+#	ntdomain
+	eap {
+		ok = return
+#		updated = return
+	}
+
+#	unix
+	files
+	-sql
+#	smbpasswd
+	-ldap
+#	daily
+	expiration
+	logintime
+	pap
+#	Autz-Type Status-Server {
+#
+#	}
+}
+
+authenticate {
+	Auth-Type PAP {
+		pap
+	}
+	Auth-Type CHAP {
+		chap
+	}
+	Auth-Type MS-CHAP {
+		mschap
+	}
+	mschap
+	digest
+	pam
+#	Auth-Type LDAP {
+#		ldap
+#	}
+	eap
+#	Auth-Type eap {
+#		eap {
+#			handled = 1
+#		}
+#		if (handled && (Response-Packet-Type == Access-Challenge)) {
+#			attr_filter.access_challenge.post-auth
+#			handled  # override the "updated" code from attr_filter
+#		}
+#	}
+}
+
+
+preacct {
+	preprocess
+#	acct_counters64
+#	update request {
+#	  	&FreeRADIUS-Acct-Session-Start-Time = "%{expr: %l - %{%{Acct-Session-Time}:-0} - %{%{Acct-Delay-Time}:-0}}"
+#	}
+
+	acct_unique
+#	IPASS
+	suffix
+#	ntdomain
+
+	#
+	#  Read the 'acct_users' file
+	files
+}
+
+#
+#  Accounting.  Log the accounting data.
+#
+accounting {
+	#  Update accounting packet by adding the CUI attribute
+	#  recorded from the corresponding Access-Accept
+	#  use it only if your NAS boxes do not support CUI themselves
+#	cui
+	#
+	#  Create a 'detail'ed log of the packets.
+	#  Note that accounting requests which are proxied
+	#  are also logged in the detail file.
+	detail
+#	daily
+
+	#  Update the wtmp file
+	#
+	#  If you don't use "radlast", you can delete this line.
+	unix
+
+	#
+	#  For Simultaneous-Use tracking.
+	#
+	#  Due to packet losses in the network, the data here
+	#  may be incorrect.  There is little we can do about it.
+#	radutmp
+#	sradutmp
+
+	#  Return an address to the IP Pool when we see a stop record.
+#	main_pool
+
+	#
+	#  Log traffic to an SQL database.
+	#
+	#  See "Accounting queries" in mods-available/sql
+	-sql
+
+	#
+	#  If you receive stop packets with zero session length,
+	#  they will NOT be logged in the database.  The SQL module
+	#  will print a message (only in debugging mode), and will
+	#  return "noop".
+	#
+	#  You can ignore these packets by uncommenting the following
+	#  three lines.  Otherwise, the server will not respond to the
+	#  accounting request, and the NAS will retransmit.
+	#
+#	if (noop) {
+#		ok
+#	}
+
+	#  Cisco VoIP specific bulk accounting
+#	pgsql-voip
+
+	# For Exec-Program and Exec-Program-Wait
+	exec
+
+	#  Filter attributes from the accounting response.
+	attr_filter.accounting_response
+
+	#
+	#  See "Autz-Type Status-Server" for how this works.
+	#
+#	Acct-Type Status-Server {
+#
+#	}
+}
+
+
+#  Session database, used for checking Simultaneous-Use. Either the radutmp
+#  or rlm_sql module can handle this.
+#  The rlm_sql module is *much* faster
+session {
+#	radutmp
+
+	#
+	#  See "Simultaneous Use Checking Queries" in mods-available/sql
+#	sql
+}
+
+
+#  Post-Authentication
+#  Once we KNOW that the user has been authenticated, there are
+#  additional steps we can take.
+post-auth {
+	#
+	#  If you need to have a State attribute, you can
+	#  add it here.  e.g. for later CoA-Request with
+	#  State, and Service-Type = Authorize-Only.
+	#
+#	if (!&reply:State) {
+#		update reply {
+#			State := "0x%{randstr:16h}"
+#		}
+#	}
+
+	#
+	#  For EAP-TTLS and PEAP, add the cached attributes to the reply.
+	#  The "session-state" attributes are automatically cached when
+	#  an Access-Challenge is sent, and automatically retrieved
+	#  when an Access-Request is received.
+	#
+	#  The session-state attributes are automatically deleted after
+	#  an Access-Reject or Access-Accept is sent.
+	#
+	update {
+		&reply: += &session-state:
+	}
+
+	#  Get an address from the IP Pool.
+#	main_pool
+
+
+	#  Create the CUI value and add the attribute to Access-Accept.
+	#  Uncomment the line below if *returning* the CUI.
+#	cui
+
+	#
+	#  If you want to have a log of authentication replies,
+	#  un-comment the following line, and enable the
+	#  'detail reply_log' module.
+#	reply_log
+
+	#
+	#  After authenticating the user, do another SQL query.
+	#
+	#  See "Authentication Logging Queries" in mods-available/sql
+	-sql
+
+	#
+	#  Un-comment the following if you want to modify the user's object
+	#  in LDAP after a successful login.
+	#
+#	ldap
+
+	# For Exec-Program and Exec-Program-Wait
+	exec
+
+	#
+	#  Calculate the various WiMAX keys.  In order for this to work,
+	#  you will need to define the WiMAX NAI, usually via
+	#
+	#	update request {
+	#	       WiMAX-MN-NAI = "%{User-Name}"
+	#	}
+	#
+	#  If you want various keys to be calculated, you will need to
+	#  update the reply with "template" values.  The module will see
+	#  this, and replace the template values with the correct ones
+	#  taken from the cryptographic calculations.  e.g.
+	#
+	# 	update reply {
+	#		WiMAX-FA-RK-Key = 0x00
+	#		WiMAX-MSK = "%{EAP-MSK}"
+	#	}
+	#
+	#  You may want to delete the MS-MPPE-*-Keys from the reply,
+	#  as some WiMAX clients behave badly when those attributes
+	#  are included.  See "raddb/modules/wimax", configuration
+	#  entry "delete_mppe_keys" for more information.
+	#
+#	wimax
+
+
+	#  If there is a client certificate (EAP-TLS, sometimes PEAP
+	#  and TTLS), then some attributes are filled out after the
+	#  certificate verification has been performed.  These fields
+	#  MAY be available during the authentication, or they may be
+	#  available only in the "post-auth" section.
+	#
+	#  The first set of attributes contains information about the
+	#  issuing certificate which is being used.  The second
+	#  contains information about the client certificate (if
+	#  available).
+#
+#	update reply {
+#	       Reply-Message += "%{TLS-Cert-Serial}"
+#	       Reply-Message += "%{TLS-Cert-Expiration}"
+#	       Reply-Message += "%{TLS-Cert-Subject}"
+#	       Reply-Message += "%{TLS-Cert-Issuer}"
+#	       Reply-Message += "%{TLS-Cert-Common-Name}"
+#	       Reply-Message += "%{TLS-Cert-Subject-Alt-Name-Email}"
+#
+#	       Reply-Message += "%{TLS-Client-Cert-Serial}"
+#	       Reply-Message += "%{TLS-Client-Cert-Expiration}"
+#	       Reply-Message += "%{TLS-Client-Cert-Subject}"
+#	       Reply-Message += "%{TLS-Client-Cert-Issuer}"
+#	       Reply-Message += "%{TLS-Client-Cert-Common-Name}"
+#	       Reply-Message += "%{TLS-Client-Cert-Subject-Alt-Name-Email}"
+#	}
+
+	#  Insert class attribute (with unique value) into response,
+	#  aids matching auth and acct records, and protects against duplicate
+	#  Acct-Session-Id. Note: Only works if the NAS has implemented
+	#  RFC 2865 behaviour for the class attribute, AND if the NAS
+	#  supports long Class attributes.  Many older or cheap NASes
+	#  only support 16-octet Class attributes.
+#	insert_acct_class
+
+	#  MacSEC requires the use of EAP-Key-Name.  However, we don't
+	#  want to send it for all EAP sessions.  Therefore, the EAP
+	#  modules put required data into the EAP-Session-Id attribute.
+	#  This attribute is never put into a request or reply packet.
+	#
+	#  Uncomment the next few lines to copy the required data into
+	#  the EAP-Key-Name attribute
+#	if (&reply:EAP-Session-Id) {
+#		update reply {
+#			EAP-Key-Name := &reply:EAP-Session-Id
+#		}
+#	}
+
+	#  Remove reply message if the response contains an EAP-Message
+	remove_reply_message_if_eap
+
+	#
+	#  Access-Reject packets are sent through the REJECT sub-section of the
+	#  post-auth section.
+	#
+	#  Add the ldap module name (or instance) if you have set
+	#  'edir_account_policy_check = yes' in the ldap module configuration
+	#
+	#  The "session-state" attributes are not available here.
+	#
+	Post-Auth-Type REJECT {
+		# log failed authentications in SQL, too.
+		-sql
+		attr_filter.access_reject
+
+		# Insert EAP-Failure message if the request was
+		# rejected by policy instead of because of an
+		# authentication failure
+		eap
+
+		#  Remove reply message if the response contains an EAP-Message
+		remove_reply_message_if_eap
+	}
+
+	#
+	#  Filter access challenges.
+	#
+	Post-Auth-Type Challenge {
+#		remove_reply_message_if_eap
+#		attr_filter.access_challenge.post-auth
+	}
+
+}
+
+#
+#  When the server decides to proxy a request to a home server,
+#  the proxied request is first passed through the pre-proxy
+#  stage.  This stage can re-write the request, or decide to
+#  cancel the proxy.
+#
+#  Only a few modules currently have this method.
+#
+pre-proxy {
+	# Before proxing the request add an Operator-Name attribute identifying
+	# if the operator-name is found for this client.
+	# No need to uncomment this if you have already enabled this in
+	# the authorize section.
+#	operator-name
+
+	#  The client requests the CUI by sending a CUI attribute
+	#  containing one zero byte.
+	#  Uncomment the line below if *requesting* the CUI.
+#	cui
+
+	#  Uncomment the following line if you want to change attributes
+	#  as defined in the preproxy_users file.
+#	files
+
+	#  Uncomment the following line if you want to filter requests
+	#  sent to remote servers based on the rules defined in the
+	#  'attrs.pre-proxy' file.
+#	attr_filter.pre-proxy
+
+	#  If you want to have a log of packets proxied to a home
+	#  server, un-comment the following line, and the
+	#  'detail pre_proxy_log' section, above.
+#	pre_proxy_log
+}
+
+#
+#  When the server receives a reply to a request it proxied
+#  to a home server, the request may be massaged here, in the
+#  post-proxy stage.
+#
+post-proxy {
+
+	#  If you want to have a log of replies from a home server,
+	#  un-comment the following line, and the 'detail post_proxy_log'
+	#  section, above.
+#	post_proxy_log
+
+	#  Uncomment the following line if you want to filter replies from
+	#  remote proxies based on the rules defined in the 'attrs' file.
+#	attr_filter.post-proxy
+
+	#
+	#  If you are proxying LEAP, you MUST configure the EAP
+	#  module, and you MUST list it here, in the post-proxy
+	#  stage.
+	#
+	#  You MUST also use the 'nostrip' option in the 'realm'
+	#  configuration.  Otherwise, the User-Name attribute
+	#  in the proxied request will not match the user name
+	#  hidden inside of the EAP packet, and the end server will
+	#  reject the EAP request.
+	#
+	eap
+
+	#
+	#  If the server tries to proxy a request and fails, then the
+	#  request is processed through the modules in this section.
+	#
+	#  The main use of this section is to permit robust proxying
+	#  of accounting packets.  The server can be configured to
+	#  proxy accounting packets as part of normal processing.
+	#  Then, if the home server goes down, accounting packets can
+	#  be logged to a local "detail" file, for processing with
+	#  radrelay.  When the home server comes back up, radrelay
+	#  will read the detail file, and send the packets to the
+	#  home server.
+	#
+	#  With this configuration, the server always responds to
+	#  Accounting-Requests from the NAS, but only writes
+	#  accounting packets to disk if the home server is down.
+	#
+#	Post-Proxy-Type Fail-Accounting {
+#			detail
+#	}
+}
+}

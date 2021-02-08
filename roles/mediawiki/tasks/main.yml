@@ -161,7 +161,7 @@
 #
 # ==================================================================================================
 - name: "Update Extensions"
-  command:
+  ansible.builtin.command:
     cmd: "git submodule update --init --recursive"
     chdir: "/srv/www/{{ item.name }}/w/extensions"
   loop: "{{ virtual_hosts }}"

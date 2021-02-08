@@ -30,9 +30,13 @@ Host *.{{ rebeldream_root_domain }}
   CertificateFile ~/.ssh/%u-cert.pub
 
 {% if inventory_hostname in groups['workstations'] %}
-{% if rebeldream_smart_card_login %}
+{% if rebeldream_smart_card_login -%}
   {% if openssh_github -%}
   Host github.com
+  PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+  {% endif %}
+  {% if openssh_github -%}
+  Host gitlab.com
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
   {% endif %}
 {% endif %}

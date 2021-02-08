@@ -32,8 +32,21 @@ Some smaller goals that I have for this project is minimizing the variables I ha
 
 Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
 
+### Name
+
+In the spirit of freedom to control _your_ data I initially named this project "Rebel Dream" after the Star Wars [starship](https://starwars.fandom.com/wiki/Rebel_Dream) of the same name.
+
+I wanted the freedom to tinker and have my systems work the way I wanted. I was tired of systems and applications I used and liked being killed off. I wanted to be self sufficient. I felt that in a way, the name captures that feeling.
+
+Other names that feel appropriate: Sovereign, Self-Hosted, are either already in use, or while they clearly indicate what this project is, don't quite capture the spirit behind this project.
+
+That said, "Rebel dream" doesn't quite feel right either.  Looking for a new name: See issue [#238](https://github.com/bloodymage/ansible-collection-rebeldream/issues/238), feel free to comment.
+
 ## Installation
 ### Ansible Galaxy
+
+TBD
+
 ### Github
 
 ```
@@ -41,6 +54,7 @@ mkdir -p ~/.ansible/collections/ansible_collections/bloodymage
 cd ~/.ansible/collections/ansible_collections/bloodymage
 git clone https://github.com/bloodymage/ansible-collection-rebeldream rebeldream
 ```
+
 ## Usage
 
 Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
@@ -172,6 +186,12 @@ Sovereign is a set of ansible playbooks to build and maintain your own private s
 - VPN
 - and more. 
 
+#### [Debops](https://docs.debops.org/en/master/) [DebOps Github](https://github.com/debops/debops)
+
+Your Debian-based data center in a box.
+
+The DebOps project is a set of Free and Open Source tools that let users bootstrap and manage an IT infrastructure based on Debian or Ubuntu operating systems. Ansible is used as the main configuration management platform. DebOps provides a collection of Ansible roles that manage various services, as well as a set of Ansible playbooks that tie them together in a highly integrated environment.
+
 ### Related Projects
 #### [Hearthminion](https://github.com/hearthminion/ansible-collection-hearthminion)
 
@@ -187,7 +207,6 @@ The Hearthminion ansible collection expands on this collection adding in new fea
 - [Awesome Self-Hosted](https://github.com/awesome-selfhosted/awesome-selfhosted)
 - [Reddit: Selfhosted](https://www.reddit.com/r/selfhosted/)
 - [Self-hosted Cookbook](https://github.com/tborychowski/self-hosted-cookbook/)
-- [Debops](https://docs.debops.org/en/master/) [DebOps Github](https://github.com/debops/debops)
 
 ## Contributing
 [How to Contribute](CONTRIBUTING.md)

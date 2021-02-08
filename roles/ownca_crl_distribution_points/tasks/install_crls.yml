@@ -17,3 +17,23 @@
   tags:
     - ownca-crl-distribution-points
     - ownca_crl_distribution_points
+
+- name: Copy CA Certs to server.
+  ansible.builtin.copy:
+    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    dest: "/srv/www/{{ vhost.name }}/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  loop:
+    - "{{ rebeldream_org_name }}-root-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
+    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+  become: yes
+  tags:
+    - ownca-crl-distribution-points
+    - ownca_crl_distribution_points
