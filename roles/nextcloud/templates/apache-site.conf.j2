@@ -41,6 +41,7 @@
   SSLEngine on
   SSLCertificateFile "{{ item.ssl_certificate_file }}"
   SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
+  SSLCertificateChainFile "{{ item.ssl_certificate_chain_file }}"
 
   ErrorLog ${APACHE_LOG_DIR}/{{ item.name }}/error.log
   CustomLog ${APACHE_LOG_DIR}/{{ item.name }}/access.log combined

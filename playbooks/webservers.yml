@@ -12,21 +12,18 @@
 #   roles:
 #     - role: bloodymage.rebeldream.nginx
 
-- hosts: web_servers
-  roles:
-    - role: bloodymage.rebeldream.mediawiki
-      tags:
-        - mediawiki
-        - mediawiki_debug
-        - mediawiki-debug
-    # - role: bloodymage.rebeldream.drush
-    # - role: bloodymage.rebeldream.drupal
-
+# ==================================================================================================
+#
+# This needs to go before the next group for all webservers because while this group definitely
+# depends on an ACME CA working, the next group may depend on an ACME CA working.
+#
+# ==================================================================================================
 - hosts: web_servers:&public_zone
   roles:
     - role: bloodymage.rebeldream.acmeca_challenge_site
       tags:
         - acmeca-challenge-site
+    - role: bloodymage.rebeldream.config_acmeca_environment
     - role: bloodymage.rebeldream.acmeca_host_certs
       tags:
         - acmeca_host_certs
@@ -38,4 +35,14 @@
       tags:
         - ownca-crl-distribution-points
         - ownca_crl_distribution_points
+
+- hosts: web_servers
+  roles:
+    - role: bloodymage.rebeldream.mediawiki
+      tags:
+        - mediawiki
+        - mediawiki_debug
+        - mediawiki-debug
+    # - role: bloodymage.rebeldream.drush
+    # - role: bloodymage.rebeldream.drupal
 
