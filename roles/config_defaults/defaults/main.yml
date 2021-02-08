@@ -395,6 +395,15 @@ domain_user_nextcloud:
 
 # ==================================================================================================
 #
+# Do not modify
+#
+# The following variables are defaults that can be modified via tags (eg, the
+# 'regenerate-private-key' will change '__acmeca_regenerate_private_key' to 'yes') or they are
+# constants that if changed will  cause this playbook to fail.
+#
+# ==================================================================================================
+# ==================================================================================================
+#
 # The following varibles are defaults that can be modified through tag usage
 #
 #
@@ -422,6 +431,17 @@ __rebeldream_zones:
     zone: internal
   - name: "{{ rebeldream_dmz_zone_name }}"
     zone: dmz
+
+__acmeca_regenerate_server_private_key: no
+__acmeca_regenerate_acme_account_private_key: no
+
+__letsencrypt_staging_directory: "acme-staging.api.letsencrypt.org/directory"
+__letsencrypt_production_directory: "acme-v02.api.letsencrypt.org/directory"
+__letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
+__letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
+__buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
+__buypass_production_directory: "https://api.buypass.com/acme/directory"
+
 
 # ==================================================================================================
 #
