@@ -66,8 +66,10 @@ postfix_virtual_mailbox_user_aliases:
     email: "webmaster@{{ rebeldream_root_domain }}"
   - alias: "hostmaster@{{ rebeldream_root_domain }}"
     email: "webmaster@{{ rebeldream_root_domain }}"
-  - alias: "@{{ rebeldream_root_domain }}"
-    email: "webmaster@{{ rebeldream_root_domain }}"
+
+postfix_catchall_user_alias:
+  alias: "@{{ rebeldream_root_domain }}"
+  email: "webmaster@{{ rebeldream_root_domain }}"
 
 postfix_canonical_mappings:
   - origin: "www-data@{{ rebeldream_fqdn }}"
