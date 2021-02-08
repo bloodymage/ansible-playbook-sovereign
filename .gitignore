@@ -1,0 +1,7 @@
+# Ansible
+
+*.retry
+ansible/releases/
+
+# Sphinx documentation
+docs/build/

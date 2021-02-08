@@ -2,3 +2,5 @@
 # defaults file for gnupg
 packages:
   - gnupg
+  - parcimonie
+  - dirmngr
