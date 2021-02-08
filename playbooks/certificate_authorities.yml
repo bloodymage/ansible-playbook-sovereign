@@ -1,8 +1,6 @@
 - hosts: certificate_authorities
   roles:
     - role: bloodymage.rebeldream.config_ownca_environment
-      tags:
-        - always
     - role: bloodymage.rebeldream.sshca
       tags:
         - sshca
