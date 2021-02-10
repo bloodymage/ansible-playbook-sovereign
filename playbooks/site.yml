@@ -18,6 +18,7 @@
 # 6. Configure database servers
 # 7. Configure webservers
 # 8. Configure mailservers
+# 9. Configure workstations
 #
 # ==================================================================================================
 - import_playbook: control.yml

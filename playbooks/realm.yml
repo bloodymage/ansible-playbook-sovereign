@@ -57,8 +57,6 @@
         - samba-domain-users-debug
         - recreate-realm
 
-# - hosts: freeipa_controllers
-
 # - hosts: openldap_servers
 #   roles:
 #     - role: bloodymage.rebeldream.openldap

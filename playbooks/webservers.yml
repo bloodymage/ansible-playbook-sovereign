@@ -8,9 +8,9 @@
   roles:
     - role: bloodymage.rebeldream.apache
 
-# - hosts: nginx_servers
-#   roles:
-#     - role: bloodymage.rebeldream.nginx
+- hosts: nginx_servers
+  roles:
+    - role: bloodymage.rebeldream.nginx
 
 # ==================================================================================================
 #
@@ -43,6 +43,5 @@
         - mediawiki
         - mediawiki_debug
         - mediawiki-debug
-    # - role: bloodymage.rebeldream.drush
-    # - role: bloodymage.rebeldream.drupal
-
+    - role: bloodymage.rebeldream.drush
+    - role: bloodymage.rebeldream.drupal
