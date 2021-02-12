@@ -51,7 +51,7 @@
   loop: "{{ polkit_sudo_groups }}"
   become: yes
   when:
-    - inventory_host in groups['workstations']
+    - inventory_hostname in groups['workstations']
   tags:
         - polkit
         - polkit_debug
