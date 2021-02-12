@@ -45,6 +45,44 @@
     mode: "0644"
   become: yes
 
+# - name: "Install config ldifs"
+#   ansible.builtin.copy:
+#     src: "{{ item }}"
+#     dest: "/etc/ldap/schema/{{ item }}"
+#     owner: root
+#     group: root
+#     mode: 0644
+#   become: yes
+#   loop:
+#     - collective.ldif
+#     - collective.schema
+#     - corba.ldif
+#     - corba.schema
+#     - core.ldif
+#     - core.schema
+#     - cosine.ldif
+#     - cosine.schema
+#     - duaconf.ldif
+#     - duaconf.schema
+#     - dyngroup.ldif
+#     - dyngroup.schema
+#     - gnupg-ldap-init.ldif
+#     - gnupg-ldap-schema.ldif
+#     - inetorgperson.ldif
+#     - inetorgperson.schema
+#     - java.ldif
+#     - java.schema
+#     - misc.ldif
+#     - misc.schema
+#     - nis.ldif
+#     - nis.schema
+#     - openldap.ldif
+#     - openldap.schema
+#     - pmi.ldif
+#     - pmi.schema
+#     - ppolicy.ldif
+#     - ppolicy.schema
+
 - name: "Create Config Ldifs"
   ansible.builtin.template:
     src: "{{ item }}.j2"

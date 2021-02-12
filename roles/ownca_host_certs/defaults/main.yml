@@ -8,7 +8,8 @@ ownca_hosts_directory: "{{ ownca_directory }}/hosts"
 
 ownca_host_certs_directories:
   - name: private
-    mode: "0700"
+    mode: "{{ __ownca_private_key_dir_mode }}"
+    group: "{{ __ownca_private_key_dir_group }}"
   - name: csr
     mode: "0700"
   - name: pkcs12
@@ -43,3 +44,5 @@ ownca_generate_locally: no
 ownca_host_certs_pkcs12_password: "password"
 ownca_private_key_group: "root"
 ownca_private_key_mode: "0600"
+__ownca_private_key_dir_mode: "0700"
+__ownca_private_key_dir_group: "root"
