@@ -57,9 +57,11 @@
         - samba-domain-users-debug
         - recreate-realm
 
-# - hosts: openldap_servers
-#   roles:
-#     - role: bloodymage.rebeldream.openldap
+- hosts: openldap_servers
+  roles:
+    - role: bloodymage.rebeldream.openldap
+      tags:
+        - openldap
 
 - hosts: sssd
   roles:

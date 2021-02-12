@@ -14,64 +14,77 @@
       paths:
         - "vars"
   become: no
-  tags:
-    - openldap
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
-  tags:
-    - openldap
-    - install-packages
 
 # ==================================================================================================
 #
 #
 #
 # ==================================================================================================
-- name: Create Config Ldifs
-  template:
+- name: "Ensure ldap config dir exists"
+  ansible.builtin.file:
+    path: "/etc/ldap/schema"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: "Create basic ldap.conf"
+  ansible.builtin.template:
+    src: "ldap.conf.j2"
+    dest: "/etc/ldap/ldap.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+
+- name: "Create Config Ldifs"
+  ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/ldap/schema/{{ item }}"
+    owner: root
+    group: root
     mode: "0644"
   become: yes
   loop:
     - certinfo.ldif
-  tags:
-    - openldap
 
-- name: Create Backend schemas
-  template:
+- name: "Create Backend schemas"
+  ansible.builtin.template:
     src: backend.ldif.j2
     dest: "/etc/ldap/schema/backend_{{ item.name }}.ldif"
+    owner: root
+    group: root
     mode: "0644"
   become: yes
   loop: "{{ openldap_backends }}"
-  tags:
-    - openldap
 
-- name: Create module ldif
-  template:
+- name: "Create module ldif"
+  ansible.builtin.template:
     src: module.ldif.j2
     dest: "/etc/ldap/schema/module_{{ item }}.ldif"
+    owner: root
+    group: root
     mode: "0644"
   become: yes
   loop: "{{ openldap_modules }}"
-  tags:
-    - openldap
 
-# Add schema
-# ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/{{ item }}.ldif
-# loop:
-  # - certinfo
-  # - core
-  # - cosine
-  # - inetorgperson
-  # - misc
-  # - nis
-  # - module_rwm
-  # - gnupg-ldap-init
-  # - gnupg-ldap-schema
-
+- name: "Add schema to ldap"
+  ansible.builtin.command:
+    cmd: "ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/{{ item }}.ldif"
+  become: yes
+  loop:
+    - certinfo
+    - core
+    - cosine
+    - inetorgperson
+    - misc
+    - nis
+    - module_rwm
+    #- gnupg-ldap-init
+    #- gnupg-ldap-schema
