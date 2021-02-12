@@ -85,12 +85,15 @@
         - keycloak
         - recreate-realm
 
-# - hosts: samba_file_servers:workstations:&linux
-#   roles:
-#     - role: bloodymage.rebeldream.dotfiles
-#       vars:
-#         dotfiles_users: "{{ domain_users }}"
-#         dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
+# Need to add in specific file server(s) (ones with user home directories).
+- hosts: workstations:&linux
+  roles:
+    - role: bloodymage.rebeldream.dotfiles
+      vars:
+        dotfiles_users: "{{ domain_users }}"
+        dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
+      tags:
+        - dotfiles
 
 - hosts: samba_ownca_user_hosts
   roles:
