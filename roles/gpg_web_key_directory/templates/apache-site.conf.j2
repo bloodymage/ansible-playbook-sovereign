@@ -1,0 +1,48 @@
+# {{ ansible_managed }}
+<VirtualHost *:80>
+	ServerName {{ item.name }}
+
+  # ACME Certificate
+  DocumentRoot /srv/www/{{ item.name }}
+  <Directory /srv/www/{{ item.name }}/.well-known/>
+    Options +FollowSymLinks
+    AllowOverride All
+    <IfModule !mod_authz_core.c>
+      Order allow,deny
+      Allow from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+      Require all granted
+    </IfModule>
+    DirectoryIndex index.html
+</Directory>
+
+	Redirect / https://{{ item.name }}/
+</VirtualHost>
+
+<VirtualHost *:443>
+	ServerName {{ item.name }}
+	ServerAdmin webmaster@{{ item.name }}
+
+	DocumentRoot /srv/www/{{ item.name }}
+
+  <Directory /srv/www/{{ item.name }}>
+    Require all granted
+    AllowOverride All
+    Options FollowSymLinks MultiViews
+    <IfModule mod_headers.c>
+      Header always set Strict-Transport-Security "max-age={{ nextcloud_hsts_max_age }}; includeSubDomains"
+    </IfModule>
+    <IfModule mod_dav.c>
+      Dav off
+    </IfModule>
+  </Directory>
+
+  SSLEngine on
+  SSLCertificateFile "{{ item.ssl_certificate_file }}"
+  SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
+  SSLCertificateChainFile "{{ item.ssl_certificate_chain_file }}"
+
+  ErrorLog ${APACHE_LOG_DIR}/{{ item.name }}/error.log
+  CustomLog ${APACHE_LOG_DIR}/{{ item.name }}/access.log combined
+</VirtualHost>

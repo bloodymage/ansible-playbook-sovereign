@@ -103,6 +103,7 @@
     - nextcloud_debug
     - nextcloud-debug
     - websites
+
 - name: Check If Data Directory in default location
   ansible.builtin.stat:
     path: "/srv/www/{{ item.name }}/data"
