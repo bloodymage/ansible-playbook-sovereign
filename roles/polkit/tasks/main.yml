@@ -40,3 +40,19 @@
         - polkit
         - polkit_debug
         - polkit-debug
+
+- name: Install rules
+  ansible.builtin.template:
+    src: "sudo.j2"
+    dest: "/etc/polkit-1/localauthority.conf.d/81-bloodymage_blueman_{{ item }}.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ polkit_sudo_groups }}"
+  become: yes
+  when:
+    - inventory_hostname in groups['workstations']
+  tags:
+        - polkit
+        - polkit_debug
+        - polkit-debug
