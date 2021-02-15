@@ -22,3 +22,5 @@ ownca_user_pki_dirs:
     mode: "0700"
   - name: "ssh"
     mode: "0755"
+
+__user_cert_force_regeneration: no
