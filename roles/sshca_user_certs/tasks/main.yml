@@ -171,7 +171,7 @@
     dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
-    mode: "0644"
+    mode: "0600"
   loop: "{{ domain_users }}"
   become: yes
   when:
@@ -183,7 +183,7 @@
     dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}-cert.pub"
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
-    mode: "0644"
+    mode: "0600"
   loop: "{{ domain_users }}"
   become: yes
   when:
