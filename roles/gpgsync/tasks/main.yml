@@ -1,0 +1,20 @@
+---
+# tasks file for gpgsync
+# - name: Ensure destination directory exists
+#   ansible.builtin.file:
+#     path: "/srv/www/{{ rebeldream_root_domain }}/pgp/"
+#     state: directory
+#     owner: www-data
+#     group: www-data
+#     mode: 755
+#   become: yes
+
+- name: "Create keylist"
+  ansible.builtin.template:
+    src: "keylist.json.j2"
+    dest: "/tmp/keylist.json"
+    owner: www-data
+    group: www-data
+    mode: 644
+  become: yes
+    

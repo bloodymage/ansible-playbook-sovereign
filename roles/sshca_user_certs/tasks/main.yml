@@ -165,6 +165,12 @@
   when:
     - item.id_number is defined
 
+# Okay, it feels weird to need the public key as permissions "0600" instead of "0644" but if the
+# permissions were set to "0644" I got an error with the smart card saying the permissions weren't
+# correct, and ssh would not use the public key.
+#
+# There may be another issue involved, but setting the permissions to "0600" solves the problem
+# until further testing can be completed."
 - name: "Install SSH public key"
   ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"

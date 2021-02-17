@@ -12,3 +12,6 @@
     - role: bloodymage.rebeldream.chromium
       tags:
         - chromium
+    - role: bloodymage.rebeldream.gpgsync
+      tags:
+        - gpgsync
