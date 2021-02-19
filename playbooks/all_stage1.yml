@@ -3,7 +3,7 @@
 # First we gather some information
 #
 # ==================================================================================================
-- hosts: all:!public_zone
+- hosts: all:!public_zone:!virtual_host
   ignore_unreachable: yes
   roles:
     - role: bloodymage.rebeldream.config_environment
