@@ -311,7 +311,7 @@
 
 - name: "Cleanup acme challenge directory"
   ansible.builtin.file:
-    path: "/srv/www/{{ item.name }}/{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource'] }}"
+    path: "/srv/www/{{ item.name }}/.well-known/acme-challenge"
     state: absent
   loop: "{{ virtual_hosts }}"
   loop_control:
@@ -319,5 +319,3 @@
   become: yes
   when:
     - virtual_hosts is defined
-    - item.certificate == "acme"
-    - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined

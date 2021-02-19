@@ -157,7 +157,6 @@
     __user_csr_dir: "{{ __user_home_dir }}/{{ ownca_user_csr_dir }}"
     __id_number: "{{ item[0].id_number }}"
     __user_principal_name: "{{ item[0].username }}@{{ rebeldream_domain }}"
-    #__email: "{% if item[1].name == 'authentication' %}{{ __user_principal_name }}{% else %}{{ __public_email }}{%endif %}"
     __email: "{{ __public_email }}"
     __san_auth: "otherName:{{ msupn }};UTF8:{{ __user_principal_name }}"
     __san_email: "email:{{ __email }}"
@@ -185,23 +184,48 @@
     - item[0].id_number is defined
     - item[0].spns is not defined
 
-# - name: "Get identity certificate information"
-#   community.crypto.x509_certificate_info:
-#     path: "{{ ownca_identity_ca_file }}"
-#   register: identity_cert
+- name: "Get identity certificate information"
+  community.crypto.x509_certificate_info:
+    path: "{{ ownca_identity_ca_file }}"
+  become: no
+  register: identity_cert
+  delegate_to: localhost
 
-# TODO: Check if the path even exists
-# - name: "Get old certificate information"
-#   community.crypto.x509_certificate_info:
-#     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
-#   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
-#   register: certs
-#   when:
-#     - result.results is defined
-#     - item.backup_file is defined
+- name: "Check if user cert exists"
+  ansible.builtin.stat:
+    path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
+  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  delegate_to: localhost
+  become: no
+  register: cert_file
+  vars:
+    __username: "{{ item[0].username }}"
+  when:
+    - item[0].id_number is defined
+    - item[0].spns is not defined
 
-# TODO: Check if identity_cert serial_number matches the users authority_cert_serial_number.
-# If not, force regeneration.
+- name: "Get old certificate information"
+  community.crypto.x509_certificate_info:
+    path: "{{ item.stat.path }}"
+  loop: "{{ cert_file.results }}"
+  become: no
+  delegate_to: localhost
+  register: user_certs
+  when:
+    - item.stat is defined
+    - item.stat.exists is true
+    - item.stat.path is defined
+
+# Note: This will force regeneration if ANY user certificate's authority_key_identified doesn't
+# match the Identity CA's subject_key_identifier.
+- name: "Check if the user's cert authority_key_identifier matches the Identity CA's subject_key_identifier."
+  ansible.builtin.set_fact:
+    __user_cert_force_regeneration: yes
+  loop: "{{ user_certs.results }}"
+  become: no
+  when:
+    - item.authority_key_identifier is defined
+    - item.authority_key_identifier != identity_cert.subject_key_identifier
 
 - name: "Generate User Certificates"
   community.crypto.x509_certificate:
@@ -212,7 +236,7 @@
     ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     provider: ownca
     backup: yes
-    force: no
+    force: "{{ __user_cert_force_regeneration }}"
   become: no
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   delegate_to: localhost
