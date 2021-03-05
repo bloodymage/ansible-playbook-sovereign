@@ -15,7 +15,7 @@
 # Next we configure setting applicable to ALL hosts
 #
 # ==================================================================================================
-- hosts: all:!localhost:!tpeap:!printers:!public_zone
+- hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_ip_address
   strategy: linear
   roles:
     - role: bloodymage.rebeldream.hostname
@@ -39,7 +39,7 @@
 #   - Windows
 #
 # ==================================================================================================
-- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone
+- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
   strategy: linear
   roles:
     - role: bloodymage.rebeldream.sshca_host_certs
@@ -120,7 +120,7 @@
 # - Debian
 #
 # ==================================================================================================
-- hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone
+- hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
   roles:
     - role: bloodymage.rebeldream.aptitude
       tags:

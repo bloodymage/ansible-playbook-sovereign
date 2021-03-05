@@ -44,6 +44,26 @@
   ansible.builtin.command: /bin/bash -c "/usr/sbin/realm list"
   register: realm_list_results
 
+- name: "Set SSSD configuration"
+  ansible.builtin.set_fact:
+    sssd_ldap_user_certificate: "userCertificate;binary"
+    sssd_pam_cert_auth: yes
+    sssd_ad_gpo_access_control: "permissive"
+    #sssd_soft_crl: yes
+    #sssd_soft_ocsp: yes
+    #sssd_certificate_verification: "no_verification"
+    sssd_certificate_verification: "crl_file={{ rebeldream_identity_crl_file }}"
+    #sssd_debug_level: 1
+    sssd_systemd: yes
+    #sssd_pam_verbosity: 3
+    sssd_services: "nss, pam"
+    sssd_pkinit_pool: "DIR:/etc/ssl/certs/"
+    sssd_pkinit_identities: "PKCS11:opensc-pkcs11.so:slotid=0:certid=01"
+    sssd_default_ccache_name: "KEYRING:persistent:%{uid}"
+    sssd_enable_pkinit: "yes"
+  when:
+    - inventory_hostname in groups['workstations']
+
 - name: Debug realm_list_results
   ansible.builtin.debug:
     msg: "{{ realm_list_results.stdout }}"

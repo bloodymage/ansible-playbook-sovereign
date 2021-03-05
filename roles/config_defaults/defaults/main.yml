@@ -245,6 +245,7 @@ ownca_codesign_ca_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }
 ownca_codesign_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign-ca-chain.crt"
 ownca_codesign_crl_file: "{{ ownca_ca_crl_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-codesign.crl"
 
+rebeldream_ipv6_address: "{{ ansible_default_ipv6.address }}"
 
 # ==================================================================================================
 #
