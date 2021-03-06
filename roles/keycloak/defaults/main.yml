@@ -9,7 +9,7 @@ keycloak_keystore_alias: "{{ keycloak_name | lower }}"
 keycloak_service_description: "{{ keycloak_name | title }}"
 
 # Keycloak ...
-keycloak_version: "12.0.1"
+keycloak_version: "12.0.4"
 keycloak_host: 127.0.0.1
 keycloak_mode: "standalone"
 keycloak_keystore_type: "pkcs12"
@@ -20,14 +20,15 @@ keycloak_service_switches: "-b {{ keycloak_host }}"
 keycloak_admin_user: "admin"
 keycloak_admin_password: "password"
 keycloak_keystore_password: "password"
-keycloak_password_legnth: "{{ rebeldream_password_length }}"
+keycloak_password_length: "{{ rebeldream_password_length }}"
 keycloak_loglevel: "INFO"
 keycloak_hostname_verification_policy: "ANY" #Default to "WILDCARD"
 
 # Directories
-keycloak_config_dir: "{{ keycloak_home }}/{{ keycloak_mode }}/configuration"
-keycloak_binary_dir: "{{ keycloak_home }}/bin"
-keycloak_docs_dir: "{{ keycloak_home }}/docs"
+keycloak_alt_home: "/opt/keycloak-{{ keycloak_version }}"
+keycloak_config_dir: "{{ keycloak_alt_home }}/{{ keycloak_mode }}/configuration"
+keycloak_binary_dir: "{{ keycloak_alt_home }}/bin"
+keycloak_docs_dir: "{{ keycloak_alt_home }}/docs"
 keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
 keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
 
@@ -44,7 +45,7 @@ keycloak_url: "https://github.com/keycloak/keycloak/releases/download"
 keycloak_source_url:
   - source: "{{ keycloak_url }}/{{ keycloak_version }}/keycloak-{{ keycloak_version }}.tar.gz"
     file: "keycloak-{{ keycloak_version }}.tar.gz"
-    checksum: "67ed335ff99b9f7f7c0812bc23f8b38ff288530e"
+    checksum: "803e4f9f085b0560649c2486aa4378a66ddc08f0"
     checksum_type: "sha1"
   
 keycloak_samba_federation:
