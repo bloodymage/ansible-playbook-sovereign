@@ -4,6 +4,8 @@
     name: "{{ packages }}"
     state: present
   become: yes
+  when:
+    - inventory_hostname not in groups['virtual_ip_address']
   tags:
     - ownca_host_certs
     - ownca-host-certs

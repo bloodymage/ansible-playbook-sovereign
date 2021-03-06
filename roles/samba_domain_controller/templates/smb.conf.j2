@@ -6,7 +6,7 @@
 {#                                                                                                #}
 {# ============================================================================================== #}
 [global]
-netbios name = {{ rebeldream_hostname_short | upper }}
+netbios name = {{ rebeldream_hostname | upper }}
 realm = {{ rebeldream_domain | upper }}
 server role = active directory domain controller
 server services = s3fs, rpc, nbt, wrepl, ldap, cldap, kdc, drepl, winbindd, ntp_signd, kcc, dnsupdate

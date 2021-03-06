@@ -92,7 +92,7 @@
   ansible.builtin.set_fact:
     keycloak_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_admin_password"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/keycloak_admin_password"
     __password_length: "length={{ keycloak_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -110,7 +110,7 @@
   ansible.builtin.set_fact:
     keycloak_keystore_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_keystore_password"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/keycloak_keystore_password"
     __password_length: "length={{ keycloak_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"

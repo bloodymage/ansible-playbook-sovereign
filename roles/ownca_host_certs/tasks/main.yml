@@ -143,8 +143,8 @@
   ansible.builtin.copy:
     dest: "{{ ownca_hosts_directory }}/certs/{{ rebeldream_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
-    owner: "{{ ownca_user }}"
-    group: "{{ ownca_user }}"
+    owner: "{{ rebeldream_user }}"
+    group: "{{ rebeldream_user }}"
     mode: "0600"
   become: no
   delegate_to: localhost

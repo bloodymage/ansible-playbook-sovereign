@@ -35,8 +35,8 @@
     iter_size: 0
     maciter_size: 0
     mode: '0600'
-    owner: "{{ ownca_user }}"
-    group: "{{ ownca_user }}"
+    owner: "{{ rebeldream_user }}"
+    group: "{{ rebeldream_user }}"
     #force: yes
   become: no
   delegate_to: localhost

@@ -4,8 +4,8 @@
   ansible.builtin.file:
     path: "{{ ownca_directory }}/users/{{ item.name }}"
     state: directory
-    owner: "{{ ownca_user }}"
-    group: "{{ ownca_user }}"
+    owner: "{{ rebeldream_user }}"
+    group: "{{ rebeldream_user }}"
     mode: "{{ item.mode }}"
   become: no
   loop: "{{ sshca_user_pki_dirs }}"
@@ -75,8 +75,8 @@
   ansible.builtin.copy:
     dest: "{{ ownca_directory }}/users/certs/{{ item.item.username }}.pub"
     content:  "{{ item.public_key }}"
-    owner: "{{ ownca_user }}"
-    group: "{{ ownca_user }}"
+    owner: "{{ rebeldream_user }}"
+    group: "{{ rebeldream_user }}"
     mode: "0644"
   loop: "{{ __result.results }}"
   become: no

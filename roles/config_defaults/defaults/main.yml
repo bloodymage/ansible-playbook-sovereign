@@ -29,10 +29,12 @@ rebeldream_password_length: "42"
 #
 # ==================================================================================================
 # Domain Information
-#rebeldream_root_domain: "example.com"
+rebeldream_root_domain: "example.com"
 rebeldream_internal_zone_name: "internal"
 rebeldream_dmz_zone_name: "dmz"
-
+rebeldream_zones:
+  - internal
+  - dmz
 
 rebeldream_default_domain: "internal.example.com"
 rebeldream_domain: "{{ ansible_domain | default(rebeldream_default_domain) }}"
@@ -49,15 +51,10 @@ rebeldream_country: ""
 rebeldream_region: ""
 rebeldream_state: "{{ rebeldream_region }}"
 rebeldream_city: ""
-rebeldream_zones:
-  - internal
-  - dmz
 
 # Host Information
 rebeldream_hostname: "{{ inventory_hostname_short }}"
 rebeldream_fqdn: "{{ rebeldream_hostname }}.{{ rebeldream_domain }}"
-# Eliminate after verifying no longer in use
-rebeldream_hostname_short: "{{ rebeldream_hostname }}"
 
 # Default Passwords
 mediawiki_db_password: "password"

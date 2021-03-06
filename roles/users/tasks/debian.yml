@@ -286,35 +286,37 @@
     - users_debug
     - users-debug
 
-- name: Determine removed users
-  ansible.builtin.set_fact:
-    removed_users: "{{ existing_users.stdout_lines | difference(users) }}"
-  tags:
-    - users
-    - users_debug
-    - users-debug
+# This currently fails because it needs a straight list of users.  Currently "users" list each item
+# is a dictionary.  Containing user configuration options
+# - name: Determine removed users
+#   ansible.builtin.set_fact:
+#     removed_users: "{{ existing_users.stdout_lines | difference(users) }}"
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
-- name: Delete removed user accounts
-  ansible.builtin.user:
-    name: "{{ item }}"
-    state: absent
-  loop: "{{ removed_users }}"
-  become: yes
-  tags:
-    - users
-    - users_debug
-    - users-debug
+# - name: Delete removed user accounts
+#   ansible.builtin.user:
+#     name: "{{ item }}"
+#     state: absent
+#   loop: "{{ removed_users }}"
+#   become: yes
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
-- name: Remove sudoers for remove accounts
-  ansible.builtin.file:
-    name: "/etc/sudoers.d/{{ item }}"
-    state: absent
-  loop: "{{ removed_users }}"
-  become: yes
-  tags:
-    - users
-    - users_debug
-    - users-debug
+# - name: Remove sudoers for remove accounts
+#   ansible.builtin.file:
+#     name: "/etc/sudoers.d/{{ item }}"
+#     state: absent
+#   loop: "{{ removed_users }}"
+#   become: yes
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
 # ==================================================================================================
 #

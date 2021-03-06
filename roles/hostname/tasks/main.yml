@@ -33,20 +33,9 @@
 # Allows changing a hostname simply by updating the hosts IP address
 #
 # ==================================================================================================
-- name: "Print Variables"
-  ansible.builtin.debug:
-    msg:
-      - "Hostname: {{ rebeldream_hostname_short }}"
-    verbosity: 2
-  become: no
-  tags:
-    - never
-    - hostname_debug
-    - hostname-debug
-
 - name: "Set Hostname"
   ansible.builtin.hostname:
-    name: "{{ rebeldream_hostname_short }}"
+    name: "{{ rebeldream_hostname }}"
   become: yes
   when:
     - inventory_hostname != "localhost"
