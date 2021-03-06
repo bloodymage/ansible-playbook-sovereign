@@ -192,6 +192,14 @@ Your Debian-based data center in a box.
 
 The DebOps project is a set of Free and Open Source tools that let users bootstrap and manage an IT infrastructure based on Debian or Ubuntu operating systems. Ansible is used as the main configuration management platform. DebOps provides a collection of Ansible roles that manage various services, as well as a set of Ansible playbooks that tie them together in a highly integrated environment.
 
+#### [FreedomBox](https://www.freedombox.org/)
+
+FreedomBox is a private server for non-experts: it lets you install and configure server applications with only a few clicks. It runs on cheap hardware of your choice, uses your internet connection and power, and is under your control.
+
+#### [Yunohost](https://yunohost.org)
+
+YunoHost is an operating system aiming for the simplest administration of a server, and therefore democratize self-hosting, while making sure it stays reliable, secure, ethical and lightweight. It is a copylefted libre software project maintained exclusively by volunteers. Technically, it can be seen as a distribution based on Debian GNU/Linux and can be installed on many kinds of hardware.
+
 ### Related Projects
 #### [Hearthminion](https://github.com/hearthminion/ansible-collection-hearthminion)
 
