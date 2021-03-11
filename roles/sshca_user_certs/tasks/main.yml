@@ -4,8 +4,8 @@
   ansible.builtin.file:
     path: "{{ ownca_directory }}/users/{{ item.name }}"
     state: directory
-    owner: "{{ ownca_user }}"
-    group: "{{ ownca_user }}"
+    owner: "{{ rebeldream_user }}"
+    group: "{{ rebeldream_user }}"
     mode: "{{ item.mode }}"
   become: no
   loop: "{{ sshca_user_pki_dirs }}"
@@ -75,8 +75,8 @@
   ansible.builtin.copy:
     dest: "{{ ownca_directory }}/users/certs/{{ item.item.username }}.pub"
     content:  "{{ item.public_key }}"
-    owner: "{{ ownca_user }}"
-    group: "{{ ownca_user }}"
+    owner: "{{ rebeldream_user }}"
+    group: "{{ rebeldream_user }}"
     mode: "0644"
   loop: "{{ __result.results }}"
   become: no
@@ -165,13 +165,19 @@
   when:
     - item.id_number is defined
 
+# Okay, it feels weird to need the public key as permissions "0600" instead of "0644" but if the
+# permissions were set to "0644" I got an error with the smart card saying the permissions weren't
+# correct, and ssh would not use the public key.
+#
+# There may be another issue involved, but setting the permissions to "0600" solves the problem
+# until further testing can be completed."
 - name: "Install SSH public key"
   ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
     dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
-    mode: "0644"
+    mode: "0600"
   loop: "{{ domain_users }}"
   become: yes
   when:
@@ -183,7 +189,7 @@
     dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}-cert.pub"
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
-    mode: "0644"
+    mode: "0600"
   loop: "{{ domain_users }}"
   become: yes
   when:

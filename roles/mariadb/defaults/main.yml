@@ -4,4 +4,3 @@ packages:
   - mariadb-server
   - mariadb-client
   - python3-mysqldb
-

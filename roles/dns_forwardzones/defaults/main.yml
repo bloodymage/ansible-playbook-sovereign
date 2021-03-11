@@ -2,3 +2,5 @@
 # defaults file for dns_forwardzones
 packages:
   - python3-dnspython
+
+__cname_records: []

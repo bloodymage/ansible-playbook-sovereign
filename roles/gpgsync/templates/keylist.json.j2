@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "signature_uri": "https://{{ rebeldream_root_domain }}/pgp/keylist.json.asc",
+    "comment": "The GPG Sync example keylist"
+  },
+  "keys": [
+{% for user in domain_users %}
+  {% if user.gpg_keys is defined %}
+    {% for key in user.gpg_keys %}
+      {
+      {% if key.key_fingerprint is defined %}
+        "fingerprint": "{{ key.key_fingerprint.split(' ') | join('')  }}",
+        "name": "{{ key.name }}"
+      {% endif %}
+    }{{ "," if not loop.last else "" }}
+      {% endfor %}
+    {% endif %}
+      {% endfor %}
+  ]
+}

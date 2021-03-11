@@ -28,6 +28,9 @@
         - ansible_os_family == "Debian"
         - ansible_network_os is undefined
         - inventory_hostname != 'localhost'
+        - inventory_hostname not in groups['virtual_ip_address']
+        - inventory_hostname in groups['internal_zone']
+        - inventory_hostname in groups['dmz_zone']
       tags:
         - dns_forwardzones
         - dns-forwardzones
@@ -35,6 +38,28 @@
         - dns-forwardzones-debug
         - install-packages
         - dns-update
+
+- name: "Update NS host A records"
+  community.general.nsupdate:
+    key_name: "ansible"
+    key_secret: "{{ item.bind_dnssec_secret }}"
+    key_algorithm: "hmac-sha256"
+    server: "{{ item.address_ipv4 }}"
+    zone: "{{ bind_zone }}"
+    record: "{{ item.name }}"
+    value: "{{ item.address_ipv4 }}"
+  loop: "{{ bind_zone_dnsservers }}"
+  become: yes
+  when:
+    - bind_zone is defined
+  remote_user: root
+  delegate_to: "{{ item.address_ipv4 }}"
+  tags:
+    - dns_forwardzones
+    - dns-forwardzones
+    - dns_forwardzones_debug
+    - dns-forwardzones-debug
+    - dns-update
 
 - name: "Add or modify host A records"
   community.general.nsupdate:
@@ -59,21 +84,21 @@
     - dns-update
 
 # tasks file for dns-update
-- name: "Add or modify host AAAA records"
+- name: "Update NS host AAAA records"
   community.general.nsupdate:
     key_name: "ansible"
     key_secret: "{{ item.bind_dnssec_secret }}"
     key_algorithm: "hmac-sha256"
     server: "{{ item.address_ipv4 }}"
     zone: "{{ bind_zone }}"
-    record: "{{ inventory_hostname_short }}"
-    value: "{{ ansible_default_ipv6.address }}"
+    record: "{{ item.name }}"
+    value: "{{ item.address_ipv6 }}"
     type: "AAAA"
   loop: "{{ bind_zone_dnsservers }}"
   become: yes
   when:
     - bind_zone is defined
-    - ansible_default_ipv6.address is defined
+    - item.address_ipv6 is defined
   remote_user: root
   delegate_to: "{{ item.address_ipv4 }}"
   tags:
@@ -83,7 +108,85 @@
     - dns-forwardzones-debug
     - dns-update
 
-- name: "Add or modify host CNAME records"
+- name: "Add or modify host AAAA records"
+  community.general.nsupdate:
+    key_name: "ansible"
+    key_secret: "{{ item.bind_dnssec_secret }}"
+    key_algorithm: "hmac-sha256"
+    server: "{{ item.address_ipv4 }}"
+    zone: "{{ bind_zone }}"
+    record: "{{ inventory_hostname_short }}"
+    value: "{{ rebeldream_ipv6_address }}"
+    type: "AAAA"
+  loop: "{{ bind_zone_dnsservers }}"
+  become: yes
+  when:
+    - bind_zone is defined
+    - rebeldream_ipv6_address is defined
+  remote_user: root
+  delegate_to: "{{ item.address_ipv4 }}"
+  tags:
+    - dns_forwardzones
+    - dns-forwardzones
+    - dns_forwardzones_debug
+    - dns-forwardzones-debug
+    - dns-update
+
+# ==================================================================================================
+#
+# Create cname records
+#
+# ==================================================================================================
+# - name: "Ensure we have user groups required by host role"
+#   ansible.builtin.set_fact:
+#     __cname_records: "{{ __cname_records + [__cname] }}"
+#   loop: "{{ group_list }}"
+#   when:
+#     - inventory_hostname in groups[item.name] | default([])
+#   become: no
+#   vars:
+#     __cname: item.cname_base + groups[item.name].index(inventory_hostname).str
+#     group_list:
+#       - name: database_servers
+#         cname_Base: "db"
+#       - name: dlna_servers
+#         cname_base: "dlna"
+#       - name: samba_domain_controllers
+#         cname_base: "dc"
+#       - name: "mail_servers"
+#         cname_base: "mail"
+#   tags:
+#     - dns_forwardzones
+#     - dns-forwardzones
+#     - dns_forwardzones_debug
+#     - dns-forwardzones-debug
+#     - dns-update
+
+# - name: "Add or modify host CNAME records based on server role"
+#   community.general.nsupdate:
+#     key_name: "ansible"
+#     key_secret: "{{ item[0].bind_dnssec_secret }}"
+#     key_algorithm: "hmac-sha256"
+#     server: "{{ item[0].address_ipv4 }}"
+#     zone: "{{ bind_zone }}"
+#     record: "{{ item[1] }}"
+#     value: "{{ inventory_hostname }}."
+#     type: "CNAME"
+#   loop: "{{ bind_zone_dnsservers | product(__cname_records) | list }}"
+#   become: yes
+#   when:
+#     - bind_zone is defined
+#   remote_user: root
+#   delegate_to: "{{ item[0].address_ipv4 }}"
+#   tags:
+#     - dns_forwardzones
+#     - dns-forwardzones
+#     - dns_forwardzones_debug
+#     - dns-forwardzones-debug
+#     - dns-update
+
+
+- name: "Add or modify host CNAME records based on defined virtual hosts"
   community.general.nsupdate:
     key_name: "ansible"
     key_secret: "{{ item[0].bind_dnssec_secret }}"

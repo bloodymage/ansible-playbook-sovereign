@@ -1,0 +1,16 @@
+#
+# * Galera-related settings
+#
+# [mysqld]
+# # Mandatory settings
+# wsrep_on=ON
+# wsrep_provider=/usr/lib/libgalera_smm.so
+# wsrep_cluster_address="gcomm://db1.olympus.home,db2.olympus.home"
+# binlog_format=row
+# default_storage_engine=InnoDB
+# innodb_autoinc_lock_mode=2
+
+# wsrep_cluster_name = db
+# wsrep_node_name = db2
+# wsrep_node_address = "db2.olympus.home"
+# innodb_flush_log_at_trx_commit=0

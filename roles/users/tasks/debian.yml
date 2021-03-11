@@ -277,36 +277,27 @@
 # ...
 #
 # ==================================================================================================
-# - name: Determine existing users
-#   shell: 'grep {{ user_group_ansible_managed }} /etc/group | cut -d: -f4 | tr "," "\n"'
-#   changed_when: false
-#   register: existing_users
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: Determine existing users
+  ansible.builtin.shell: 'grep {{ user_group_ansible_managed }} /etc/group | cut -d: -f4 | tr "," "\n"'
+  changed_when: false
+  register: existing_users
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
+# This currently fails because it needs a straight list of users.  Currently "users" list each item
+# is a dictionary.  Containing user configuration options
 # - name: Determine removed users
-#   set_fact:
+#   ansible.builtin.set_fact:
 #     removed_users: "{{ existing_users.stdout_lines | difference(users) }}"
 #   tags:
 #     - users
 #     - users_debug
 #     - users-debug
 
-# - name: "List removed users"
-#   ansible.builtin.debug:
-#     msg:
-#       - "{{ item }}"
-#     verbosity: 1
-#   loop: "{{ removed_users }}"
-#   tags:
-#     - never
-#     - users_debug
-#     - users-debug
-
 # - name: Delete removed user accounts
-#   user:
+#   ansible.builtin.user:
 #     name: "{{ item }}"
 #     state: absent
 #   loop: "{{ removed_users }}"
@@ -317,7 +308,7 @@
 #     - users-debug
 
 # - name: Remove sudoers for remove accounts
-#   file:
+#   ansible.builtin.file:
 #     name: "/etc/sudoers.d/{{ item }}"
 #     state: absent
 #   loop: "{{ removed_users }}"

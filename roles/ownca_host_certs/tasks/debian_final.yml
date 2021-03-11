@@ -140,7 +140,7 @@
     friendly_name: "{{ rebeldream_fqdn }}"
     passphrase: "{{ ownca_host_certs_pkcs12_password }}"
     privatekey_path: "{{ ownca_etc }}/private/{{ rebeldream_fqdn }}.key"
-    certificate_path: "{{ ownca_etc }}/certs/{{ rebeldream_fqdn }}-chain.pem"
+    certificate_path: "/usr/local/share/ca-certificates/{{ rebeldream_fqdn }}-chain.crt"
     other_certificates:
       - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
       - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"

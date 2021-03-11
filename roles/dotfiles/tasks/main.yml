@@ -8,94 +8,173 @@
   ansible.builtin.file:
     dest: "{{ __dotfiles_home }}"
     state: directory
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
     mode: "{{ __mode }}"
   loop: "{{ dotfiles_users }}"
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
     __mode: "{{ dotfiles_mode }}"
   when:
-    - users is defined
-    - item.unix_home is defined
+    - dotfiles_users is defined
+    - item.username is defined
+    - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-  tags:
-    - dotfiles
-    - dotfiles_debug
-    - dotfiles-debug
 
 - name: Install User gitconfig
   ansible.builtin.template:
     src: "gitconfig.j2"
     dest: "{{ __dotfiles_home }}/.gitconfig"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
     mode: "0644"
-  loop: "{{ users }}"
+  loop: "{{ dotfiles_users }}"
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
   when:
-    - users is defined
+    - dotfiles_users is defined
+    - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  tags:
-    - dotfiles
-    - dotfiles_debug
-    - dotfiles-debug
 
 - name: Ensure user .gnupg folder exists
   ansible.builtin.file:
     path: "{{ __dotfiles_home }}/.gnupg"
     state: directory
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
     mode: "0700"
-  loop: "{{ users }}"
+  loop: "{{ dotfiles_users }}"
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
   when:
-    - users is defined
+    - dotfiles_users is defined
+    - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  tags:
-    - dotfiles
-    - dotfiles_debug
-    - dotfiles-debug
 
 - name: Install gpg.conf
   ansible.builtin.template:
     src: "gpg.conf.j2"
     dest: "{{ __dotfiles_home }}/.gnupg/gpg.conf"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
     mode: "0644"
-  loop: "{{ users }}"
+  loop: "{{ dotfiles_users }}"
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
   when:
-    - users is defined
+    - dotfiles_users is defined
+    - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  tags:
-    - dotfiles
-    - dotfiles_debug
-    - dotfiles-debug
 
 - name: Install gpg-agent.conf
   ansible.builtin.template:
     src: "gpg-agent.conf.j2"
     dest: "{{ __dotfiles_home }}/.gnupg/gpg-agent.conf"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
     mode: "0644"
-  loop: "{{ users }}"
+  loop: "{{ dotfiles_users }}"
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
   become: yes
   when:
+    - dotfiles_users is defined
+    - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  tags:
-    - dotfiles
-    - dotfiles_debug
-    - dotfiles-debug
+
+- name: Ensure User ~/.config/autostart directory exists
+  ansible.builtin.file:
+    dest: "{{ __dotfiles_home }}/.config/autostart"
+    state: directory
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "{{ __mode }}"
+  loop: "{{ dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
+    __mode: "{{ dotfiles_mode }}"
+  when:
+    - dotfiles_users is defined
+    - item.username is defined
+    - item.id_number is defined
+    - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+    - item.id_number >= 100000
+
+- name: Ensure User ~/.config/gpgsync directory exists
+  ansible.builtin.file:
+    dest: "{{ __dotfiles_home }}/.config/gpgsync"
+    state: directory
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "{{ __mode }}"
+  loop: "{{ dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
+    __mode: "{{ dotfiles_mode }}"
+  when:
+    - dotfiles_users is defined
+    - item.username is defined
+    - item.id_number is defined
+    - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+    - item.id_number >= 100000
+
+# This file is modified each time gpgsync runs, therefore we only want to install it if it does not
+# currently exist.  Set Force = "no"
+- name: "Install gpgsync settings.json"
+  ansible.builtin.template:
+    src: "config/gpgsync/settings.json.j2"
+    dest: "{{ __dotfiles_home }}/.config/gpgsync/settings.json"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+    force: no
+  loop: "{{ dotfiles_users }}"
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
+  become: yes
+  when:
+    - dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+    - item.id_number >= 100000
+
+- name: "Install gpgsync.desktop"
+  ansible.builtin.copy:
+    src: "config/autostart/gpgsync.desktop"
+    dest: "{{ __dotfiles_home }}/.config/autostart/gpgsync.desktop"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ dotfiles_users }}"
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
+  become: yes
+  when:
+    - dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+    - item.id_number >= 100000

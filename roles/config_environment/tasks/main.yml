@@ -24,6 +24,10 @@
   tags:
     - always
 
+- name: "Identify User running ansible."
+  ansible.builtin.set_fact:
+    rebeldream_user: "{{ lookup('env','USER') }}"
+
 #     - name: Check if we are using debug mode
 #       ansible.builtin.set_fact:
 #         __debug_mode: yes

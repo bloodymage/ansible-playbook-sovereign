@@ -147,11 +147,11 @@
 
 - name: "Install System Maintenance config"
   ansible.builtin.template:
-    src: "debian.cnf.j2"
+    src: "mysql/debian.cnf.j2"
     dest: "/etc/mysql/debian.cnf"
     owner: root
     group: root
-    mode: 000
+    mode: 600
   become: yes
   when:
     - ansible_os_family == "Debian"

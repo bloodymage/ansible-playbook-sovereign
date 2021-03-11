@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 {% if item.gpg_keys is defined -%}
-  default-key {{ item.gpg_keys[0].keyid }}
+  default-key {{ item.gpg_keys[0].key_id }}
 {% endif %}
 {% if dotfiles_gpg_pinentry_mode is defined -%}
   pinentry-mode {{ dotfiles_gpg_pinentry_mode }}
@@ -36,7 +36,6 @@ verify-options show-uid-validity
 # IsolateDestAddr
 #
 # ================================================================================================== #}
-#keyserver-options http-proxy=socks5-hostname://127.0.0.1:9050
 {# When using --refresh-keys, if the key in question has a preferred keyserver #}
 {# URL, then disable use of that preferred keyserver to refresh the key from #}
 keyserver-options include-revoked
