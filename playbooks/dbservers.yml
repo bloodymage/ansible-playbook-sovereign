@@ -1,5 +1,5 @@
 ---
-- hosts: mariadb_servers:!public
+- hosts: mariadb_servers:!public_zone
   roles:
     - role: bloodymage.rebeldream.mariadb
 

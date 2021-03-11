@@ -175,7 +175,14 @@ Not yet implemented advantages:
 Each role is built with the idea of do one thing, and do it well.  So there will be many more roles than other projects might have.  The advantage is that you don't have to run every role every time.  Each role can be selected individually by using '--tag' with the role's name, for example '--tag dovecot' will run the dovecot role.  If you wish to run all roles related to email servers, you would run the playbook 'mailservers.yml'
 
 ### Similar Projects
-#### [Sovereign](https://github.com/sovereign/sovereign)
+#### Ansible Based
+##### [Debops](https://docs.debops.org/en/master/) [DebOps Github](https://github.com/debops/debops)
+
+Your Debian-based data center in a box.
+
+The DebOps project is a set of Free and Open Source tools that let users bootstrap and manage an IT infrastructure based on Debian or Ubuntu operating systems. Ansible is used as the main configuration management platform. DebOps provides a collection of Ansible roles that manage various services, as well as a set of Ansible playbooks that tie them together in a highly integrated environment.
+
+##### [Sovereign](https://github.com/sovereign/sovereign)
 
 Sovereign is a set of ansible playbooks to build and maintain your own private servers: 
 - email
@@ -186,19 +193,39 @@ Sovereign is a set of ansible playbooks to build and maintain your own private s
 - VPN
 - and more. 
 
-#### [Debops](https://docs.debops.org/en/master/) [DebOps Github](https://github.com/debops/debops)
-
-Your Debian-based data center in a box.
-
-The DebOps project is a set of Free and Open Source tools that let users bootstrap and manage an IT infrastructure based on Debian or Ubuntu operating systems. Ansible is used as the main configuration management platform. DebOps provides a collection of Ansible roles that manage various services, as well as a set of Ansible playbooks that tie them together in a highly integrated environment.
-
-#### [FreedomBox](https://www.freedombox.org/)
+#### Non-Ansible Based
+##### [FreedomBox](https://www.freedombox.org/)
 
 FreedomBox is a private server for non-experts: it lets you install and configure server applications with only a few clicks. It runs on cheap hardware of your choice, uses your internet connection and power, and is under your control.
 
-#### [Yunohost](https://yunohost.org)
+##### [HomelabOS](https://homelabos.com/)
+
+Your offline-first privacy-centric personal data center.
+
+Includes over 100 services you can easily self-host.
+
+##### [Yunohost](https://yunohost.org)
 
 YunoHost is an operating system aiming for the simplest administration of a server, and therefore democratize self-hosting, while making sure it stays reliable, secure, ethical and lightweight. It is a copylefted libre software project maintained exclusively by volunteers. Technically, it can be seen as a distribution based on Debian GNU/Linux and can be installed on many kinds of hardware.
+
+| Project                  | Rebeldream               | DebOps     | Sovereign | FreedomBox | HomelabOS | Yunohost |
+| :------                  | :---------               | :-----     | :-------- | :--------- | :-------- | :------- |
+| Uses Ansible             | Yes                      | Yes        | Yes       | No         | No        | No       |
+| Email                    | Dovecot\                 |            |           |            |           |          |
+|                          | Postfix                  |            |           |            |           |          |
+| Identity Management      | Active Directory (Samba) |            |           |            |           |          |
+| Groupware                | Nextcloud                | Nextcloud  | OwnCloud  |            |           |          |
+| Cloud Storage            | Nextcloud                | Nextcloud\ | OwnCloud  |            |           |          |
+|                          |                          | Owncloud   |           |            |           |          |
+| Certificate Authority    | Internal \               |            |           |            |           |          |
+|                          | Let's Encrypt            |            |           |            |           |          |
+| DNS                      | Bind9                    |            |           |            |           |          |
+|                          |                          |            |           |            |           |          |
+| Operating System Support | Linux                    |            |           |            |           |          |
+| Distribution Support     | Debian                   | Debian     |           |            |           |          |
+| Smart Card Support       | Yes                      |            |           |            |           |          |
+| Website                  | https://github.com/bloodymage/ansible-collection-bloodymage | https://debops.org | https://github.com/sovereign/sovereign | https://freedombox.org | https://homelabos.com | https://yunohost.org |
+
 
 ### Related Projects
 #### [Hearthminion](https://github.com/hearthminion/ansible-collection-hearthminion)
