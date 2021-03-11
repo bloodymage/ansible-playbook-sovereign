@@ -13,6 +13,13 @@
     - "update system ca certificates"
     - "update ca-certificates"
 
+- name: Update PAM
+  ansible.builtin.command:
+    cmd: "update-ca-certificates"
+  become: yes
+  listen:
+    - "update pam"
+
 - name: "postfix tls"
   ansible.builtin.copy:
     src: /etc/ssl/certs/ca-certificates.crt

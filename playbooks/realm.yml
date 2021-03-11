@@ -3,6 +3,8 @@
   ignore_unreachable: yes
   roles:
     - role: bloodymage.rebeldream.config_environment
+      tags:
+        - always
     - role: bloodymage.rebeldream.config_realm_environment
 
 - name: "Configure baseline Kerberos"
@@ -57,11 +59,12 @@
         - samba-domain-users-debug
         - recreate-realm
 
-# - hosts: freeipa_controllers
-
-# - hosts: openldap_servers
-#   roles:
-#     - role: bloodymage.rebeldream.openldap
+- hosts: openldap_servers
+  roles:
+    - role: bloodymage.rebeldream.openldap
+      tags:
+        - never
+        - openldap
 
 - hosts: sssd
   roles:
@@ -84,12 +87,15 @@
         - keycloak
         - recreate-realm
 
-# - hosts: samba_file_servers:workstations:&linux
-#   roles:
-#     - role: bloodymage.rebeldream.dotfiles
-#       vars:
-#         dotfiles_users: "{{ domain_users }}"
-#         dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
+# Need to add in specific file server(s) (ones with user home directories).
+- hosts: workstations:&linux
+  roles:
+    - role: bloodymage.rebeldream.dotfiles
+      vars:
+        dotfiles_users: "{{ domain_users }}"
+        dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
+      tags:
+        - dotfiles
 
 - hosts: samba_ownca_user_hosts
   roles:

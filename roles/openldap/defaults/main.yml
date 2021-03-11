@@ -5,6 +5,24 @@ packages:
   - ldap-utils
   - nslcd
 
+openldap_etc_folders:
+  - name: sasl2
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  - name: schema
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  - name: slap.d
+    owner: "root"
+    group: "root"
+    mode: "0755"
+  - name: slapd.d
+    owner: "openldap"
+    group: "openldap"
+    mode: "0755"
+
 openldap_basedn: "dc={{ ansible_domain.split('.')[0] }},dc={{ ansible_domain.split('.')[1] }},dc={{ ansible_domain.split('.')[2] }}"
 
 openldap_backends:
@@ -13,3 +31,4 @@ openldap_backends:
 
 openldap_modules:
   - rwm
+

@@ -1,0 +1,9 @@
+---
+# tasks file for drush
+- name: Install Drush
+  community.general.composer:
+    command: require
+    global_command: yes
+    arguments: drush/drush
+  tags:
+    - drush

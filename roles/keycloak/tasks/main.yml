@@ -48,7 +48,7 @@
 
 - name: "Create Keycloak Directory"
   ansible.builtin.file:
-    path: "{{ keycloak_home }}"
+    path: "{{ keycloak_alt_home }}"
     state: directory
     owner: root
     group: root
@@ -62,7 +62,7 @@
 - name: Extract Sources
   ansible.builtin.unarchive:
     src: "/tmp/{{ item.file }}"
-    dest: "{{ keycloak_home }}"
+    dest: "{{ keycloak_alt_home }}"
     remote_src: yes
     owner: root
     group: root
@@ -75,12 +75,25 @@
     - keycloak_debug
     - keycloak-debug
 
+- name: "Create a symbolic link keycloak -> keycloak-{{ keycloak_version }}"
+  ansible.builtin.file:
+    src: "{{ keycloak_alt_home }}"
+    dest: "{{ keycloak_home }}"
+    owner: root
+    group: root
+    state: link
+  become: yes
+  tags:
+    - keycloak
+    - keycloak_debug
+    - keycloak-debug
+
 - name: "Ensure we have a password for the keycloak administrator user"
   ansible.builtin.set_fact:
     keycloak_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_admin_password"
-    __password_length: "length={{ keycloak_password_legnth }}"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/keycloak_admin_password"
+    __password_length: "length={{ keycloak_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
@@ -97,8 +110,8 @@
   ansible.builtin.set_fact:
     keycloak_keystore_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname_short }}/keycloak_keystore_password"
-    __password_length: "length={{ keycloak_password_legnth }}"
+    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/keycloak_keystore_password"
+    __password_length: "length={{ keycloak_password_length }}"
     __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
@@ -197,19 +210,24 @@
     - keycloak_debug
     - keycloak-debug
 
-- name: "Login to keycloak server"
-  ansible.builtin.command:
-    cmd: >-
-      {{ keycloak_binary_dir }}/kcadm.sh config credentials
-      --server http://localhost:8080/auth
-      --realm master
-      --user {{ keycloak_admin_user }}
-      --password {{ keycloak_admin_password }}
-  become: no
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
+# ==================================================================================================
+#
+# This next command will fail if a server isn't actually running
+#
+# ==================================================================================================
+# - name: "Login to keycloak server"
+#   ansible.builtin.command:
+#     cmd: >-
+#       {{ keycloak_binary_dir }}/kcadm.sh config credentials
+#       --server http://localhost:8080/auth
+#       --realm master
+#       --user {{ keycloak_admin_user }}
+#       --password {{ keycloak_admin_password }}
+#   become: no
+#   tags:
+#     - keycloak
+#     - keycloak_debug
+#     - keycloak-debug
 
 # ==================================================================================================
 #

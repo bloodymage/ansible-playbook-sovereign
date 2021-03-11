@@ -1,6 +1,9 @@
 - hosts: all:!localhost:!public_zone
   ignore_unreachable: yes
   roles:
+    - role: bloodymage.rebeldream.config_environment
+      tags:
+        - always
     - role: bloodymage.rebeldream.config_ownca_environment
       tags:
         - always
@@ -8,4 +11,3 @@
       tags:
         - ownca_host_certs
         - ownca-host-certs
-

@@ -15,7 +15,7 @@
     - install-packages
 
 - name: "Install packages"
-  package:
+  ansible.builtin.package:
     pkg: "{{ packages }}"
     state: present
   become: yes

@@ -4,6 +4,8 @@
     name: "{{ packages }}"
     state: present
   become: yes
+  when:
+    - inventory_hostname not in groups['virtual_ip_address']
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -30,6 +32,22 @@
     - ownca-host-certificates-debug
     - ownca-all
 
+- name: "Check if host is in 'apache' group"
+  ansible.builtin.set_fact:
+    ownca_private_key_group: "ssl-cert"
+    ownca_private_key_mode: "0640"
+    __ownca_private_key_dir_mode: "0750"
+    __ownca_private_key_dir_group: "ssl-cert"
+  when:
+    - inventory_hostname in groups['apache_servers']
+    - inventory_hostname in groups['openldap_servers']
+  tags:
+    - ownca_host_certs
+    - ownca-host-certs
+    - ownca_host_certs_debug
+    - ownca-host-certs-debug
+    - ownca-all
+
 # ==================================================================================================
 #
 # Create SSL Private Key and CRS Directories
@@ -44,33 +62,11 @@
   ansible.builtin.file:
     path: "{{ ownca_etc }}/{{ item.name }}"
     state: directory
-    owner: "{{ ownca_etc_owner }}"
-    group: "{{ ownca_etc_group }}"
+    owner: "{{ item.owner | default(ownca_etc_owner) }}"
+    group: "{{ item.group | default(ownca_etc_group) }}"
     mode: "{{ item.mode }}"
   become: yes
   loop: "{{ ownca_host_certs_directories }}"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
-
-# ==================================================================================================
-#
-# Generate Passwords if they don't exist
-#
-# First we check if the host is in the 'apache' web servers group.  Apache requires that the
-# private key have permissions '0644' with the group being 'ssl-certs' otherwise it can't read the
-# private key when starting the server.  (Is this for debian family systems only?)
-#
-# ==================================================================================================
-- name: "Check if host is in 'apache' group"
-  ansible.builtin.set_fact:
-    ownca_private_key_group: "ssl-cert"
-    ownca_private_key_mode: "0640"
-  when:
-    - inventory_hostname in groups['apache_servers']
   tags:
     - ownca_host_certs
     - ownca-host-certs

@@ -1,0 +1,39 @@
+---
+# tasks file for gpg_web_key_directory
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: Install Apache site.conf
+  ansible.builtin.template:
+    src: "apache-site.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ virtual_hosts }}"
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "gpg-wkd"
+    - item.enabled is defined
+    - item.enabled
+  notify: reload apache
+
+- name: Create Data Directory
+  ansible.builtin.file:
+    path: "/srv/www/{{ item.name }}/.well-knows/openpgpkey/"
+    state: directory
+    owner: webkey
+    group: webkey
+    mode: "2750"
+  loop: "{{ virtual_hosts }}"
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "gpg-wkd"
+    - item.enabled is defined
+    - item.enabled
