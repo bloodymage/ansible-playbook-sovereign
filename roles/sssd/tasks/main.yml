@@ -193,4 +193,4 @@
     group: root
     mode: "0644"
   become: yes
-  #notify: pam-auth-update
+  notify: update pam
