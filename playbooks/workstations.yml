@@ -6,6 +6,8 @@
         - rebeldream_smart_card_login
     - role: bloodymage.rebeldream.libnss3_tools
     - role: bloodymage.rebeldream.evolution
+      tags:
+        - evolution
     - role: bloodymage.rebeldream.firefox
       tags:
         - firefox
@@ -15,3 +17,6 @@
     - role: bloodymage.rebeldream.gpgsync
       tags:
         - gpgsync
+    - role: bloodymage.rebeldream.devilspie2
+      tags:
+        - devilspie2
