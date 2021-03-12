@@ -3,4 +3,4 @@
 packages:
   - mariadb-server
   - mariadb-client
-  - python3-mysqldb
+  - python3-pymysql
