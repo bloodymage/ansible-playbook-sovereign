@@ -112,6 +112,9 @@
     - role: bloodymage.rebeldream.uptimed
       tags:
         - uptimed
+    - role: bloodymage.rebeldream.htop
+      tags:
+        - htop
     # - role: bloodymage.rebeldream.trash_cli
     #   tags:
     #     - trash-cli
