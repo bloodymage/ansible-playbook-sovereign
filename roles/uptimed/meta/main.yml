@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Installs Curl.
+  description: Installs uptimed
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
@@ -19,10 +19,11 @@ galaxy_info:
     - name: Ubuntu
       versions:
         - 18.04
+        - 20.04
 
   galaxy_tags:
     - bloodymage
-    - curl
+    - uptimed
 
 dependencies:
   - role: bloodymage.rebeldream.config_defaults

@@ -109,6 +109,9 @@
     - role: bloodymage.rebeldream.make
       tags:
         - make
+    - role: bloodymage.rebeldream.uptimed
+      tags:
+        - uptimed
     # - role: bloodymage.rebeldream.trash_cli
     #   tags:
     #     - trash-cli
