@@ -1,6 +1,11 @@
 ---
+- name: "Print packages"
+  ansible.builtin.debug:
+    msg:
+      - "Package {{ packages }}"
+      
 - name: "Install packages"
-  ansible.builtin.package:
+  ansible.builtin.apt:
     name: "{{ packages }}"
     state: present
   become: yes

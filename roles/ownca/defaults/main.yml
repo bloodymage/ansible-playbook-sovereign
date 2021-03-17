@@ -2,6 +2,7 @@
 packages:
   - python3-cryptography
   - rng-tools
+  - ca-certificates
   
 ownca_intermediate_ca: "{{ rebeldream_org_unit_name | lower }}"
 
