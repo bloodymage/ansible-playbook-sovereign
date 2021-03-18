@@ -138,8 +138,8 @@
     recurse: yes
     follow: no
     owner: root
-    group: "{{ rebeldream_org_unit_name | upper }}\unixadmins"
-    mode: "0770"
+    group: "{{ rebeldream_org_unit_name | upper }}\\unixadmins"
+    mode: "{{ item.mode | default('0770') }}"
   become: yes
   loop: "{{ samba_shares }}"
   tags:
