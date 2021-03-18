@@ -1,9 +1,4 @@
 ---
-- name: "Print packages"
-  ansible.builtin.debug:
-    msg:
-      - "Package {{ packages }}"
-      
 - name: "Install packages"
   ansible.builtin.apt:
     name: "{{ packages }}"

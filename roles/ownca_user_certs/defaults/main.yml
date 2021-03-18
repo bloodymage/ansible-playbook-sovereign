@@ -4,7 +4,8 @@
 # Files and Directories
 #
 # ==================================================================================================
-ownca_home_dir: "/home/{{ rebeldream_org_unit_name | upper }}"
+#ownca_home_dir: "/home/{{ rebeldream_org_unit_name | upper }}"
+ownca_home_dir: "/srv/samba/home"
 ownca_user_pki_dir: ".pki"
 ownca_user_cert_dir: "{{ ownca_user_pki_dir }}/certs"
 ownca_user_csr_dir: "{{ ownca_user_pki_dir }}/csr"
@@ -13,14 +14,14 @@ ownca_user_pkcs12_dir: "{{ ownca_user_pki_dir }}/pkcs12"
 
 ownca_user_pki_dirs:
   - name: private
-    mode: "0700"
+    mode: "0770"
   - name: csr
-    mode: "0755"
+    mode: "0770"
   - name: "certs"
-    mode: "0755"
+    mode: "0770"
   - name: "pkcs12"
-    mode: "0700"
+    mode: "0770"
   - name: "ssh"
-    mode: "0755"
+    mode: "0770"
 
 __user_cert_force_regeneration: no

@@ -63,8 +63,8 @@
   ansible.builtin.file:
     path: "{{ __user_pki_dir }}/{{ item[1].name }}"
     state: directory
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
+    owner: "root"
+    group: "{{ rebeldream_org_unit_name }}\unixadmins"
     mode: "{{ item[1].mode }}"
   become: yes
   loop: "{{ domain_users | product(ownca_user_pki_dirs) | list }}"
@@ -86,11 +86,11 @@
   community.crypto.openssl_privatekey:
     path: "{{ __user_private_dir }}/{{ __username }}.key"
     type: "{{ ownca_privatekey_type }}"
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
+    owner: "root"
+    group: "{{ rebeldream_org_unit_name }}\unixadmins"
     cipher: auto
     size: 2048
-    mode: "0600"
+    mode: "0770"
     force: no
     passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     backup: yes
@@ -138,9 +138,9 @@
           - privilege_withdrawn
           - aa_compromise
     path: "{{ __user_csr_dir }}/{{ __username }}_{{ item[1].name }}.csr"
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
-    mode: "0644"
+    owner: "root"
+    group: "{{ rebeldream_org_unit_name }}\unixadmins"
+    mode: "0770"
     backup: yes
     force: no
   become: yes
@@ -279,9 +279,9 @@
   ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
     dest: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
-    mode: "0644"
+    owner: "root"
+    group: "{{ rebeldream_org_unit_name }}\unixadmins"
+    mode: "0770"
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
@@ -306,9 +306,9 @@
       - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
       - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
     state: present
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
-    mode: "0600"
+    owner: "root"
+    group: "{{ rebeldream_org_unit_name }}\unixadmins"
+    mode: "0770"
     backup: yes
     force: no
   become: yes
