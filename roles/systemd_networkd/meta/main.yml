@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Creates SSH Host certificates
+  description: Configures systemd-networkd
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
@@ -18,12 +18,11 @@ galaxy_info:
         - 10
     - name: Ubuntu
       versions:
-        - 18.04
+        - 20.04
 
   galaxy_tags:
     - bloodymage
-    - ssh
-    - certificate
+    - packages
 
 dependencies:
   - role: bloodymage.rebeldream.config_defaults

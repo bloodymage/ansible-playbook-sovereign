@@ -18,7 +18,7 @@
   ansible.builtin.set_fact:
     user_groups: "{{ user_groups + [ user_mythtv_group ] }}"
   when:
-    - inventory_hostname in groups ['mythtv']
+    - (inventory_hostname in groups ['mythtv']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users
@@ -29,7 +29,7 @@
   ansible.builtin.set_fact:
     user_groups: "{{ user_groups + [ user_minidlna_group ] }}"
   when:
-    - inventory_hostname in groups ['minidlna_servers']
+    - (inventory_hostname in groups ['minidlna_servers']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users
@@ -73,7 +73,7 @@
   ansible.builtin.set_fact:
     users: "{{ users + [ user_mythtv ] }}"
   when:
-    - inventory_hostname in groups ['mythtv']
+    - (inventory_hostname in groups['mythtv']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users
@@ -84,7 +84,7 @@
   ansible.builtin.set_fact:
     users: "{{ users + [ user_minidlna ] }}"
   when:
-    - inventory_hostname in groups ['minidlna_servers']
+    - (inventory_hostname in groups['minidlna_servers']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users

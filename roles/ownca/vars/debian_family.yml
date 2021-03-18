@@ -1,4 +1,1 @@
 ---
-packages:
-  - ca-certificates
-  - python3-cryptography
