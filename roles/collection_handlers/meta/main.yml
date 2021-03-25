@@ -26,5 +26,5 @@ galaxy_info:
     - handlers
 
 dependencies:
-  - role: bloodymage.rebeldream.config_defaults
+  - role: bloodymage.autonomy.config_defaults
 

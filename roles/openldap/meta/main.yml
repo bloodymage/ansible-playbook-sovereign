@@ -24,6 +24,6 @@ galaxy_info:
     - bloodymage
 
 dependencies:
-  - role: bloodymage.rebeldream.config_defaults
-  - role: bloodymage.rebeldream.collection_handlers
-  #- role: bloodymage.rebeldream.system_upgrade
+  - role: bloodymage.autonomy.config_defaults
+  - role: bloodymage.autonomy.collection_handlers
+  #- role: bloodymage.autonomy.system_upgrade

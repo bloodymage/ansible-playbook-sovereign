@@ -1,9 +1,9 @@
 ---
 - hosts: mariadb_servers:!public_zone
   roles:
-    - role: bloodymage.rebeldream.mariadb
+    - role: bloodymage.autonomy.mariadb
 
 - hosts: mysql_compatable_servers
   roles:
-    - role: bloodymage.rebeldream.mysql_databases
+    - role: bloodymage.autonomy.mysql_databases
 

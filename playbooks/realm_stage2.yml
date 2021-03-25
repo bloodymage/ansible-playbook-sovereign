@@ -1,7 +1,7 @@
 # Need to add in specific file server(s) (ones with user home directories).
 - hosts: workstations:&linux
   roles:
-    - role: bloodymage.rebeldream.dotfiles
+    - role: bloodymage.autonomy.dotfiles
       vars:
         dotfiles_users: "{{ domain_users }}"
         dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
@@ -10,7 +10,7 @@
 
 - hosts: samba_ownca_user_hosts
   roles:
-    - role: bloodymage.rebeldream.ownca_user_certs
+    - role: bloodymage.autonomy.ownca_user_certs
       tags:
         - ownca_user_certs
         - ownca-user-certs
@@ -20,14 +20,14 @@
 
 - hosts: samba_ownca_user_hosts:workstations:&linux
   roles:
-    - role: bloodymage.rebeldream.sshca_user_certs
+    - role: bloodymage.autonomy.sshca_user_certs
       tags:
         - sshca-user-certs
         - recreate-realm
 
 - hosts: samba_schema_master
   roles:
-    - role: bloodymage.rebeldream.samba_domain_user_certs
+    - role: bloodymage.autonomy.samba_domain_user_certs
       tags:
         - samba-domain-user-certs
         - recreate-realm

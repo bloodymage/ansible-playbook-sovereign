@@ -1,4 +1,4 @@
-# Ansible Collection - bloodymage.rebeldream
+# Ansible Collection - bloodymage.autonomy
 
 [![Ansile-Lint](https://github.com/bloodymage/ansible-collection-rebeldream/workflows/Ansible%20Lint/badge.svg?event=push)](https://github.com/bloodymage/ansible-collection-rebeldream/actions?query=workflow%3A%22Ansible+Lint%22)
 

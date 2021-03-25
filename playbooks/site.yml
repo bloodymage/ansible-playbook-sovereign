@@ -28,6 +28,7 @@
 - import_playbook: realm_stage1.yml
 - import_playbook: fileservers.yml
 - import_playbook: realm_stage2.yml
+- import_playbook: fileservers_stage2.yml
 - import_playbook: dbservers.yml
 - import_playbook: webservers.yml
 - import_playbook: mailservers.yml

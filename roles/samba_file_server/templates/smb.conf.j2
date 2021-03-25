@@ -47,31 +47,28 @@ dedicated keytab file = /etc/krb5.keytab
 kerberos method = secrets and keytab
 
 {% if samba_shares is defined -%}
-  # Enable ACL Support
-  vfs objects = acl_xattr
-  map acl inherit = yes
-  #acl_xattr: ignore system acls = yes
-  #inherit owner = unix only
+# Enable ACL Support
+vfs objects = acl_xattr
+map acl inherit = yes
+acl_xattr: ignore system acls = yes
+#inherit owner = unix only
 
-  server min protocol = SMB2
-  server max protocol = SMB3
-
-  # ==================================================================================================
-  #
-  # Share settings
-  #
-  # ==================================================================================================
+# ==================================================================================================
+#
+# Share settings
+#
+# ==================================================================================================
 
 
-  {% for share in samba_shares -%}
-    [{{ share.name }}]
-    path = {{ share.path }}
-    read only = No
-    {% if share.extended_options is defined -%}
-      {% for option in share.extended_options -%}
-        {{ option }}
-      {% endfor %}
-    {% endif %}
+{% for share in samba_shares -%}
+  [{{ share.name }}]
+  path = {{ share.path }}
+  read only = No
+  {% if share.extended_options is defined -%}
+    {% for option in share.extended_options -%}
+      {{ option }}
+    {% endfor %}
+  {% endif %}
 
 {% endfor %}
 {% endif %}

@@ -1,7 +1,7 @@
 - hosts: localhost
   roles:
-    - role: bloodymage.rebeldream.gnupg
-    - role: bloodymage.rebeldream.password_store
+    - role: bloodymage.autonomy.gnupg
+    - role: bloodymage.autonomy.password_store
       tags:
         - password_store
         - password-store

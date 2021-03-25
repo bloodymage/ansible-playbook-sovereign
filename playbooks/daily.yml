@@ -1,33 +1,33 @@
 - hosts: all
   ignore_unreachable: true
   roles:
-    - role: bloodymage.rebeldream.config_environment
+    - role: bloodymage.autonomy.config_environment
   tags:
     - always
         
 - hosts: all:!localhost
   ignore_unreachable: true
   roles:
-    - role: bloodymage.rebeldream.dns_forwardzones
+    - role: bloodymage.autonomy.dns_forwardzones
   tags:
     - dns
 
 - hosts: all:!localhost:!routeros
   ignore_unreachable: true
   roles:
-    - role: bloodymage.rebeldream.dns_reversezones
+    - role: bloodymage.autonomy.dns_reversezones
   tags:
     - dns
 
 - hosts: all:!localhost:!public_zone:!virtual_ip_address
   roles:
-    - role: bloodymage.rebeldream.system_upgrade
+    - role: bloodymage.autonomy.system_upgrade
   tags:
     - system-upgrade
     - system_upgrade
 
 - hosts: all:!localhost:!public_zone:!routeros:!virtual_ip_address
   roles:
-    - role: bloodymage.rebeldream.dotfiles
+    - role: bloodymage.autonomy.dotfiles
   tags:
     - dotfiles

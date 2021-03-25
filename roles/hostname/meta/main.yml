@@ -25,4 +25,4 @@ galaxy_info:
     - hostname
 
 dependencies:
-  - role: bloodymage.rebeldream.collection_handlers
+  - role: bloodymage.autonomy.collection_handlers

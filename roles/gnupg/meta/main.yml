@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Configure Defaults
+  description: Installs GnuPG
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
@@ -22,5 +22,7 @@ galaxy_info:
 
   galaxy_tags:
     - bloodymage
+    - gnupg
 
-dependencies: []
+dependencies:
+  - role: bloodymage.autonomy.config_defaults

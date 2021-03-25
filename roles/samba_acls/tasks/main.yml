@@ -1,0 +1,71 @@
+---
+# tasks file for samba_acls
+- name: "Set filesystem permissions on samba shares"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: yes
+    follow: no
+    owner: "root"
+    group: "{{ rebeldream_org_unit_name | upper }}\\unixadmins"
+    mode: "{{ item.mode | default('0770') }}"
+  become: yes
+  loop: "{{ samba_shares }}"
+  tags:
+    - samba_file_server
+    - samba-file-server
+    - samba_file_server_debug
+    - samba-file-server-debug
+    - recreate-realm
+    - recreate-realm-debug
+
+# ==================================================================================================
+#
+# This doesn't work the way I wanted it to work.  The win_acl module uses powershell rather than
+# python.  Still there has got to be a way to set windows acls on samba shares.
+#
+# It may be using the ansible 'command' module with 'setcifsacl' on a cifs mounted share.
+# For example mount:
+# "//fs/Users /home/{{ domain }}   cifs    _netdev,credentials=/root/creds.txt     0   0"
+#
+# setcifsacl -a "ACL:Administrator:ALLOWED/0x0/FULL" "/home/{{ domain }}/"
+#
+# The problem with that approach is setcifsacl uses '-a' to add a new acl, or '-M' to modify.
+# So the first time this is run, we will need to add, subsequent runs, it'll need to modify if
+# necessary.
+#
+# This approach also fails at idempotency.  But at least it'd work...
+#
+# ==================================================================================================
+# - name: "Set ACLs on User Home Folders"
+#   ansible.windows.win_acl:
+#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
+#     user: "{{ rebeldream_org_unit_name }}\\Domain Admins"
+#     type: allow
+#     rights: "FullControl"
+
+# - name: "Set ACLs on User Home Folders"
+#   ansible.windows.win_acl:
+#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
+#     user: "{{ rebeldream_org_unit_name }}\\unixadmins"
+#     type: allow
+#     rights: "FullControl"
+
+# - name: "Set ACLs on User Home Folders"
+#   ansible.windows.win_acl:
+#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
+#     user: "{{ rebeldream_org_unit_name }}\\Domain Users"
+#     type: allow
+#     rights: "ReadAndExecute"
+
+# - name: "Set ACLs on User Home Folders"
+#   ansible.windows.win_acl:
+#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
+#     user: "CREATOR OWNER"
+#     type: allow
+#     rights: "FullControl"
+#   loop: "{{ samba_shares }}"
+
+# - name: "Set filesystem permissions for home directories"
+#   ansible.builtin.file:
+#     path: "/srv/samba/home/{{ item }}"

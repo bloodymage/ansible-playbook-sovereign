@@ -1,22 +1,22 @@
 - hosts: workstations
   roles:
-    - role: bloodymage.rebeldream.cups
-    - role: bloodymage.rebeldream.opensc
+    - role: bloodymage.autonomy.cups
+    - role: bloodymage.autonomy.opensc
       when:
         - rebeldream_smart_card_login
-    - role: bloodymage.rebeldream.libnss3_tools
-    - role: bloodymage.rebeldream.evolution
+    - role: bloodymage.autonomy.libnss3_tools
+    - role: bloodymage.autonomy.evolution
       tags:
         - evolution
-    - role: bloodymage.rebeldream.firefox
+    - role: bloodymage.autonomy.firefox
       tags:
         - firefox
-    - role: bloodymage.rebeldream.chromium
+    - role: bloodymage.autonomy.chromium
       tags:
         - chromium
-    - role: bloodymage.rebeldream.gpgsync
+    - role: bloodymage.autonomy.gpgsync
       tags:
         - gpgsync
-    - role: bloodymage.rebeldream.devilspie2
+    - role: bloodymage.autonomy.devilspie2
       tags:
         - devilspie2
