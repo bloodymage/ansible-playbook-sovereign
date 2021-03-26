@@ -20,3 +20,6 @@
     - role: bloodymage.autonomy.devilspie2
       tags:
         - devilspie2
+    - role: bloodymage.autonomy.xscreensaver
+      tags:
+        - xscreensaver
