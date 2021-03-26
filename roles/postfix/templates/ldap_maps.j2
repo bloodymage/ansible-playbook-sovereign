@@ -1,12 +1,12 @@
 # {{ ansible_managed }}
 
-{{ 'server_host'.ljust(28) }}= dc.{{ rebeldream_domain }}
+{{ 'server_host'.ljust(28) }}= dc.{{ autonomy_domain }}
 {{ 'server_port'.ljust(28) }}= 389
 {{ 'version'.ljust(28) }}= 3
 {{ 'bind'.ljust(28) }}= yes
-{{ 'bind_dn'.ljust(28) }}= cn={{ __mail_user }},{{ rebeldream_user_dn }}
+{{ 'bind_dn'.ljust(28) }}= cn={{ __mail_user }},{{ autonomy_user_dn }}
 {{ 'bind_pw'.ljust(28) }}= {{ __mail_user_password }}
-{{ 'search_base'.ljust(28) }}= {{ rebeldream_user_dn }}
+{{ 'search_base'.ljust(28) }}= {{ autonomy_user_dn }}
 {{ 'scope'.ljust(28) }}= {{ item.scope }}
 {{ 'query_filter'.ljust(28) }}= {{ item.query_filter }}
 {% if item.leaf_result_attribute is defined -%}

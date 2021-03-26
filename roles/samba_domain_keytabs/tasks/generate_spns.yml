@@ -50,6 +50,6 @@
   become: yes
   loop: "{{ user.spns }}"
   when:
-    - rebeldream_fqdn == item.host
+    - autonomy_fqdn == item.host
     - item.spn is defined
   notify: restart keytab

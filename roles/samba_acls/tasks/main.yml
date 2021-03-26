@@ -7,7 +7,7 @@
     recurse: yes
     follow: no
     owner: "root"
-    group: "{{ rebeldream_org_unit_name | upper }}\\unixadmins"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     mode: "{{ item.mode | default('0770') }}"
   become: yes
   loop: "{{ samba_shares }}"
@@ -39,28 +39,28 @@
 # ==================================================================================================
 # - name: "Set ACLs on User Home Folders"
 #   ansible.windows.win_acl:
-#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
-#     user: "{{ rebeldream_org_unit_name }}\\Domain Admins"
+#     path: "\\\\{{ autonomy_fqdn }}\\Users"
+#     user: "{{ autonomy_org_unit_name }}\\Domain Admins"
 #     type: allow
 #     rights: "FullControl"
 
 # - name: "Set ACLs on User Home Folders"
 #   ansible.windows.win_acl:
-#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
-#     user: "{{ rebeldream_org_unit_name }}\\unixadmins"
+#     path: "\\\\{{ autonomy_fqdn }}\\Users"
+#     user: "{{ autonomy_org_unit_name }}\\unixadmins"
 #     type: allow
 #     rights: "FullControl"
 
 # - name: "Set ACLs on User Home Folders"
 #   ansible.windows.win_acl:
-#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
-#     user: "{{ rebeldream_org_unit_name }}\\Domain Users"
+#     path: "\\\\{{ autonomy_fqdn }}\\Users"
+#     user: "{{ autonomy_org_unit_name }}\\Domain Users"
 #     type: allow
 #     rights: "ReadAndExecute"
 
 # - name: "Set ACLs on User Home Folders"
 #   ansible.windows.win_acl:
-#     path: "\\\\{{ rebeldream_fqdn }}\\Users"
+#     path: "\\\\{{ autonomy_fqdn }}\\Users"
 #     user: "CREATOR OWNER"
 #     type: allow
 #     rights: "FullControl"

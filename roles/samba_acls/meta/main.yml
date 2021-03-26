@@ -3,7 +3,7 @@ galaxy_info:
   description: Installs Samba File Server
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 
@@ -26,5 +26,5 @@ galaxy_info:
     - fileserver
 
 dependencies:
-  - role: bloodymage.rebeldream.config_defaults
-  - role: bloodymage.rebeldream.collection_handlers
+  - role: bloodymage.autonomy.config_defaults
+  - role: bloodymage.autonomy.collection_handlers

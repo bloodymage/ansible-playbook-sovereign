@@ -153,9 +153,9 @@
     move_home: yes
   loop: "{{ users }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -214,9 +214,9 @@
     index_var: index
   become: yes
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"

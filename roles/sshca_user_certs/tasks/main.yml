@@ -4,8 +4,8 @@
   ansible.builtin.file:
     path: "{{ ownca_directory }}/users/{{ item.name }}"
     state: directory
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: "{{ item.mode }}"
   become: no
   loop: "{{ sshca_user_pki_dirs }}"
@@ -75,8 +75,8 @@
   ansible.builtin.copy:
     dest: "{{ ownca_directory }}/users/certs/{{ item.item.username }}.pub"
     content:  "{{ item.public_key }}"
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: "0644"
   loop: "{{ __result.results }}"
   become: no
@@ -117,7 +117,7 @@
   ansible.builtin.set_fact:
     sshca_user_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_user_key_password"
+    __password_store_id: "{{ autonomy_org_name }}_common/sshca/sshca_user_key_password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   delegate_to: localhost
@@ -155,7 +155,7 @@
 
 - name: "Ensure user has their .ssh directory"
   ansible.builtin.file:
-    path: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}/.ssh"
+    path: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh"
     state: directory
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
@@ -174,7 +174,7 @@
 - name: "Install SSH public key"
   ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
-    dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
+    dest: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
     mode: "0600"
@@ -186,7 +186,7 @@
 - name: "Install SSH Certificate"
   ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/ssh/{{ item.username }}-cert.pub"
-    dest: "/home/{{ rebeldream_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}-cert.pub"
+    dest: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}-cert.pub"
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
     mode: "0600"
@@ -205,7 +205,7 @@
   loop: "{{ domain_users }}"
   become: yes
   vars:
-    __realm: "{% if inventory_hostname not in groups['sssd'] %}{{ rebeldream_org_unit_name | upper }}\\{% else %}{% endif %}"
+    __realm: "{% if inventory_hostname not in groups['sssd'] %}{{ autonomy_org_unit_name | upper }}\\{% else %}{% endif %}"
   when:
     - item.id_number is defined
 
@@ -213,7 +213,7 @@
 # - name: Authorize key with GitHub
 #   ansible.builtin.github_key:
 #     name: "{{ item.username | title }}"
-#     token: '{{ rebeldream_github_oauth_token }}'
+#     token: '{{ autonomy_github_oauth_token }}'
 #     pubkey: "{{ lookup('file', __ssh_pubkey) }}"
 #     state: present
 #   loop: "{{ domain_users }}"
@@ -222,4 +222,4 @@
 #     __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
 #   when:
 #     - item.id_number is defined
-#     - item.username in rebeldream_github_users
+#     - item.username in autonomy_github_users

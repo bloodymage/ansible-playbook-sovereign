@@ -6,16 +6,16 @@
 - name: "Provision Subsequent Active Directory Domain Controller"
   ansible.builtin.command:
     cmd: >
-      samba-tool domain join {{ rebeldream_domain }} DC
+      samba-tool domain join {{ autonomy_domain }} DC
       --dns-backend=BIND9_DLZ
-      -U'{{ rebeldream_org_unit_name | upper }}\administrator'
+      -U'{{ autonomy_org_unit_name | upper }}\administrator'
       --password={{ samba_administrator_password }}
   register: samba_ad_created
   become: yes
   notify: Update krb5
   when:
     - not __samba_joined_as_domain_controller
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 # ==================================================================================================
 #
@@ -28,7 +28,7 @@
 #     pattern: idmap.ldb
 #     recurse: yes
 #   register: idmap_file
-#   when: rebeldream_fqdn == __samba_schema_master
+#   when: autonomy_fqdn == __samba_schema_master
 
 - name: "Backup idmap.ldb"
   ansible.builtin.command:
@@ -36,7 +36,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "Fetch idmap.ldb"
   ansible.builtin.fetch:
@@ -46,7 +46,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "Copy idmap.ldb to New Servers"
   ansible.builtin.copy:
@@ -55,7 +55,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 - name: "Flush Net Cache on New DC"
   ansible.builtin.command:
@@ -63,7 +63,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 # ==================================================================================================
 #
@@ -89,7 +89,7 @@
 #       - '--filter="+ */"'
 #       - '--filter="- *"'
 #   delegate_to: "{{ __samba_schema_master }}"
-#   when: rebeldream_fqdn != __samba_schema_master
+#   when: autonomy_fqdn != __samba_schema_master
 
 - name: "Reset Samba ACLs on Sysvol for New Controller"
   ansible.builtin.command:
@@ -97,4 +97,4 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master

@@ -3,7 +3,7 @@
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   when:
@@ -40,7 +40,7 @@
   ansible.builtin.shell: >
     samba-tool group add "{{ __groupname }}"
     --gid-number {{ item.id_number }}
-    --nis-domain "{{ rebeldream_org_unit_name | upper }}"
+    --nis-domain "{{ autonomy_org_unit_name | upper }}"
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
@@ -60,7 +60,7 @@
   ansible.builtin.shell: >
     samba-tool group add "{{ __groupname }}"
     --gid-number {{ item.id_number }}
-    --nis-domain "{{ rebeldream_org_unit_name | upper }}"
+    --nis-domain "{{ autonomy_org_unit_name | upper }}"
     --mail-address {{ item.mail_address }}
     -U Administrator
     --password {{ samba_administrator_password }}
@@ -120,13 +120,13 @@
   ansible.builtin.command:
     cmd: >
       samba-tool user create "{{ __username }}" "{{ __password }}"
-      --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
+      --unix-home "/home/{{ autonomy_org_unit_name | upper }}/{{ __username }}"
       --uid-number "{{ item.id_number }}"
       --gid-number "{{ item.id_number }}"
       --given-name "{{ item.given_name }}"
       --surname "{{ item.surname }}"
       --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
-      --nis-domain "{{ rebeldream_org_unit_name | upper }}"
+      --nis-domain "{{ autonomy_org_unit_name | upper }}"
       --mail-address "{{ __username }}@{{ samba_email_domain }}"
       --username Administrator
       --password {{ samba_administrator_password }}
@@ -135,9 +135,9 @@
   vars:
     __username: "{{ item.username | default(item.given_name | lower) }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ __username }}/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ __username }}/password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -155,12 +155,12 @@
 - name: Add Samba Users
   ansible.builtin.shell: >
     samba-tool user create "{{ __username }}" "{{ __password }}"
-    --unix-home "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
+    --unix-home "/home/{{ autonomy_org_unit_name | upper }}/{{ __username }}"
     --uid-number "{{ item.id_number }}"
     --gid-number "{{ item.id_number }}"
     --given-name "{{ item.given_name }}"
     --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
-    --nis-domain "{{ rebeldream_org_unit_name | upper }}"
+    --nis-domain "{{ autonomy_org_unit_name | upper }}"
     --mail-address "{{ __username }}@{{ samba_email_domain }}"
     --username Administrator
     --password {{ samba_administrator_password }}
@@ -169,9 +169,9 @@
   vars:
     __username: "{{ item.username }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ __username }}/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ __username }}/password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -206,9 +206,9 @@
   become: yes
   vars:
     __username: "{{ item.username }}"
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ __username }}/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ __username }}/password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -283,7 +283,7 @@
 # ==================================================================================================
 - name: "Insert User LDAP Attributes"
   community.general.ldap_attrs:
-    dn: "CN={{ __dn }},{{ rebeldream_user_dn }}"
+    dn: "CN={{ __dn }},{{ autonomy_user_dn }}"
     attributes:
       co: "{{ item.country | default(omit) }}"
       # carLicense:
@@ -327,20 +327,20 @@
       # telephoneNumber:
       title: "{{ item.job_title | default(omit) }}"
       uidNumber: "{{ item.id_number | default(omit) }}"
-      unixHomeDirectory: "/home/{{ rebeldream_org_unit_name | upper }}/{{ __username }}"
+      unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ __username }}"
       url: "{{ item.urls | default(omit) }}"
       userCertificate: []
       wWWHomePage: "{{ item.internet_address | default(omit) }}"
     state: exact
-    bind_dn: "cn=administrator,{{ rebeldream_user_dn }}"
+    bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
     bind_pw: "{{ samba_administrator_password }}"
     start_tls: yes
-    server_uri: "ldap://{{ rebeldream_fqdn }}"
+    server_uri: "ldap://{{ autonomy_fqdn }}"
   loop: "{{ domain_users }}"
   vars:
     __generated_username: "{{ __given_name[0] }}{{ __surname[0] | default(null) }}"
     __username: "{{ item.username | default(__generated_username) }}"
-    __default_mail: "{{ item.username }}@{{ rebeldream_root_domain }}"
+    __default_mail: "{{ item.username }}@{{ autonomy_root_domain }}"
     __mail: "{{ item.mail | default(__default_mail) }}"
     __given_name: "{{ item.given_name  | default(item.username) }}"
     __surname: "{{ item.surname | default(omit) }}"

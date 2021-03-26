@@ -4,7 +4,7 @@
 # Files and Directories
 #
 # ==================================================================================================
-#ownca_home_dir: "/home/{{ rebeldream_org_unit_name | upper }}"
+#ownca_home_dir: "/home/{{ autonomy_org_unit_name | upper }}"
 ownca_home_dir: "/srv/samba/home"
 ownca_user_pki_dir: ".pki"
 ownca_user_cert_dir: "{{ ownca_user_pki_dir }}/certs"

@@ -3,7 +3,7 @@ galaxy_info:
   description: Generates Certificates for Servers from the internal Certificate Authority
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 

@@ -3,7 +3,7 @@
     - role: bloodymage.autonomy.cups
     - role: bloodymage.autonomy.opensc
       when:
-        - rebeldream_smart_card_login
+        - autonomy_smart_card_login
     - role: bloodymage.autonomy.libnss3_tools
     - role: bloodymage.autonomy.evolution
       tags:

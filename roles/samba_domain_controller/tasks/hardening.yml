@@ -11,7 +11,7 @@
 #   become: yes
 #   loop:
 #     - "samba-tool domain settings account_machine_join_quota 0"
-#   when: rebeldream_fqdn == __samba_schema_master
+#   when: autonomy_fqdn == __samba_schema_master
 #   ignore_errors: yes
 
 - name: "Disable Guest Account"
@@ -23,7 +23,7 @@
     - "samba-tool user disable Guest"
   ignore_errors: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 # ==================================================================================================
 #
@@ -39,5 +39,5 @@
   register: success
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
   ignore_errors: yes

@@ -99,7 +99,7 @@ TrustedUserCAKeys {{ sshca_userca_certificate }}
 {# instead.                                                                                       #}
 {#                                                                                                #}
 {# ============================================================================================== #}
-{% if not rebeldream_smart_card_login %}
+{% if not autonomy_smart_card_login %}
 {% if openssh_gssapi_authentication != __openssh_gssapi_authentication -%}
   GSSAPIAuthentication {{ openssh_gssapi_authentication }}
 {% endif %}

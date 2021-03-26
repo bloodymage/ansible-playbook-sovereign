@@ -37,9 +37,9 @@
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   become: no
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -80,7 +80,7 @@
   include: "provision_additional_controllers.yml"
   become: no
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
     - not __samba_joined_as_domain_controller
 
 - name: "Start Samba Domain Controller"
@@ -121,7 +121,7 @@
       samba-tool dns add localhost
       "{{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa"
       "{{ ansible_host.split('.')[3] }}.{{ ansible_host.split('.')[2] }}"
-      PTR "{{ rebeldream_fqdn }}"
+      PTR "{{ autonomy_fqdn }}"
       -U administrator
       --password="{{ samba_administrator_password }}"
   become: yes
@@ -131,7 +131,7 @@
   include: "hardening.yml"
   become: no
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 # ==================================================================================================
 #
@@ -201,7 +201,7 @@
 #   become: yes
 #   register: success
 #   when:
-#     - rebeldream_fqdn == __samba_schema_master
+#     - autonomy_fqdn == __samba_schema_master
 
 - name: Create Cron Sync
   ansible.builtin.cron:
@@ -215,10 +215,10 @@
     user: "root"
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "Update Schema"
   include: "schema_updates.yml"
   become: no
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master

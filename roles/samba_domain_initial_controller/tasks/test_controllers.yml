@@ -14,7 +14,7 @@
     cmd: "samba-tool drs showrepl"
   become: yes
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
   notify: restart bind
 
 - name: "(Tests) List all shares provided by the Domain Controller"
@@ -23,13 +23,13 @@
   register: shares
   become: yes
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 # - name: Verify SMB Authentication
 #   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
 #   register: success
 #   become: yes
-#   when: rebeldream_fqdn != __samba_schema_master
+#   when: autonomy_fqdn != __samba_schema_master
 #   ignore_errors: yes
 
 #- debug:
@@ -44,7 +44,7 @@
 
 - name: "(Tests) udp-based _kerberos SRV resource record in the domain"
   ansible.builtin.command:
-    cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
+    cmd: "host -t SRV _kerberos._udp.{{ autonomy_domain }}."
   register: success
   become: yes
 
@@ -56,7 +56,7 @@
   no_log: true
   become: no
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 - name: Test Active Directory Domain Controller
   ansible.builtin.command:
@@ -64,7 +64,7 @@
   register: success
   become: no
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 - name: Print Success
   ansible.builtin.debug:
@@ -73,4 +73,4 @@
     verbosity: 1
   become: no
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master

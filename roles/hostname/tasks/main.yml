@@ -35,7 +35,7 @@
 # ==================================================================================================
 - name: "Set Hostname"
   ansible.builtin.hostname:
-    name: "{{ rebeldream_hostname }}"
+    name: "{{ autonomy_hostname }}"
   become: yes
   when:
     - inventory_hostname != "localhost"

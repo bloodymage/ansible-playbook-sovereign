@@ -50,10 +50,10 @@ RewriteRule ^/*$ %{DOCUMENT_ROOT}/w/index.php [PT,L]
   Krb5Keytab /etc/apache2/{{ item.name }}.keytab
   KrbServiceName Any 
   KrbLocalUserMapping On
-  KrbAuthRealms {{ rebeldream_domain | upper }}
+  KrbAuthRealms {{ autonomy_domain | upper }}
   AuthLDAPBindDN "cn={{ mediawiki_ldap_authenticator }},{{ mediawiki_ldap_userdn }}" 
   AuthLDAPBindPassword "{{ mediawiki_ldap_password }}" 
-  AuthLDAPURL "ldap://dc.{{ rebeldream_domain }}/{{ mediawiki_ldap_userdn }}?sAMAccountName,mail,displayName?sub?(objectClass=*)" 
+  AuthLDAPURL "ldap://dc.{{ autonomy_domain }}/{{ mediawiki_ldap_userdn }}?sAMAccountName,mail,displayName?sub?(objectClass=*)" 
   Require ldap-attribute attribute="value" 
 {% endif %} 
 
@@ -105,9 +105,9 @@ SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
 SSLCertificateFile "{{ item.ssl_certificate_file }}"
 SSLCertificateChainFile "{{ item.ssl_certificate_chain_file }}"
 #SSLCACertificatePath /etc/ssl/certs/
-SSLCACertificateFile "{{ rebeldream_component_ca_file }}"
+SSLCACertificateFile "{{ autonomy_component_ca_file }}"
 #SSLCARevocationPath /etc/apache2/ssl.crl/
-SSLCARevocationFile "{{ rebeldream_component_crl_file }}"
+SSLCARevocationFile "{{ autonomy_component_crl_file }}"
 #SSLVerifyClient require
 #SSLVerifyDepth  10
 #SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire

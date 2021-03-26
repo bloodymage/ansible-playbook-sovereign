@@ -4,7 +4,7 @@
     - role: bloodymage.autonomy.dotfiles
       vars:
         dotfiles_users: "{{ domain_users }}"
-        dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
+        dotfiles_home: "/home/{{ autonomy_org_unit_name | upper }}"
       tags:
         - dotfiles
 

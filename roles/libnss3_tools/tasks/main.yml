@@ -29,7 +29,7 @@
       certutil -d /etc/pki/nssdb
       -A -n "{{ item.common_name }}"
       -t CT,CT,CT -a
-      -i /usr/local/share/ca-certificates/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt
+      -i /usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca.crt
   become: yes
   loop: "{{ ownca_certificate_authorities }}"
   tags:

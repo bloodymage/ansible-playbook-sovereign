@@ -19,9 +19,9 @@
 {# ssh_config(5) man page.                                                                        #}
 {#                                                                                                #}
 {# ============================================================================================== #}
-Host *.{{ rebeldream_root_domain }}
+Host *.{{ autonomy_root_domain }}
 {% if inventory_hostname in groups['workstations'] %}
-{% if rebeldream_smart_card_login %}
+{% if autonomy_smart_card_login %}
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
 {% else %}
   GSSAPIDelegateCredentials yes
@@ -30,7 +30,7 @@ Host *.{{ rebeldream_root_domain }}
   CertificateFile ~/.ssh/%u-cert.pub
 
 {% if inventory_hostname in groups['workstations'] %}
-{% if rebeldream_smart_card_login -%}
+{% if autonomy_smart_card_login -%}
   {% if openssh_github -%}
   Host github.com
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
@@ -53,5 +53,5 @@ Host *.{{ rebeldream_root_domain }}
 
 {# Host * #}
 {#   CanonicalizeHostname yes #}
-{#   CanonicalDomains {{ rebeldream_root_domain }} #}
+{#   CanonicalDomains {{ autonomy_root_domain }} #}
 {#   CanonicalizeMaxDots 2 #}

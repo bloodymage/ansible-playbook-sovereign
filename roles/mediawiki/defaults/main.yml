@@ -65,7 +65,7 @@ mediawiki_skins_defaults:
   - MonoBook
   - Vector
 
-mediawiki_cookie_domain: "{{ rebeldream_domain }}"
+mediawiki_cookie_domain: "{{ autonomy_domain }}"
 mediawiki_db_name: "my_wiki"
 mediawiki_db_user: "wikiuser"
 
@@ -77,14 +77,14 @@ mediawiki_kerberos_ad_sso: no
 mediawiki_ldap_config: no
 mediawiki_ldap_authenticator: "mediawiki"
 mediawiki_ldap_password: "password"
-mediawiki_ldap_basedn: "dc={{ rebeldream_domain.split('.')[0] }},dc={{ rebeldream_domain.split('.')[1] }},dc={{ rebeldream_domain.split('.')[2] }}"
-mediawiki_ldap_userdn: "cn=users,dc={{ rebeldream_domain.split('.')[0] }},dc={{ rebeldream_domain.split('.')[1] }},dc={{ rebeldream_domain.split('.')[2] }}"
-mediawiki_ldap_groupdn: "cn=users,dc={{ rebeldream_domain.split('.')[0] }},dc={{ rebeldream_domain.split('.')[1] }},dc={{ rebeldream_domain.split('.')[2] }}"
+mediawiki_ldap_basedn: "dc={{ autonomy_domain.split('.')[0] }},dc={{ autonomy_domain.split('.')[1] }},dc={{ autonomy_domain.split('.')[2] }}"
+mediawiki_ldap_userdn: "cn=users,dc={{ autonomy_domain.split('.')[0] }},dc={{ autonomy_domain.split('.')[1] }},dc={{ autonomy_domain.split('.')[2] }}"
+mediawiki_ldap_groupdn: "cn=users,dc={{ autonomy_domain.split('.')[0] }},dc={{ autonomy_domain.split('.')[1] }},dc={{ autonomy_domain.split('.')[2] }}"
 mediawiki_json_config:
   - name: connection
     options:
       - name: server
-        value_string: "dc.{{ rebeldream_domain }}"
+        value_string: "dc.{{ autonomy_domain }}"
       - name: port
         value_string: 389
       - name: user

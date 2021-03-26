@@ -33,7 +33,7 @@
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   become: no
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   when:
     - samba_administrator_password == "password"
@@ -58,7 +58,7 @@
     #sssd_soft_crl: yes
     #sssd_soft_ocsp: yes
     #sssd_certificate_verification: "no_verification"
-    sssd_certificate_verification: "crl_file={{ rebeldream_identity_crl_file }}"
+    sssd_certificate_verification: "crl_file={{ autonomy_identity_crl_file }}"
     sssd_pkinit_pool: "DIR:/etc/ssl/certs/"
     sssd_pkinit_identities: "PKCS11:opensc-pkcs11.so:slotid=0:certid=01"
     sssd_default_ccache_name: "KEYRING:persistent:%{uid}"
@@ -145,7 +145,7 @@
 
 - name: Join Realm
   expect:
-    command: /bin/bash -c "/usr/sbin/realm join {{ rebeldream_domain }} --user=Administrator"
+    command: /bin/bash -c "/usr/sbin/realm join {{ autonomy_domain }} --user=Administrator"
     responses:
       (?i)Password: "{{ samba_administrator_password }}"
   ignore_errors: yes
@@ -174,7 +174,7 @@
   become: yes
   notify: restart sssd
   when:
-    - rebeldream_smart_card_login
+    - autonomy_smart_card_login
 
 - name: "Set variables for pam sss config"
   ansible.builtin.set_fact:
@@ -182,7 +182,7 @@
     sssd_pam_auth_initial: "pam_sss.so allow_missing_name try_cert_auth forward_pass"
   become: no
   when:
-    - rebeldream_smart_card_login
+    - autonomy_smart_card_login
     - inventory_hostname in groups['workstations']
 
 - name: "Install /usr/share/pam-configs/sss"

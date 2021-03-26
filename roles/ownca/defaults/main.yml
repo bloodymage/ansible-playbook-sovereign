@@ -4,7 +4,7 @@ packages:
   - rng-tools
   - ca-certificates
 
-ownca_intermediate_ca: "{{ rebeldream_org_unit_name | lower }}"
+ownca_intermediate_ca: "{{ autonomy_org_unit_name | lower }}"
 
 ownca_revoked_certificates: []
 

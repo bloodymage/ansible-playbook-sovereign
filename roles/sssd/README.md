@@ -1,4 +1,4 @@
-Ansible Role: Bloodymage.rebeldream.sssd
+Ansible Role: Bloodymage.autonomy.sssd
 ===============
 
 - [Description](#description)
@@ -26,8 +26,8 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 
 ### Dependencies
 ```
-- role: bloodymage.rebeldream.collection_handlers
-- role: bloodymage.rebeldream.krb5_client_config
+- role: bloodymage.autonomy.collection_handlers
+- role: bloodymage.autonomy.krb5_client_config
 ```
 
 A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
@@ -45,7 +45,7 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: servers
       roles:
-        - { role: bloodymage.rebeldream.sssd, x: 42 }
+        - { role: bloodymage.autonomy.sssd, x: 42 }
 
 Features and Advantages
 -----------------------

@@ -3,7 +3,7 @@ galaxy_info:
   description: Configures DNS Reverse Zones
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 

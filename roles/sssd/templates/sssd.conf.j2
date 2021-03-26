@@ -5,9 +5,9 @@
   services = {{ sssd_services }}
 {% endif %}
 config_file_version = 2
-domains = {{ rebeldream_domain }}
+domains = {{ autonomy_domain }}
 debug_level = {{ sssd_debug_level }}
-{% if rebeldream_smart_card_login and inventory_hostname in groups['workstations'] %}
+{% if autonomy_smart_card_login and inventory_hostname in groups['workstations'] %}
 {% if sssd_certificate_verification is defined -%}
   certificate_verification = {{ sssd_certificate_verification }}
 {% endif %}
@@ -25,10 +25,10 @@ debug_level = {{ sssd_debug_level }}
 {% else -%}
   pam_pwd_expiration_warning = {{ sssd_pam_pwd_expiration_warning }}
 {% endif %}
-{% if rebeldream_smart_card_login  and inventory_hostname in groups['workstations'] -%}
+{% if autonomy_smart_card_login  and inventory_hostname in groups['workstations'] -%}
 {% if sssd_ldap_user_certificate is defined -%}
   pam_cert_auth = {{ sssd_pam_cert_auth }}
-  pam_cert_db_path = {{ rebeldream_identity_ca_chain_file }}
+  pam_cert_db_path = {{ autonomy_identity_ca_chain_file }}
   {#p11_uri = pkcs11:opensc-pkcs11.so:slotid=0:certid=01;id=01 #}
 {% endif %}
 {% endif %}
@@ -36,10 +36,10 @@ debug_level = {{ sssd_debug_level }}
   pam_verbosity = {{ sssd_pam_verbosity }}
 {% endif %}
 
-[domain/{{ rebeldream_domain }}]
-ad_domain = {{ rebeldream_domain }}
-ad_server = dc.{{ rebeldream_domain }}
-krb5_realm = {{ rebeldream_realm }}
+[domain/{{ autonomy_domain }}]
+ad_domain = {{ autonomy_domain }}
+ad_server = dc.{{ autonomy_domain }}
+krb5_realm = {{ autonomy_realm }}
 id_provider = ad
 access_provider = ad
 realmd_tags = manages-system joined-with-adcli 
@@ -51,17 +51,17 @@ enumerate = true
 {% if sssd_ad_gpo_access_control is defined -%}
   ad_gpo_access_control = {{ sssd_ad_gpo_access_control }}
 {% endif %}
-{% if rebeldream_smart_card_login  and inventory_hostname in groups['workstations']  -%}
+{% if autonomy_smart_card_login  and inventory_hostname in groups['workstations']  -%}
 {% if sssd_ldap_user_certificate is defined -%}
   ldap_tls_reqcert = demand
-  ldap_tls_cacert = {{ rebeldream_component_ca_chain_file }}
+  ldap_tls_cacert = {{ autonomy_component_ca_chain_file }}
   ldap_user_certificate = {{ sssd_ldap_user_certificate }}
 {% endif %}
 {% endif %}
 
 {# Smart card's don't work without this #}
-{% if rebeldream_smart_card_login  and inventory_hostname in groups['workstations'] -%}
-  [certmap/{{ rebeldream_domain }}/ms]
+{% if autonomy_smart_card_login  and inventory_hostname in groups['workstations'] -%}
+  [certmap/{{ autonomy_domain }}/ms]
   matchrule = <SAN:ntPrincipalName>.*@.*
   maprule = (|(userPrincipal={subject_nt_principal})(samAccountName={subject_nt_principal.short_name}))
 {% endif %}
