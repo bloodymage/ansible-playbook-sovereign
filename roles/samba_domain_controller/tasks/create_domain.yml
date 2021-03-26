@@ -12,14 +12,14 @@
       --server-role=dc
       --use-rfc2307
       --dns-backend="{{ samba_dns_backend }}"
-      --realm="{{ rebeldream_domain | upper }}"
-      --domain="{{ rebeldream_org_unit_name | upper }}"
+      --realm="{{ autonomy_domain | upper }}"
+      --domain="{{ autonomy_org_unit_name | upper }}"
       --adminpass="{{ samba_administrator_password }}"
   register: samba_ad_created
   become: yes
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "Restart bind"
   service:
@@ -28,7 +28,7 @@
   become: yes
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "start samba-ad-dc"
   ansible.builtin.service:
@@ -36,7 +36,7 @@
     state: started
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
     - __samba_recreate_realm
 
 - name: "Create Reverse Zone"
@@ -49,7 +49,7 @@
   become: yes
   ignore_errors: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "Add Domain Controller to Reverse Zone"
   ansible.builtin.command:
@@ -57,7 +57,7 @@
       samba-tool dns add localhost
       "{{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa"
       "{{ ansible_host.split('.')[3] }}.{{ ansible_host.split('.')[2] }}"
-      PTR "{{ rebeldream_fqdn }}"
+      PTR "{{ autonomy_fqdn }}"
       -U administrator
       --password="{{ samba_administrator_password }}"
   become: yes
@@ -74,13 +74,13 @@
   register: shares
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 # - name: Verify SMB Authentication
 #   shell: "smbclient //localhost/netlogon -UAdministrator -c 'ls' --password={{ samba_administrator_password }}"
 #   register: success
 #   become: yes
-#   when: rebeldream_fqdn == __samba_schema_master
+#   when: autonomy_fqdn == __samba_schema_master
 #   ignore_errors: yes
 
 #- debug:
@@ -89,19 +89,19 @@
 
 - name: "(Tests) Tcp-based _ldap SRV record in the domain"
   ansible.builtin.command:
-    cmd: "host -t SRV _ldap._tcp.{{ rebeldream_domain }}."
+    cmd: "host -t SRV _ldap._tcp.{{ autonomy_domain }}."
   register: success
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "(Tests) udp-based _kerberos SRV resource record in the domain"
   ansible.builtin.command:
-    cmd: "host -t SRV _kerberos._udp.{{ rebeldream_domain }}."
+    cmd: "host -t SRV _kerberos._udp.{{ autonomy_domain }}."
   register: success
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "(Tests) The A record of the domain controller"
   ansible.builtin.command:
@@ -109,7 +109,7 @@
   register: success
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "(Tests) KDC get ticket"
   expect:
@@ -119,7 +119,7 @@
   no_log: true
   become: no
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "(Tests) KDC verify ticket"
   ansible.builtin.command:
@@ -127,7 +127,7 @@
   register: success
   become: no
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "(Tests) The PTR record of the domain controller"
   ansible.builtin.command:
@@ -135,7 +135,7 @@
   register: success
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "Print Success"
   ansible.builtin.debug:
@@ -143,4 +143,4 @@
     verbosity: 1
   become: no
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master

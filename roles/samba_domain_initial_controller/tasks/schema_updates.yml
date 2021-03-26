@@ -8,7 +8,7 @@
   loop: "{{ samba_schema_extensions }}"
   become: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 # ==================================================================================================
 #
@@ -27,4 +27,4 @@
   become: yes
   ignore_errors: yes
   when:
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master

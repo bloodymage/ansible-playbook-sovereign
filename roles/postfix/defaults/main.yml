@@ -6,7 +6,7 @@ packages:
 postfix_mailbox_users: []
 
 postfix_virtual_mailbox_domain_maps:
-  - name: "{{ rebeldream_domain }}"
+  - name: "{{ autonomy_domain }}"
     status: "OK"
 
 postfix_sasl_relay_files:
@@ -17,63 +17,63 @@ postfix_sasl_relay_files:
 
 postfix_local_user_maps:
   - username: webmaster
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: www
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: www-data
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: postmaster
-    email: "postmaster@{{ rebeldream_root_domain }}"
+    email: "postmaster@{{ autonomy_root_domain }}"
   - username: mailer-daemon
-    email: "postmaster@{{ rebeldream_root_domain }}"
+    email: "postmaster@{{ autonomy_root_domain }}"
   - username: abuse
-    email: "abuse@{{ rebeldream_root_domain }}"
+    email: "abuse@{{ autonomy_root_domain }}"
   - username: nobody
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: hostmaster
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: usenet
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: news
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: ftp
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: noc
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: security
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
   - username: clamav
-    email: "webmaster@{{ rebeldream_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
 
 postfix_virtual_mailbox_users:
-  - username: "webmaster@{{ rebeldream_root_domain }}"
-    email: "webmaster@{{ rebeldream_root_domain }}"
-  - username: "postmaster@{{ rebeldream_root_domain }}"
-    email: "postmaster@{{ rebeldream_root_domain }}"
-  - username: "abuse@{{ rebeldream_root_domain }}"
-    email: "abuse@{{ rebeldream_root_domain }}"
+  - username: "webmaster@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: "postmaster@{{ autonomy_root_domain }}"
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: "abuse@{{ autonomy_root_domain }}"
+    email: "abuse@{{ autonomy_root_domain }}"
 
 postfix_virtual_mailbox_user_aliases:
-  - alias: "webmaster@{{ rebeldream_root_domain }}"
-    email: "webmaster@{{ rebeldream_root_domain }}"
-  - alias: "postmaster@{{ rebeldream_root_domain }}"
-    email: "postmaster@{{ rebeldream_root_domain }}"
-  - alias: "abuse@{{ rebeldream_root_domain }}"
-    email: "abuse@{{ rebeldream_root_domain }}"
-  - alias: "root@{{ rebeldream_root_domain }}"
-    email: "webmaster@{{ rebeldream_root_domain }}"
-  - alias: "root@mail.{{ rebeldream_root_domain }}"
-    email: "webmaster@{{ rebeldream_root_domain }}"
-  - alias: "hostmaster@{{ rebeldream_root_domain }}"
-    email: "webmaster@{{ rebeldream_root_domain }}"
+  - alias: "webmaster@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - alias: "postmaster@{{ autonomy_root_domain }}"
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - alias: "abuse@{{ autonomy_root_domain }}"
+    email: "abuse@{{ autonomy_root_domain }}"
+  - alias: "root@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - alias: "root@mail.{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - alias: "hostmaster@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
 
 postfix_catchall_user_alias:
-  alias: "@{{ rebeldream_root_domain }}"
-  email: "webmaster@{{ rebeldream_root_domain }}"
+  alias: "@{{ autonomy_root_domain }}"
+  email: "webmaster@{{ autonomy_root_domain }}"
 
 postfix_canonical_mappings:
-  - origin: "www-data@{{ rebeldream_fqdn }}"
-    destination: "webmaster@{{ rebeldream_root_domain }}"
+  - origin: "www-data@{{ autonomy_fqdn }}"
+    destination: "webmaster@{{ autonomy_root_domain }}"
 
 postfix_ldap_maps: []
 postfix_ldap_map_debug_level: 0
@@ -107,9 +107,9 @@ postfix_line_length_limit: "6144"
 postfix_mailbox_size_limit: "0"
 postfix_mydestination:
   - "$myhostname"
-  - "localhost.{{ rebeldream_domain }}"
+  - "localhost.{{ autonomy_domain }}"
   - "localhost"
-postfix_myhostname: "{{ rebeldream_fqdn }}"
+postfix_myhostname: "{{ autonomy_fqdn }}"
 postfix_non_smtpd_milters: "$smtpd_milters"
 postfix_postscreen_dnsbl_action: "enforce"
 postfix_postscreen_dnsbl_sites:
@@ -120,8 +120,8 @@ postfix_postscreen_greet_action: "enforce"
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 postfix_smtpd_banner: "$myhostname ESMTP"
 postfix_smtpd_tls_chain_files:
-  - "/etc/ssl/private/{{ rebeldream_fqdn }}.key"
-  - "/etc/ssl/certs/{{ rebeldream_fqdn }}-chain.pem"
+  - "/etc/ssl/private/{{ autonomy_fqdn }}.key"
+  - "/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem"
 postfix_smtpd_helo_required: "yes"
 postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
 postfix_smtpd_use_tls: "yes"

@@ -63,8 +63,8 @@
   ansible.builtin.file:
     path: "{{ __user_pki_dir }}/{{ item[1].name }}"
     state: directory
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
+    owner: "root"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     mode: "{{ item[1].mode }}"
   become: yes
   loop: "{{ domain_users | product(ownca_user_pki_dirs) | list }}"
@@ -86,18 +86,18 @@
   community.crypto.openssl_privatekey:
     path: "{{ __user_private_dir }}/{{ __username }}.key"
     type: "{{ ownca_privatekey_type }}"
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
+    owner: "root"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     cipher: auto
     size: 2048
-    mode: "0600"
+    mode: "0770"
     force: no
     passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     backup: yes
   become: yes
   loop: "{{ domain_users }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item.username }}/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ item.username }}/password"
     __username: "{{ item.username }}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ item.username }}"
     __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
@@ -113,11 +113,11 @@
 # ==================================================================================================
 - name: Generate User CSRs
   community.crypto.openssl_csr:
-    country_name: "{{ rebeldream_country }}"
-    state_or_province_name: "{{ rebeldream_region }}"
-    locality_name: "{{ rebeldream_city }}"
-    organization_name: "{{ rebeldream_org_name }}"
-    organizational_unit_name: "{{ rebeldream_org_unit_name }}"
+    country_name: "{{ autonomy_country }}"
+    state_or_province_name: "{{ autonomy_region }}"
+    locality_name: "{{ autonomy_city }}"
+    organization_name: "{{ autonomy_org_name }}"
+    organizational_unit_name: "{{ autonomy_org_unit_name }}"
     common_name: "{{ __given_name }}{{ __surname }}"
     email_address: "{{ __email }}"
     key_usage: "{{ item[1].key_usage }}"
@@ -138,30 +138,30 @@
           - privilege_withdrawn
           - aa_compromise
     path: "{{ __user_csr_dir }}/{{ __username }}_{{ item[1].name }}.csr"
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
-    mode: "0644"
+    owner: "root"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "0770"
     backup: yes
     force: no
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item[0].username }}/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
     __password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     __username: "{{ item[0].username }}"
-    __public_email: "{{ item[0].username }}@{{ rebeldream_root_domain }}"
+    __public_email: "{{ item[0].username }}@{{ autonomy_root_domain }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"
     __surname: "{% if item[0].surname is defined %} {{ item[0].surname }}{% else %}{% endif %}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
     __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
     __user_csr_dir: "{{ __user_home_dir }}/{{ ownca_user_csr_dir }}"
     __id_number: "{{ item[0].id_number }}"
-    __user_principal_name: "{{ item[0].username }}@{{ rebeldream_domain }}"
+    __user_principal_name: "{{ item[0].username }}@{{ autonomy_domain }}"
     __email: "{{ __public_email }}"
     __san_auth: "otherName:{{ msupn }};UTF8:{{ __user_principal_name }}"
     __san_email: "email:{{ __email }}"
     __san: "{{ __san_email }}{% if item[1].name == 'authentication' %},{{ __san_auth }}{%endif %}"
-    __crl_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity.crl"
+    __crl_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
   when:
     - item[0].id_number is defined
     - item[0].spns is not defined
@@ -242,7 +242,7 @@
   delegate_to: localhost
   register: result
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_identity_password"
+    __password_store_id: "{{ autonomy_domain }}/ownca/ownca_identity_password"
     __password_lookup: "{{ __password_store_id }}"
     __username: "{{ item[0].username }}"
   when:
@@ -260,7 +260,7 @@
 
 # - name: Add serial number to crl database
 #   ansible.builtin.blockinfile:
-#     dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ rebeldrream_org_unit_name }}-identity-ca.crl.srl"
+#     dest: "{{ ownca_ca_directory }}/db/{{ autonomy_org_name }}-{{ rebeldrream_org_unit_name }}-identity-ca.crl.srl"
 #     block: |
 #       - serial_number: {{ item.serial_number }}
 #         revocation_date: "{{ lookup('pipe','date --utc +%Y%m%d%H%M%S') }}Z"
@@ -279,9 +279,9 @@
   ansible.builtin.copy:
     src: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
     dest: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
-    mode: "0644"
+    owner: "root"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "0770"
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
@@ -302,19 +302,19 @@
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     certificate_path: "{{ __pki_cert_file }}"
     other_certificates:
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-identity-ca.pem"
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.pem"
+      - "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-root-ca.pem"
     state: present
-    owner: "{{ __id_number }}"
-    group: "{{ __id_number }}"
-    mode: "0600"
+    owner: "root"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "0770"
     backup: yes
     force: no
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ item[0].username }}/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
     __username: "{{ item[0].username }}"
     __id_number: "{{ item[0].id_number }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"

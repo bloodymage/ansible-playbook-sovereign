@@ -1,18 +1,18 @@
 - hosts: all
   roles:
-    - role: bloodymage.rebeldream.config_environment
+    - role: bloodymage.autonomy.config_environment
 
 - hosts: dns_servers:!public_zone
   roles:
-    - role: bloodymage.rebeldream.bind
+    - role: bloodymage.autonomy.bind
 
 - hosts: all:!localhost
   ignore_unreachable: yes
   roles:
-    - role: bloodymage.rebeldream.dns_forwardzones
+    - role: bloodymage.autonomy.dns_forwardzones
 
 # TODO: Configure RouterOS reversezones
 - hosts: all:!localhost:!routeros
   ignore_unreachable: yes
   roles:
-    - role: bloodymage.rebeldream.dns_reversezones
+    - role: bloodymage.autonomy.dns_reversezones

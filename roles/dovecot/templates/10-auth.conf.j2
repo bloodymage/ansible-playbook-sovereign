@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-{% if rebeldream_realm_identity_management_system == "samba" %}
+{% if autonomy_realm_identity_management_system == "samba" %}
 auth_gssapi_hostname = "$ALL"
   auth_krb5_keytab = "/etc/dovecot/dovecot.keytab"
 {% endif %}

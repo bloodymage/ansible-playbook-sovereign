@@ -3,7 +3,7 @@ galaxy_info:
   description: Configures krb5.conf
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 
@@ -25,5 +25,4 @@ galaxy_info:
     - krb5
 
 dependencies:
-  - role: bloodymage.rebeldream.collection_handlers
-  #- role: bloodymage.rebeldream.system_upgrade
+  - role: bloodymage.autonomy.collection_handlers

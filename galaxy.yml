@@ -1,5 +1,5 @@
 namespace: bloodymage
-name: rebeldream
+name: autonomy
 version: 0.5.0
 
 description: Installs your own network services.
@@ -13,10 +13,10 @@ dependencies:
   - community.crypto
   - community.network
 
-repository: https://github.com/bloodymage/ansible-collection-rebeldream
+repository: https://github.com/bloodymage/ansible-collection-autonomy
 documentation: http://docs.bloodymage.org
 homepage: https://bloodymage.org
-issues: https://github.com/bloodymage/ansible-collection-rebeldream/issues
+issues: https://github.com/bloodymage/ansible-collection-autonomy/issues
 
 build_ignore: []
 

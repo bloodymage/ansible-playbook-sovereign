@@ -1,0 +1,53 @@
+---
+# tasks file for xscreensaver
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+
+- name: "Install packages"
+  ansible.builtin.package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+
+- name: Install Default Config File
+  ansible.builtin.template:
+    src: xscreensaver.j2
+    dest: "/etc/X11/app-defaults/XScreenSaver"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+
+- name: "Set gnome lockscreen to use xscreensaver lock"
+  ansible.builtin.file:
+    src: "/usr/bin/xscreensaver-command"
+    dest: "/usr/bin/gnome-screensaver-command"
+    owner: root
+    group: root
+    state: link
+  become: yes
+
+# ==================================================================================================
+#
+# This is needed for Kali, but breaks with Ubuntu
+#
+# ==================================================================================================
+# - name: "Set rss-glx links"
+#   ansible.builtin.file:
+#     src: "{{ item.link }}/{{ item.name }}"
+#     dest: "/usr/libexec/xscreensaver/{{ item.name }}"
+#     owner: root
+#     group: root
+#     state: link
+#   loop: "{{ xscreensaver_programs }}"
+#   become: yes
+#   when:
+#     - item.link is defined
+

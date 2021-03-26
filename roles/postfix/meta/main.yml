@@ -3,7 +3,7 @@ galaxy_info:
   description: Installs Postfix MTA
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 
@@ -26,5 +26,5 @@ galaxy_info:
     - mta
 
 dependencies:
-  - role: bloodymage.rebeldream.collection_handlers
-  #- role: bloodymage.rebeldream.krb5_client_config
+  - role: bloodymage.autonomy.collection_handlers
+  #- role: bloodymage.autonomy.krb5_client_config

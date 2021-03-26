@@ -50,13 +50,13 @@
     group: root
     mode: "0644"
   loop:
-    - "{{ rebeldream_org_name }}-root-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
-    - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+    - "{{ autonomy_org_name }}-root-ca.crt"
+    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca.crt"
+    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca.crt"
+    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-identity-ca.crt"
+    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca.crt"
+    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca.crt"
+    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-identity-ca.crt"
   become: yes
   tags:
     - firefox

@@ -29,9 +29,9 @@
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   become: no
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -59,7 +59,7 @@
   become: no
   when:
     - __samba_recreate_realm
-    - rebeldream_fqdn == __samba_schema_master
+    - autonomy_fqdn == __samba_schema_master
 
 - name: "Configure smb.conf file"
   ansible.builtin.template:

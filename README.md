@@ -1,6 +1,6 @@
-# Ansible Collection - bloodymage.rebeldream
+# Ansible Collection - bloodymage.autonomy
 
-[![Ansile-Lint](https://github.com/bloodymage/ansible-collection-rebeldream/workflows/Ansible%20Lint/badge.svg?event=push)](https://github.com/bloodymage/ansible-collection-rebeldream/actions?query=workflow%3A%22Ansible+Lint%22)
+[![Ansile-Lint](https://github.com/bloodymage/ansible-collection-autonomy/workflows/Ansible%20Lint/badge.svg?event=push)](https://github.com/bloodymage/ansible-collection-autonomy/actions?query=workflow%3A%22Ansible+Lint%22)
 
 - [Description](#description)
 - [Installation](#installation)
@@ -40,7 +40,7 @@ I wanted the freedom to tinker and have my systems work the way I wanted. I was 
 
 Other names that feel appropriate: Sovereign, Self-Hosted, are either already in use, or while they clearly indicate what this project is, don't quite capture the spirit behind this project.
 
-That said, "Rebel dream" doesn't quite feel right either.  Looking for a new name: See issue [#238](https://github.com/bloodymage/ansible-collection-rebeldream/issues/238), feel free to comment.
+That said, "Rebel dream" doesn't quite feel right either.  Looking for a new name: See issue [#238](https://github.com/bloodymage/ansible-collection-autonomy/issues/238), feel free to comment.
 
 ## Installation
 ### Ansible Galaxy
@@ -52,7 +52,7 @@ TBD
 ```
 mkdir -p ~/.ansible/collections/ansible_collections/bloodymage
 cd ~/.ansible/collections/ansible_collections/bloodymage
-git clone https://github.com/bloodymage/ansible-collection-rebeldream rebeldream
+git clone https://github.com/bloodymage/ansible-collection-autonomy autonomy
 ```
 
 ## Usage
@@ -61,7 +61,7 @@ Create your inventory.  Set variables according to [Variables](#Variables).  Aga
 For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) for more information.
 
 ```
-ansible-playbook bloodymage/rebeldream/playbooks/site.yml
+ansible-playbook bloodymage/autonomy/playbooks/site.yml
 ```
 
 This will create your site.

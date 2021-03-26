@@ -48,4 +48,4 @@ galaxy_info:
     #       Maximum 20 tags per role.
 
 dependencies:
-  - role: bloodymage.rebeldream.collection_handlers
+  - role: bloodymage.autonomy.collection_handlers

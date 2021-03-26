@@ -98,7 +98,7 @@
   notify: start samba-domain-member
   vars:
     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   no_log: yes
   when:
@@ -114,14 +114,14 @@
 - name: "Set SeDiskOperatorPrivilege for unixadmins so they can set ACLs"
   ansible.builtin.expect:
     command: >
-      net rpc rights grant '{{ rebeldream_org_unit_name | upper }}\unixadmins'
-      SeDiskOperatorPrivilege -U '{{ rebeldream_org_unit_name | upper }}\administrator'
+      net rpc rights grant '{{ autonomy_org_unit_name | upper }}\unixadmins'
+      SeDiskOperatorPrivilege -U '{{ autonomy_org_unit_name | upper }}\administrator'
     responses:
       (?i)password: "{{ __samba_administrator_password }}"
   become: yes
   vars:
     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   tags:
     - samba_file_server
@@ -130,25 +130,3 @@
     - samba-file-server-debug
     - recreate-realm
     - recreate-realm-debug
-
-# - name: "Set filesystem permissions"
-#   ansible.builtin.file:
-#     path: "{{ item.path }}"
-#     state: directory
-#     recurse: yes
-#     follow: no
-#     owner: root
-#     group: "{{ rebeldream_org_unit_name | upper }}\unixadmins"
-#     mode: "0770"
-#   become: yes
-#   tags:
-#     - samba_file_server
-#     - samba-file-server
-#     - samba_file_server_debug
-#     - samba-file-server-debug
-#     - recreate-realm
-#     - recreate-realm-debug
-
-# - name: "Set filesystem permissions for home directories"
-#   ansible.builtin.file:
-#     path: "/srv/samba/home/{{ item }}"

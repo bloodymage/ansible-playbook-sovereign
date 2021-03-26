@@ -19,7 +19,7 @@ samba_dns_backend: "BIND9_DLZ"
 
 samba_schema_extensions:
   - name: sshpubkey
-    dn: "CN=sshPublicKey,{{ rebeldream_schema_dn }}"
+    dn: "CN=sshPublicKey,{{ autonomy_schema_dn }}"
     change_type: "add"
     object_class: "top"
     object_class_detail: "attributeSchema"
@@ -31,11 +31,11 @@ samba_schema_extensions:
     attribute_syntax: "2.5.5.10"
     om_syntax: "4"
     single_valued: "FALSE"
-    object_category: "cn=attribute-schema,{{ rebeldream_schema_dn }}"
+    object_category: "cn=attribute-schema,{{ autonomy_schema_dn }}"
     search_flags: "8"
     schema_id_guid: ": cjdazyexzu+/aki0egdw+g=="
   - name: ldappubkey
-    dn: "cn=ldapPublicKey,{{ rebeldream_schema_dn }}"
+    dn: "cn=ldapPublicKey,{{ autonomy_schema_dn }}"
     change_type: "add"
     object_class: "top"
     object_class_detail: "classschema"
@@ -46,12 +46,12 @@ samba_schema_extensions:
     description: "mandatory: openssh lpk objectclass"
     sub_class_of: "top"
     object_class_category: "3"
-    object_category: "cn=class-schema,{{ rebeldream_schema_dn }}"
-    default_object_category: "cn=ldapPublicKey,{{ rebeldream_schema_dn }}"
+    object_category: "cn=class-schema,{{ autonomy_schema_dn }}"
+    default_object_category: "cn=ldapPublicKey,{{ autonomy_schema_dn }}"
     may_contain: "sshPublicKey"
     schema_id_guid: ": +8nfq43rpkwtogbcccskqa=="
   - name: sshldapmod
-    dn: "cn=user,{{ rebeldream_schema_dn }}"
+    dn: "cn=user,{{ autonomy_schema_dn }}"
     change_type: "modify"
     replace: "auxiliaryClass"
     auxiliary_class:

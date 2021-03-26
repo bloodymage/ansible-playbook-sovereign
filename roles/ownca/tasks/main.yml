@@ -55,8 +55,8 @@
   ansible.builtin.file:
     path: '{{ ownca_ca_directory }}/{{ item }}'
     state: directory
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: '0700'
   loop:
     - private
@@ -92,7 +92,7 @@
   ansible.builtin.debug:
     msg:
       - "{{ ownca_certificate_authorities }}"
-      - "{{ rebeldream_org_unit_name }}"
+      - "{{ autonomy_org_unit_name }}"
     verbosity: 2
   delegate_to: localhost
   become: no
@@ -105,7 +105,7 @@
 - name: Create crl serial file
   ansible.builtin.template:
     src: "{{ role_path }}/templates/serial.j2"
-    dest: "{{ ownca_ca_directory }}/db/{{ rebeldream_org_name }}-{{ item.name }}-ca.crl.srl"
+    dest: "{{ ownca_ca_directory }}/db/{{ autonomy_org_name }}-{{ item.name }}-ca.crl.srl"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     mode: "0600"
@@ -128,9 +128,9 @@
   ansible.builtin.set_fact:
     ownca_root_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_org_name }}_common/ownca/ownca_root_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_org_name }}_common/ownca/ownca_root_password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -148,9 +148,9 @@
   ansible.builtin.set_fact:
     ownca_{{ item }}_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_{{ item }}_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/ownca/ownca_{{ item }}_password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -175,12 +175,12 @@
 # ==================================================================================================
 - name: Generate CA Private Key
   community.crypto.openssl_privatekey:
-    path: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
     passphrase: "{{ item.password }}"
     type: "{{ ownca_privatekey_type }}"
     cipher: "auto"
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: "0400"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
@@ -195,22 +195,22 @@
 
 - name: Generate Certificate Authority Certificate Signing Requests (CSR)
   community.crypto.openssl_csr:
-    path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
-    privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
     common_name: "{{ item.common_name }}"
-    country_name: "{{ rebeldream_country_name | default(country) }}"
+    country_name: "{{ autonomy_country_name | default(country) }}"
     email_address: "{{ item.email_address | default(omit) }}"
-    organization_name: "{{ item.organization_name | default(rebeldream_org_name | title ) }}"
-    organizational_unit_name: "{{ item.organizational_unit_name | default(rebeldream_org_unit_name) | title }}"
-    state_or_province_name: "{{ rebeldream_region_name | default(region) }}"
+    organization_name: "{{ item.organization_name | default(autonomy_org_name | title ) }}"
+    organizational_unit_name: "{{ item.organizational_unit_name | default(autonomy_org_unit_name) | title }}"
+    state_or_province_name: "{{ autonomy_region_name | default(region) }}"
     key_usage: "{{ item.keyusage }}"
     key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
     basic_constraints: "{{ item.basic_constraints }}"
     basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
     create_subject_key_identifier: yes
     crl_distribution_points:
-      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item.name }}.crl"
         reasons:
           - key_compromise
           - ca_compromise
@@ -220,8 +220,8 @@
           - certificate_hold
           - privilege_withdrawn
           - aa_compromise
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     backup: yes
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
@@ -237,13 +237,13 @@
 
 - name: Generate Selfsigned Certificate
   community.crypto.x509_certificate:
-    path: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
-    privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ item.password }}"
-    csr_path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
     provider: "{{ item.provider }}"
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     backup: yes
     force: "{{ __ownca_regenerate }}"
   loop: "{{ ownca_certificate_authorities }}"
@@ -284,15 +284,15 @@
 
 - name: Generate OwnCA Signed Certificate
   community.crypto.x509_certificate:
-    path: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
-    csr_path: "{{ ownca_ca_directory }}/csr/{{ rebeldream_org_name }}-{{ item.name }}-ca.csr"
-    ownca_path: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.crt"
-    ownca_privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ rebeldream_org_name }}-{{ item.ownca }}-ca.key"
+    path: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    ownca_path: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca.crt"
+    ownca_privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca.key"
     ownca_privatekey_passphrase: "{{ item.ownca_privatekey_passphrase }}"
     provider: "{{ item.provider }}"
     backup: yes
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     force: "{{ __ownca_force_regeneration }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
@@ -317,11 +317,11 @@
     intermediate_certificates:
       - "{{ __intermediate_cert_path }}"
     root_certificates:
-      - "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-root-ca.crt"
+      - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
   vars:
-    __intermediate_cert_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
+    __intermediate_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
     __intermediate_cert_path: "{{ ownca_ca_certs_directory }}/{{ __intermediate_cert_file }}"
-    __input_chain_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item }}-ca.crt"
+    __input_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-{{ item }}-ca.crt"
     __input_chain_path: "{{ ownca_ca_certs_directory }}/{{ __input_chain_file }}"
   loop: "{{ ownca_issuing_authorities }}"
   register: parent_cert_authorities
@@ -401,9 +401,9 @@
   community.crypto.certificate_complete_chain:
     input_chain: "{{ lookup('file', __input_chain_path) }}"
     root_certificates:
-      - "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-root-ca.crt"
+      - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
   vars:
-    __input_chain_file: "{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
+    __input_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
     __input_chain_path: "{{ ownca_ca_certs_directory }}/{{ __input_chain_file }}"
   register: root_cert_authorities
   delegate_to: localhost
@@ -447,10 +447,10 @@
 
 - name: Write complete chain to disk
   ansible.builtin.copy:
-    dest: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-{{ item.item }}-ca-chain.crt"
+    dest: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-{{ item.item }}-ca-chain.crt"
     content: "{{ ''.join(item.complete_chain) }}"
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: "0644"
   loop: "{{ parent_cert_authorities.results }}"
   delegate_to: localhost
@@ -467,10 +467,10 @@
 
 - name: Write root chain (intermediates and root) to disk
   ansible.builtin.copy:
-    dest: "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca-chain.crt"
+    dest: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain.crt"
     content: "{{ ''.join(root_cert_authorities.complete_chain) }}"
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: "0644"
   delegate_to: localhost
   become: no
@@ -495,9 +495,9 @@
   ansible.builtin.command:
     cmd: >
       openssl x509
-      -in {{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt -inform PEM
-      -out {{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca.der -outform DER
-    creates: "{{ rebeldream_org_name }}-{{ item.name }}-ca.der"
+      -in {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crt -inform PEM
+      -out {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.der -outform DER
+    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca.der"
   become: no
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
@@ -513,9 +513,9 @@
   ansible.builtin.command:
     cmd: >
       openssl x509
-      -in {{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.crt -inform PEM
-      -out {{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.der -outform DER
-    creates: "{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.der"
+      -in {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt -inform PEM
+      -out {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der -outform DER
+    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
   become: no
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost

@@ -61,9 +61,9 @@
   ansible.builtin.set_fact:
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
-    __password_length: "length={{ rebeldream_password_length }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_org_name }}_common/sshca/sshca_host_key_password"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -82,9 +82,9 @@
   ansible.builtin.set_fact:
     sshca_user_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_user_key_password"
-    __password_length: "length={{ rebeldream_password_length }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_org_name }}_common/sshca/sshca_user_key_password"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
