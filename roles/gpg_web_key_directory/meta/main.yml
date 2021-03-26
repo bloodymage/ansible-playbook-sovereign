@@ -3,7 +3,7 @@ galaxy_info:
   description: Configures a GPG web key directory
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 
@@ -27,4 +27,4 @@ galaxy_info:
     - web_key_directory
 
 dependencies:
-  - role: bloodymage.rebeldream.config_defaults
+  - role: bloodymage.autonomy.config_defaults

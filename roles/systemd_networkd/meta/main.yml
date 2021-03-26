@@ -1,0 +1,29 @@
+galaxy_info:
+  author: G Derber
+  description: Configures systemd-networkd
+  company: Bloodymage
+
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
+
+  license: MIT
+
+  min_ansible_version: 2.10
+
+  platforms:
+    - name: Rasbian
+      versions:
+        - 10
+    - name: Debian
+      versions:
+        - 10
+    - name: Ubuntu
+      versions:
+        - 20.04
+
+  galaxy_tags:
+    - bloodymage
+    - packages
+
+dependencies:
+  - role: bloodymage.autonomy.config_defaults
+  - role: bloodymage.autonomy.collection_handlers

@@ -92,9 +92,9 @@
   ansible.builtin.set_fact:
     keycloak_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/keycloak_admin_password"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/keycloak_admin_password"
     __password_length: "length={{ keycloak_password_length }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -110,9 +110,9 @@
   ansible.builtin.set_fact:
     keycloak_keystore_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/keycloak_keystore_password"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/keycloak_keystore_password"
     __password_length: "length={{ keycloak_password_length }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -183,16 +183,16 @@
   community.crypto.openssl_pkcs12:
     path:  "{{ keycloak_home }}/{{ keycloak_mode }}/configuration/{{ keycloak_keystore_file }}"
     friendly_name: "{{ keycloak_keystore_alias }}"
-    privatekey_path: "{{ ownca_etc }}/private/{{ rebeldream_fqdn }}.key"
-    certificate_path: "{{ ownca_etc }}/certs/{{ rebeldream_fqdn }}-chain.pem"
+    privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
+    certificate_path: "{{ ownca_etc }}/certs/{{ autonomy_fqdn }}-chain.pem"
     other_certificates:
       - "/etc/ssl/certs/zeus.olympus.drbr.org.pem"
       - "/etc/ssl/certs/hera.olympus.drbr.org.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.pem"
-      - "/etc/ssl/certs/{{ rebeldream_org_name }}-root-ca.pem"
+      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca.pem"
+      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca.pem"
+      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca.pem"
+      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca.pem"
+      - "/etc/ssl/certs/{{ autonomy_org_name }}-root-ca.pem"
     action: export
     passphrase: "{{ keycloak_keystore_password }}"
     state: present
@@ -245,7 +245,7 @@
 #   ansible.builtin.command:
 #     cmd: >-
 #       {{ keycloak_binary_dir }}/kcadm.sh create realms
-#       -s realm="{{ rebeldream_org_unit_name | lower }}"
+#       -s realm="{{ autonomy_org_unit_name | lower }}"
 #       -s enabled=true
 #   become: no
 #   tags:
@@ -256,7 +256,7 @@
 # Create User Federation
 #
 # kcadm.sh create components
-# -r {{ rebeldream_org_unit_name | title }}
+# -r {{ autonomy_org_unit_name | title }}
 # -s name=kerberos-ldap-provider
 # -s providerId=ldap
 # -s providerType=org.keycloak.storage.UserStorageProvider
@@ -278,9 +278,9 @@
 # -s 'config.uuidLDAPAttribute=["objectGUID"]'
 # -s 'config.userObjectClasses=["inetOrgPerson, organizationalPerson, user"]'
 # -s 'config.connectionUrl=["ldap://{{ __samba_schema_master }}"]'
-# -s 'config.usersDn=["{{ rebeldream_users_dn }}"]'
+# -s 'config.usersDn=["{{ autonomy_users_dn }}"]'
 # -s 'config.authType=["simple"]'
-# -s 'config.bindDn=["{{ __keycloak_user }},{{ rebeldream_user_dn }}"]'
+# -s 'config.bindDn=["{{ __keycloak_user }},{{ autonomy_user_dn }}"]'
 # -s 'config.bindCredential=["{{ __keycloak_password }}"]'
 # -s 'config.searchScope=["1"]'
 # -s 'config.useTruststoreSpi=["ldapsOnly"]'
@@ -289,7 +289,7 @@
 # -s 'config.allowKerberosAuthentication=["true"]'
 # -s 'config.serverPrincipal=["HTTP/localhost@KEYCLOAK.ORG"]'
 # -s 'config.keyTab=["http.keytab"]'
-# -s 'config.kerberosRealm=["{{ rebeldream_domain | upper }}"]'
+# -s 'config.kerberosRealm=["{{ autonomy_domain | upper }}"]'
 # -s 'config.debug=["true"]'
 # -s 'config.useKerberosForPasswordAuthentication=["true"]'
 
@@ -306,7 +306,7 @@
 #   local_action:
 #     module: keycloak_client
 #     auth_client_id: admin-cli
-#     auth_keycloak_url: "https://{{ rebeldream_fqdn }}"
+#     auth_keycloak_url: "https://{{ autonomy_fqdn }}"
 #     auth_realm: master
 #     auth_username: "{{ keycloak_admin_user }}"
 #     auth_password: "{{ keycloak_admin_password }}"

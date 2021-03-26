@@ -2,15 +2,15 @@
   hosts: all:!public_zone
   ignore_unreachable: yes
   roles:
-    - role: bloodymage.rebeldream.config_environment
+    - role: bloodymage.autonomy.config_environment
       tags:
         - always
-    - role: bloodymage.rebeldream.config_realm_environment
+    - role: bloodymage.autonomy.config_realm_environment
 
 - name: "Configure baseline Kerberos"
   hosts: internal_network:!routeros
   roles:
-    - role: bloodymage.rebeldream.krb5_client_config
+    - role: bloodymage.autonomy.krb5_client_config
 
 # ==================================================================================================
 #
@@ -22,7 +22,7 @@
 # ==================================================================================================
 - hosts: samba_domain_controllers:samba_file_servers
   roles:
-    - role: bloodymage.rebeldream.samba_domain_clean_environment
+    - role: bloodymage.autonomy.samba_domain_clean_environment
       when:
         - __samba_recreate_realm
       tags:
@@ -32,7 +32,7 @@
 
 - hosts: samba_schema_master
   roles:
-    - role: bloodymage.rebeldream.samba_domain_initial_controller
+    - role: bloodymage.autonomy.samba_domain_initial_controller
       when:
         - __samba_recreate_realm
       tags:
@@ -42,7 +42,7 @@
 
 - hosts: samba_domain_controllers
   roles:
-    - role: bloodymage.rebeldream.samba_domain_controller
+    - role: bloodymage.autonomy.samba_domain_controller
       tags:
         - samba_domain_controller
         - samba-domain-controller
@@ -50,8 +50,8 @@
 
 - hosts: samba_schema_master
   roles:
-    - role: bloodymage.rebeldream.config_ownca_environment
-    - role: bloodymage.rebeldream.samba_domain_users
+    - role: bloodymage.autonomy.config_ownca_environment
+    - role: bloodymage.autonomy.samba_domain_users
       tags:
         - samba_domain_users
         - samba-domain-users
@@ -61,68 +61,34 @@
 
 - hosts: openldap_servers
   roles:
-    - role: bloodymage.rebeldream.openldap
+    - role: bloodymage.autonomy.openldap
       tags:
         - never
         - openldap
 
 - hosts: sssd
   roles:
-    - role: bloodymage.rebeldream.sssd
+    - role: bloodymage.autonomy.sssd
       tags:
         - sssd
         - recreate-realm
 
 - hosts: keytabs
   roles:
-    - role: bloodymage.rebeldream.samba_domain_keytabs
+    - role: bloodymage.autonomy.samba_domain_keytabs
       tags:
         - samba-domain-keytabs
         - recreate-realm
 
 - hosts: keycloak_servers:!public_zone
   roles:
-    - role: bloodymage.rebeldream.keycloak
+    - role: bloodymage.autonomy.keycloak
       tags:
         - keycloak
         - recreate-realm
 
-# Need to add in specific file server(s) (ones with user home directories).
-- hosts: workstations:&linux
-  roles:
-    - role: bloodymage.rebeldream.dotfiles
-      vars:
-        dotfiles_users: "{{ domain_users }}"
-        dotfiles_home: "/home/{{ rebeldream_org_unit_name | upper }}"
-      tags:
-        - dotfiles
-
-- hosts: samba_ownca_user_hosts
-  roles:
-    - role: bloodymage.rebeldream.ownca_user_certs
-      tags:
-        - ownca_user_certs
-        - ownca-user-certs
-        - ownca_user_certs_debug
-        - ownca-user-certs-debug
-        - recreate-realm
-
-- hosts: samba_ownca_user_hosts:workstations:&linux
-  roles:
-    - role: bloodymage.rebeldream.sshca_user_certs
-      tags:
-        - sshca-user-certs
-        - recreate-realm
-
-- hosts: samba_schema_master
-  roles:
-    - role: bloodymage.rebeldream.samba_domain_user_certs
-      tags:
-        - samba-domain-user-certs
-        - recreate-realm
-
 - hosts: freeradius_servers
   roles:
-    - role: bloodymage.rebeldream.freeradius
+    - role: bloodymage.autonomy.freeradius
       tags:
         - freeradius

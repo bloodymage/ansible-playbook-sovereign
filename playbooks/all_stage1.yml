@@ -6,7 +6,7 @@
 - hosts: all:!public_zone:!virtual_ip_address
   ignore_unreachable: yes
   roles:
-    - role: bloodymage.rebeldream.config_environment
+    - role: bloodymage.autonomy.config_environment
       tags:
         - always
 
@@ -18,17 +18,17 @@
 - hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_ip_address
   strategy: linear
   roles:
-    - role: bloodymage.rebeldream.hostname
+    - role: bloodymage.autonomy.hostname
       tags:
         - hostname
-    - role: bloodymage.rebeldream.hosts
+    - role: bloodymage.autonomy.hosts
       tags:
         - hosts
-    - role: bloodymage.rebeldream.system_upgrade
+    - role: bloodymage.autonomy.system_upgrade
       tags:
         - system_upgrade
         - system-upgrade
-    - role: bloodymage.rebeldream.users
+    - role: bloodymage.autonomy.users
       tags:
         - users
 
@@ -42,74 +42,80 @@
 - hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
   strategy: linear
   roles:
-    - role: bloodymage.rebeldream.sshca_host_certs
-    - role: bloodymage.rebeldream.openssh
+    - role: bloodymage.autonomy.sshca_host_certs
+    - role: bloodymage.autonomy.openssh
       tags:
         - openssh
-    - role: bloodymage.rebeldream.nftables
+    - role: bloodymage.autonomy.nftables
       tags:
         - nftables
-    - role: bloodymage.rebeldream.fail2ban
+    - role: bloodymage.autonomy.fail2ban
       tags:
         - fail2ban
-    - role: bloodymage.rebeldream.ntp
+    - role: bloodymage.autonomy.ntp
       tags:
         - ntp
-    - role: bloodymage.rebeldream.unattended_upgrades
+    - role: bloodymage.autonomy.unattended_upgrades
       tags:
         - unattended-upgrades
-    - role: bloodymage.rebeldream.sudo
+    - role: bloodymage.autonomy.sudo
       tags:
         - sudo
-    - role: bloodymage.rebeldream.skel
+    - role: bloodymage.autonomy.skel
       tags:
         - skel
-    - role: bloodymage.rebeldream.dotfiles
+    - role: bloodymage.autonomy.dotfiles
       tags:
         - dotfiles
-    - role: bloodymage.rebeldream.etckeeper
+    - role: bloodymage.autonomy.etckeeper
       tags:
         - etckeeper
-    - role: bloodymage.rebeldream.polkit
-      tags:
-        - polkit
-    - role: bloodymage.rebeldream.screen
+    #- role: bloodymage.autonomy.polkit
+    #  tags:
+    #    - polkit
+    - role: bloodymage.autonomy.screen
       tags:
         - screen
-    - role: bloodymage.rebeldream.global
+    - role: bloodymage.autonomy.global
       tags:
         - global
-    - role: bloodymage.rebeldream.rsync
+    - role: bloodymage.autonomy.rsync
       tags:
         - rsync
-    - role: bloodymage.rebeldream.curl
+    - role: bloodymage.autonomy.curl
       tags:
         - curl
-    - role: bloodymage.rebeldream.git
+    - role: bloodymage.autonomy.git
       tags:
         - git
-    - role: bloodymage.rebeldream.keychain
+    - role: bloodymage.autonomy.keychain
       tags:
         - keychain
-    - role: bloodymage.rebeldream.man
+    - role: bloodymage.autonomy.man
       tags:
         - man
-    - role: bloodymage.rebeldream.rename
+    - role: bloodymage.autonomy.rename
       tags:
         - rename
-    - role: bloodymage.rebeldream.members
+    - role: bloodymage.autonomy.members
       tags:
         - members
-    - role: bloodymage.rebeldream.bash_completion
+    - role: bloodymage.autonomy.bash_completion
       tags:
         - bash-completion
-    - role: bloodymage.rebeldream.ispell
+    - role: bloodymage.autonomy.ispell
       tags:
         - ispell
-    - role: bloodymage.rebeldream.make
+    - role: bloodymage.autonomy.make
       tags:
         - make
-    # - role: bloodymage.rebeldream.trash_cli
+    - role: bloodymage.autonomy.uptimed
+      tags:
+        - uptimed
+    - role: bloodymage.autonomy.htop
+      tags:
+        - htop
+    # - role: bloodymage.autonomy.trash_cli
     #   tags:
     #     - trash-cli
 
@@ -122,6 +128,6 @@
 # ==================================================================================================
 - hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
   roles:
-    - role: bloodymage.rebeldream.aptitude
+    - role: bloodymage.autonomy.aptitude
       tags:
         - aptitude

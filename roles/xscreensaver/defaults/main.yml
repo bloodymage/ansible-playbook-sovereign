@@ -1,0 +1,725 @@
+---
+# defaults file for xscreensaver
+packages:
+  - xscreensaver
+  - xscreensaver-data-extra
+  - xscreensaver-gl-extra
+  - xscreensaver-screensaver-bsod
+  - xscreensaver-screensaver-dizzy
+  - xscreensaver-screensaver-webcollage
+  - rss-glx
+
+xscreensaver_mode: "random"
+xscreensaver_timeout: "0:10:00"
+xscreensaver_cycle: "0:10:00"
+xscreensaver_lock_timeout: "0:00:00"
+xscreensaver_passwd_timeout: "0:00:30"
+xscreensaver_dpms_enabled: "False"
+xscreensaver_dpms_quickoff_enabled: "False"
+xscreensaver_dpms_standby: "2:00:00"
+xscreensaver_dpms_suspend: "2:00:00"
+xscreensaver_dpms_off: "4:00:00"
+xscreensaver_grab_desktop_images: "False"
+xscreensaver_grab_video_frames: "False"
+xscreensaver_choose_random_images: "False"
+xscreensaver_image_directory: ""
+xscreensaver_nice: "10"
+xscreensaver_memory_limit: "0"
+xscreensaver_lock: "False"
+xscreensaver_verbose: "False"
+xscreensaver_timestamp: "True"
+xscreensaver_fade: "True"
+xscreensaver_unfade: "False"
+xscreensaver_fade_seconds: "0:00:03"
+xscreensaver_fade_ticks: "20"
+xscreensaver_splash: "True"
+xscreensaver_splash_duration: "0:00:05"
+xscreensaver_visual_id: "default"
+xscreensaver_install_colormap: "True"
+xscreensaver_ignore_uninstalled_programs: "False"
+xscreensaver_auth_warning_slack: "20"
+
+# Allowed Values: 'date', 'literal', 'file', 'program', 'url', undef
+# Default: 'url'
+xscreensaver_text_mode: "{{ __xscreensaver_text_mode }}"
+xscreensaver_text_literal: "XScreenSaver"
+xscreensaver_text_file: ""
+xscreensaver_text_program: "fortune"
+xscreensaver_text_url: "https://planet.debian.org/rss20.xml"
+xscreensaver_capture_stderr: "True"
+xscreensaver_overlay_stderr: "True"
+xscreensaver_overlay_text_foreground: "#FFFF00"
+xscreensaver_overlay_text_background: "#000000"
+xscreensaver_font: "*-medium-r-*-140-*-m-*"
+xscreensaver_sgi_saver_extension: "True"
+xscreensaver_xidle_extension: "True"
+xscreensaver_proc_interrupts: "True"
+xscreensaver_xinput_extension_dev: "False"
+xscreensaver_get_view_port_is_full_of_lies: "False"
+xscreensaver_demo_command: "xscreensaver-demo"
+xscreensaver_help_url: "https://www.jwz.org/xscreensaver/man.html"
+xscreensaver_load_url: "x-www-browser '%s'"
+xscreensaver_date_format: "%Y-%m-%d %H:%M:%S"
+xscreensaver_new_login_command: "dm-tool switch-to-greeter"
+
+# # Change these at your peril:
+xscreensaver_pointer_poll_time: "0:00:05"
+xscreensaver_pointer_hysteresis: "10"
+xscreensaver_initial_delay: "0:00:00"
+xscreensaver_window_creation_timeout: "0:00:30"
+xscreensaver_bourne_shell: "/bin/sh"
+
+xscreensaver_dialog_heading_font: "-*-helvetica-bold-r-*-*-*-180-*-*-*-*-iso8859-1"
+xscreensaver_dialog_body_font: "-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1"
+xscreensaver_dialog_label_font: "-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1"
+xscreensaver_dialog_uname_font: "-*-helvetica-bold-r-*-*-*-120-*-*-*-*-iso8859-1"
+xscreensaver_dialog_button_font: "-*-helvetica-bold-r-*-*-*-140-*-*-*-*-iso8859-1"
+xscreensaver_dialog_date_font: "-*-helvetica-medium-r-*-*-*-80-*-*-*-*-iso8859-1"
+
+xscreensaver_passwd_font: "-*-courier-bold-r-*-*-*-140-*-*-*-iso8859-1"
+xscreensaver_passwd_uname: "True"
+xscreensaver_passwd_asterisks: "True"
+
+xscreensaver_dialog_foreground: "#000000"
+xscreensaver_dialog_background: "#E6E6E6"
+xscreensaver_dialog_button_foreground: "#000000"
+xscreensaver_dialog_button_background: "#F5F5F5"
+xscreensaver_dialog_text_foreground: "#000000"
+xscreensaver_dialog_text_background: "#FFFFFF"
+xscreensaver_dialog_top_shadow_color: "#FFFFFF"
+xscreensaver_dialog_bottom_shadow_color: "#CECECE"
+xscreensaver_dialog_logo_width: "210"
+xscreensaver_dialog_logo_height: "210"
+xscreensaver_dialog_internal_border_width: "24"
+xscreensaver_dialog_border_width: "1"
+xscreensaver_dialog_shadow_thickness: "2"
+xscreensaver_passwd_thermometer_foreground: "#4464AC"
+xscreensaver_passwd_thermometer_background: "#FFFFFF"
+xscreensaver_passwd_thermometer_width: "8"
+
+# ! A few other example color schemes.
+# !
+# ! A convenient way to debug these is to build and run "driver/test-passwd".
+# ! Remember that configure overwrites XScreenSaver.ad from XScreenSaver.ad.in.
+
+
+# ! Borderless theme:
+# !
+# ! xscreensaver_Dialog.topShadowColor:         #E6E6E6
+# ! xscreensaver_Dialog.bottomShadowColor:      #E6E6E6
+# ! xscreensaver_passwd.thermometer.width:      6
+
+
+# ! Dark gray theme:
+# !
+# ! xscreensaver_Dialog.foreground:             #CCCCCC
+# ! xscreensaver_Dialog.background:             #333333
+# ! xscreensaver_Dialog.topShadowColor:         #444444
+# ! xscreensaver_Dialog.bottomShadowColor:      #111111
+# ! xscreensaver_Dialog.text.foreground:        #DDDDDD
+# ! xscreensaver_Dialog.text.background:        #666666
+# ! xscreensaver_Dialog.Button.foreground:      #CCCCCC
+# ! xscreensaver_Dialog.Button.background:      #666666
+# ! xscreensaver_passwd.thermometer.foreground: #4464AC
+# ! xscreensaver_passwd.thermometer.background: #666666
+
+
+# ! Black borderless theme:
+# !
+# ! xscreensaver_Dialog.foreground:             #CCCCCC
+# ! xscreensaver_Dialog.background:             #000000
+# ! xscreensaver_Dialog.topShadowColor:         #000000
+# ! xscreensaver_Dialog.bottomShadowColor:      #000000
+# ! xscreensaver_Dialog.text.foreground:        #CCCCCC
+# ! xscreensaver_Dialog.text.background:        #000000
+# ! xscreensaver_Dialog.Button.foreground:      #CCCCCC
+# ! xscreensaver_Dialog.Button.background:      #333333
+# ! xscreensaver_passwd.thermometer.foreground: #CCCCCC
+# ! xscreensaver_passwd.thermometer.background: #333333
+# ! xscreensaver_passwd.thermometer.width:      3
+
+
+# ! Green on black theme:
+# !
+# ! xscreensaver_Dialog.foreground:             #00FF00
+# ! xscreensaver_Dialog.background:             #000000
+# ! xscreensaver_Dialog.topShadowColor:         #000000
+# ! xscreensaver_Dialog.bottomShadowColor:      #000000
+# ! xscreensaver_Dialog.shadowThickness:        1
+# ! xscreensaver_Dialog.text.foreground:        #00FF00
+# ! xscreensaver_Dialog.text.background:        #006600
+# ! xscreensaver_Dialog.Button.foreground:      #00FF00
+# ! xscreensaver_Dialog.Button.background:      #006600
+# ! xscreensaver_passwd.thermometer.foreground: #00CC00
+# ! xscreensaver_passwd.thermometer.background: #006600
+
+
+# ! White theme:
+# !
+# ! xscreensaver_Dialog.foreground:             #000000
+# ! xscreensaver_Dialog.background:             #FFFFFF
+# ! xscreensaver_Dialog.topShadowColor:         #CCCCCC
+# ! xscreensaver_Dialog.bottomShadowColor:      #CCCCCC
+# ! xscreensaver_Dialog.shadowThickness:        1
+# ! xscreensaver_Dialog.text.foreground:        #000000
+# ! xscreensaver_Dialog.text.background:        #FFFFFF
+# ! xscreensaver_Dialog.Button.foreground:      #000000
+# ! xscreensaver_Dialog.Button.background:      #FFFFFF
+
+
+# ! Blue theme:
+# !
+# ! xscreensaver_Dialog.foreground:             #000000
+# ! xscreensaver_Dialog.background:             #BBCCDD
+# ! xscreensaver_Dialog.topShadowColor:         #CCDDEE
+# ! xscreensaver_Dialog.bottomShadowColor:      #AABBCC
+# ! xscreensaver_Dialog.text.foreground:        #000000
+# ! xscreensaver_Dialog.text.background:        #DDEEFF
+# ! xscreensaver_Dialog.Button.foreground:      #000000
+# ! xscreensaver_Dialog.Button.background:      #DDEEFF
+# ! xscreensaver_passwd.thermometer.foreground: #5566AA
+# ! xscreensaver_passwd.thermometer.background: #BBCCDD
+
+
+# ! Aqua on black borderless theme:
+# !
+# ! xscreensaver_Dialog.foreground:             #00EFEF
+# ! xscreensaver_Dialog.background:             #000000
+# ! xscreensaver_Dialog.topShadowColor:         #000000
+# ! xscreensaver_Dialog.bottomShadowColor:      #000000
+# ! xscreensaver_Dialog.Button.foreground:      #000000
+# ! xscreensaver_Dialog.Button.background:      #2244EE
+# ! xscreensaver_Dialog.text.foreground:        #2244EE
+# ! xscreensaver_Dialog.text.background:        #EEEEEE
+# ! xscreensaver_Dialog.internalBorderWidth:    36
+# ! xscreensaver_Dialog.borderWidth:            4
+# ! xscreensaver_Dialog.shadowThickness:        2
+# ! xscreensaver_passwd.thermometer.foreground: #2244EE
+# ! xscreensaver_passwd.thermometer.background: #000088
+
+
+# ! Wine theme, similar to the login screen of "Ubuntu 18.04 Community".
+# !
+# ! xscreensaver_Dialog.foreground:             #AD8FA6
+# ! xscreensaver_Dialog.background:             #2C041E
+# ! xscreensaver_Dialog.topShadowColor:         #2C041E
+# ! xscreensaver_Dialog.bottomShadowColor:      #2C041E
+# ! xscreensaver_Dialog.text.foreground:        #706B70
+# ! xscreensaver_Dialog.text.background:        #F9F9F8
+# ! xscreensaver_Dialog.Button.foreground:      #CFC8CB
+# ! xscreensaver_Dialog.Button.background:      #4D2946
+# ! xscreensaver_passwd.thermometer.foreground: #AD8FA6
+# ! xscreensaver_passwd.thermometer.background: #4D2946
+# ! xscreensaver_passwd.thermometer.width:      6
+
+
+# ! Static text in the dialog boxes:
+# !
+xscreensaver_passwd_heading_label: "XScreenSaver %s"
+xscreensaver_passwd_body_label: "Please enter your password."
+xscreensaver_passwd_unlock_label: "OK"
+xscreensaver_passwd_login_label: "New Login"
+xscreensaver_passwd_user_label: "Username:"
+xscreensaver_passwd_passwd_label: "Password:"
+
+xscreensaver_splash_heading_label: "XScreenSaver %s"
+xscreensaver_splash_body_label: 'Copyright \251 1991-2020 by'
+xscreensaver_splash_body2_label: "Jamie Zawinski <jwz@jwz.org>"
+xscreensaver_splash_demo_label: "Settings"
+xscreensaver_splash_help_label: "Help"
+
+xscreensaver_programs:
+  - name: abstractile
+  - name: anemone
+  - name: anemotaxis
+  - name: antinspect
+    gl: yes
+    enabled: no
+    hack_name: "AntInspect"
+  - name: antmaze
+    gl: yes
+    enabled: no
+    hack_name: "AntMaze"
+  - name: antspotlight
+    gl: yes
+    enabled: no
+    hack_name: "AntSpotlight"
+  - name: apollonian
+  - name: apple2
+  - name: atlantis
+    gl: yes
+  - name: attraction
+  - name: atunnel
+    gl: yes
+  - name: barcode
+  - name: beats
+    gl: yes
+  - name: binaryring
+    hack_name: "BinaryRing"
+  - name: blaster
+  - name: blinkbox
+    gl: yes
+    hack_name: "BlinkBox"
+  - name: blitspin
+    hack_name: "BlitSpin"
+  - name: blocktube
+    gl: yes
+    hack_name: "BlockTube"
+  - name: boing
+    gl: yes
+  - name: bouboule
+  - name: bouncingcow
+    gl: yes
+    hack_name: "BouncingCow"
+  - name: boxed
+    gl: yes
+  - name: boxfit
+    hack_name: "BoxFit"
+  - name: braid
+    enabled: no
+  - name: bsod
+    hack_name: "BSOD"
+  - name: bubble3d
+    gl: yes
+    hack_name: "Bubble3D"
+  - name: bumps
+  - name: cage
+    gl: yes
+  - name: carousel
+    gl: yes
+  - name: ccurve
+    hack_name: "CCurve"
+  - name: celtic
+  - name: circuit
+    gl: yes
+  - name: cityflow
+    gl: yes
+  - name: cloudlife
+    hack_name: "CloudLife"
+  - name: companioncube
+    gl: yes
+    hack_name: "CompanionCube"
+  - name: compass
+  - name: coral
+  - name: covid19
+    gl: yes
+    hack_name: "COVID19"
+  - name: crackberg
+    gl: yes
+  - name: crumbler
+    gl: yes
+  - name: crystal
+    enabled: no
+  - name: cube21
+    gl: yes
+  - name: cubenetic
+    gl: yes
+  - name: cubestack
+    gl: yes
+    hack_name: "CubeStack"
+  - name: cubestorm
+    gl: yes
+    hack_name: "CubeStorm"
+  - name: cubetwist
+    gl: yes
+    hack_name: "CubeTwist"
+  - name: cubicgrid
+    gl: yes
+    hack_name: "CubicGrid"
+  - name: cwaves
+    hack_name: "CWaves"
+  - name: cynosure
+  - name: dangerball
+    gl: yes
+    hack_name: "DangerBall"
+  - name: decayscreen
+    hack_name: "DecayScreen"
+  - name: deco
+  - name: deepstars
+    hack_name: "DeepStars"
+    gl: yes
+  - name: deluxe
+  - name: demon
+    enabled: no
+  - name: discoball
+    gl: yes
+  - name: discrete
+  - name: distort
+  - name: drift
+  - name: dymaxionmap
+    gl: yes
+    hack_name: "DymaxionMap"
+  - name: endgame
+    gl: yes
+  - name: energystream
+    gl: yes
+    hack_name: "EnergyStream"
+  - name: engine
+    gl: yes
+  - name: epicycle
+  - name: eruption
+  - name: esper
+    gl: yes
+  - name: etruscanvenus
+    gl: yes
+    hack_name: "EtruscanVenus"
+  - name: euler2d
+    hack_name: "Euler2D"
+  - name: extrusion
+    gl: yes
+  - name: fadeplot
+    hack_name: "FadePlot"
+    enabled: no
+  - name: fiberlamp
+  - name: filmleader
+    hack_name: "FilmLeader"
+  - name: fireworkx
+  - name: flame
+  - name: flipflop
+    gl: yes
+    hack_name: "FlipFlop"
+  - name: flipscreen3d
+    gl: yes
+    hack_name: "FlipScreen3D"
+  - name: fliptext
+    gl: yes
+    hack_name: "FlipText"
+  - name: flow
+  - name: fluidballs
+    hack_name: "FluidBalls"
+  - name: flurry
+    gl: yes
+  - name: flyingtoasters
+    gl: yes
+    hack_name: "FlyingToasters"
+  - name: fontglide
+    hack_name: "FontGlide"
+  - name: fuzzyflakes
+    hack_name: "FuzzyFlakes"
+  - name: galaxy
+  - name: gears
+    gl: yes
+  - name: geodesic
+    gl: yes
+  - name: geodesicgears
+    gl: yes
+    hack_name: "GeodesicGears"
+  - name: gflux
+    gl: yes
+    hack_name: "GFlux"
+  - name: gibson
+    gl: yes
+  - name: glblur
+    gl: yes
+    enabled: no
+  - name: glcells
+    gl: yes
+  - name: gleidescope
+    gl: yes
+    hack_name: "Gleidescope"
+  - name: glhanoi
+    gl: yes
+  - name: glitchpeg
+    hack_name: "GlitchPEG"
+  - name: glknots
+    gl: yes
+  - name: glmatrix
+    gl: yes
+  - name: glplanet
+    gl: yes
+  - name: glschool
+    gl: yes
+  - name: glslideshow
+    gl: yes
+    enabled: no
+  - name: glsnake
+    gl: yes
+  - name: gltext
+    gl: yes
+  - name: goop
+  - name: grav
+  - name: gravitywell
+    gl: yes
+    hack_name: "GravityWell"
+  - name: greynetic
+  - name: halftone
+  - name: halo
+  - name: handsy
+    gl: yes
+  - name: headroom
+    gl: yes
+  - name: helix
+  - name: hexadrop
+  - name: hexstrut
+    gl: yes
+  - name: hilbert
+    gl: yes
+  - name: hopalong
+  - name: hydrostat
+    gl: yes
+  - name: hypertorus
+    gl: yes
+  - name: hypnowheel
+    gl: yes
+  - name: ifs
+    hack_name: "IFS"
+  - name: imsmap
+    hack_name: "IMSMap"
+  - name: interaggregate
+  - name: interference
+  - name: intermomentary
+  - name: jigglypuff
+    gl: yes
+    hack_name: "JigglyPuff"
+    enabled: no
+  - name: jigsaw
+    gl: yes
+  - name: juggler3d
+    gl: yes
+    hack_name: "Juggler3D"
+  - name: julia
+  - name: kaleidescope
+    enabled: no
+  - name: kaleidocycle
+    gl: yes
+  - name: klein
+    gl: yes
+  - name: kumppa
+  - name: lament
+    gl: yes
+  - name: lavalite
+    gl: yes
+  - name: lcdscrub
+    hack_name: "LCDscrub"
+    enabled: no
+  - name: lockward
+    gl: yes
+  - name: loop
+    enabled: no
+  - name: m6502
+    hack_name: "m6502"
+  - name: maze
+  - name: maze3d
+    gl: yes
+    hack_name: "Maze3D"
+  - name: memscroller
+    hack_name: "MemScroller"
+  - name: menger
+    gl: yes
+  - name: metaballs
+    hack_name: "MetaBalls"
+  - name: mirrorblob
+    gl: yes
+    hack_name: "MirrorBlob"
+  - name: moebius
+    gl: yes
+  - name: moebiusgears
+    gl: yes
+    hack_name: "MoebiusGears"
+  - name: moire
+  - name: moire2
+  - name: molecule
+    gl: yes
+  - name: morph3d
+    gl: yes
+    hack_name: "Morph3D"
+  - name: mountain
+  - name: munch
+  - name: nerverot
+    hack_name: "NerveRot"
+    gl: yes
+  - name: noof
+    gl: yes
+  - name: noseguy
+    hack_name: "NoseGuy"
+    enabled: no
+  - name: pacman
+  - name: pedal
+  - name: peepers
+    gl: yes
+  - name: penetrate
+  - name: penrose
+  - name: petri
+  - name: phosphor
+  - name: photopile
+    gl: yes
+  - name: piecewise
+  - name: pinion
+    gl: yes
+  - name: pipes
+    gl: yes
+  - name: polyhedra
+    gl: yes
+  - name: polyominoes
+    enabled: no
+  - name: polytopes
+    gl: yes
+  - name: pong
+  - name: popsquares
+    hack_name: "PopSquares"
+  - name: projectiveplane
+    gl: yes
+    hack_name: "ProjectivePlane"
+  - name: providence
+    gl: yes
+    enabled: no
+  - name: pulsar
+    gl: yes
+  - name: pyro
+    enabled: no
+  - name: qix
+  - name: quasicrystal
+    gl: yes
+    hack_name: "QuasiCrystal"
+  - name: queens
+    gl: yes
+  - name: raverhoop
+    gl: yes
+    hack_name: "RaverHoop"
+  - name: razzledazzle
+    gl: yes
+    hack_name: "RazzleDazzle"
+  - name: rd-bomb
+    hack_name: "RDbomb"
+  - name: ripples
+  - name: rocks
+    enabled: no
+  - name: romanboy
+    gl: yes
+    hack_name: "RomanBoy"
+  - name: rorschach
+  - name: rotzoomer
+    hack_name: "RotZoomer"
+  - name: rubik
+    gl: yes
+  - name: rubikblocks
+    gl: yes
+    hack_name: "RubikBlocks"
+  - name: sballs
+    gl: yes
+    hack_name: "SBalls"
+    enabled: no
+  - name: scooter
+  - name: shadebobs
+    hack_name: "ShadeBobs"
+  - name: sierpinski
+    enabled: no
+  - name: sierpinski3d
+    gl: yes
+    hack_name: "Sierpinski3D"
+  - name: skytentacles
+    gl: yes
+    hack_name: "SkyTentacles"
+  - name: slidescreen
+    hack_name: "SlideScreen"
+  - name: slip
+  - name: sonar
+    gl: yes
+  - name: speedmine
+    hack_name: "SpeedMine"
+  - name: sphereeversion
+    gl: yes
+    hack_name: "SphereEversion"
+  - name: spheremonics
+    gl: yes
+  - name: splitflap
+    gl: yes
+    hack_name: "SplitFlap"
+  - name: splodesic
+    gl: yes
+  - name: spotlight
+  - name: sproingies
+    gl: yes
+  - name: squiral
+  - name: stairs
+    gl: yes
+  - name: starfish
+  - name: starwars
+    gl: yes
+    hack_name: "StarWars"
+  - name: stonerview
+    gl: yes
+    hack_name: "StonerView"
+  - name: strange
+  - name: substrate
+  - name: superquadrics
+    gl: yes
+  - name: surfaces
+    gl: yes
+  - name: swirl
+  - name: tangram
+    gl: yes
+  - name: tessellimage
+  - name: thornbird
+    enabled: no
+  - name: timetunnel
+    gl: yes
+    hack_name: "TimeTunnel"
+  - name: topblock
+    gl: yes
+    hack_name: "TopBlock"
+  - name: triangle
+  - name: tronbit
+    gl: yes
+    hack_name: "TronBit"
+  - name: truchet
+  - name: twang
+  - name: unicode
+  - name: unicrud
+    gl: yes
+  - name: unknownpleasures
+    gl: yes
+    hack_name: "UnknownPleasures"
+  - name: vermiculate
+  - name: vfeedback
+    hack_name: "VFeedback"
+  - name: vidwhacker
+    enabled: no
+    hack_name: "VidWhacker"
+  - name: vigilance
+    gl: yes
+  - name: voronoi
+    gl: yes
+  - name: wander
+  - name: webcollage
+    hack_name: "WebCollage"
+    enabled: no
+  - name: whirlwindwarp
+    hack_name: "WhirlWindWarp"
+  - name: winduprobot
+    gl: yes
+    hack_name: "WindupRobot"
+  - name: wormhole
+  - name: xanalogtv
+    hack_name: "XAnalogTV"
+  - name: xflame
+  - name: xjack
+  - name: xlyap
+  - name: xmatrix
+  - name: xrayswarm
+    hack_name: "XRaySwarm"
+  - name: xspirograph
+  - name: zoom
+
+# xscreensaver_hacks.dnalogo.name:        DNA Logo
+# xscreensaver_hacks.glforestfire.name:  GLForestFire
+# xscreensaver_hacks.hyperball.name:      HyperBall
+# xscreensaver_hacks.hypercube.name:      HyperCube
+# xscreensaver_hacks.lmorph.name:         LMorph
+# xscreensaver_hacks.rdbomb.name:         RDbomb
+# xscreensaver_hacks.t3d.name:            T3D
+# xscreensaver_hacks.testx11.name:        TestX11
+
+
+
+# ! obsolete, but still used by xscreensaver-demo-Xm.
+# xscreensaver_hacks.documentation.isInstalled: True
+
+# ! (xrdb prevention kludge: whole file) */
+
+# ==================================================================================================
+#
+# Defaults
+#
+# ==================================================================================================
+__xscreensaver_text_mode: "url"

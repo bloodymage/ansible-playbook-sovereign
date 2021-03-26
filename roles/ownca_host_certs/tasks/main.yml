@@ -55,9 +55,9 @@
   ansible.builtin.set_fact:
     ownca_component_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/ownca/ownca_component_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/ownca/ownca_component_password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -92,12 +92,12 @@
 
 - name: "Identify Certificate Complete Chain"
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + rebeldream_fqdn + '.crt') }}"
+    input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + autonomy_fqdn + '.crt') }}"
     intermediate_certificates:
       - "{{ ownca_component_ca_cert }}"
       - "{{ ownca_intermediate_ca_cert }}"
     root_certificates:
-      - "{{ ownca_ca_certs_directory }}/{{ rebeldream_org_name }}-root-ca.crt"
+      - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
   register: parent_cert_authorities
   become: no
   delegate_to: localhost
@@ -141,10 +141,10 @@
 
 - name: "Write complete chain to disk"
   ansible.builtin.copy:
-    dest: "{{ ownca_hosts_directory }}/certs/{{ rebeldream_fqdn }}-chain.crt"
+    dest: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: "0600"
   become: no
   delegate_to: localhost
@@ -208,8 +208,8 @@
 
 - name: Copy CA Certificates Samba File Server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
-    dest: "/srv/samba/pki/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     owner: root
     group: root
     mode: "0644"
@@ -226,8 +226,8 @@
 
 - name: Copy CA Certificate Chains Samba File Server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.crt"
-    dest: "/srv/samba/pki/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.crt"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     owner: root
     group: root
     mode: "0644"
@@ -245,8 +245,8 @@
 
 - name: Copy CA Certificates Samba File Server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.der"
-    dest: "/srv/samba/pki/{{ rebeldream_org_name }}-{{ item.name }}-ca.cer"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.der"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.cer"
     owner: root
     group: root
     mode: "0644"
@@ -263,8 +263,8 @@
 
 - name: Copy CA Certificate Chains Samba File Server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.der"
-    dest: "/srv/samba/pki/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.cer"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.cer"
     owner: root
     group: root
     mode: "0644"

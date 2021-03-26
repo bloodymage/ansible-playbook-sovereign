@@ -3,7 +3,7 @@
 # {{ Rebeldream_Domain.Split('.')[1] }} {{ Rebeldream_Domain.Split('.')[0] }} Component CA
 
 [ default ]
-ca                      = {{ rebeldream_domain.split('.')[1] }}-{{ Rebeldream_Domain.Split('.')[0] }}-component-ca          # CA name
+ca                      = {{ autonomy_domain.split('.')[1] }}-{{ Rebeldream_Domain.Split('.')[0] }}-component-ca          # CA name
 dir                     = .                     # Top dir
 base_url                = http://{{ pki_url }}    # CA base URL
 aia_url                 = $base_url/$ca.cer     # CA certificate URL
@@ -88,7 +88,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always
 authorityInfoAccess     = @ocsp_info
 crlDistributionPoints   = @crl_info
-certificatePolicies     = {{ rebeldream_domain.split('.')[1] }}MediumDevice
+certificatePolicies     = {{ autonomy_domain.split('.')[1] }}MediumDevice
 
 [ client_ext ]
 keyUsage                = critical,digitalSignature
@@ -98,7 +98,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always
 authorityInfoAccess     = @ocsp_info
 crlDistributionPoints   = @crl_info
-certificatePolicies     = {{ rebeldream_domain.split('.')[1] }}MediumDevice
+certificatePolicies     = {{ autonomy_domain.split('.')[1] }}MediumDevice
 
 [ timestamp_ext ]
 keyUsage                = critical,digitalSignature
@@ -108,7 +108,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always
 authorityInfoAccess     = @issuer_info
 crlDistributionPoints   = @crl_info
-certificatePolicies     = {{ rebeldream_domain.split('.')[1] }}MediumDevice
+certificatePolicies     = {{ autonomy_domain.split('.')[1] }}MediumDevice
 
 [ ocspsign_ext ]
 keyUsage                = critical,digitalSignature
@@ -118,7 +118,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always
 authorityInfoAccess     = @issuer_info
 noCheck                 = null
-certificatePolicies     = {{ rebeldream_domain.split('.')[1] }}MediumDevice
+certificatePolicies     = {{ autonomy_domain.split('.')[1] }}MediumDevice
 
 [ crl_ext ]
 authorityKeyIdentifier  = keyid:always
@@ -140,4 +140,4 @@ URI.0                   = $crl_url
 oid_section             = additional_oids
 
 [ additional_oids ]
-{{ rebeldream_domain.split('.')[1] }}MediumDevice        = {{ Rebeldream_Domain.Split('.')[1] }} Medium Device Assurance, 1.3.6.1.4.1.0.1.7.9
+{{ autonomy_domain.split('.')[1] }}MediumDevice        = {{ Rebeldream_Domain.Split('.')[1] }} Medium Device Assurance, 1.3.6.1.4.1.0.1.7.9

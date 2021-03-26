@@ -6,11 +6,11 @@
 {#                                                                                                #}
 {# ============================================================================================== #}
 [global]
-netbios name = {{ rebeldream_hostname | upper }}
-realm = {{ rebeldream_domain | upper }}
+netbios name = {{ autonomy_hostname | upper }}
+realm = {{ autonomy_domain | upper }}
 server role = active directory domain controller
 server services = s3fs, rpc, nbt, wrepl, ldap, cldap, kdc, drepl, winbindd, ntp_signd, kcc, dnsupdate
-workgroup = {{ rebeldream_org_unit_name | upper }}
+workgroup = {{ autonomy_org_unit_name | upper }}
 idmap_ldb:use rfc2307 = yes
 
 {# ============================================================================================== #}
@@ -26,15 +26,15 @@ username map = /etc/samba/user.map
 {#                                                                                                #}
 {# ============================================================================================== #}
 tls enabled  = yes
-tls certfile = {{ ownca_etc }}/certs/{{ rebeldream_fqdn }}.pem
-tls keyfile  = {{ ownca_etc }}/private/{{ rebeldream_fqdn }}.key
-tls cafile   = {{ ownca_etc }}/certs/{{ rebeldream_org_name | lower }}-root-ca.pem
-tls crlfile  = {{ ownca_etc }}/crls/{{ rebeldream_org_name }}-root.crl
-tls dhparams file = {{ ownca_etc }}/dhparams/{{ rebeldream_fqdn }}.pem
+tls certfile = {{ ownca_etc }}/certs/{{ autonomy_fqdn }}.pem
+tls keyfile  = {{ ownca_etc }}/private/{{ autonomy_fqdn }}.key
+tls cafile   = {{ ownca_etc }}/certs/{{ autonomy_org_name | lower }}-root-ca.pem
+tls crlfile  = {{ ownca_etc }}/crls/{{ autonomy_org_name }}-root.crl
+tls dhparams file = {{ ownca_etc }}/dhparams/{{ autonomy_fqdn }}.pem
 
 # Shares
 [netlogon]
-path = /var/lib/samba/sysvol/{{ rebeldream_domain }}/scripts
+path = /var/lib/samba/sysvol/{{ autonomy_domain }}/scripts
 read only = No
 
 [sysvol]

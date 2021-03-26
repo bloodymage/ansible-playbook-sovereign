@@ -1,11 +1,11 @@
 # {{ ansible_managed }}
 
-hosts = dc.{{ rebeldream_domain }}:389
+hosts = dc.{{ autonomy_domain }}:389
 ldap_version = 3
 auth_bind = yes
-dn = cn={{ mail_user }},{{ rebeldream_user_dn }}
+dn = cn={{ mail_user }},{{ autonomy_user_dn }}
 dnpass = {{ __mail_user_password }}
-base = {{ rebeldream_user_dn }}
+base = {{ autonomy_user_dn }}
 scope = subtree
 deref = never
 user_filter = (&(userPrincipalName=%u)(objectClass=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))

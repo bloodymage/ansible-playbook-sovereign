@@ -1,18 +1,18 @@
 - hosts: certificate_authorities
   roles:
-    - role: bloodymage.rebeldream.config_environment
+    - role: bloodymage.autonomy.config_environment
       tags:
         - always
-    - role: bloodymage.rebeldream.config_ownca_environment
+    - role: bloodymage.autonomy.config_ownca_environment
       tags:
         - always
-    - role: bloodymage.rebeldream.sshca
+    - role: bloodymage.autonomy.sshca
       tags:
         - sshca
-    - role: bloodymage.rebeldream.ownca
+    - role: bloodymage.autonomy.ownca
       tags:
         - ownca
-    - role: bloodymage.rebeldream.ownca_crl
+    - role: bloodymage.autonomy.ownca_crl
       tags:
         - ownca_crl
         - ownca-crl

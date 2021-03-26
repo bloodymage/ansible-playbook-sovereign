@@ -148,5 +148,5 @@ bind_extra_include_files: []
 bind_zone_file_mode: "0640"
 
 bind_rpc_policies:
-  - "zone 'accept.{{ rebeldream_root_domain }}' policy passthru;"
-  - "zone 'block.{{ rebeldream_root_domain }}';"
+  - "zone 'accept.{{ autonomy_root_domain }}' policy passthru;"
+  - "zone 'block.{{ autonomy_root_domain }}';"

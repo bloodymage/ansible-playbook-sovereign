@@ -2,7 +2,7 @@
 dn: cn=config
 changetype: modify
 add: olcTLSCACertificateFile
-olcTLSCACertificateFile: {{ rebeldream_component_ca_chain_file }}
+olcTLSCACertificateFile: {{ autonomy_component_ca_chain_file }}
 -
 replace: olcTLSCertificateFile
 olcTLSCertificateFile: /etc/ssl/certs/{{ inventory_hostname }}.pem

@@ -18,7 +18,7 @@
   ansible.builtin.set_fact:
     user_groups: "{{ user_groups + [ user_mythtv_group ] }}"
   when:
-    - inventory_hostname in groups ['mythtv']
+    - (inventory_hostname in groups ['mythtv']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users
@@ -29,7 +29,7 @@
   ansible.builtin.set_fact:
     user_groups: "{{ user_groups + [ user_minidlna_group ] }}"
   when:
-    - inventory_hostname in groups ['minidlna_servers']
+    - (inventory_hostname in groups ['minidlna_servers']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users
@@ -73,7 +73,7 @@
   ansible.builtin.set_fact:
     users: "{{ users + [ user_mythtv ] }}"
   when:
-    - inventory_hostname in groups ['mythtv']
+    - (inventory_hostname in groups['mythtv']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users
@@ -84,7 +84,7 @@
   ansible.builtin.set_fact:
     users: "{{ users + [ user_minidlna ] }}"
   when:
-    - inventory_hostname in groups ['minidlna_servers']
+    - (inventory_hostname in groups['minidlna_servers']) or (inventory_hostname in groups['file_servers'])
   become: no
   tags:
     - users
@@ -153,9 +153,9 @@
     move_home: yes
   loop: "{{ users }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -214,9 +214,9 @@
     index_var: index
   become: yes
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"

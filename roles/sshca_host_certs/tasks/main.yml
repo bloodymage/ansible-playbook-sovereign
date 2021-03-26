@@ -44,7 +44,7 @@
   ansible.builtin.set_fact:
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_org_name }}_common/sshca/sshca_host_key_password"
+    __password_store_id: "{{ autonomy_org_name }}_common/sshca/sshca_host_key_password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   changed_when:
@@ -119,18 +119,18 @@
 #       https://docs.ansible.com/ansible/latest/modules/expect_module.html
 #
 # ==================================================================================================
-- name: Sign SSH keys.
-  expect:
+- name: "Sign SSH Public Keys."
+  ansible.builtin.expect:
     command: ssh-keygen -s "{{ sshca_host_signer_key }}"
              -I "{{ sshca_host_signer_id }}"
              -h -n "{{ sshca_host_signer_hostnames }}"
-             "{{ temporary_directory.path }}/public_keys/{{ rebeldream_fqdn }}{{ item.path | quote }}.pub"
+             "{{ temporary_directory.path }}/public_keys/{{ autonomy_fqdn }}{{ item.path | quote }}.pub"
     responses:
       (?i)passphrase: "{{ sshca_host_key_password }}"
   become: no
   #no_log: yes
   loop: "{{ private_keys.files }}"
-  changed_when: false
+  #changed_when: false
   delegate_to: localhost
   tags:
     - sshca_host_certs
@@ -146,7 +146,7 @@
 # ==================================================================================================
 - name: Find certificates.
   ansible.builtin.find:
-    path: "{{ temporary_directory.path }}/public_keys/{{ rebeldream_fqdn }}{{ ssh_config_dir }}/"
+    path: "{{ temporary_directory.path }}/public_keys/{{ autonomy_fqdn }}{{ ssh_config_dir }}/"
     pattern: ssh_host_*_key-cert.pub
   register: certificates
   delegate_to: localhost
@@ -171,12 +171,12 @@
     executable: "/bin/bash"
   vars:
     __existing_cert_dir: "{{ temporary_directory.path | quote }}/existing_certificates"
-    __existing_host_dir: "{{ __existing_cert_dir }}/{{ rebeldream_fqdn }}"
+    __existing_host_dir: "{{ __existing_cert_dir }}/{{ autonomy_fqdn }}"
     __existing_ssh_config_dir: "{{ __existing_host_dir }}{{ ssh_config_dir }}"
     __existing_cert: "{{ item.path | basename | quote }}"
     __existing_cert_path: "{{ __existing_ssh_config_dir }}/{{ __existing_cert }}"
   with_items: "{{ certificates.files }}"
-  changed_when: false
+  #changed_when: false
   failed_when: false
   register: certificate_comparison
   delegate_to: localhost
@@ -194,16 +194,16 @@
 # ==================================================================================================
 - name: Copy certificates back to server.
   ansible.builtin.copy:
-    src: "{{ item.item.path }}"
-    dest: "{{ ssh_config_dir }}/{{ item }}"
+    src: "{{ item[0].item.path }}"
+    dest: "{{ item[1].path }}-cert.pub"
     owner: "root"
     group: "root"
     mode: "0644"
-  loop: "{{ certificate_comparison.results }}"
+  loop: "{{ certificate_comparison.results | product(private_keys.files) | list }}"
   notify: restart ssh
   become: yes
   when:
-    - item.rc != 0
+    - item[0].rc != 0
   tags:
     - sshca_host_certs
     - sshca-host-certs

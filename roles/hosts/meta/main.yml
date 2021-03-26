@@ -3,7 +3,7 @@ galaxy_info:
   description: Sets server hosts file
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 
@@ -25,4 +25,4 @@ galaxy_info:
     - hosts
 
 dependencies:
-  - role: bloodymage.rebeldream.collection_handlers
+  - role: bloodymage.autonomy.collection_handlers

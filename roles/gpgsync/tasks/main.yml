@@ -2,7 +2,7 @@
 # tasks file for gpgsync
 # - name: Ensure destination directory exists
 #   ansible.builtin.file:
-#     path: "/srv/www/{{ rebeldream_root_domain }}/pgp/"
+#     path: "/srv/www/{{ autonomy_root_domain }}/pgp/"
 #     state: directory
 #     owner: www-data
 #     group: www-data

@@ -3,9 +3,9 @@
   ansible.builtin.set_fact:
     ownca_host_cert_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ inventory_hostname_short }}/ownca_host_cert_pkcs12_password"
-    __password_length: "length={{ item.password_legnth | default(rebeldream_password_length) }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/ownca_host_cert_pkcs12_password"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -28,15 +28,15 @@
     privatekey_path: "{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key"
     certificate_path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}-chain.crt"
     other_certificates:
-      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.crt"
-      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.crt"
-      - "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-root-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+      - "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-root-ca.crt"
     state: present
     iter_size: 0
     maciter_size: 0
     mode: '0600'
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     #force: yes
   become: no
   delegate_to: localhost
@@ -93,19 +93,19 @@
 #     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
 #     dest: "/usr/local/share/ca-certificates/"
 #   loop:
-#     - "{{ rebeldream_org_name }}-root-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-component-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[0] }}-identity-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca-chain.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-component-ca.crt"
-#     - "{{ rebeldream_org_name }}-{{ rebeldream_zones[1] }}-identity-ca.crt"
+#     - "{{ autonomy_org_name }}-root-ca.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca-chain.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca-chain.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-identity-ca-chain.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-identity-ca.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca-chain.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca-chain.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-identity-ca-chain.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca.crt"
+#     - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-identity-ca.crt"
 #   become: yes
 #   notify: restart all
 #   tags:
@@ -117,8 +117,8 @@
 
 # - name: Copy CRLs to server.
 #   copy:
-#     src: "{{ ownca_directory }}/certificate_authorities/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-#     dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+#     src: "{{ ownca_directory }}/certificate_authorities/crl/{{ autonomy_org_name }}-{{ item.name }}.crl"
+#     dest: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ item.name }}.crl"
 #   loop: "{{ ownca_certificate_authorities }}"
 #   become: yes
 #   tags:
@@ -139,9 +139,9 @@
 # #   with_items:
 # #     - "curl -T {{ ca_directory }}/certs/{{ ansible_hostname }}.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
 # #     - "curl -T {{ ca_directory }}/private/{{ ansible_hostname }}.key ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}" 
-# #     - "curl -T {{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-root-ca.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
-# #     - "curl -T {{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
-# #     - "curl -T {{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-component-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+# #     - "curl -T {{ ca_directory }}/certs/{{ autonomy_domain.split('.')[1] }}-root-ca.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+# #     - "curl -T {{ ca_directory }}/certs/{{ autonomy_domain.split('.')[1] }}-{{ autonomy_domain.split('.')[0] }}-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
+# #     - "curl -T {{ ca_directory }}/certs/{{ autonomy_domain.split('.')[1] }}-{{ autonomy_domain.split('.')[0] }}-component-ca-chain.crt ftp://{{ ansible_host }} --user {{ ansible_user }}:{{ ansible_password }}"
 
 # # # ======================================================================
 # # #
@@ -163,7 +163,7 @@
 # #     commands:
 # #       - "/certificate import file-name={{ ca_directory }}/certs/{{ ansible_hostname }}.crt"
 # #       - "/certificate import file-name={{ ca_directory }}/private/{{ ansible_hostname }}.key"
-# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-root-ca.crt"
-# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-ca-chain.crt"
-# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ rebeldream_domain.split('.')[1] }}-{{ rebeldream_domain.split('.')[0] }}-component-ca-chain.crt"
+# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ autonomy_domain.split('.')[1] }}-root-ca.crt"
+# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ autonomy_domain.split('.')[1] }}-{{ autonomy_domain.split('.')[0] }}-ca-chain.crt"
+# #       - "/certificate import file-name={{ ca_directory }}/certs/{{ autonomy_domain.split('.')[1] }}-{{ autonomy_domain.split('.')[0] }}-component-ca-chain.crt"
 

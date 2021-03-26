@@ -1,0 +1,131 @@
+! {{ ansible_managed }}
+
+{{ "*mode:".ljust(40) }}{{ xscreensaver_mode }}
+{{ "*timeout:".ljust(40) }}{{ xscreensaver_timeout }}
+{{ "*cycle:".ljust(40) }}{{ xscreensaver_cycle }}
+{{ "*lockTimeout:".ljust(40) }}{{ xscreensaver_lock_timeout }}
+{{ "*passwdTimeout:".ljust(40) }}{{ xscreensaver_passwd_timeout }}
+{{ "*dpmsEnabled:".ljust(40) }}{{ xscreensaver_dpms_enabled }}
+{{ "*dpmsQuickoffEnabled:".ljust(40) }}{{ xscreensaver_dpms_quickoff_enabled }}
+{{ "*dpmsStandby:".ljust(40) }}{{ xscreensaver_dpms_standby }}
+{{ "*dpmsSuspend:".ljust(40) }}{{ xscreensaver_dpms_suspend }}
+{{ "*dpmsOff:".ljust(40) }}{{ xscreensaver_dpms_off }}
+{{ "*grabDesktopImages:".ljust(40) }}{{ xscreensaver_grab_desktop_images }}
+{{ "*grabVideoFrames:".ljust(40) }}{{ xscreensaver_grab_video_frames }}
+{{ "*chooseRandomImages:".ljust(40) }}{{ xscreensaver_choose_random_images }}
+{{ "*imageDirectory:".ljust(40) }}{{ xscreensaver_image_directory }}
+{{ "*nice:".ljust(40) }}{{ xscreensaver_nice }}
+{{ "*memoryLimit:".ljust(40) }}{{ xscreensaver_memory_limit }}
+{{ "*lock:".ljust(40) }}{{ xscreensaver_lock }}
+{{ "*verbose:".ljust(40) }}{{ xscreensaver_verbose }}
+{{ "*timestamp:".ljust(40) }}{{ xscreensaver_timestamp }}
+{{ "*fade:".ljust(40) }}{{ xscreensaver_fade }}
+{{ "*unfade:".ljust(40) }}{{ xscreensaver_unfade }}
+{{ "*fadeSeconds:".ljust(40) }}{{ xscreensaver_fade_seconds }}
+{{ "*fadeTicks:".ljust(40) }}{{ xscreensaver_fade_ticks }}
+{{ "*splash:".ljust(40) }}{{ xscreensaver_splash }}
+{{ "*splashDuration:".ljust(40) }}{{ xscreensaver_splash_duration }}
+{{ "*visualID:".ljust(40) }}{{ xscreensaver_visual_id }}
+{{ "*installColormap:".ljust(40) }}{{ xscreensaver_install_colormap }}
+{{ "*ignoreUninstalledPrograms:".ljust(40) }}{{ xscreensaver_ignore_uninstalled_programs }}
+{{ "*authWarningSlack:".ljust(40) }}{{ xscreensaver_auth_warning_slack }}
+{% if xscreensaver_text_mode == "file" and xscreensaver_text_file is falsy %}
+  {{ "*textMode:".ljust(40) }}{{ __xscreensaver_text_mode -}}
+{% else -%}
+  {{ "*textMode:".ljust(40) }}{{ xscreensaver_text_mode }}
+{% endif %}
+{{ "*textLiteral:".ljust(40) }}{{ xscreensaver_text_literal }}
+{{ "*textFile:".ljust(40) }}{{ xscreensaver_text_file }}
+{{ "*textProgram:".ljust(40) }}{{ xscreensaver_text_program }}
+{{ "*textURL:".ljust(40) }}{{ xscreensaver_text_url }}
+{{ "*captureStderr:".ljust(40) }}{{ xscreensaver_capture_stderr }}
+{{ "*overlayStderr:".ljust(40) }}{{ xscreensaver_overlay_stderr }}
+{{ "*overlayTextForeground:".ljust(40) }}{{ xscreensaver_overlay_text_foreground }}
+{{ "*overlayTextBackground:".ljust(40) }}{{ xscreensaver_overlay_text_background }}
+{{ "*font:".ljust(40) }}{{ xscreensaver_font }}
+{{ "*sgiSaverExtension:".ljust(40) }}{{ xscreensaver_sgi_saver_extension }}
+{{ "*xidleExtension:".ljust(40) }}{{ xscreensaver_xidle_extension }}
+{{ "*procInterrupts:".ljust(40) }}{{ xscreensaver_proc_interrupts }}
+{{ "*xinputExtensionDev:".ljust(40) }}{{ xscreensaver_xinput_extension_dev }}
+{{ "*GetViewPortIsFullOfLies:".ljust(40) }}{{ xscreensaver_get_view_port_is_full_of_lies }}
+{{ "*demoCommand:".ljust(40) }}{{ xscreensaver_demo_command }}
+{{ "*helpURL:".ljust(40) }}{{ xscreensaver_help_url }}
+{{ "*loadURL:".ljust(40) }}{{ xscreensaver_load_url }}
+{# *manualCommand: yelp man:%s || \ #}
+{# 			x-terminal-emulator -title "%s manual" \ #}
+{# 			  -e /bin/sh -c 'man "%s'" #}
+
+{{ "*dateFormat:".ljust(40) }}{{ xscreensaver_date_format }}
+{{ "*newLoginCommand:".ljust(40) }}{{ xscreensaver_new_login_command }}
+{{ "XScreenSaver.pointerPollTime:".ljust(40) }}{{ xscreensaver_pointer_poll_time }}
+{{ "XScreenSaver.pointerHysteresis:".ljust(40) }}{{ xscreensaver_pointer_hysteresis }}
+{{ "XScreenSaver.initialDelay:".ljust(40) }}{{ xscreensaver_initial_delay }}
+{{ "XScreenSaver.windowCreationTimeout:".ljust(40) }}{{ xscreensaver_window_creation_timeout }}
+{{ "XScreenSaver.bourneShell:".ljust(40) }}{{ xscreensaver_bourne_shell }}
+
+{{ "*Dialog.headingFont:".ljust(40) }}{{ xscreensaver_dialog_heading_font }}
+{{ "*Dialog.bodyFont:".ljust(40) }}{{ xscreensaver_dialog_body_font }}
+{{ "*Dialog.labelFont:".ljust(40) }}{{ xscreensaver_dialog_label_font }}
+{{ "*Dialog.unameFont:".ljust(40) }}{{ xscreensaver_dialog_uname_font }}
+{{ "*Dialog.buttonFont:".ljust(40) }}{{ xscreensaver_dialog_button_font }}
+{{ "*Dialog.dateFont:".ljust(40) }}{{ xscreensaver_dialog_date_font }}
+
+{{ "*passwd.passwdFont:".ljust(40) }}{{ xscreensaver_passwd_font }}
+{{ "*passwd.uname:".ljust(40) }}{{ xscreensaver_passwd_uname }}
+{{ "*passwd.asterisks:".ljust(40) }}{{ xscreensaver_passwd_asterisks }}
+
+{{ "*Dialog.foreground:".ljust(40) }}{{ xscreensaver_dialog_foreground }}
+{{ "*Dialog.background:".ljust(40) }}{{ xscreensaver_dialog_background }}
+{{ "*Dialog.Button.foreground:".ljust(40) }}{{ xscreensaver_dialog_button_foreground }}
+{{ "*Dialog.Button.background:".ljust(40) }}{{ xscreensaver_dialog_button_background }}
+{{ "*Dialog.text.foreground:".ljust(40) }}{{ xscreensaver_dialog_text_foreground }}
+{{ "*Dialog.text.background:".ljust(40) }}{{ xscreensaver_dialog_text_background }}
+{{ "*Dialog.topShadowColor:".ljust(40) }}{{ xscreensaver_dialog_top_shadow_color }}
+{{ "*Dialog.bottomShadowColor:".ljust(40) }}{{ xscreensaver_dialog_bottom_shadow_color }}
+{{ "*Dialog.logo.width:".ljust(40) }}{{ xscreensaver_dialog_logo_width }}
+{{ "*Dialog.logo.height:".ljust(40) }}{{ xscreensaver_dialog_logo_height }}
+{{ "*Dialog.internalBorderWidth:".ljust(40) }}{{ xscreensaver_dialog_internal_border_width }}
+{{ "*Dialog.borderWidth:".ljust(40) }}{{ xscreensaver_dialog_border_width }}
+{{ "*Dialog.shadowThickness:".ljust(40) }}{{ xscreensaver_dialog_shadow_thickness }}
+{{ "*passwd.thermometer.foreground:".ljust(40) }}{{ xscreensaver_passwd_thermometer_foreground }}
+{{ "*passwd.thermometer.background:".ljust(40) }}{{ xscreensaver_passwd_thermometer_background }}
+{{ "*passwd.thermometer.width:".ljust(40) }}{{ xscreensaver_passwd_thermometer_width }}
+
+{{ "*passwd.heading.label:".ljust(40) }}{{ xscreensaver_passwd_heading_label }}
+{{ "*passwd.body.label:".ljust(40) }}{{ xscreensaver_passwd_body_label }}
+{{ "*passwd.unlock.label:".ljust(40) }}{{ xscreensaver_passwd_unlock_label }}
+{{ "*passwd.login.label:".ljust(40) }}{{ xscreensaver_passwd_login_label }}
+{{ "*passwd.user.label:".ljust(40) }}{{ xscreensaver_passwd_user_label }}
+{{ "*passwd.passwd.label:".ljust(40) }}{{ xscreensaver_passwd_passwd_label }}
+
+{{ "*splash.heading.label:".ljust(40) }}{{ xscreensaver_splash_heading_label }}
+{{ "*splash.body.label:".ljust(40) }}{{ xscreensaver_splash_body_label }}
+{{ "*splash.body2.label:".ljust(40) }}{{ xscreensaver_splash_body2_label }}
+{{ "*splash.demo.label:".ljust(40) }}{{ xscreensaver_splash_demo_label }}
+{{ "*splash.help.label:".ljust(40) }}{{ xscreensaver_splash_help_label }}
+
+{{ "*programs:".ljust(40) }}\
+{% for program in xscreensaver_programs %}
+{%- if program.enabled is false -%}
+  {{ "-".ljust(2) }}
+{%- else -%}
+  {{ " ".ljust(2) }}
+{%- endif -%}
+{%- if program.gl is defined and program.gl -%}
+  {{ "GL:".ljust(8) }}
+{%- else -%}
+  {{ " ".ljust(8) }}
+{%- endif -%}
+{%- if program.options is defined -%}
+  {{ program.name }}{{ " " }}{{ program.options.ljust(16) }}
+{%- else -%}
+  {{ program.name }}{{ " " }}{{ "-root".ljust(16) }}
+{%- endif -%}
+{{ '\\n\\' if not loop.last else '\\n' }}
+{% endfor %}
+
+{% for program in xscreensaver_programs %}
+{%- if program.hack_name is defined -%}
+  {{ "*hacks." }}{{ program.name }}{{ ".name:".ljust(24) }}{{ program.hack_name }}
+{% endif %}
+{% endfor %}

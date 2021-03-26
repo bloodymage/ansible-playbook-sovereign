@@ -3,7 +3,7 @@ galaxy_info:
   description: Configure Defaults
   company: Bloodymage
 
-  issue_tracker_url: http://github.com/bloodymage/ansible-collection-rebeldream
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
 
   license: MIT
 
@@ -24,6 +24,6 @@ galaxy_info:
     - bloodymage
 
 dependencies:
-  - role: bloodymage.rebeldream.config_defaults
-  - role: bloodymage.rebeldream.collection_handlers
-  #- role: bloodymage.rebeldream.system_upgrade
+  - role: bloodymage.autonomy.config_defaults
+  - role: bloodymage.autonomy.collection_handlers
+  #- role: bloodymage.autonomy.system_upgrade

@@ -116,13 +116,13 @@
     server: "{{ item.address_ipv4 }}"
     zone: "{{ bind_zone }}"
     record: "{{ inventory_hostname_short }}"
-    value: "{{ rebeldream_ipv6_address }}"
+    value: "{{ autonomy_ipv6_address }}"
     type: "AAAA"
   loop: "{{ bind_zone_dnsservers }}"
   become: yes
   when:
     - bind_zone is defined
-    - rebeldream_ipv6_address is defined
+    - autonomy_ipv6_address is defined
   remote_user: root
   delegate_to: "{{ item.address_ipv4 }}"
   tags:

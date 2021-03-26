@@ -71,8 +71,8 @@
     path: "{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key"
     type: "{{ ownca_privatekey_type }}"
     size: 4096
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     mode: "0640"
     force: no
   become: no
@@ -87,11 +87,11 @@
 - name: Print CSR Variables
   ansible.builtin.debug:
     msg:
-      - "country_name: {{ rebeldream_country_code | default(country) }}"
-      - "state_or_province_name: {{ rebeldream_region_name | default(region) }}"
+      - "country_name: {{ autonomy_country_code | default(country) }}"
+      - "state_or_province_name: {{ autonomy_region_name | default(region) }}"
       - "locality_name: {{ loc_city | default(none) }}"
-      - "organization_name: {{ rebeldream_org_name | title }}"
-      - "organizational_unit_name: {{ rebeldream_org_unit_name | title }}"
+      - "organization_name: {{ autonomy_org_name | title }}"
+      - "organizational_unit_name: {{ autonomy_org_unit_name | title }}"
       - "common_name: {{ inventory_hostname }}"
       - "key_usage: {{ ownca_host_certs_key_usage }}"
       - "extended_key_usage: {{ ownca_host_certs_extended_key_usage }}"
@@ -109,13 +109,13 @@
   community.crypto.openssl_csr:
     path: "{{ ownca_hosts_directory }}/csr/{{ inventory_hostname }}.csr"
     mode: "0644"
-    owner: "{{ rebeldream_user }}"
-    group: "{{ rebeldream_user }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_user }}"
     country_name: "{{ ownca_country_code | default(country) }}"
-    state_or_province_name: "{{ rebeldream_region | default(region) }}"
+    state_or_province_name: "{{ autonomy_region | default(region) }}"
     locality_name: "{{ loc_city | default(none) }}"
-    organization_name: "{{ rebeldream_org_name | title }}"
-    organizational_unit_name: "{{ rebeldream_org_unit_name | title }}"
+    organization_name: "{{ autonomy_org_name | title }}"
+    organizational_unit_name: "{{ autonomy_org_unit_name | title }}"
     common_name: "{{ inventory_hostname }}"
     key_usage: "{{ ownca_host_certs_key_usage }}"
     key_usage_critical: yes
@@ -124,7 +124,7 @@
     privatekey_path: "{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key"
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
     crl_distribution_points:
-      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ rebeldream_org_name }}-{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component.crl"
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
         reasons:
           - key_compromise
           - ca_compromise

@@ -20,7 +20,7 @@ keycloak_service_switches: "-b {{ keycloak_host }}"
 keycloak_admin_user: "admin"
 keycloak_admin_password: "password"
 keycloak_keystore_password: "password"
-keycloak_password_length: "{{ rebeldream_password_length }}"
+keycloak_password_length: "{{ autonomy_password_length }}"
 keycloak_loglevel: "INFO"
 keycloak_hostname_verification_policy: "ANY" #Default to "WILDCARD"
 
@@ -49,5 +49,5 @@ keycloak_source_url:
     checksum_type: "sha1"
   
 keycloak_samba_federation:
-  - name: "{{ rebeldream_org_unit_name }} Active Directory"
+  - name: "{{ autonomy_org_unit_name }} Active Directory"
     edit_mode: "READONLY"

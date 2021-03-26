@@ -6,8 +6,8 @@
 # ==================================================================================================
 [global]
 netbios name = {{ inventory_hostname_short | upper }}
-workgroup = {{ rebeldream_org_unit_name | upper }}
-realm = {{ rebeldream_domain | upper }}
+workgroup = {{ autonomy_org_unit_name | upper }}
+realm = {{ autonomy_domain | upper }}
 security = {{ samba_security }}
 
 # Logging
@@ -25,12 +25,12 @@ username map = /etc/samba/user.map
 # idmap config for ...
 idmap config * : backend = tdb
 idmap config * : range = 3000-7999
-# idmap config for {{ rebeldream_org_unit_name | upper }} domain
-idmap config {{ rebeldream_org_unit_name | upper }} : backend = ad
-idmap config {{ rebeldream_org_unit_name | upper }} : schema_mode = rfc2307
-idmap config {{ rebeldream_org_unit_name | upper }} : range = 100000-99999999
-idmap config {{ rebeldream_org_unit_name | upper }} : unix_nss_info = yes
-idmap config {{ rebeldream_org_unit_name | upper }} : unix_primary_group = yes
+# idmap config for {{ autonomy_org_unit_name | upper }} domain
+idmap config {{ autonomy_org_unit_name | upper }} : backend = ad
+idmap config {{ autonomy_org_unit_name | upper }} : schema_mode = rfc2307
+idmap config {{ autonomy_org_unit_name | upper }} : range = 100000-99999999
+idmap config {{ autonomy_org_unit_name | upper }} : unix_nss_info = yes
+idmap config {{ autonomy_org_unit_name | upper }} : unix_primary_group = yes
 
 # Winbind Settings
 winbind enum users = {{ winbind_enum_users }}
@@ -47,31 +47,28 @@ dedicated keytab file = /etc/krb5.keytab
 kerberos method = secrets and keytab
 
 {% if samba_shares is defined -%}
-  # Enable ACL Support
-  vfs objects = acl_xattr
-  map acl inherit = yes
-  #acl_xattr: ignore system acls = yes
-  #inherit owner = unix only
+# Enable ACL Support
+vfs objects = acl_xattr
+map acl inherit = yes
+acl_xattr: ignore system acls = yes
+#inherit owner = unix only
 
-  server min protocol = SMB2
-  server max protocol = SMB3
-
-  # ==================================================================================================
-  #
-  # Share settings
-  #
-  # ==================================================================================================
+# ==================================================================================================
+#
+# Share settings
+#
+# ==================================================================================================
 
 
-  {% for share in samba_shares -%}
-    [{{ share.name }}]
-    path = {{ share.path }}
-    read only = No
-    {% if share.extended_options is defined -%}
-      {% for option in share.extended_options -%}
-        {{ option }}
-      {% endfor %}
-    {% endif %}
+{% for share in samba_shares -%}
+  [{{ share.name }}]
+  path = {{ share.path }}
+  read only = No
+  {% if share.extended_options is defined -%}
+    {% for option in share.extended_options -%}
+      {{ option }}
+    {% endfor %}
+  {% endif %}
 
 {% endfor %}
 {% endif %}

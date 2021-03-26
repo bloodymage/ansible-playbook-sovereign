@@ -34,7 +34,7 @@
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
-    - rebeldream_realm_identity_management_system is truthy
+    - autonomy_realm_identity_management_system is truthy
   notify: restart all
   tags:
     - ownca_host_certs
@@ -53,7 +53,7 @@
   become: yes
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
-    - rebeldream_realm_identity_management_system is truthy
+    - autonomy_realm_identity_management_system is truthy
   notify: restart all
   tags:
     - ownca_host_certs
@@ -64,8 +64,8 @@
 
 - name: Copy CA Certificates to server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
-    dest: "/usr/local/share/ca-certificates/{{ rebeldream_org_name }}-{{ item.name }}-ca.crt"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     owner: root
     group: root
     mode: "0644"
@@ -81,8 +81,8 @@
 
 - name: Copy CA Chains Certificates to server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.crt"
-    dest: "/usr/local/share/ca-certificates/{{ rebeldream_org_name }}-{{ item.name }}-ca-chain.crt"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
+    dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     owner: root
     group: root
     mode: "0644"
@@ -100,8 +100,8 @@
 
 - name: Copy CRLs to server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/crl/{{ rebeldream_org_name }}-{{ item.name }}.crl"
-    dest: "{{ ownca_etc }}/crls/{{ rebeldream_org_name }}-{{ item.name }}.crl"
+    src: "{{ ownca_ca_directory }}/crl/{{ autonomy_org_name }}-{{ item.name }}.crl"
+    dest: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ item.name }}.crl"
     owner: root
     group: root
     mode: "0644"
@@ -117,9 +117,9 @@
   ansible.builtin.set_fact:
     ownca_host_certs_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/hosts/{{ rebeldream_hostname }}/ownca_host_cert_pkcs12_password"
-    __password_length: "length={{ rebeldream_password_length }}"
-    __password_overwrite: "overwrite={{ rebeldream_overwrite_password }} backup=yes"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/ownca_host_cert_pkcs12_password"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
@@ -136,15 +136,15 @@
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
-    path:  "{{ ownca_etc }}/pkcs12/{{ rebeldream_fqdn }}.pkcs12"
-    friendly_name: "{{ rebeldream_fqdn }}"
+    path:  "{{ ownca_etc }}/pkcs12/{{ autonomy_fqdn }}.pkcs12"
+    friendly_name: "{{ autonomy_fqdn }}"
     passphrase: "{{ ownca_host_certs_pkcs12_password }}"
-    privatekey_path: "{{ ownca_etc }}/private/{{ rebeldream_fqdn }}.key"
-    certificate_path: "/usr/local/share/ca-certificates/{{ rebeldream_fqdn }}-chain.crt"
+    privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
+    certificate_path: "/usr/local/share/ca-certificates/{{ autonomy_fqdn }}-chain.crt"
     other_certificates:
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-component-ca.pem"
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-{{ rebeldream_org_unit_name }}-ca.pem"
-      - "{{ ownca_etc }}/certs/{{ rebeldream_org_name }}-root-ca.pem"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-root-ca.crt"
     state: present
     iter_size: 0
     maciter_size: 0
@@ -168,7 +168,7 @@
 # ==================================================================================================
 - name: Generate DH Parameters
   community.crypto.openssl_dhparam:
-    path: "/etc/ssl/dhparams/{{ rebeldream_fqdn }}.pem"
+    path: "/etc/ssl/dhparams/{{ autonomy_fqdn }}.pem"
     owner: "root"
     group: "root"
     mode: "0644"

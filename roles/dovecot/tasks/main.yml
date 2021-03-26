@@ -39,7 +39,7 @@
     dovecot_auth_conf: "{{ dovecot_auth_conf + [dovecot_auth_conf_ldap] + [dovecot_auth_conf_oauth2] }}"
   become: no
   when:
-    - rebeldream_realm_identity_management_system == "samba"
+    - autonomy_realm_identity_management_system == "samba"
   tags:
     - dovecot
     - dovecot_debug
@@ -51,7 +51,7 @@
     __mail_user: "{{ mail_user }}"
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ rebeldream_domain }}/domain_users/{{ mail_user }}/password"
+    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
     __password_lookup: "{{ __password_store_id }}"
   #no_log: yes
   become: no

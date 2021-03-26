@@ -11,7 +11,7 @@
   no_log: true
   become: no
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 - name: "Test Kerberos Ticket from Active Directory Domain Controller"
   ansible.builtin.command:
@@ -19,11 +19,11 @@
   register: success
   become: no
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master
 
 - name: Print Success
   ansible.builtin.debug:
     msg: "{{ success }}"
     verbosity: 1
   when:
-    - rebeldream_fqdn != __samba_schema_master
+    - autonomy_fqdn != __samba_schema_master

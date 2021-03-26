@@ -74,7 +74,7 @@ nextcloud_source_url:
 nextcloud_admin_user: "administrator"
 nextcloud_admin_password: "password"
 nextcloud_ldap_password: "password"
-nextcloud_password_legnth: "{{ rebeldream_password_length }}"
+nextcloud_password_legnth: "{{ autonomy_password_length }}"
 
 nextcloud_post_max_size: "512M"
 nextcloud_upload_max_filesize: "512M"
@@ -124,9 +124,9 @@ nextcloud_apps:
   - weather_status
   - workflowengine
 
-nextcloud_password_length: "{{ rebeldream_password_length }}"
+nextcloud_password_length: "{{ autonomy_password_length }}"
 
-nextcloud_group_members: "({{ samba_member_of }}=cn=nextcloudusers,{{ rebeldream_user_dn }})"
+nextcloud_group_members: "({{ samba_member_of }}=cn=nextcloudusers,{{ autonomy_user_dn }})"
 nextcloud_samba_user_filter: "(&{{ samba_user_class }}{{ samba_search }}{{ samba_enabled_users }}{{ nextcloud_group_members }})"
 nextcloud_samba_login_filter: "(&{{ samba_user_class }}{{ samba_enabled_users }}({{ nextcloud_group_members }})"
 nextcloud_samba_group_filter: "(&{{ samba_group_class }}{{ nextcloud_group_members }}"
@@ -136,15 +136,15 @@ nextcloud_ldap_config_ids:
     id: s01
     ldap_config:
       - ldap_attribute: "ldapBase"
-        ldap_value: "cn=users,{{ rebeldream_base_dn }}"
+        ldap_value: "cn=users,{{ autonomy_base_dn }}"
       - ldap_attribute: "ldapBaseUsers"
-        ldap_value: "{{ rebeldream_user_dn }}"
+        ldap_value: "{{ autonomy_user_dn }}"
       - ldap_attribute: "ldapBaseGgroups"
-        ldap_value: "{{ rebeldream_group_dn }}"
+        ldap_value: "{{ autonomy_group_dn }}"
       - ldap_attribute: "ldapUserDisplayName"
         ldap_value: "displayname"
       - ldap_attribute: "ldapAgentName"
-        ldap_value: "cn=nextcloud,{{ rebeldream_user_dn }}"
+        ldap_value: "cn=nextcloud,{{ autonomy_user_dn }}"
       - ldap_attribute: "ldapAgentPassword"
         ldap_value: "{{ nextcloud_ldap_password }}"
       - ldap_attribute: "ldapEmailAttribute"
@@ -184,9 +184,9 @@ nextcloud_saml_config:
   - saml_attribute: "general-uid_mapping"
     saml_value: "userPrincipalName"
             # "general-use_saml_auth_for_desktop": "1"
-            # "idp-entityId": "https:\/\/auth.{{ rebeldream_root_domain }}\/auth\/realms\/{{ rebeldream_internal_zone_name }}"
-            # "idp-singleLogoutService.url": "https:\/\/auth.{{ rebeldream_root_domain }}\/auth\/realms\/{{ rebeldream_internal_zone_name }}\/protocol\/saml"
-            # "idp-singleSignOnService.url": "https:\/\/auth.{{ rebeldream_root_domain }}\/auth\/realms\/{{ rebeldream_internal_zone_name }}\/protocol\/saml"
+            # "idp-entityId": "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}"
+            # "idp-singleLogoutService.url": "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}\/protocol\/saml"
+            # "idp-singleSignOnService.url": "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}\/protocol\/saml"
             # "idp-x509cert": ""
             # "installed_version": "3.3.1"
             # "providerIds": "1"
