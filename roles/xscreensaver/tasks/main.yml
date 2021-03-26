@@ -33,3 +33,21 @@
     group: root
     state: link
   become: yes
+
+# ==================================================================================================
+#
+# This is needed for Kali, but breaks with Ubuntu
+#
+# ==================================================================================================
+# - name: "Set rss-glx links"
+#   ansible.builtin.file:
+#     src: "{{ item.link }}/{{ item.name }}"
+#     dest: "/usr/libexec/xscreensaver/{{ item.name }}"
+#     owner: root
+#     group: root
+#     state: link
+#   loop: "{{ xscreensaver_programs }}"
+#   become: yes
+#   when:
+#     - item.link is defined
+
