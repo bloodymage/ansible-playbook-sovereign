@@ -1,0 +1,9 @@
+[Unit]
+Description=XScreenSaver
+
+[Service]
+ExecStartPre=/bin/sleep 30
+ExecStart=xscreensaver
+
+[Install]
+WantedBy=default.target

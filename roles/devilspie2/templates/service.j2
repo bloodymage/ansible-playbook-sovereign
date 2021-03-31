@@ -1,0 +1,11 @@
+[Unit]
+Description="Devil's Pie"
+After=default.target
+
+[Service]
+ExecStartPre=/bin/sleep 30
+ExecStart=/usr/bin/devilspie2
+#Restart=on-falure
+
+[Install]
+WantedBy=default.target
