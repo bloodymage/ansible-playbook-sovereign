@@ -35,13 +35,6 @@
   become: yes
   notify: "daemon reload"
 
-- name: "Enable service xscreensaver and ensure it is not masked."
-  ansible.builtin.systemd:
-    name: xscreensaver
-    enabled: yes
-    masked: no
-    scope: global
-
 - name: "Set gnome lockscreen to use xscreensaver lock"
   ansible.builtin.file:
     src: "/usr/bin/xscreensaver-command"
