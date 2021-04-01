@@ -1,6 +1,6 @@
 /**************************************************************************************************/
 /*                                                                                                */
-/* Ansible Managed                                                                                */
+/* {{ ansible_managed.ljust(96) }} */
 /*                                                                                                */
 /* Firefox Privacy Settings                                                                       */
 /* https://privacytools.io/browsers/#about_config                                                 */
@@ -8,34 +8,26 @@
 /* https://github.com/arkenfox/user.js                                                            */
 /*                                                                                                */
 /**************************************************************************************************/
-
-// A result of the Tor Uplift effort, this preference isolates all browser identifier sources (e.g.
-// cookies) to the first party domain, with the goal of preventing tracking across different domains.
-pref("privacy.firstparty.isolate", true);
-
-// A result of the Tor Uplift effort, this preference makes Firefox more resistant to browser
-// fingerprinting.
-pref("privacy.resistFingerprinting", true);
-
-// Blocks Fingerprinting
-pref("privacy.trackingprotection.fingerprinting.enabled", true);
-
-// Blocks CryptoMining
-pref("privacy.trackingprotection.cryptomining.enabled", true);
-
-// This is Mozilla's new built-in tracking protection. One of it's benefits is blocking tracking
-// (i.e. Google Analytics) on privileged pages where add-ons that usually do that are disabled.
+{# A result of the Tor Uplift effort, this preference isolates all browser identifier sources     #}
+{# (e.g. cookies) to the first party domain, with the goal of preventing tracking across          #}
+{# different domains.                                                                             #}
+pref("privacy.firstparty.isolate", {{ firefox_privacy_firstparty_isolate }});
+{# A result of the Tor Uplift effort, this preference makes Firefox more resistant to browser     #}
+{# fingerprinting.                                                                                #}
+pref("privacy.resistFingerprinting", {{ firefox_privacy_resist_fingerprinting }});
+{# Blocks Fingerprinting                                                                          #}
+pref("privacy.trackingprotection.fingerprinting.enabled", {{ firefox_privacy_trackingprotection_fingerprinting_enabled }});
+{# Blocks CryptoMining                                                                            #}
+pref("privacy.trackingprotection.cryptomining.enabled", {{ firefox_privacy_trackingprotection_cryptomining_enabled }});
+{# This is Mozilla's new built-in tracking protection. One of it's benefits is blocking tracking  #}
+{# (i.e. Google Analytics) on privileged pages where add-ons that usually do that are disabled.   #}
 pref("privacy.trackingprotection.enabled", true);
-
-// The attribute would be useful for letting websites track visitors' clicks.
+{# The attribute would be useful for letting websites track visitors' clicks.                     #}
 pref("browser.send_pings", true);
-
-// Disable preloading of autocomplete URLs. Firefox preloads URLs that autocomplete when a user
-// types into the address bar, which is a concern if URLs are suggested that the user does not want
-// to connect to.
+{# Disable preloading of autocomplete URLs. Firefox preloads URLs that autocomplete when a user   #}
+{# types into the address bar, which is a concern if URLs are suggested that the user does not    #}
+{# want to connect to.                                                                            #}
 pref("browser.urlbar.speculativeConnect.enabled", false);
-
-// Disable that websites can get notifications if you copy, paste, or cut something from a web page,
-// and it lets them know which part of the page had been selected.
-pref("dom.event.clipboardevents.enabled", fales);
-
+{# Disable that websites can get notifications if you copy, paste, or cut something from a web    #}
+{# page, and it lets them know which part of the page had been selected.                          #}
+pref("dom.event.clipboardevents.enabled", false);
