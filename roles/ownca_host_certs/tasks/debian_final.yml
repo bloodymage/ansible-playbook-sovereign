@@ -166,7 +166,7 @@
 # Are there security implications for generating elsewhere and transferring to the RPi server later?
 #
 # ==================================================================================================
-- name: Generate DH Parameters
+- name: "Generate Diffie-Hellman Parameters."
   community.crypto.openssl_dhparam:
     path: "/etc/ssl/dhparams/{{ autonomy_fqdn }}.pem"
     owner: "root"
@@ -175,6 +175,8 @@
     backup: yes
     force: "{{ __ownca_regenerate_csr }}"
   become: yes
+  when:
+    - ownca_privatekey_type in ['DSA','RSA']
   tags:
     - ownca_host_certs
     - ownca-host-certs

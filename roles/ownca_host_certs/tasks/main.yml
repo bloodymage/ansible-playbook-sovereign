@@ -71,6 +71,46 @@
     - ownca_host_certs_debug
     - ownca-host-certs-debug
 
+- name: "Get component CA certificate information"
+  community.crypto.x509_certificate_info:
+    path: "{{ ownca_component_ca_file }}"
+  become: no
+  register: identity_cert
+  delegate_to: localhost
+
+- name: "Check if host cert exists"
+  ansible.builtin.stat:
+    path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
+  delegate_to: localhost
+  become: no
+  register: cert_file
+
+- name: "Print cert_file"
+  debug:
+    msg:
+      - "cert_file: {{ cert_file }}"
+
+- name: "Get old certificate information"
+  community.crypto.x509_certificate_info:
+    path: "{{ cert_file.stat.path }}"
+  become: no
+  delegate_to: localhost
+  register: host_cert
+  when:
+    - cert_file.stat is defined
+    - cert_file.stat.exists is true
+    - cert_file.stat.path is defined
+
+# Note: This will force regeneration if ANY user certificate's authority_key_identified doesn't
+# match the Identity CA's subject_key_identifier.
+- name: "Check if the user's cert authority_key_identifier matches the Identity CA's subject_key_identifier."
+  ansible.builtin.set_fact:
+    __host_cert_force_regeneration: yes
+  become: no
+  when:
+    - host_cert.authority_key_identifier is defined
+    - host_cert.authority_key_identifier != identity_cert.subject_key_identifier
+
 - name: "Generate Host Certificate"
   community.crypto.x509_certificate:
     path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
@@ -80,7 +120,7 @@
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
     provider: ownca
     backup: yes
-    force: "{{ __ownca_regenerate }}"
+    force: "{{ __host_cert_force_regeneration }}"
   become: no
   delegate_to: localhost
   tags:
