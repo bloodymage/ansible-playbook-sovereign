@@ -16,13 +16,31 @@
   become: yes
   register: result
 
-- name: Install Default Config File
+- name: "Install Default Config File."
   ansible.builtin.template:
     src: xscreensaver.j2
     dest: "/etc/X11/app-defaults/XScreenSaver"
     owner: root
     group: root
     mode: "0644"
+  become: yes
+
+- name: "Install Modified xscreensaver.service file."
+  ansible.builtin.template:
+    src: service.j2
+    dest: "/usr/lib/systemd/user/xscreensaver.service"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: "daemon reload"
+
+- name: "Enable service xscreensaver and ensure it is not masked."
+  ansible.builtin.systemd:
+    name: xscreensaver
+    enabled: yes
+    masked: no
+    scope: global
   become: yes
 
 - name: "Set gnome lockscreen to use xscreensaver lock"

@@ -1,6 +1,6 @@
 namespace: bloodymage
 name: autonomy
-version: 0.5.0
+version: 0.6.0
 
 description: Installs your own network services.
 

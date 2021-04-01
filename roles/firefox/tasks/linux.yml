@@ -3,14 +3,17 @@
 # This configures firefox to provide kerberos logon information to the server.
 #
 # ==================================================================================================
-- name: Install kerberos config
+- name: Install config preferences
   ansible.builtin.template:
-    src: kerberos.j2
-    dest: "{{ firefox_share_path }}/browser/defaults/preferences/kerberos.js"
+    src: "{{ item }}.j2"
+    dest: "{{ firefox_share_path }}/browser/defaults/preferences/{{ item }}.js"
     owner: root
     group: root
     mode: "0644"
   become: yes
+  loop:
+    - kerberos
+    - privacy
   tags:
     - firefox
     - firefox_debug
@@ -41,7 +44,11 @@
     - firefox_debug
     - firefox-debug
 
-
+# ==================================================================================================
+#
+# TODO: Really need to re-write this loop to allow for more zones
+#
+# ==================================================================================================
 - name: "Copy certificates to the Firefox Certificate folder."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"

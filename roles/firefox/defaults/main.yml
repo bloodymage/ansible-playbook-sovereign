@@ -12,3 +12,164 @@ mozilla_lib_path: "/usr/lib/mozilla"
 firefox_etc: "/etc/{{ firefox }}"
 
 firefox_certificate_path: "{{ mozilla_lib_path }}/certificates"
+
+
+# ==================================================================================================
+#
+# Firefox Privacy Settings
+#
+# https://privacytools.io/browsers/#about_config
+# https://github.com/arkenfox/user.js
+#
+# ==================================================================================================
+# A result of the Tor Uplift effort, this preference isolates all browser identifier sources (e.g.
+# cookies) to the first party domain, with the goal of preventing tracking across different domains.
+firefox_privacy_firstparty_isolate: yes
+# A result of the Tor Uplift effort, this preference makes Firefox more resistant to browser
+# fingerprinting.
+firefox_privacy_resist_fingerprinting: yes
+# [FF67+] Blocks Fingerprinting
+firefox_privacy_trackingprotection_fingerprinting_enabled: yes
+# [FF67+] Blocks CryptoMining
+firefox_privacy_trackingprotection_cryptomining_enabled: yes
+# This is Mozilla's new built-in tracking protection. One of it's benefits is blocking tracking
+# (i.e. Google Analytics) on privileged pages where add-ons that usually do that are disabled.
+firefox_privacy_trackingprotection_enabled: yes
+# The attribute would be useful for letting websites track visitors' clicks.
+firefox_browser_send_pings: no
+# Disable preloading of autocomplete URLs. Firefox preloads URLs that autocomplete when a user types
+# into the address bar, which is a concern if URLs are suggested that the user does not want to
+# connect to.
+firefox_browser_urlbar_speculativeConnect_enabled: no
+# Disable that websites can get notifications if you copy, paste, or cut something from a web page,
+# and it lets them know which part of the page had been selected.
+firefox_dom_event_clipboardevents_enabled: no
+# Disables playback of DRM-controlled HTML5 content, which, if enabled, automatically downloads the
+# Widevine Content Decryption Module provided by Google Inc.  DRM-controlled content that requires
+# the Adobe Flash or Microsoft Silverlight NPAPI plugins will still play, if installed and enabled
+# in Firefox_
+firefox_media_eme_enabled: no
+# Disables the Widevine Content Decryption Module provided by Google Inc., used for the playback of
+# DRM-controlled HTML5 content. Details
+firefox_media_gmp-widevinecdm_enabled: no
+# Websites can track the microphone and camera status of your device.
+firefox_media_navigator_enabled: no
+# Disable cookies
+# 0 = Accept all cookies by default
+# 1 = Only accept from the originating site (block third-party cookies)
+# 2 = Block all cookies by default
+firefox_network_cookie_cookieBehavior: 1
+# Only send Referer header when the full hostnames match. (Note: if you notice significant breakage,
+# you might try 1 combined with an XOriginTrimmingPolicy tweak below.) Source
+# 0 = Send Referer in all cases
+# 1 = Send Referer to same eTLD sites
+# 2 = Send Referer only when the full hostnames match
+firefox_network_http_referer_XOriginPolicy: 2
+# When sending Referer across origins, only send scheme, host, and port in the Referer header of
+# cross-origin requests. Source
+# 0 = Send full url in Referer
+# 1 = Send url without query string in Referer
+# 2 = Only send scheme, host, and port in Referer
+firefox_network_http_referer_XOriginTrimmingPolicy: 2
+# WebGL is a potential security risk. Source
+firefox_webgl_disabled: yes
+# This preference controls when to store extra information about a session: contents of forms,
+# scrollbar positions, cookies, and POST data. Details
+# 0 = Store extra session data for any site. (Default starting with Firefox 4.)
+# 1 = Store extra session data for unencrypted (non-HTTPS) sites only. (Default before Firefox 4.)
+# 2 = Never store extra session data.
+firefox_browser_sessionstore_privacy_level: 2
+# Disables sending additional analytics to web servers. Details
+firefox_beacon_enabled: no
+# Prevents Firefox from sending information about downloaded executable files to Google Safe Browsing to determine whether it should be blocked for safety reasons. Details
+firefox_browser_safebrowsing_downloads_remote_enabled: no
+# Disable Firefox prefetching pages it thinks you will visit next:
+# Prefetching causes cookies from the prefetched site to be loaded and other potentially unwanted
+# behavior. Details here and here.
+firefox_network_dns_disablePrefetch: yes
+firefox_network_dns_disablePrefetchFromHTTPS: yes
+firefox_network_predictor_enabled: no
+firefox_network_predictor_enable-prefetch: no
+firefox_network_prefetch-next: no
+# Not rendering IDNs as their Punycode equivalent leaves you open to phishing attacks that can be
+# very difficult to notice. Source
+firefox_network_IDN_show_punycode: yes
+
+
+# ==================================================================================================
+#
+# Defaults
+#
+# ==================================================================================================
+# A result of the Tor Uplift effort, this preference isolates all browser identifier sources (e.g.
+# cookies) to the first party domain, with the goal of preventing tracking across different domains.
+__firefox_privacy_firstparty_isolate: yes
+# A result of the Tor Uplift effort, this preference makes Firefox more resistant to browser
+# fingerprinting_
+__firefox_privacy_resist_fingerprinting: yes
+# [FF67+] Blocks Fingerprinting
+__firefox_privacy_trackingprotection_fingerprinting_enabled: yes
+# [FF67+] Blocks CryptoMining
+__firefox_privacy_trackingprotection_cryptomining_enabled: yes
+# This is Mozilla's new built-in tracking protection. One of it's benefits is blocking tracking
+# (i.e. Google Analytics) on privileged pages where add-ons that usually do that are disabled.
+__firefox_privacy_trackingprotection_enabled: yes
+# The attribute would be useful for letting websites track visitors' clicks.
+__firefox_browser_send_pings: no
+# Disable preloading of autocomplete URLs. Firefox preloads URLs that autocomplete when a user types
+# into the address bar, which is a concern if URLs are suggested that the user does not want to
+# connect to.
+__firefox_browser_urlbar_speculativeConnect_enabled: no
+# Disable that websites can get notifications if you copy, paste, or cut something from a web page,
+# and it lets them know which part of the page had been selected.
+__firefox_dom_event_clipboardevents_enabled: no
+# Disables playback of DRM-controlled HTML5 content, which, if enabled, automatically downloads the
+# Widevine Content Decryption Module provided by Google Inc.  DRM-controlled content that requires
+# the Adobe Flash or Microsoft Silverlight NPAPI plugins will still play, if installed and enabled
+# in Firefox.
+__firefox_media_eme_enabled: no
+# Disables the Widevine Content Decryption Module provided by Google Inc., used for the playback of
+# DRM-controlled HTML5 content. Details
+__firefox_media_gmp_widevinecdm_enabled: no
+# Websites can track the microphone and camera status of your device.
+__firefox_media_navigator_enabled: no
+# Disable cookies
+# 0 = Accept all cookies by default
+# 1 = Only accept from the originating site (block third-party cookies)
+# 2 = Block all cookies by default
+__firefox_network_cookie_cookieBehavior: 1
+# Only send Referer header when the full hostnames match. (Note: if you notice significant breakage,
+# you might try 1 combined with an XOriginTrimmingPolicy tweak below.) Source
+# 0 = Send Referer in all cases
+# 1 = Send Referer to same eTLD sites
+# 2 = Send Referer only when the full hostnames match
+__firefox_network_http_referer_XOriginPolicy: 2
+# When sending Referer across origins, only send scheme, host, and port in the Referer header of
+# cross-origin requests. Source
+# 0 = Send full url in Referer
+# 1 = Send url without query string in Referer
+# 2 = Only send scheme, host, and port in Referer
+__firefox_network_http_referer_XOriginTrimmingPolicy: 2
+# WebGL is a potential security risk. Source
+__firefox_webgl_disabled: yes
+# This preference controls when to store extra information about a session: contents of forms,
+# scrollbar positions, cookies, and POST data. Details
+# 0 = Store extra session data for any site. (Default starting with Firefox 4.)
+# 1 = Store extra session data for unencrypted (non-HTTPS) sites only. (Default before Firefox 4.)
+# 2 = Never store extra session data.
+__firefox_browser_sessionstore_privacy_level: 2
+# Disables sending additional analytics to web servers. Details
+__firefox_beacon_enabled: no
+# Prevents Firefox from sending information about downloaded executable files to Google Safe Browsing to determine whether it should be blocked for safety reasons. Details
+__firefox_browser_safebrowsing_downloads_remote_enabled: no
+# Disable Firefox prefetching pages it thinks you will visit next:
+# Prefetching causes cookies from the prefetched site to be loaded and other potentially unwanted
+# behavior. Details here and here.
+__firefox_network_dns_disablePrefetch: yes
+__firefox_network_dns_disablePrefetchFromHTTPS: yes
+__firefox_network_predictor_enabled: no
+__firefox_network_predictor_enable-prefetch: no
+__firefox_network_prefetch-next: no
+# Not rendering IDNs as their Punycode equivalent leaves you open to phishing attacks that can be
+# very difficult to notice. Source
+__firefox_network_IDN_show_punycode: yes

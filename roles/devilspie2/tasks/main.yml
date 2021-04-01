@@ -15,3 +15,21 @@
         name: "{{ packages }}"
         state: present
       become: yes
+
+- name: "Install Modified devilspie2.service file"
+  ansible.builtin.template:
+    src: service.j2
+    dest: "/usr/lib/systemd/user/devilspie2.service"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: "daemon reload"
+
+- name: "Enable service devilspie2 and ensure it is not masked."
+  ansible.builtin.systemd:
+    name: devilspie2
+    enabled: yes
+    masked: no
+    scope: global
+  become: yes

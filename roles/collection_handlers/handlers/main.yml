@@ -38,6 +38,13 @@
   when:
     - inventory_hostname in groups['postfix_servers'] | default([])
 
+- name: "Force systemd to reread configs"
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  listen:
+    - "daemon reload"
+
+
 # ==================================================================================================
 #
 # Restart Service Handlers
