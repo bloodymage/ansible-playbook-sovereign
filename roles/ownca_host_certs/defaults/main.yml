@@ -46,3 +46,5 @@ ownca_private_key_group: "root"
 ownca_private_key_mode: "0600"
 __ownca_private_key_dir_mode: "0700"
 __ownca_private_key_dir_group: "root"
+
+__host_cert_force_regeneration: no

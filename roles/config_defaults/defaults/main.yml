@@ -218,12 +218,12 @@ ownca_format: 'pem'
 ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy
-autonomy_component_ca_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.pem"
-autonomy_component_ca_chain_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.pem"
-autonomy_component_crl_file: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
-autonomy_identity_ca_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.pem"
-autonomy_identity_ca_chain_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.pem"
-autonomy_identity_crl_file: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
+ownca_component_ca_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.pem"
+ownca_component_ca_chain_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.pem"
+ownca_component_crl_file: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
+ownca_identity_ca_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.pem"
+ownca_identity_ca_chain_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.pem"
+ownca_identity_crl_file: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
 
 ownca_intermediate_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
 ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"

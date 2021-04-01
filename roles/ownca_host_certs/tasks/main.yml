@@ -71,6 +71,45 @@
     - ownca_host_certs_debug
     - ownca-host-certs-debug
 
+- name: "Get component CA certificate information"
+  community.crypto.x509_certificate_info:
+    path: "{{ ownca_component_ca_file }}"
+  become: no
+  register: component_cert
+  delegate_to: localhost
+
+- name: "Check if host cert exists"
+  ansible.builtin.stat:
+    path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
+  delegate_to: localhost
+  become: no
+  register: cert_file
+
+- name: "Get old certificate information"
+  community.crypto.x509_certificate_info:
+    path: "{{ cert_file.stat.path }}"
+  become: no
+  delegate_to: localhost
+  register: host_cert
+  when:
+    - cert_file.stat is defined
+    - cert_file.stat.exists is true
+    - cert_file.stat.path is defined
+
+# ==================================================================================================
+#
+# We want to check if these match, because if they don't we need to force regeneration of the host's
+# certificate.  A mismatch typically happens when the issuing CA's cert has been updated while the
+# host's certificate has not.
+#
+# ==================================================================================================
+- name: "Check if the host's cert authority_key_identifier matches the Component CA's subject_key_identifier."
+  ansible.builtin.set_fact:
+    __host_cert_force_regeneration: yes
+  become: no
+  when:
+    - host_cert.authority_key_identifier != component_cert.subject_key_identifier
+
 - name: "Generate Host Certificate"
   community.crypto.x509_certificate:
     path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
@@ -80,7 +119,7 @@
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
     provider: ownca
     backup: yes
-    force: "{{ __ownca_regenerate }}"
+    force: "{{ __host_cert_force_regeneration }}"
   become: no
   delegate_to: localhost
   tags:
@@ -108,36 +147,6 @@
     - ownca-host-certs-debug
     - ownca-bundles
     - ownca-all
-
-- name: "Print Cert Chain (Name, Ownca, Chain, Complete Chain)"
-  ansible.builtin.debug:
-    msg:
-      - "{{ parent_cert_authorities.chain }}"
-      - "{{ parent_cert_authorities.complete_chain }}"
-      - "{{ parent_cert_authorities.root }}"
-    verbosity: 1
-  become: no
-  delegate_to: localhost
-  when:
-    - parent_cert_authorities.chain is defined
-  tags:
-    - never
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-
-- name: Print Cert Authorities (Full)
-  ansible.builtin.debug:
-    msg:
-      - "{{ parent_cert_authorities }}"
-    verbosity: 4
-  become: no
-  delegate_to: localhost
-  when:
-    - parent_cert_authorities is defined
-  tags:
-    - never
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
 
 - name: "Write complete chain to disk"
   ansible.builtin.copy:

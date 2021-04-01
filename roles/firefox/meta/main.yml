@@ -26,4 +26,5 @@ galaxy_info:
     - imap
 
 dependencies:
+  - role: bloodymage.autonomy.config_defaults
   - role: bloodymage.autonomy.collection_handlers
