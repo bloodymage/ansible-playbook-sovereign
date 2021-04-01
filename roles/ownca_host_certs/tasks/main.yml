@@ -96,6 +96,13 @@
     - cert_file.stat.exists is true
     - cert_file.stat.path is defined
 
+# ==================================================================================================
+#
+# We want to check if these match, because if they don't we need to force regeneration of the host's
+# certificate.  A mismatch typically happens when the issuing CA's cert has been updated while the
+# host's certificate has not.
+#
+# ==================================================================================================
 - name: "Check if the host's cert authority_key_identifier matches the Component CA's subject_key_identifier."
   ansible.builtin.set_fact:
     __host_cert_force_regeneration: yes
@@ -140,36 +147,6 @@
     - ownca-host-certs-debug
     - ownca-bundles
     - ownca-all
-
-- name: "Print Cert Chain (Name, Ownca, Chain, Complete Chain)"
-  ansible.builtin.debug:
-    msg:
-      - "{{ parent_cert_authorities.chain }}"
-      - "{{ parent_cert_authorities.complete_chain }}"
-      - "{{ parent_cert_authorities.root }}"
-    verbosity: 1
-  become: no
-  delegate_to: localhost
-  when:
-    - parent_cert_authorities.chain is defined
-  tags:
-    - never
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-
-- name: Print Cert Authorities (Full)
-  ansible.builtin.debug:
-    msg:
-      - "{{ parent_cert_authorities }}"
-    verbosity: 4
-  become: no
-  delegate_to: localhost
-  when:
-    - parent_cert_authorities is defined
-  tags:
-    - never
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
 
 - name: "Write complete chain to disk"
   ansible.builtin.copy:
