@@ -75,7 +75,7 @@
   community.crypto.x509_certificate_info:
     path: "{{ ownca_component_ca_file }}"
   become: no
-  register: identity_cert
+  register: component_cert
   delegate_to: localhost
 
 - name: "Check if host cert exists"
@@ -84,11 +84,6 @@
   delegate_to: localhost
   become: no
   register: cert_file
-
-- name: "Print cert_file"
-  debug:
-    msg:
-      - "cert_file: {{ cert_file }}"
 
 - name: "Get old certificate information"
   community.crypto.x509_certificate_info:
@@ -101,15 +96,12 @@
     - cert_file.stat.exists is true
     - cert_file.stat.path is defined
 
-# Note: This will force regeneration if ANY user certificate's authority_key_identified doesn't
-# match the Identity CA's subject_key_identifier.
-- name: "Check if the user's cert authority_key_identifier matches the Identity CA's subject_key_identifier."
+- name: "Check if the host's cert authority_key_identifier matches the Component CA's subject_key_identifier."
   ansible.builtin.set_fact:
     __host_cert_force_regeneration: yes
   become: no
   when:
-    - host_cert.authority_key_identifier is defined
-    - host_cert.authority_key_identifier != identity_cert.subject_key_identifier
+    - host_cert.authority_key_identifier != component_cert.subject_key_identifier
 
 - name: "Generate Host Certificate"
   community.crypto.x509_certificate:

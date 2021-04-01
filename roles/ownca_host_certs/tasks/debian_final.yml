@@ -165,6 +165,9 @@
 #
 # Are there security implications for generating elsewhere and transferring to the RPi server later?
 #
+# We only need to run this if the host's private key type is DSA or RSA.  It doesn't really apply
+# to elliptical curve cryptography.
+#
 # ==================================================================================================
 - name: "Generate Diffie-Hellman Parameters."
   community.crypto.openssl_dhparam:
