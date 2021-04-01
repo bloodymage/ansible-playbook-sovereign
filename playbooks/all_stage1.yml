@@ -115,6 +115,9 @@
     - role: bloodymage.autonomy.htop
       tags:
         - htop
+    - role: bloodymage.autonomy.emacs
+      tags:
+        - emacs
     # - role: bloodymage.autonomy.trash_cli
     #   tags:
     #     - trash-cli
