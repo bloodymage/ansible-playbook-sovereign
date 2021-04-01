@@ -32,16 +32,6 @@ Some smaller goals that I have for this project is minimizing the variables I ha
 
 Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
 
-### Name
-
-In the spirit of freedom to control _your_ data I initially named this project "Rebel Dream" after the Star Wars [starship](https://starwars.fandom.com/wiki/Rebel_Dream) of the same name.
-
-I wanted the freedom to tinker and have my systems work the way I wanted. I was tired of systems and applications I used and liked being killed off. I wanted to be self sufficient. I felt that in a way, the name captures that feeling.
-
-Other names that feel appropriate: Sovereign, Self-Hosted, are either already in use, or while they clearly indicate what this project is, don't quite capture the spirit behind this project.
-
-That said, "Rebel dream" doesn't quite feel right either.  Looking for a new name: See issue [#238](https://github.com/bloodymage/ansible-collection-autonomy/issues/238), feel free to comment.
-
 ## Installation
 ### Ansible Galaxy
 
@@ -208,23 +198,19 @@ Includes over 100 services you can easily self-host.
 
 YunoHost is an operating system aiming for the simplest administration of a server, and therefore democratize self-hosting, while making sure it stays reliable, secure, ethical and lightweight. It is a copylefted libre software project maintained exclusively by volunteers. Technically, it can be seen as a distribution based on Debian GNU/Linux and can be installed on many kinds of hardware.
 
-| Project                  | Rebeldream               | DebOps     | Sovereign | FreedomBox | HomelabOS | Yunohost |
+| Project                  | Autonomy                 | DebOps     | Sovereign | FreedomBox | HomelabOS | Yunohost |
 | :------                  | :---------               | :-----     | :-------- | :--------- | :-------- | :------- |
 | Uses Ansible             | Yes                      | Yes        | Yes       | No         | No        | No       |
-| Email                    | Dovecot\                 |            |           |            |           |          |
-|                          | Postfix                  |            |           |            |           |          |
+| Email                    | Dovecot<br>Postfix       |            |           |            |           |          |
 | Identity Management      | Active Directory (Samba) |            |           |            |           |          |
 | Groupware                | Nextcloud                | Nextcloud  | OwnCloud  |            |           |          |
-| Cloud Storage            | Nextcloud                | Nextcloud\ | OwnCloud  |            |           |          |
-|                          |                          | Owncloud   |           |            |           |          |
-| Certificate Authority    | Internal \               |            |           |            |           |          |
-|                          | Let's Encrypt            |            |           |            |           |          |
+| Cloud Storage            | Nextcloud                | Nextcloud<br>Owncloud | OwnCloud  |            |           |          |
+| Certificate Authority    | Internal<br>Let's Encrypt|            |           |            |           |          |
 | DNS                      | Bind9                    |            |           |            |           |          |
-|                          |                          |            |           |            |           |          |
 | Operating System Support | Linux                    |            |           |            |           |          |
 | Distribution Support     | Debian                   | Debian     |           |            |           |          |
 | Smart Card Support       | Yes                      |            |           |            |           |          |
-| Website                  | https://github.com/bloodymage/ansible-collection-bloodymage | https://debops.org | https://github.com/sovereign/sovereign | https://freedombox.org | https://homelabos.com | https://yunohost.org |
+| Website                  | https://github.com/bloodymage/ansible-collection-autonomy | https://debops.org | https://github.com/sovereign/sovereign | https://freedombox.org | https://homelabos.com | https://yunohost.org |
 
 
 ### Related Projects
