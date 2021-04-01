@@ -44,7 +44,11 @@
     - firefox_debug
     - firefox-debug
 
-
+# ==================================================================================================
+#
+# TODO: Really need to re-write this loop to allow for more zones
+#
+# ==================================================================================================
 - name: "Copy certificates to the Firefox Certificate folder."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ item }}"
