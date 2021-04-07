@@ -22,7 +22,6 @@ galaxy_info:
 
   galaxy_tags:
     - bloodymage
-    - samba
 
 dependencies:
   - role: bloodymage.autonomy.config_defaults
