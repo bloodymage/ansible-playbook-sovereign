@@ -1,0 +1,29 @@
+---
+# tasks file for aliases
+- name: "Prepare Host"
+  block:
+    - name: "Include OS-specific variables."
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+
+    - name: "Install packages."
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+
+- name: "Install /etc configuration files."
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/etc/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop:
+    - aliases

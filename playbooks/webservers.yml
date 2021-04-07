@@ -23,11 +23,13 @@
     - role: bloodymage.autonomy.acmeca_challenge_site
       tags:
         - acmeca-challenge-site
+        - acmeca
     - role: bloodymage.autonomy.config_acmeca_environment
     - role: bloodymage.autonomy.acmeca_host_certs
       tags:
         - acmeca_host_certs
         - acmeca-host-certs
+        - acmeca
     - role: bloodymage.autonomy.nextcloud
       tags:
         - nextcloud

@@ -1,4 +1,4 @@
 ---
 # defaults file for emacs
 packages:
-  - emacs-nw
+  - emacs-nox

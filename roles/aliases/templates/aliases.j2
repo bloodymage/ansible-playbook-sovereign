@@ -6,6 +6,6 @@
 {% endif %}
 {% endfor %}
 # Need a way to determine if these users exist on the host
-{% for user in postfix_local_user_maps -%}
+{% for user in aliases_local_user_maps -%}
   {{ user.username }}: {{ user.email }}
 {% endfor %}
