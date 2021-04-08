@@ -51,7 +51,7 @@ freeradius_mods:
           - name: certificate_file
             value: "/etc/ssl/certs/{{ autonomy_fqdn }}.pem"
           - name: "ca_file"
-            value: "{{ autonomy_component_ca_file }}"
+            value: "{{ ownca_component_ca_file }}"
           # - name:	"auto_chain"
           #   value:  "yes"
           # - name:	"psk_identity"
