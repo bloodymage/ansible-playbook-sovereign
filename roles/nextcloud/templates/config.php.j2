@@ -7,7 +7,7 @@ $CONFIG = array (
   array (
     0 => '{{ item.name }}',
   ),
-  'datadirectory' => '{{ nextcloud_data_directory }}/{{ item.name }}/data',
+  'datadirectory' => '{{ nextcloud_data_directory }}/{{ item.name }}',
   'dbtype' => 'mysql',
   'version' => '{{ nextcloud_version }}',
   'overwrite.cli.url' => 'https://{{ item.name }}',
@@ -28,4 +28,5 @@ $CONFIG = array (
   'mail_domain' => '{{ autonomy_root_domain }}',
   'mail_smtphost' => 'mail.{{ autonomy_root_domain }}',
   'mail_smtpport' => '25',
+  'default_phone_region' => 'US',
 );
