@@ -1,12 +1,20 @@
 namespace: bloodymage
 name: autonomy
-version: 0.6.0
+version: 0.6.3
 
 description: Installs your own network services.
 
 readme: "README.md"
 license_file: "LICENSE.md"
-tags: []
+tags:
+  - selfhosted
+  - autonomy
+  - bloodymage
+  - dns
+  - activedirectory
+  - email
+  - dovecot
+  - postfix
 
 dependencies:
   - ansible.netcommon
