@@ -1,4 +1,4 @@
-- hosts: all:!localhost:!public_zone
+- hosts: all:!localhost
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
@@ -11,3 +11,5 @@
       tags:
         - ownca_host_certs
         - ownca-host-certs
+        - ownca_host_certificates
+        - ownca-host-certificates

@@ -36,11 +36,9 @@ autonomy_zones:
   - internal
   - dmz
 
-autonomy_default_domain: "internal.example.com"
+autonomy_default_domain: "internal.{{ autonomy_root_domain }}"
 autonomy_domain: "{{ ansible_domain | default(autonomy_default_domain) }}"
 autonomy_realm: "{{ autonomy_domain | upper }}"
-autonomy_domain_list: "{{ autonomy_domain.split('.')[-2:] }}"
-autonomy_root_domain: "{{ autonomy_domain_list | join('.') }}"
 autonomy_tld: "{{ autonomy_domain.split('.')[-1] }}"
 autonomy_min_domain_id_number: 10000
 

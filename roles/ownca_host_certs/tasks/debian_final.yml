@@ -14,15 +14,9 @@
     mode: "0644"
   become: yes
   loop:
-    - "{{ inventory_hostname }}"
-    - "{{ inventory_hostname }}-chain"
+    - "{{ autonomy_fqdn }}"
+    - "{{ autonomy_fqdn }}-chain"
   notify: restart all
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
 - name: Copy domain controllers' certificate to server.
   ansible.builtin.copy:
@@ -36,12 +30,6 @@
   when:
     - autonomy_realm_identity_management_system is truthy
   notify: restart all
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
 - name: Copy domain controllers' certificate chain to server.
   ansible.builtin.copy:
@@ -55,12 +43,6 @@
   when:
     - autonomy_realm_identity_management_system is truthy
   notify: restart all
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
 - name: Copy CA Certificates to server.
   ansible.builtin.copy:
@@ -72,12 +54,6 @@
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   notify: restart all
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
 - name: Copy CA Chains Certificates to server.
   ansible.builtin.copy:
@@ -91,12 +67,6 @@
   notify: restart all
   when:
     - item.name != "root"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
 - name: Copy CRLs to server.
   ansible.builtin.copy:
@@ -107,11 +77,6 @@
     mode: "0644"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
-  tags:
-    - ownca_crl
-    - ownca-crl
-    - ownca_crl_debug
-    - ownca-crl-debug
 
 - name: "Ensure we have a PKCS12 password for the Host"
   ansible.builtin.set_fact:
@@ -126,11 +91,6 @@
   delegate_to: localhost
   when:
     - ownca_host_certs_pkcs12_password == "password"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
 
 - name: Generate PKCS#12 file
   community.crypto.openssl_pkcs12:
@@ -166,7 +126,7 @@
 # Are there security implications for generating elsewhere and transferring to the RPi server later?
 #
 # We only need to run this if the host's private key type is DSA or RSA.  It doesn't really apply
-# to elliptical curve cryptography.
+# to elliptical curve cryptography.  Need to verify this.  I read it somewhere.
 #
 # ==================================================================================================
 - name: "Generate Diffie-Hellman Parameters."
@@ -180,21 +140,10 @@
   become: yes
   when:
     - ownca_privatekey_type in ['DSA','RSA']
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
 
 # - name: Fetch PKCS#12 files
 #   ansible.builtin.fetch:
-#     src: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
+#     src: "{{ ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
 #     dest: "{{ ownca_hosts_directory }}/csr/"
 #     flat: yes
 #   become: yes
-#   tags:
-#     - ownca_host_certs
-#     - ownca-host-certs
-#     - ownca_host_certs_debug
-#     - ownca-host-certs-debug
-#     - ownca-all

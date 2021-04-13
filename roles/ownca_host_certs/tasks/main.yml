@@ -9,69 +9,37 @@
           paths:
             - "vars"
       become: no
-      tags:
-        - ownca_host_certs
-        - ownca-host-certs
-        - ownca_host_certificates
-        - ownca-host-certificates
-        - ownca_host_certs_debug
-        - ownca-host-certs-debug
-        - ownca_host_certificates_debug
-        - ownca-host-certificates-debug
 
-- name: Include Family Tasks
+- name: "Include OS Family Preparation Tasks."
   include: "{{ ansible_os_family | lower }}_prep.yml"
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
     - not ownca_generate_locally
   become: no
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
 
-- name: "Include tasks for localhost generation"
+- name: "Include Localhost Preparation Tasks."
   include: "localhost_prep.yml"
   when:
     - ansible_network_os is defined or ownca_generate_locally
   become: no
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
 
-- name: "Ensure we have a password for the Component Issuing CA"
+- name: "Ensure we have a password for the Component Issuing CA."
   ansible.builtin.set_fact:
     ownca_component_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ autonomy_domain }}/ownca/ownca_component_password"
-    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password_lookup: "{{ __password_store_id }}"
   become: no
   delegate_to: localhost
-  when:
-    - ownca_component_password == "password"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
 
-- name: "Get component CA certificate information"
+# ==================================================================================================
+#
+# The next four tasks ensure we regenerate the host certificate if the issuing certificate is newer
+# than the host certificate.
+#
+# ==================================================================================================
+- name: "Get component CA certificate information."
   community.crypto.x509_certificate_info:
     path: "{{ ownca_component_ca_file }}"
   become: no
@@ -80,12 +48,12 @@
 
 - name: "Check if host cert exists"
   ansible.builtin.stat:
-    path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
+    path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
   delegate_to: localhost
   become: no
   register: cert_file
 
-- name: "Get old certificate information"
+- name: "Get host certificate information"
   community.crypto.x509_certificate_info:
     path: "{{ cert_file.stat.path }}"
   become: no
@@ -108,12 +76,13 @@
     __host_cert_force_regeneration: yes
   become: no
   when:
+    - host_cert.authority_key_identifier is defined
     - host_cert.authority_key_identifier != component_cert.subject_key_identifier
 
 - name: "Generate Host Certificate"
   community.crypto.x509_certificate:
-    path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}.crt"
-    csr_path: "{{ ownca_hosts_directory }}/csr/{{ inventory_hostname }}.csr"
+    path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
+    csr_path: "{{ ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
     ownca_path: "{{ ownca_component_ca_cert }}"
     ownca_privatekey_path: "{{ ownca_component_ca_key }}"
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
@@ -122,14 +91,8 @@
     force: "{{ __host_cert_force_regeneration }}"
   become: no
   delegate_to: localhost
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
-- name: "Identify Certificate Complete Chain"
+- name: "Identify Certificate Complete Chain."
   community.crypto.certificate_complete_chain:
     input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + autonomy_fqdn + '.crt') }}"
     intermediate_certificates:
@@ -140,15 +103,8 @@
   register: parent_cert_authorities
   become: no
   delegate_to: localhost
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-bundles
-    - ownca-all
 
-- name: "Write complete chain to disk"
+- name: "Write complete chain to disk."
   ansible.builtin.copy:
     dest: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
@@ -159,63 +115,29 @@
   delegate_to: localhost
   when:
     - parent_cert_authorities.complete_chain is defined
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-bundles
-    - ownca-all
 
-- name: Include Family Tasks
+- name: "Include OS Family Tasks."
   include: "{{ ansible_os_family | lower }}_final.yml"
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
     - not ownca_generate_locally
   become: no
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
 
-- name: Include NetworkOS Tasks
+- name: "Include NetworkOS Tasks."
   include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
   become: no
   when:
     - ansible_network_os is defined
     - not ownca_generate_locally
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
 
-- name: Include Local tasks
+- name: "Include Local tasks."
   include: "localhost_final.yml"
   become: no
   when:
     - ownca_generate_locally
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
 
-- name: Copy CA Certificates Samba File Server.
+- name: "Copy CA Certificates Samba File Server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
@@ -226,14 +148,8 @@
   become: yes
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
-- name: Copy CA Certificate Chains Samba File Server.
+- name: "Copy CA Certificate Chains Samba File Server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
@@ -245,14 +161,8 @@
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
     - item.name != "root"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
-- name: Copy CA Certificates Samba File Server.
+- name: "Copy CA Certificates Samba File Server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.der"
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.cer"
@@ -263,14 +173,8 @@
   become: yes
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
-- name: Copy CA Certificate Chains Samba File Server.
+- name: "Copy CA Certificate Chains Samba File Server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.cer"
@@ -282,9 +186,3 @@
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
     - item.name != "root"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all

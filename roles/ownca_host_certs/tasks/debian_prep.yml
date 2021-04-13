@@ -6,33 +6,8 @@
   become: yes
   when:
     - inventory_hostname not in groups['virtual_ip_address']
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
-    - install-packages
-    - ownca-all
 
-- name: Get IP geolocation data
-  community.general.ipinfoio_facts:
-  become: yes
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
-    - ownca-all
-
-- name: "Check if host is in 'apache' group"
+- name: "Check if host is in 'apache' or 'openldap' group"
   ansible.builtin.set_fact:
     ownca_private_key_group: "ssl-cert"
     ownca_private_key_mode: "0640"
@@ -41,12 +16,6 @@
   when:
     - inventory_hostname in groups['apache_servers']
     - inventory_hostname in groups['openldap_servers']
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
 # ==================================================================================================
 #
@@ -67,16 +36,10 @@
     mode: "{{ item.mode }}"
   become: yes
   loop: "{{ ownca_host_certs_directories }}"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
-- name: Generate Host Private Key
+- name: "Generate Host Private Key."
   community.crypto.openssl_privatekey:
-    path: '{{ ownca_etc }}/private/{{ inventory_hostname }}.key'
+    path: '{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key'
     type: '{{ ownca_privatekey_type }}'
     size: 4096
     owner: "{{ ownca_etc_owner }}"
@@ -84,46 +47,20 @@
     mode: "{{ ownca_private_key_mode }}"
     force: no
   become: yes
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
-- name: Print CSR Variables
-  ansible.builtin.debug:
-    msg:
-      - "country_name: {{ autonomy_country_code | default(country) }}"
-      - "state_or_province_name: {{ autonomy_region_name | default(region) }}"
-      - "locality_name: {{ loc_city | default(none) }}"
-      - "organization_name: {{ autonomy_org_name | title }}"
-      - "organizational_unit_name: {{ autonomy_org_unit_name | title }}"
-      - "common_name: {{ inventory_hostname }}"
-      - "key_usage: {{ ownca_host_certs_key_usage }}"
-      - "extended_key_usage: {{ ownca_host_certs_extended_key_usage }}"
-      - "privatekey_path: {{ ownca_etc }}/private/{{ inventory_hostname }}.key"
-      - "subject_alt_name: {{ ownca_host_certs_subject_alt_name }}"
-    verbosity: 1
-  become: no
-  tags:
-    - never
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-
-- name: Generate Host CSR
+- name: "Generate Host CSR."
   community.crypto.openssl_csr:
-    country_name: "{{ ownca_country_code | default(country) }}"
-    state_or_province_name: "{{ autonomy_region | default(region) }}"
+    country_name: "{{ ownca_country_code | default(none) }}"
+    state_or_province_name: "{{ autonomy_region | default(none) }}"
     locality_name: "{{ loc_city | default(none) }}"
     organization_name: "{{ autonomy_org_name | title }}"
     organizational_unit_name: "{{ autonomy_org_unit_name | title }}"
-    common_name: "{{ inventory_hostname }}"
+    common_name: "{{ autonomy_fqdn }}"
     key_usage: "{{ ownca_host_certs_key_usage }}"
     key_usage_critical: yes
     extended_key_usage: "{{ ownca_host_certs_extended_key_usage }}"
     extended_key_usage_critical: yes
-    privatekey_path: "{{ ownca_etc }}/private/{{ inventory_hostname }}.key"
+    privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
     crl_distribution_points:
       - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
@@ -136,19 +73,13 @@
           - certificate_hold
           - privilege_withdrawn
           - aa_compromise
-    path: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
+    path: "{{ ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
     mode: "0644"
     owner: "{{ ownca_etc_owner }}"
     group: "{{ ownca_etc_group }}"
     backup: yes
     force: "{{ __ownca_regenerate_csr }}"
   become: yes
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 
 # ==================================================================================================
 #
@@ -158,13 +89,7 @@
 # ==================================================================================================
 - name: Fetch CSRs.
   ansible.builtin.fetch:
-    src: "{{ ownca_etc }}/csr/{{ inventory_hostname }}.csr"
+    src: "{{ ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
     dest: "{{ ownca_hosts_directory }}/csr/"
     flat: yes
   become: yes
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
