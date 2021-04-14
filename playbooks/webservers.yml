@@ -4,11 +4,16 @@
       tags:
         redis
 
+# ==================================================================================================
+#
+# We don't run this on the public zone servers, as that would be redundant.
+#
+# ==================================================================================================
 - hosts: apache_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.apache
 
-- hosts: nginx_servers
+- hosts: nginx_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.nginx
 
@@ -20,28 +25,32 @@
 # ==================================================================================================
 - hosts: web_servers:&public_zone
   roles:
+    - role: bloodymage.autonomy.config_acmeca_environment
     - role: bloodymage.autonomy.acmeca_challenge_site
       tags:
         - acmeca-challenge-site
-    - role: bloodymage.autonomy.config_acmeca_environment
     - role: bloodymage.autonomy.acmeca_host_certs
       tags:
         - acmeca_host_certs
         - acmeca-host-certs
-    - role: bloodymage.autonomy.nextcloud
-      tags:
-        - nextcloud
     - role: bloodymage.autonomy.ownca_crl_distribution_points
       tags:
         - ownca-crl-distribution-points
         - ownca_crl_distribution_points
+        - websites
 
-- hosts: web_servers
+- hosts: nextcloud_severs:&public_zone
+  roles:
+    - role: bloodymage.autonomy.nextcloud
+      tags:
+        - nextcloud
+        - websites
+
+- hosts: mediawiki_servers
   roles:
     - role: bloodymage.autonomy.mediawiki
       tags:
         - mediawiki
-        - mediawiki_debug
-        - mediawiki-debug
+        - websites
     # - role: bloodymage.autonomy.drush
     # - role: bloodymage.autonomy.drupal

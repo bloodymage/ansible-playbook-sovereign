@@ -14,17 +14,6 @@
     - websites
     - install-packages
 
-- name: "Check to determine if we need krb5 support"
-  ansible.builtin.set_fact:
-    packages: "{{ packages + [ mediawiki_krb5_packages ] }}"
-  become: no
-  when:
-    - autonomy_realm_identity_management_system is truthy
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
 - name: "Ensure we have a password for the database user"
   ansible.builtin.set_fact:
     mediawiki_db_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
@@ -67,30 +56,6 @@
     - mediawiki-debug
     - websites
     - install-packages
-
-# ==================================================================================================
-#
-# The conditional needs work.
-#
-# I need it to enable the modules in mediawiki_apache_modules, but only if one of the virtual hosts
-# is a mediawiki website.
-#
-# ==================================================================================================
-- name: "Enable Apache Modules"
-  community.general.apache2_module:
-    state: present
-    name: "{{ item }}"
-  loop: "{{ mediawiki_apache_modules }}"
-  become: yes
-  when:
-    - virtual_hosts is defined
-    - inventory_hostname in groups['apache_servers']
-  notify: restart apache
-  tags:
-    - mediawiki
-    - mediawiki_debug
-    - mediawiki-debug
-    - websites
 
 - name: "Install Mediawiki Site"
   ansible.builtin.git:

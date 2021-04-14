@@ -122,7 +122,7 @@
   ansible.builtin.expect:
     command: >
       net rpc rights grant '{{ autonomy_org_unit_name | upper }}\unixadmins'
-      SeDiskOperatorPrivilege -U '{{ autonomy_org_unit_name | upper }}\administrator'
+      SeDiskOperatorPrivilege -U '{{ autonomy_org_unit_name | upper }}\Administrator'
     responses:
       (?i)password: "{{ __samba_administrator_password }}"
   become: yes

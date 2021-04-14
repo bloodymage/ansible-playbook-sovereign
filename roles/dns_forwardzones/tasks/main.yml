@@ -144,7 +144,8 @@
       - "{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
       - "{{ item.alt_name }}.{{ autonomy_domain }}"
   when:
-    - inventory_hostname in groups[__group_id]
+    - inventory_hostname not in groups ['public_zone']
+    - inventory_hostname in groups[item.name]
 
 - name: "Add or modify host CNAME records based on server role"
   community.general.nsupdate:

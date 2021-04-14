@@ -144,16 +144,7 @@
     - nextcloud-debug
     - websites
 
-# ==================================================================================================
-#
-# TODO: Update this to fully qualified collection name
-#
-# As of ansible 2.10.3 this fails with the fully qualified collection name:
-# - ansible.builtin.command
-#
-# ==================================================================================================
-
-- name: "Ensure we have a password for the nextcloud ldap lookup user"
+- name: "Ensure we have a password for the nextcloud ldap lookup user."
   ansible.builtin.set_fact:
     nextcloud_ldap_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
@@ -167,11 +158,6 @@
   when:
     - virtual_hosts is defined
     - nextcloud_ldap_password == "password"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: Update nextcloud config
   ansible.builtin.template:
@@ -188,11 +174,6 @@
     - item.content == "nextcloud"
     - item.enabled is defined
     - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: "Install Nextcloud apps"
   include: nextcloud_apps.yml
@@ -203,11 +184,6 @@
     - virtual_hosts is defined
     - host.content is defined
     - host.content == "nextcloud"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: "Ensure we have a clean nextcloud state before we do anything else"
   ansible.builtin.command:

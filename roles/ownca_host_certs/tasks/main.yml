@@ -83,7 +83,7 @@
   community.crypto.x509_certificate:
     path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
     csr_path: "{{ ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
-    ownca_path: "{{ ownca_component_ca_cert }}"
+    ownca_path: "{{ ownca_component_ca_file }}"
     ownca_privatekey_path: "{{ ownca_component_ca_key }}"
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
     provider: ownca
@@ -96,7 +96,7 @@
   community.crypto.certificate_complete_chain:
     input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + autonomy_fqdn + '.crt') }}"
     intermediate_certificates:
-      - "{{ ownca_component_ca_cert }}"
+      - "{{ ownca_component_ca_file }}"
       - "{{ ownca_intermediate_ca_cert }}"
     root_certificates:
       - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"

@@ -51,8 +51,6 @@
 - name: "Set subject alt name based on role."
   ansible.builtin.set_fact:
     ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
-  when:
-    - inventory_hostname in groups[__group_id]
   become: no
   loop:
     - name: "db_servers"
