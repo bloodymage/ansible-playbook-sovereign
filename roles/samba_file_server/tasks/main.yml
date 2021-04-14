@@ -44,6 +44,13 @@
         - recreate-realm
         - recreate-realm-debug
 
+# ==================================================================================================
+#
+# We need a way to check if the file server is part of a samba domain or not.  If it is, we need to
+# set samba security to 'ADS' else it can be another option.
+#
+# ==================================================================================================
+
 # Create Config File
 - name: Install smb.conf configuration file
   ansible.builtin.template:

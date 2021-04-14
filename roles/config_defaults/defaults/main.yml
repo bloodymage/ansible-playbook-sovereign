@@ -32,12 +32,14 @@ autonomy_password_length: "42"
 autonomy_root_domain: "example.com"
 autonomy_internal_zone_name: "internal"
 autonomy_dmz_zone_name: "dmz"
+autonomy_zone_name: "internal"
 autonomy_zones:
   - internal
   - dmz
 
 autonomy_default_domain: "internal.{{ autonomy_root_domain }}"
 autonomy_domain: "{{ ansible_domain | default(autonomy_default_domain) }}"
+autonomy_domain_list: "{{ autonomy_domain.split('.')[-2:] }}"
 autonomy_realm: "{{ autonomy_domain | upper }}"
 autonomy_tld: "{{ autonomy_domain.split('.')[-1] }}"
 autonomy_min_domain_id_number: 10000
@@ -53,6 +55,8 @@ autonomy_city: ""
 # Host Information
 autonomy_hostname: "{{ inventory_hostname_short }}"
 autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
+autonomy_ipv4_address: "{{ ansible_host }}"
+autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default(omit) }}"
 
 # Default Passwords
 mediawiki_db_password: "password"
@@ -216,31 +220,22 @@ ownca_format: 'pem'
 ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy
-ownca_component_ca_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.pem"
-ownca_component_ca_chain_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.pem"
-ownca_component_crl_file: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
-ownca_identity_ca_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.pem"
-ownca_identity_ca_chain_file: "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.pem"
-ownca_identity_crl_file: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
-
 ownca_intermediate_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
 ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
 ownca_intermediate_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain.crt"
 ownca_intermediate_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}.crl"
-ownca_component_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.key"
-ownca_component_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
+ownca_component_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
 ownca_component_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.crt"
 ownca_component_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
-ownca_identity_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.key"
+ownca_component_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.key"
 ownca_identity_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crt"
 ownca_identity_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.crt"
 ownca_identity_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
+ownca_identity_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.key"
 ownca_codesign_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.key"
 ownca_codesign_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.crt"
 ownca_codesign_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca-chain.crt"
 ownca_codesign_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign.crl"
-
-autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default(omit) }}"
 
 # ==================================================================================================
 #

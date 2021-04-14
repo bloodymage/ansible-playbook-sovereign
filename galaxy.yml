@@ -2,7 +2,7 @@ namespace: bloodymage
 name: autonomy
 version: 0.6.3
 
-description: Installs your own network services.
+description: Installs your own self-hosted network services.
 
 readme: "README.md"
 license_file: "LICENSE.md"
