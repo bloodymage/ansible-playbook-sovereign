@@ -50,9 +50,7 @@
 # set samba security to 'ADS' else it can be another option.
 #
 # ==================================================================================================
-
-# Create Config File
-- name: Install smb.conf configuration file
+- name: "Install smb.conf configuration file."
   ansible.builtin.template:
     src: "smb.conf.j2"
     dest: /etc/samba/smb.conf

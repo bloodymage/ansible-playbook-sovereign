@@ -7,6 +7,12 @@
   when:
     - inventory_hostname not in groups['virtual_ip_address']
 
+# ==================================================================================================
+#
+# Apache servers and openldap servers require different permissions for the private keys from other
+# server types.
+#
+# ==================================================================================================
 - name: "Check if host is in 'apache' or 'openldap' group"
   ansible.builtin.set_fact:
     ownca_private_key_group: "ssl-cert"
