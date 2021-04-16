@@ -7,27 +7,22 @@
   when:
     - ownca_host_certs_pkcs12_password == "password"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/ownca_host_cert_pkcs12_password"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/ownca_host_cert_pkcs12_password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
 
 - name: Generate PKCS#12 file
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
     path:  "{{ ownca_hosts_directory }}/pkcs12/{{ autonomy_fqdn }}.pkcs12"
-    friendly_name: "{{ inventory_hostname_short }}"
+    friendly_name: "{{ autonomy_fqdn }}"
     passphrase: "{{ ownca_host_cert_pkcs12_password }}"
-    privatekey_path: "{{ ownca_hosts_directory }}/private/{{ inventory_hostname }}.key"
-    certificate_path: "{{ ownca_hosts_directory }}/certs/{{ inventory_hostname }}-chain.crt"
+    privatekey_path: "{{ ownca_hosts_directory }}/private/{{ autonomy_fqdn }}.key"
+    certificate_path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
     other_certificates:
       - "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
       - "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
@@ -41,13 +36,6 @@
     #force: yes
   become: no
   delegate_to: localhost
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-bundles
-    - ownca-all
 
 - name: Copy PKCS12 files Samba File Server.
   ansible.builtin.copy:
@@ -60,9 +48,3 @@
   become: yes
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all

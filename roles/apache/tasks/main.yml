@@ -19,40 +19,53 @@
     - apache_debug
     - apache-debug
 
+- name: "Check to determine if we need krb5 support"
+  ansible.builtin.set_fact:
+    packages: "{{ packages + [ apache_krb5_packages ] }}"
+    apache_modules: "{{ apache_modules + [ apache_kerberos_ad_sso_modules ] }}"
+  become: no
+  when:
+    - inventory_hostname in groups['internal_zone']
+    - autonomy_realm_identity_management_system is truthy
+
+- name: "Check to determine if we need ldap support"
+  ansible.builtin.set_fact:
+    apache_modules: "{{ apache_modules + [ apache_ldap_modules ] }}"
+  become: no
+  when:
+    - autonomy_realm_identity_management_system is truthy
+
 - name: "Install packages"
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
   become: yes
-  tags:
-    - apache
-    - apache_debug
-    - apache-debug
-    - install-packages
 
+# ==================================================================================================
+#
+# The conditional needs work.
+#
+# I need it to enable the modules in apache_modules, but only if one of the virtual hosts
+# is a mediawiki website.
+#
+# ==================================================================================================
 - name: "http service state"
-  service:
+  ansible.builtin.service:
     name: apache2
     state: started
     enabled: yes
   become: yes
-  tags:
-    - apache
-    - apache_debug
-    - apache-debug
 
-- name: "Enable Apache modules"
+- name: "Enable Apache Modules"
   community.general.apache2_module:
     state: present
     name: "{{ item }}"
-  loop:
-    - ssl
-  notify: reload apache
+  loop: "{{ apache_modules }}"
   become: yes
-  tags:
-    - apache
-    - apache_debug
-    - apache-debug
+  when:
+    - virtual_hosts is defined
+    - inventory_hostname in groups['apache_servers']
+  notify: restart apache
 
 # ======================================================================
 #

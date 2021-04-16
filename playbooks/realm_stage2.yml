@@ -1,5 +1,5 @@
 # Need to add in specific file server(s) (ones with user home directories).
-- hosts: workstations:&linux
+- hosts: workstations:&linux:!mythfrontend
   roles:
     - role: bloodymage.autonomy.dotfiles
       vars:
@@ -18,7 +18,7 @@
         - ownca-user-certs-debug
         - recreate-realm
 
-- hosts: samba_ownca_user_hosts:workstations:&linux
+- hosts: samba_ownca_user_hosts:workstations:&linux:!mythfrontend
   roles:
     - role: bloodymage.autonomy.sshca_user_certs
       tags:

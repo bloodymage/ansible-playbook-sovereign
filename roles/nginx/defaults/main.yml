@@ -2,3 +2,5 @@
 # defaults file for nginx
 packages:
   - nginx
+
+nginx_proxy_pass: "http://localhost:8080"
