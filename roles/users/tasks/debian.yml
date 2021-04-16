@@ -222,7 +222,6 @@
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   when:
     - item.ssh_cert is defined
-    - user_password_list.results[index].ansible_facts.ssh_key_password is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
   tags:
     - users
