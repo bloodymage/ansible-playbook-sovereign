@@ -2,6 +2,10 @@
 
 [![Ansile-Lint](https://github.com/bloodymage/ansible-collection-autonomy/workflows/Ansible%20Lint/badge.svg?event=push)](https://github.com/bloodymage/ansible-collection-autonomy/actions?query=workflow%3A%22Ansible+Lint%22)
 
+# Help Wanted
+
+Looking for help.  Let me know if you are interested.
+
 - [Description](#description)
 - [Installation](#installation)
 - [Usage](#usage)

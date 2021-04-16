@@ -11,3 +11,5 @@
       tags:
         - ownca_host_certs
         - ownca-host-certs
+        - ownca_host_certificates
+        - ownca-host-certificates

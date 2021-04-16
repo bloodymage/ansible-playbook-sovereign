@@ -44,8 +44,13 @@
         - recreate-realm
         - recreate-realm-debug
 
-# Create Config File
-- name: Install smb.conf configuration file
+# ==================================================================================================
+#
+# We need a way to check if the file server is part of a samba domain or not.  If it is, we need to
+# set samba security to 'ADS' else it can be another option.
+#
+# ==================================================================================================
+- name: "Install smb.conf configuration file."
   ansible.builtin.template:
     src: "smb.conf.j2"
     dest: /etc/samba/smb.conf
@@ -115,7 +120,7 @@
   ansible.builtin.expect:
     command: >
       net rpc rights grant '{{ autonomy_org_unit_name | upper }}\unixadmins'
-      SeDiskOperatorPrivilege -U '{{ autonomy_org_unit_name | upper }}\administrator'
+      SeDiskOperatorPrivilege -U '{{ autonomy_org_unit_name | upper }}\Administrator'
     responses:
       (?i)password: "{{ __samba_administrator_password }}"
   become: yes

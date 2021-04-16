@@ -40,11 +40,11 @@
   no_log: yes
 
   # Check for existing AD
-- name: Checking to see if system is already joined to AD
+- name: "Checking to see if system is already joined to AD."
   ansible.builtin.command: /bin/bash -c "/usr/sbin/realm list"
   register: realm_list_results
 
-- name: "Set SSSD Smart Card Configuration"
+- name: "Set SSSD Configuration."
   ansible.builtin.set_fact:
     sssd_ad_gpo_access_control: "permissive"
     #sssd_debug_level: 1
@@ -58,21 +58,13 @@
     #sssd_soft_crl: yes
     #sssd_soft_ocsp: yes
     #sssd_certificate_verification: "no_verification"
-    sssd_certificate_verification: "crl_file={{ autonomy_identity_crl_file }}"
+    sssd_certificate_verification: "crl_file={{ ownca_identity_crl_file }}"
     sssd_pkinit_pool: "DIR:/etc/ssl/certs/"
     sssd_pkinit_identities: "PKCS11:opensc-pkcs11.so:slotid=0:certid=01"
     sssd_default_ccache_name: "KEYRING:persistent:%{uid}"
     sssd_enable_pkinit: "yes"
   when:
     - inventory_hostname in groups['workstations']
-
-- name: Debug realm_list_results
-  ansible.builtin.debug:
-    msg: "{{ realm_list_results.stdout }}"
-    verbosity: 1
-  tags:
-    - never
-    - debug
 
 - name: "stop sssd"
   service:
@@ -143,8 +135,8 @@
     - realm_list_results.stdout is defined
     - realm_list_results.stdout is falsy
 
-- name: Join Realm
-  expect:
+- name: "Join Realm."
+  ansible.builtin.expect:
     command: /bin/bash -c "/usr/sbin/realm join {{ autonomy_domain }} --user=Administrator"
     responses:
       (?i)Password: "{{ samba_administrator_password }}"

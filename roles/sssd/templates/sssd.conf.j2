@@ -28,7 +28,7 @@ debug_level = {{ sssd_debug_level }}
 {% if autonomy_smart_card_login  and inventory_hostname in groups['workstations'] -%}
 {% if sssd_ldap_user_certificate is defined -%}
   pam_cert_auth = {{ sssd_pam_cert_auth }}
-  pam_cert_db_path = {{ autonomy_identity_ca_chain_file }}
+  pam_cert_db_path = {{ ownca_identity_ca_chain_file }}
   {#p11_uri = pkcs11:opensc-pkcs11.so:slotid=0:certid=01;id=01 #}
 {% endif %}
 {% endif %}
@@ -54,7 +54,7 @@ enumerate = true
 {% if autonomy_smart_card_login  and inventory_hostname in groups['workstations']  -%}
 {% if sssd_ldap_user_certificate is defined -%}
   ldap_tls_reqcert = demand
-  ldap_tls_cacert = {{ autonomy_component_ca_chain_file }}
+  ldap_tls_cacert = {{ ownca_component_ca_chain_file }}
   ldap_user_certificate = {{ sssd_ldap_user_certificate }}
 {% endif %}
 {% endif %}

@@ -28,9 +28,6 @@
       tags:
         - system_upgrade
         - system-upgrade
-    - role: bloodymage.autonomy.users
-      tags:
-        - users
 
 # ==================================================================================================
 #
@@ -46,6 +43,22 @@
     - role: bloodymage.autonomy.openssh
       tags:
         - openssh
+
+# ==================================================================================================
+#
+# Next we configure setting applicable to ALL hosts
+#
+# ==================================================================================================
+- hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_ip_address
+  strategy: linear
+  roles:
+    - role: bloodymage.autonomy.users
+      tags:
+        - users
+
+- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
+  strategy: linear
+  roles:
     - role: bloodymage.autonomy.nftables
       tags:
         - nftables

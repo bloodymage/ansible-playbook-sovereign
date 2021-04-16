@@ -124,7 +124,7 @@
 #     - sshca-debug
 
 - name: Generate Host CA keys
-  command: ssh-keygen -t "{{ sshca_host_key_type }}"
+  ansible.builtin.command: ssh-keygen -t "{{ sshca_host_key_type }}"
              -f "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
              -C "{{ sshca_host_key_comment }}"
              -N "{{ sshca_host_key_password }}"
@@ -144,7 +144,7 @@
 #
 # ==================================================================================================
 - name: Generate User CA key
-  command: ssh-keygen -t "{{ sshca_user_key_type }}"
+  ansible.builtin.command: ssh-keygen -t "{{ sshca_user_key_type }}"
              -f "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
              -C "{{ sshca_user_key_comment }}"
              -N "{{ sshca_user_key_password }}"

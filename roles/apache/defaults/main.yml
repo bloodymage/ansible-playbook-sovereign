@@ -7,5 +7,17 @@ packages:
 #  - libsemanage-python
 #  - libselinux-python
 
-#drupal_version: 
+#drupal_version:
 
+apache_krb5_packages:
+  - libapache2-mod-auth-kerb
+  - libapache2-mod-auth-gssapi
+
+apache_kerberos_ad_sso_modules:
+  - auth_kerb
+
+apache_ldap_modules:
+  - authnz_ldap
+
+apache_modules:
+  - ssl
