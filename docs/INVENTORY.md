@@ -87,6 +87,7 @@ ansible_user: pi
 ```
 
 # Example Inventory
+```
 internal_zone:
   hosts:
     auth.internal.example.com:
@@ -316,5 +317,4 @@ workstations:
     atlas.internal.example.com:
     #athena.internal.example.com:
     #hermes.internal.example.com:
-
-
+```
