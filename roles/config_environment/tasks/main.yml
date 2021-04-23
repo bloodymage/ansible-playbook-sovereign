@@ -24,6 +24,35 @@
   tags:
     - always
 
+- name: "Create parent groups based on host role."
+  group_by:
+    key: "{{ item.parent }}"
+  loop:
+    - name: "mariadb_servers"
+      parent: "mysql_compatible_servers"
+    - name: "mysql_compatible_servers"
+      parent: "db_servers"
+    - name: "postgresql_servers"
+      parent: "db_servers"
+    - name: "bind9_servers"
+      parent: "dns_servers"
+    - name: "keycloak_servers"
+      parent: "auth_servers"
+    - name: "openldap_servers"
+      parent: "ldap_servers"
+    - name: "dovecot_servers"
+      parent: "imap_servers"
+    - name: "postfix_servers"
+      parent: "smtp_servers"
+    - name: "smtp_servers"
+      parent: "mail_servers"
+    - name: "imap_servers"
+      parent: "mail_servers"
+    - name: "minidlna_servers"
+      parent: "dlna_servers"
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+
 - name: "Create host groups based on zone and role."
   group_by:
     key: "{{ autonomy_zone_name }}_{{ item }}"
@@ -46,7 +75,7 @@
     - samba_domain_controllers
     - web_servers
   when:
-    - inventory_hostname in groups[item]
+    - inventory_hostname in groups[item] | default([])
 
 - name: "Identify User running ansible."
   ansible.builtin.set_fact:

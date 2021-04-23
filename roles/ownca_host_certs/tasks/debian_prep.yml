@@ -94,13 +94,12 @@
   vars:
     __group_id: "{{ autonomy_zone_name }}_{{ item.name }}"
     __host_index: "{{ groups[__group_id].index(inventory_hostname) + 1 }}"
-    #__padded_index: "{{ __host_index | string }}"
     __padded_index: "{{ '%02d' % __host_index | int }}"
     __alt_name:
       - "DNS:{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
       - "DNS:{{ item.alt_name }}.{{ autonomy_domain }}"
   when:
-    - inventory_hostname in groups[item.name]
+    - inventory_hostname in groups[item.name] | default([])
 
 - name: "Generate Host CSR."
   community.crypto.openssl_csr:

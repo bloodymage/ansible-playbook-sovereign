@@ -8,6 +8,7 @@ packages:
 firefox: "firefox"
 firefox_lib_path: "/usr/lib/{{ firefox }}"
 firefox_share_path: "/usr/share/{{ firefox }}"
+firefox_path: "{{ firefox_share_path }}"
 mozilla_lib_path: "/usr/lib/mozilla"
 firefox_etc: "/etc/{{ firefox }}"
 

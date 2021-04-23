@@ -1,0 +1,1 @@
+firefox_path: "{{ firefox_lib_path }}"

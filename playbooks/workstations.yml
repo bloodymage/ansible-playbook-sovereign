@@ -5,6 +5,8 @@
       when:
         - autonomy_smart_card_login
     - role: bloodymage.autonomy.libnss3_tools
+      tags:
+        - nssdb
     - role: bloodymage.autonomy.evolution
       tags:
         - evolution
