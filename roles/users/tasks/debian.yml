@@ -45,19 +45,19 @@
     users: "{{ users + [ item.user ] }}"
   loop:
     - name: "mythtv"
-      group: "{{ user_mythtv }}"
+      user: "{{ user_mythtv }}"
     - name: "file_servers"
-      group: "{{ user_mythtv }}"
+      user: "{{ user_mythtv }}"
     - name: "file_servers"
-      group: "{{ user_git }}"
+      user: "{{ user_git }}"
     - name: "minidlna_servers"
-      group: "{{ user_minidlna }}"
+      user: "{{ user_minidlna }}"
     - name: "git_servers"
-      group: "{{ user_git }}"
+      user: "{{ user_git }}"
     - name: "homeassistant"
-      group: "{{ user_homeassistant }}"
+      user: "{{ user_homeassistant }}"
     - name: "mail_servers"
-      group: "{{ user_vmail }}"
+      user: "{{ user_vmail }}"
   when:
     - inventory_hostname in groups [item.name] | default([])
   become: no
@@ -89,6 +89,11 @@
 # defined in the user definitions, then remove the user from the local system.
 #
 # ==================================================================================================
+- name: Print variable "users"
+  debug:
+    msg:
+      - "Users: {{ users }}"
+
 - name: Create login users (Password Enabled)
   ansible.builtin.user:
     name: "{{ item['username'] }}"
