@@ -1,6 +1,14 @@
 ---
 # tasks file for acmeca_host_certs
-- name: Include OS-specific variables.
+# ==================================================================================================
+#
+# Add OS-Specific variable files.
+#
+# Variables:
+#   - __os_variables_files: a list, defined in roles/config_defaults/defaults/main.yml
+#
+# ==================================================================================================
+- name: "Include OS-specific variables."
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
@@ -9,7 +17,18 @@
         - "vars"
   become: no
 
-- name: "Install packages"
+# ==================================================================================================
+#
+# Install packages
+#
+# We want to ensure the host is not a 'virtual_host' because that is simply a waste of time to
+# install the packages twice on the same host.
+#
+# Variables:
+#   - packages: a list, defined in roles/acmeca_host_certs/defaults/main.yml
+#
+# ==================================================================================================
+- name: "Install packages."
   ansible.builtin.package:
     name: "{{ packages }}"
     state: present
@@ -20,10 +39,22 @@
 
 # ==================================================================================================
 #
+# Ensure we have the required directories for acmeca.
 #
+# This is designed to closely, but not exactly match the structure used by 'letsencrypt.'
+#
+# /etc/letsencrypt/
+#   |- accounts/
+#   |- archive/
+#   |- csr/
+#   |- keys/
+#   |- live/
+#
+# Variables:
+#  - All variables defined in role/acmeca_host_certs/defaults/main.yml
 #
 # ==================================================================================================
-- name: "Create required directories"
+- name: "Create required directories."
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
@@ -38,7 +69,19 @@
     - "{{ acmeca_live_dir }}"
   become: yes
 
-- name: "Generate Let's Encrypt Account private key"
+# ==================================================================================================
+#
+# Generate Let's Encrypt Account Private Key.
+#
+# Variables:
+#   - acmeca_account_key_path: string, defined in role/acmeca_host_certs/defaults/main.yml
+#   - acmeca_account_key_type: string, defined in role/acmeca_host_certs/defaults/main.yml
+#   - acmeca_account_key_size: string, defined in role/acmeca_host_certs/defaults/main.yml
+#   - __acmeca_regenerate_acme_account_private_key: bool,
+#     defined by task in role/config_acmeca_environment/tasks/main.yml
+#
+# ==================================================================================================
+- name: "Generate Let's Encrypt Account private key."
   community.crypto.openssl_privatekey:
     path: "{{ acmeca_account_key_path }}"
     type: "{{ acmeca_account_key_type }}"
@@ -175,7 +218,7 @@
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
-- name: "Backup Old Certs"
+- name: "Backup Old Certificates."
   ansible.builtin.copy:
     content: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem"
     dest: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem.{{ __acmeca_timestamp }}~"
@@ -191,7 +234,7 @@
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
-- name: "Backup Old Cert Chain"
+- name: "Backup Old Certificate Chains."
   ansible.builtin.copy:
     content: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
     dest: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem.{{ __acmeca_timestamp }}~"
@@ -207,7 +250,7 @@
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
-- name: "Backup Old Full Certificate Chain"
+- name: "Backup Old Full Certificate Chain."
   ansible.builtin.copy:
     content: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
     dest: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem.{{ __acmeca_timestamp }}~"
@@ -223,7 +266,7 @@
     - item.certificate == "acme"
     - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined
 
-- name: "Complete Let's Encrypt challenges"
+- name: "Complete Let's Encrypt challenges."
   community.crypto.acme_certificate:
     acme_directory: "{{ acmeca_directory_url }}"
     acme_version: "{{ acmeca_version }}"
@@ -247,7 +290,7 @@
     - acme_challenge['results'][my_index]['challenge_data'] is defined
   notify: restart apache
 
-- name: Setup live link directories
+- name: "Setup live link directories."
   ansible.builtin.file:
     path: "{{ acmeca_live_dir }}/{{ item.name }}"
     state: directory
@@ -260,7 +303,7 @@
     - virtual_hosts is defined
     - item.certificate == "acme"
 
-- name: Create live link certs
+- name: "Create live link certs."
   ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/cert.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/cert.pem"
@@ -273,7 +316,7 @@
     - virtual_hosts is defined
     - item.certificate == "acme"
 
-- name: Setup Live Link chain
+- name: "Setup Live Link chain."
   ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/chain.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/chain.pem"
@@ -286,7 +329,7 @@
     - virtual_hosts is defined
     - item.certificate == "acme"
 
-- name: Setup Live Link fullchain
+- name: "Setup Live Link fullchain."
   ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/fullchain.pem"
@@ -299,7 +342,7 @@
     - virtual_hosts is defined
     - item.certificate == "acme"
 
-- name: Setup live link privkey
+- name: "Setup live link privkey."
   ansible.builtin.file:
     src: "{{ acmeca_archive_dir }}/{{ item.name }}/privkey.pem"
     dest: "{{ acmeca_live_dir }}/{{ item.name }}/privkey.pem"
@@ -312,7 +355,7 @@
     - virtual_hosts is defined
     - item.certificate == "acme"
 
-- name: "Cleanup acme challenge directory"
+- name: "Cleanup acme challenge directory."
   ansible.builtin.file:
     path: "/srv/www/{{ item.name }}/.well-known/acme-challenge"
     state: absent
