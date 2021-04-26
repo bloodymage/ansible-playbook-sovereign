@@ -1,4 +1,4 @@
-Ansible Role: Bloodymage.autonomy.acmeca_host_certs
+Ansible Role: bloodymage.autonomy.acmeca_host_certs
 ===============
 
 - [Description](#description)
@@ -26,6 +26,7 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 
 ### Dependencies
 ```
+- role: bloodymage.autonomy.config_defaults
 - role: bloodymage.autonomy.collection_handlers
 ```
 
@@ -45,6 +46,7 @@ Including an example of how to use your role (for instance, with variables passe
     - hosts: servers
       roles:
         - { role: bloodymage.autonomy.acmeca_host_certs, x: 42 }
+        
 
 Features and Advantages
 -----------------------

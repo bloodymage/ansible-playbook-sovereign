@@ -1,5 +1,10 @@
 ---
 # tasks file for config_environment
+# ==================================================================================================
+#
+# First we create groups based on gathered facts about the system.
+#
+# ==================================================================================================
 - name: "Create groups based on the Network OS"
   group_by:
     key: "{{ ansible_network_os.split('.')[2] | lower }}"
@@ -24,7 +29,12 @@
   tags:
     - always
 
-- name: "Create parent groups based on host role."
+# ==================================================================================================
+#
+# Now we create groups based on the host's role
+#
+# ==================================================================================================
+- name: "Create parent groups based on host's role."
   group_by:
     key: "{{ item.parent }}"
   loop:
@@ -50,6 +60,10 @@
       parent: "mail_servers"
     - name: "minidlna_servers"
       parent: "dlna_servers"
+    - name: "apache_servers"
+      parent: "web_servers"
+    - name: "nginx_servers"
+      parent: "web_servers"
   when:
     - inventory_hostname in groups[item.name] | default([])
 
@@ -77,9 +91,16 @@
   when:
     - inventory_hostname in groups[item] | default([])
 
+# ==================================================================================================
+#
+# Now we need to identify who is running ansible.
+#
+# TODO: Change the variable to "__autonomy_user"
+#
+# ==================================================================================================
 - name: "Identify User running ansible."
   ansible.builtin.set_fact:
-    autonomy_user: "{{ lookup('env','USER') }}"
+    __autonomy_user: "{{ lookup('env','USER') }}"
 
 #     - name: Check if we are using debug mode
 #       ansible.builtin.set_fact:

@@ -1,7 +1,7 @@
-Role Name
+Role Name: bloodymage.autonomy.sshca_user_certs
 =========
 
-A brief description of the role goes here.
+This role creates ssh public keys based on their openssl public keys.  Then sign's them using the SSH Certificate Authority.
 
 Requirements
 ------------
@@ -30,7 +30,7 @@ Including an example of how to use your role (for instance, with variables passe
 License
 -------
 
-BSD
+MIT
 
 Author Information
 ------------------

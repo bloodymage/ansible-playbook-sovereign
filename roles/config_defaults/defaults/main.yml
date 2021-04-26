@@ -1,6 +1,16 @@
 ---
 # defaults file for config_defaults
+# ==================================================================================================
+#
 # Decisions
+#
+# TODO: Make 'autonomy_realm_identity_management_system' definition based on defined inventory
+#       groups.
+#
+# Goals:
+#   - Ideally, these would be the only variables that anyone would need to define in their inventoy.
+#
+# ==================================================================================================
 autonomy_realm_identity_management_system: ""
 autonomy_smart_card_login: no
 autonomy_overwrite_password: no
@@ -52,13 +62,44 @@ autonomy_region: ""
 autonomy_state: "{{ autonomy_region }}"
 autonomy_city: ""
 
+# ==================================================================================================
+#
 # Host Information
+#
+# In some ways, this is a bit redundant.  The goal of these variables is to ensure consistant
+# definitions.  For example if the inventory format is:
+#
+# apache_servers:
+#   hosts:
+#     www:
+#
+# or:
+#
+# apache_servers:
+#   hosts:
+#     www.internal.example.com:
+#
+# These variables will end up having the same definition.
+#   'autonomy_hostname' will always have the short hostname. 'www'
+#   'autonomy_fqdn' will always have the fqdn. 'www.internal.example.com'
+#
+# ==================================================================================================
 autonomy_hostname: "{{ inventory_hostname_short }}"
 autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
 autonomy_ipv4_address: "{{ ansible_host }}"
 autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default(omit) }}"
 
+# ==================================================================================================
+#
 # Default Passwords
+#
+# For all passwords, set the default to 'password'
+#
+# In each instance, when configuring the actual service, a lookup is done, using
+# 'password_store' to set the actual password if the password hasn't been manually defined in
+# the inventory.
+#
+# ==================================================================================================
 mediawiki_db_password: "password"
 mysql_administrator_password: "password"
 mysql_system_maintenance_user_password: "password"
@@ -386,8 +427,6 @@ domain_user_nextcloud:
     - spn: "HTTP"
       host: "{{ dmz_www_host }}"
   account_expire: "--noexpiry"
-
-
 
 # ==================================================================================================
 #

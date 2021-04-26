@@ -13,12 +13,15 @@ galaxy_info:
     - name: Rasbian
       versions:
         - 10
+        - 11
     - name: Debian
       versions:
         - 10
+        - 11
     - name: Ubuntu
       versions:
         - 18.04
+        - 20.04
 
   galaxy_tags:
     - bloodymage
