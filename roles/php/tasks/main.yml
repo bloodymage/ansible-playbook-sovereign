@@ -1,2 +1,18 @@
 ---
 # tasks file for php
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+      become: yes

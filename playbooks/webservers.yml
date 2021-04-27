@@ -48,6 +48,10 @@
         - ownca_crl_distribution_points
         - websites
 
+- hosts: nextcloud_servers:mediawiki_servers
+  roles:
+    - role: bloodymage.autonomy.php
+
 - hosts: nextcloud_severs:&public_zone
   roles:
     - role: bloodymage.autonomy.nextcloud
