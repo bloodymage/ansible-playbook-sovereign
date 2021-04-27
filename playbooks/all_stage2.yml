@@ -1,3 +1,12 @@
+# ==================================================================================================
+#
+# This was split into a separate playbook as a way to 'reset' hosts that had previous failures.
+#
+# This should always run.
+#
+# QUESTION: Maybe there is a better way?
+#
+# ==================================================================================================
 - hosts: all:!localhost:!public_zone
   ignore_unreachable: yes
   roles:
