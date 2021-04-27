@@ -16,3 +16,20 @@
         name: "{{ packages }}"
         state: present
       become: yes
+
+- name: "Identify ports by role"
+  ansible.builtin.set_fact:
+    __nftable_ports: "{{ __nftable_ports + item.ports }}"
+  loop: "{{ nftables_ports }}"
+  become: no
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+
+- name: "Configure nftables.conf file"
+  ansible.builtin.template:
+    src: "nftables.conf.j2"
+    dest: "/etc/nftables.conf.test"
+    owner: root
+    group: root
+    mode: 0755
+  become: yes

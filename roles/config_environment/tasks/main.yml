@@ -31,6 +31,21 @@
 
 # ==================================================================================================
 #
+# Create groups based on zone information.
+#
+# =================================================================================================
+- name: "Create group by zone type."
+  group_by:
+    key: "{{ autonomy_zone_type }}_zone"
+
+- name: "Create group by zone."
+  group_by:
+    key: "{{ autonomy_zone_name }}_zone"
+  when:
+    - autonomy_zone_name is defined
+
+# ==================================================================================================
+#
 # Now we create groups based on the host's role
 #
 # ==================================================================================================

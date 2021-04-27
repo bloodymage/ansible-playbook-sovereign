@@ -17,13 +17,21 @@
 
 # ==================================================================================================
 #
+# Create the realm.
+#
+# This is done using one of three identity management systems.
+# 1. Active Directory (Samba)
+# 2. OpenLDAP (not implemented)
+# 3. FreeIPA (not implemented)
+#
 # If we are recreating the realm, we need to:
 # 1. Remove all old files from previous iteration on all domain controller hosts
 # 2. Create the realm on an initial controller
 # 3. Join subesquent domain controller to domain as domain controllers
 #
 # ==================================================================================================
-- hosts: samba_domain_controllers:samba_file_servers
+- name: "Configure Samba Domain"
+  hosts: samba_domain_controllers:samba_file_servers
   roles:
     - role: bloodymage.autonomy.samba
       tags:
@@ -37,7 +45,8 @@
         - never
         - openldap
 
-- hosts: samba_schema_master
+- name: "Create realm users"
+  hosts: samba_schema_master
   roles:
     - role: bloodymage.autonomy.config_ownca_environment
     - role: bloodymage.autonomy.realm_users

@@ -6,9 +6,10 @@ packages:
 nftables_families:
   - name: "inet"
     table_name: "filter"
-    chain:
+    chains:
       - name: "input"
         policy: "drop"
+        hook: "input"
         rules:
           - iif lo accept comment "Accept any localhost traffic"
           - ct state invalid drop comment "Drop invalid connections"
@@ -20,72 +21,104 @@ nftables_families:
           - udp dport mdns ip daddr 224.0.0.251 accept comment "Accept mDNS"
           - udp sport 1900 udp dport >= 1024 ip6 saddr { fd00::/8, fe80::/10 } meta pkttype unicast limit rate 4/second burst 20 packets accept comment "Accept UPnP IGD port mapping reply"
           - udp sport 1900 udp dport >= 1024 meta pkttype unicast ip saddr { 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16 } accept comment "Accept Samba Workgroup browsing replies"
+        post_rules:
           - counter comment "Count any other traffic"
       - name: "forward"
         policy: "drop"
       - name: "output"
-        policy: "drop"
+        policy: "accept"
 
 # ==================================================================================================
 #
 #
 # ==================================================================================================
-linux_ports:
-  - "{{ ssh_port }}"
+nftables_ports:
+  - name: "dlna_servers"
+    ports: "{{ dlna_ports }}"
+  - name: "dns_servers"
+    ports: "{{ dns_ports }}"
+  - name: "nfs_servers"
+    ports: "{{ nfs_server_ports }}"
+  - name: "smtp_servers"
+    ports: "{{ smtp_server_ports }}"
+  - name: "imap_servers"
+    ports: "{{ imap_server_ports }}"
+  - name: "linux"
+    ports: "{{ linux_ports }}"
+  - name: "mosquitto_servers"
+    ports: "{{ mosquitto_ports }}"
+  - name: "mythbackend"
+    ports: "{{ mythtv_backend_server_ports }}"
+  - name: "mysql_compatible_servers"
+    ports: "{{ mysql_ports }}"
+  - name: "samba_domain_controllers"
+    ports: "{{ samba_ad_dc_ports }}"
+  - name: "samba_file_servers"
+    ports: "{{ samba_file_server_ports }}"
+  - name: "web_servers"
+    ports: "{{ web_ports }}"
 
-apache_ports:
-  - 80
-  - 443
+dlna_ports:
+  - "{{ trivnet_port }}"
+  - "{{ ssdp_port }}"
 
-samba_ad_dc_ports:
+dns_ports:
   - "{{ dns_port }}"
-  - "{{ kerberos_port }}"
-  - "{{ kpasswd5_port }}"
-  - "{{ ldap_port }}"
-  - "{{ ldapssl_port }}"
-  - "{{ microsoft_ds_port }}"
-  - "{{ msrpc_port }}"
-  - "{{ netbios_port }}"
 
-samba_file_server_ports:
-  - "{{ rpcbind_port }}"
-  - "{{ netbios_ssn_port }}"
-  - "{{ microsoft_ds_port }}"
-
-nfs_server_ports:
-  - "{{ nfs_port }}"
-
-smtp_server_ports:
-  - "{{ smtp_port }}"
-  - "{{ smtps_port }}"
-  - "{{ submission_port }}"
+home_assistant_ports:
+  - "{{ polipo_port }}"
 
 imap_server_ports:
   - "{{ imap_port }}"
   - "{{ imaps_port }}"
+
+linux_ports:
+  - "{{ ssh_port }}"
+
+mosquitto_ports:
+  - "{{ mqtt_port }}"
+  - "{{ mqtts_port }}"
+
+mysql_ports:
+  - "{{ mysql_port }}"
+
+mythtv_backend_server_ports:
+  - "{{ mythtv_backend_port }}"
+  - "{{ mythtv_api_port }}"
+
+nfs_server_ports:
+  - "{{ nfs_port }}"
 
 printer_ports:
   - "{{ printer_port }}"
   - "{{ ipp_port }}"
   - "{{ jetdirect_port }}"
 
-home_assistant_ports:
-  - "{{ polipo_port }}"
+samba_ad_dc_ports:
+  - "{{ kerberos_port }}"
+  - "{{ kpasswd5_port }}"
+  - "{{ ldap_port }}"
+  - "{{ ldapssl_port }}"
+  - "{{ microsoft_ds_port }}"
+  - "{{ msrpc_port }}"
+  - "{{ netbios_ssn_port }}"
+
+samba_file_server_ports:
+  - "{{ rpcbind_port }}"
+  - "{{ netbios_ssn_port }}"
+  - "{{ microsoft_ds_port }}"
+
+smtp_server_ports:
+  - "{{ smtp_port }}"
+  - "{{ smtps_port }}"
+  - "{{ submission_port }}"
 
 vnc_ports:
   - "{{ vnc_port }}"
 
-mosquitto_ports:
-  - "{{ mqtt_port }}"
-  - "{{ mqtts_port }}"
-
-mythtv_backend_server_ports:
-  - "{{ mythtv_backend_port }}"
-  - "{{ mythtv_api_port }}"
-
-readydlna_ports:
-  - "{{ trivnet_port }}"
-  - "{{ ssdp_port }}"
+web_ports:
+  - "{{ http_port }}"
+  - "{{ https_port }}"
 
 dns_port: 53
 globalcatLDAP_port: 3268
@@ -122,3 +155,5 @@ ssh_port: 22
 submission_port: 587
 trivnet_port: 8200
 vnc_port: 5900
+
+__nftable_ports: []
