@@ -1,7 +1,7 @@
 ---
 - name: "Ensure we have a PKCS12 password for the Host"
   ansible.builtin.set_fact:
-    ownca_host_cert_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __ownca_host_cert_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   become: no
   delegate_to: localhost
   when:
@@ -14,13 +14,20 @@
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
 
-- name: Generate PKCS#12 file
+# ==================================================================================================
+#
+# Generate PKCS#12 file.
+#
+# TODO: Set force update to a variable.
+#
+# ==================================================================================================
+- name: "Generate PKCS#12 file."
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
     path:  "{{ ownca_hosts_directory }}/pkcs12/{{ autonomy_fqdn }}.pkcs12"
     friendly_name: "{{ autonomy_fqdn }}"
-    passphrase: "{{ ownca_host_cert_pkcs12_password }}"
+    passphrase: "{{ __ownca_host_cert_pkcs12_password }}"
     privatekey_path: "{{ ownca_hosts_directory }}/private/{{ autonomy_fqdn }}.key"
     certificate_path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
     other_certificates:
@@ -31,8 +38,8 @@
     iter_size: 0
     maciter_size: 0
     mode: '0600'
-    owner: "{{ autonomy_user }}"
-    group: "{{ autonomy_user }}"
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
     #force: yes
   become: no
   delegate_to: localhost

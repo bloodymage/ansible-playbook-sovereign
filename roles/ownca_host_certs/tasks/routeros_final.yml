@@ -1,10 +1,10 @@
 ---
-- name: "Ensure we have a PKCS12 password for the Host"
+- name: "Ensure we have a PKCS12 password for the Host."
   ansible.builtin.set_fact:
     ownca_host_cert_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/ownca_host_cert_pkcs12_password"
-    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_length: "length={{ autonomy_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
@@ -18,7 +18,7 @@
     - ownca_host_certs_debug
     - ownca-host-certs-debug
 
-- name: Generate PKCS#12 file
+- name: "Generate PKCS#12 file."
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
@@ -35,8 +35,8 @@
     iter_size: 0
     maciter_size: 0
     mode: '0600'
-    owner: "{{ autonomy_user }}"
-    group: "{{ autonomy_user }}"
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
     #force: yes
   become: no
   delegate_to: localhost
