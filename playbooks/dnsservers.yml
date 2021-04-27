@@ -1,6 +1,8 @@
 - hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
+  tags:
+    - always
 
 - hosts: dns_servers:!public_zone
   roles:
