@@ -1,0 +1,20 @@
+---
+- name: "Configure smb.conf file"
+  ansible.builtin.template:
+    src: "smb.conf.j2"
+    dest: "/etc/samba/smb.conf"
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: restart samba
+
+- name: "Configure user.map file"
+  ansible.builtin.template:
+    src: "user_map.j2"
+    dest: /etc/samba/user.map
+    owner: root
+    group: root
+    mode: 0644
+  become: yes
+  notify: restart samba

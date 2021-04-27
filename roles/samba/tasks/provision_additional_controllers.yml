@@ -98,3 +98,9 @@
   when:
     - __samba_recreate_realm
     - autonomy_fqdn != __samba_schema_master
+
+- name: "Start Samba Domain Controller"
+  ansible.builtin.service:
+    name: samba-ad-dc
+    state: started
+  become: yes

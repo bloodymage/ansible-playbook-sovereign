@@ -1,6 +1,11 @@
 ---
 # tasks file for samba-domain-member
-- name: Determine if host is already joined as a domain member
+# ==================================================================================================
+#
+# TODO: Really test if the host is joined as a domain member.
+#
+# ==================================================================================================
+- name: Determine if host is already joined as a domain member.
   ansible.builtin.set_fact:
     __samba_joined_as_domain_member: yes
   become: no

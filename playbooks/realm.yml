@@ -6,6 +6,8 @@
       tags:
         - always
     - role: bloodymage.autonomy.config_realm_environment
+      tags:
+        - always
 
 - name: "Configure baseline Kerberos"
   hosts: internal_network:!routeros
@@ -22,41 +24,9 @@
 # ==================================================================================================
 - hosts: samba_domain_controllers:samba_file_servers
   roles:
-    - role: bloodymage.autonomy.samba_domain_clean_environment
-      when:
-        - __samba_recreate_realm
+    - role: bloodymage.autonomy.samba
       tags:
-        - samba_domain_controller
-        - samba-domain-controller
-        - recreate-realm
-
-- hosts: samba_schema_master
-  roles:
-    - role: bloodymage.autonomy.samba_domain_initial_controller
-      when:
-        - __samba_recreate_realm
-      tags:
-        - samba_domain_controller
-        - samba-domain-controller
-        - recreate-realm
-
-- hosts: samba_domain_controllers
-  roles:
-    - role: bloodymage.autonomy.samba_domain_controller
-      tags:
-        - samba_domain_controller
-        - samba-domain-controller
-        - recreate-realm
-
-- hosts: samba_schema_master
-  roles:
-    - role: bloodymage.autonomy.config_ownca_environment
-    - role: bloodymage.autonomy.samba_domain_users
-      tags:
-        - samba_domain_users
-        - samba-domain-users
-        - samba_domain_users_debug
-        - samba-domain-users-debug
+        - samba
         - recreate-realm
 
 - hosts: openldap_servers
@@ -65,6 +35,53 @@
       tags:
         - never
         - openldap
+
+- hosts: samba_schema_master
+  roles:
+    - role: bloodymage.autonomy.config_ownca_environment
+    - role: bloodymage.autonomy.realm_users
+      tags:
+        - realm_users
+        - realm-users
+        - recreate-realm
+
+# ==================================================================================================
+#
+# TODO: Explicitly specify file server(s) with user home directories.
+#
+# ==================================================================================================
+- hosts: workstations:&linux:!mythfrontend
+  roles:
+    - role: bloodymage.autonomy.dotfiles
+      vars:
+        dotfiles_users: "{{ domain_users }}"
+        dotfiles_home: "/home/{{ autonomy_org_unit_name | upper }}"
+      tags:
+        - dotfiles
+
+- hosts: samba_ownca_user_hosts
+  roles:
+    - role: bloodymage.autonomy.ownca_user_certs
+      tags:
+        - ownca_user_certs
+        - ownca-user-certs
+        - ownca_user_certs_debug
+        - ownca-user-certs-debug
+        - recreate-realm
+
+- hosts: samba_ownca_user_hosts:workstations:&linux:!mythfrontend
+  roles:
+    - role: bloodymage.autonomy.sshca_user_certs
+      tags:
+        - sshca-user-certs
+        - recreate-realm
+
+- hosts: samba_schema_master
+  roles:
+    - role: bloodymage.autonomy.samba_domain_user_certs
+      tags:
+        - samba-domain-user-certs
+        - recreate-realm
 
 - hosts: sssd
   roles:

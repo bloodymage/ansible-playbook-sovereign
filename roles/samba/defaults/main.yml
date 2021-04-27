@@ -57,5 +57,39 @@ samba_schema_extensions:
   #   auxiliary_class:
   #     - "ldapPublicKey"
 
+#packages:
+#  - winbind
+#  - libpam-winbind
+#  - libnss-winbind
+
+schema_update_allowed: no
+
+samba_log_level: 1
+
+winbind_enum_users: no
+winbind_enum_groups: no
+winbind_refresh_tickets: yes
+
+samba_security: user
+
+samba_services:
+    - winbind
+
+# ==================================================================================================
+#
+# Do not use in inventory!  These are settings that are modified via set_facts, or mandatory system
+# defaults.
+#
+# ==================================================================================================
+__samba_recreate_realm: no
+__samba_joined_as_domain_member: no
 __samba_smbd_bin: "/usr/sbin/smbd"
 __samba_joined_as_domain_controller: no
+
+__dc_samba_shares:
+  - name: "netlogon"
+    path: "/var/lib/samba/sysvol/{{ autonomy_domain }}/scripts"
+    read_only: "No"
+  - name: "sysvol"
+    path: "/var/lib/samba/sysvol"
+    read_only: "No"

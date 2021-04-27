@@ -168,6 +168,7 @@
     - "restart all"
     - "restart tls"
     - "restart samba-ad-dc"
+    - "restart samba"
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
 
@@ -180,8 +181,9 @@
     - "restart all"
     - "restart tls"
     - "restart samba file server"
+    - "restart samba"
   when:
-    - inventory_hostname in groups['samba_file_servers']
+    - inventory_hostname in groups['samba_file_servers'] | default([])
 
 - name: "Restart NMBD Server"
   ansible.builtin.service:
@@ -192,8 +194,9 @@
     - "restart all"
     - "restart tls"
     - "restart samba file server"
+    - "restart samba"
   when:
-    - inventory_hostname in groups['samba_file_servers']
+    - inventory_hostname in groups['samba_file_servers'] | default([])
 
 - name: "Restart SSH Server"
   ansible.builtin.service:
@@ -213,8 +216,9 @@
     - "restart all"
     - "restart tls"
     - "restart samba file server"
+    - "restart samba"
   when:
-    - inventory_hostname in groups['samba_file_servers']
+    - inventory_hostname in groups['samba_file_servers'] | default([])
 
 - name: "restart sssd"
   ansible.builtin.service:
@@ -225,7 +229,7 @@
     - "restart all"
     - "restart tls"
   when:
-    - inventory_hostname in groups['sssd']
+    - inventory_hostname in groups['sssd'] | default([])
 
 - name: "restart unattended-upgrades"
   ansible.builtin.service:
@@ -259,7 +263,7 @@
     - "reload all"
     - "reload tls"
   when:
-    - inventory_hostname in groups['apache_servers']
+    - inventory_hostname in groups['apache_servers'] | default([])
 
 - name: "reload nginx"
   ansible.builtin.service:
@@ -270,7 +274,7 @@
     - "reload all"
     - "reload tls"
   when:
-    - inventory_hostname in groups['nginx_servers']
+    - inventory_hostname in groups['nginx_servers'] | default([])
 
 - name: "Reload Postfix"
   ansible.builtin.service:
@@ -282,7 +286,7 @@
     - "reload tls"
     - "reload postfix"
   when:
-    - inventory_hostname in groups['postfix_servers']
+    - inventory_hostname in groups['postfix_servers'] | default([])
 
 - name: "Reload Samba Domain Controller"
   ansible.builtin.service:
@@ -307,7 +311,7 @@
     state: started
   become: yes
   when:
-    - inventory_hostname in groups['sssd']
+    - inventory_hostname in groups['sssd'] | default([])
 
 # ==================================================================================================
 #

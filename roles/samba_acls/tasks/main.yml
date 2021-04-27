@@ -11,13 +11,6 @@
     mode: "{{ item.mode | default('0770') }}"
   become: yes
   loop: "{{ samba_shares }}"
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
 
 # ==================================================================================================
 #
