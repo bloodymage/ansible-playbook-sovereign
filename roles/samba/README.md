@@ -1,4 +1,4 @@
-Ansible Role: Bloodymage.autonomy.samba_domain_controller
+Ansible Role: Bloodymage.autonomy.samba
 ===============
 
 - [Description](#description)
@@ -15,7 +15,7 @@ Ansible Role: Bloodymage.autonomy.samba_domain_controller
 
 Description
 -----------
-Installs Samba Domain Controllers
+Installs and configures Samba as either a domain controller or file server.
 
 Installation
 ------------
@@ -26,6 +26,7 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 
 ### Dependencies
 ```
+- role: bloodymaeg.autonomy.config_defaults
 - role: bloodymage.autonomy.collection_handlers
 - role: bloodymage.autonomy.krb5_client_config
 ```
