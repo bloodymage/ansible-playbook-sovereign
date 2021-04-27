@@ -13,7 +13,7 @@ workgroup = {{ autonomy_org_unit_name | upper }}
 server role = active directory domain controller
 server services = s3fs, rpc, nbt, wrepl, ldap, cldap, kdc, drepl, winbindd, ntp_signd, kcc, dnsupdate
 idmap_ldb:use rfc2307 = yes
-{% else %}
+{% else -%}
   security = {{ samba_security }}
 {% endif %}
 
@@ -21,7 +21,6 @@ idmap_ldb:use rfc2307 = yes
 max log size = 1000
 log file = /var/log/samba/log.%m
 log level = {{ samba_log_level }}
-
 {# ============================================================================================== #}
 {#                                                                                                #}
 {# User Settings                                                                                  #}
@@ -66,17 +65,17 @@ winbind refresh tickets = {{ winbind_refresh_tickets }}
 # Used for SSH Single Sign On
 dedicated keytab file = /etc/krb5.keytab
 kerberos method = secrets and keytab
-
 {% endif %}
 
 {% if inventory_hostname in groups['samba_domain_controllers'] -%}
-  {# Shares #}
-  {% for share in __dc_samba_shares -%}
-  [{{ share.name }}]
-  path = {{ share.path }}
-  read only = No
-  {% endfor %}
-{% else %}
+{# Shares #}
+{% for share in __dc_samba_shares -%}
+[{{ share.name }}]
+path = {{ share.path }}
+read only = No
+
+{% endfor %}
+{% else -%}
   {% if samba_shares is defined -%}
 # Enable ACL Support
 vfs objects = acl_xattr

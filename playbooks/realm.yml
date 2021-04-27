@@ -5,9 +5,10 @@
     - role: bloodymage.autonomy.config_environment
       tags:
         - always
+    # NOTE: Tags are set at task level for 'config_realm_environment'.
+    #       DO NOT SET HERE!
+    #       That will cause the realm to be recreated every time.
     - role: bloodymage.autonomy.config_realm_environment
-      tags:
-        - always
 
 - name: "Configure baseline Kerberos"
   hosts: internal_network:!routeros

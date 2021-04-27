@@ -1,19 +1,7 @@
 ---
 # ==================================================================================================
 #
-# Needs complete re-write
-#
-# New role tasks:
-# 1. Determine if we are to recreate the realm (tag "recreate-realm")
-# 2. If yes, primary_domain_controller = groups['samba_domain_controllers'][0]
-#    if not, primary_domain_controller = {{ discovered schema master domain_controller }},
-#    ie, whichever domain controller is being used to manage the database
-#    "samba-tool fsmo show | grep SchemaMasterRole"
-#    Ref: https://wiki.samba.org/index.php/Setting_up_RFC2307_in_AD
-# 3. If yes, clear samba database files
-# 4. Install Samba
-# 5. If yes, create first domain controller
-# 6. All other hosts join domain
+# 
 #
 # ==================================================================================================
 # TODO: Really check if already joined
@@ -25,12 +13,21 @@
 #   when:
 #     - not __samba_recreate_realm
 
-- name: "Set joined status"
+- name: "Set domain controller joined status"
   ansible.builtin.set_fact:
     __samba_joined_as_domain_controller: "{{ joined_as_ad_dc }}"
   become: no
   when:
     - not __samba_recreate_realm
+    - inventory_hostname in groups['samba_domain_controllers']
+
+- name: "Set domain controller joined status"
+  ansible.builtin.set_fact:
+    __samba_joined_as_domain_member: yes
+  become: no
+  when:
+    - not __samba_recreate_realm
+    - inventory_hostname in groups['samba_file_servers']
 
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:
@@ -80,18 +77,8 @@
     - autonomy_fqdn == __samba_schema_master
     - inventory_hostname in groups['samba_domain_controllers']
 
-# Move this to appropriate task file (initial_domain_controller.yml, additional_domain_controllers
-# etc.)
-- name: "Ensure we have the correct permissionss on /var/lib/samba/usershares"
-  ansible.builtin.file:
-    path: "/var/lib/samba/usershares"
-    owner: "root"
-    group: "sambashare"
-    mode: "1755"
-  become: yes
-
-- name: "Precheck domain prior to provisioning new domain controllers"
-  include: "precheck.yml"
+- name: "Check domain prior to provisioning new domain controllers"
+  include: "check_domain.yml"
   become: no
   when:
     - not __samba_joined_as_domain_controller
@@ -103,6 +90,7 @@
   when:
     - autonomy_fqdn != __samba_schema_master
     - not __samba_joined_as_domain_controller
+    - inventory_hostname in groups['samba_domain_controllers']
 
 # ==================================================================================================
 #
@@ -118,6 +106,7 @@
   become: no
   when:
     - not __samba_joined_as_domain_controller
+    - inventory_hostname in groups['samba_domain_controllers']
 
 # ==================================================================================================
 #
@@ -129,9 +118,14 @@
   include: "configure_samba.yml"
   become: no
 
+- name: "Configure file servers"
+  include: "file_servers.yml"
+  become: no
+  when:
+    - inventory_hostname in groups['samba_file_servers']
+
 - name: "Additional Domain Controller Configuration."
   include: additional_domain_controller_configuration.yml
   become: no
   when:
     - inventory_hostname in groups['samba_domain_controllers']
-

@@ -15,6 +15,10 @@
       PTR "{{ autonomy_fqdn }}"
       -U administrator
       --password="{{ samba_administrator_password }}"
+  register: result
+  #failed_when: >
+  #  - result.rc != "0"
+  #  - "'Record already exist' not in result.stderr"
   become: yes
   ignore_errors: yes
 

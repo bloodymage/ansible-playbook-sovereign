@@ -144,3 +144,11 @@
   become: no
   when:
     - autonomy_fqdn == __samba_schema_master
+
+- name: "Ensure we have the correct permissionss on /var/lib/samba/usershares"
+  ansible.builtin.file:
+    path: "/var/lib/samba/usershares"
+    owner: "root"
+    group: "sambashare"
+    mode: "1755"
+  become: yes
