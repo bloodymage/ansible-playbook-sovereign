@@ -1,3 +1,10 @@
+- name: "Prepare playbook environment"
+  hosts: all
+  roles:
+    - role: bloodymage.autonomy.config_environment
+  tags:
+    - always
+
 - hosts: workstations
   roles:
     - role: bloodymage.autonomy.cups

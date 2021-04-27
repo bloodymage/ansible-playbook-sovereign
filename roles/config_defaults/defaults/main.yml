@@ -16,6 +16,7 @@ autonomy_smart_card_login: no
 autonomy_overwrite_password: no
 autonomy_use_source_code_repos: no
 autonomy_password_length: "42"
+autonomy_zone_type: "internal"
 
 #===================================================================================================
 #

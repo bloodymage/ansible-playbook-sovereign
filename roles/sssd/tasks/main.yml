@@ -57,7 +57,6 @@
     sssd_pam_cert_auth: yes
     #sssd_soft_crl: yes
     #sssd_soft_ocsp: yes
-    __sssd_certificate_verification: "crl_file={{ ownca_identity_crl_file_path }}"
     sssd_certificate_verification: "{{ sssd_certificate_verification | default(__sssd_certificate_verification) }}"
     sssd_pkinit_pool: "DIR:/etc/ssl/certs/"
     sssd_pkinit_identities: "PKCS11:opensc-pkcs11.so:slotid=0:certid=01"
@@ -68,7 +67,7 @@
     - autonomy_smart_card_login
 
 - name: "stop sssd"
-  service:
+  ansible.builtin.service:
     name: sssd
     state: stopped
   become: yes

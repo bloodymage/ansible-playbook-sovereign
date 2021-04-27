@@ -1,5 +1,5 @@
 - name: "Prepare playbook environment"
-  hosts: all:!public_zone
+  hosts: all
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment

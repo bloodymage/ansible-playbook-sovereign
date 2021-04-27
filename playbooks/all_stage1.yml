@@ -3,7 +3,7 @@
 # Gather some information.  This is always done, as it'll create groups used later in this playbook.
 #
 # ==================================================================================================
-- hosts: all:!public_zone:!virtual_ip_address
+- hosts: all:!localhost
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
