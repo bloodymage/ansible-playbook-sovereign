@@ -1,3 +1,0 @@
----
-# defaults file for samba_domain_clean_environment
-__samba_smbd_bin: "/usr/sbin/smbd"

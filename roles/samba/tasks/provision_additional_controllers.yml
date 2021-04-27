@@ -1,0 +1,106 @@
+# ==================================================================================================
+#
+# Provision Active Directory Domain Controllers
+#
+# ==================================================================================================
+- name: "Provision Subsequent Active Directory Domain Controller"
+  ansible.builtin.command:
+    cmd: >
+      samba-tool domain join {{ autonomy_domain }} DC
+      --dns-backend=BIND9_DLZ
+      -U'{{ autonomy_org_unit_name | upper }}\administrator'
+      --password={{ samba_administrator_password }}
+  register: samba_ad_created
+  become: yes
+  notify: Update krb5
+  when:
+    - not __samba_joined_as_domain_controller
+    - autonomy_fqdn != __samba_schema_master
+
+# ==================================================================================================
+#
+# Find idmap.ldb
+#
+# ==================================================================================================
+# - name: Find idmap.ldb
+#   find:
+#     path: "/var"
+#     pattern: idmap.ldb
+#     recurse: yes
+#   register: idmap_file
+#   when: autonomy_fqdn == __samba_schema_master
+
+- name: "Backup idmap.ldb"
+  ansible.builtin.command:
+    cmd: "tdbbackup -s .bak /var/lib/samba/private/idmap.ldb"
+  become: yes
+  when:
+    - __samba_recreate_realm
+    - autonomy_fqdn == __samba_schema_master
+
+- name: "Fetch idmap.ldb"
+  ansible.builtin.fetch:
+    src: "/var/lib/samba/private/idmap.ldb.bak"
+    dest: "/tmp/idmap.ldb"
+    flat: yes
+  become: yes
+  when:
+    - __samba_recreate_realm
+    - autonomy_fqdn == __samba_schema_master
+
+- name: "Copy idmap.ldb to New Servers"
+  ansible.builtin.copy:
+    src: "/tmp/idmap.ldb"
+    dest: "/var/lib/samba/private/idmap.ldb"
+  become: yes
+  when:
+    - __samba_recreate_realm
+    - autonomy_fqdn != __samba_schema_master
+
+- name: "Flush Net Cache on New DC"
+  ansible.builtin.command:
+    cmd: "net cache flush"
+  become: yes
+  when:
+    - __samba_recreate_realm
+    - autonomy_fqdn != __samba_schema_master
+
+# ==================================================================================================
+#
+# Syncronize Sysvol to New Servers
+#
+# Command Equivalent:
+# - /usr/bin/rsync -XAavz --delete-after -f"+ */" -f"- *"  /var/lib/samba/sysvol root@DC2:/var/lib/samba
+#
+# References:
+# - https://wiki.samba.org/index.php/Bidirectional_Rsync/Unison_based_SysVol_replication_workaround
+#
+# ==================================================================================================
+# - name: "Sync Sysvol to new servers"
+#   synchronize:
+#     src: "/var/lib/samba/sysvol"
+#     dest: "/var/lib/samba"
+#     archive: yes
+#     compress: yes
+#     rsync_opts:
+#       - "--xattrs"
+#       - "--acls"
+#       - "--delete-after"
+#       - '--filter="+ */"'
+#       - '--filter="- *"'
+#   delegate_to: "{{ __samba_schema_master }}"
+#   when: autonomy_fqdn != __samba_schema_master
+
+- name: "Reset Samba ACLs on Sysvol for New Controller"
+  ansible.builtin.command:
+    cmd: "samba-tool ntacl sysvolreset"
+  become: yes
+  when:
+    - __samba_recreate_realm
+    - autonomy_fqdn != __samba_schema_master
+
+- name: "Start Samba Domain Controller"
+  ansible.builtin.service:
+    name: samba-ad-dc
+    state: started
+  become: yes
