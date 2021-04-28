@@ -15,6 +15,7 @@
         - always
 
 - hosts: all:!localhost:!public_zone
+  roles:
     - role: bloodymage.autonomy.config_ownca_environment
       tags:
         - always

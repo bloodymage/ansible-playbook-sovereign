@@ -21,8 +21,8 @@
 
 - name: "Check to determine if we need krb5 support"
   ansible.builtin.set_fact:
-    packages: "{{ packages + [ apache_krb5_packages ] }}"
-    apache_modules: "{{ apache_modules + [ apache_kerberos_ad_sso_modules ] }}"
+    packages: "{{ packages + apache_krb5_packages }}"
+    apache_modules: "{{ apache_modules + apache_kerberos_ad_sso_modules }}"
   become: no
   when:
     - inventory_hostname in groups['internal_zone']
@@ -30,7 +30,7 @@
 
 - name: "Check to determine if we need ldap support"
   ansible.builtin.set_fact:
-    apache_modules: "{{ apache_modules + [ apache_ldap_modules ] }}"
+    apache_modules: "{{ apache_modules + apache_ldap_modules  }}"
   become: no
   when:
     - autonomy_realm_identity_management_system is truthy

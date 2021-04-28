@@ -14,6 +14,7 @@ apache_kerberos_ad_sso_modules:
   - auth_kerb
 
 apache_ldap_modules:
+  - ldap
   - authnz_ldap
 
 apache_modules:

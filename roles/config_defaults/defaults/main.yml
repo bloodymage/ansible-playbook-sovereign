@@ -263,8 +263,10 @@ ownca_format: 'pem'
 ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy
-ownca_intermediate_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
+ownca_intermediate_ca_key: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
+ownca_intermediate_ca_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key }}"
 ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+ownca_intermediate_ca_cert_path: "{{ ownca_ca_certs_directory }}/{{ ownca_intermediate_ca_cert_path }}"
 ownca_intermediate_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain.crt"
 ownca_intermediate_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}.crl"
 ownca_component_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"

@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Installs an Apache Web Server
+  description: Installs an Exim smtp server
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy

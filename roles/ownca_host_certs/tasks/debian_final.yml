@@ -16,7 +16,7 @@
   loop:
     - "{{ autonomy_fqdn }}"
     - "{{ autonomy_fqdn }}-chain"
-  notify: restart all
+  notify: restart tls
 
 - name: Copy domain controllers' certificate to server.
   ansible.builtin.copy:
@@ -29,7 +29,7 @@
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
     - autonomy_realm_identity_management_system is truthy
-  notify: restart all
+  notify: restart tls
 
 - name: Copy domain controllers' certificate chain to server.
   ansible.builtin.copy:
@@ -42,7 +42,7 @@
   loop: "{{ groups['samba_domain_controllers'] | default([]) }}"
   when:
     - autonomy_realm_identity_management_system is truthy
-  notify: restart all
+  notify: restart tls
 
 - name: Copy CA Certificates to server.
   ansible.builtin.copy:
@@ -53,7 +53,7 @@
     mode: "0644"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
-  notify: restart all
+  notify: restart tls
 
 - name: Copy CA Chains Certificates to server.
   ansible.builtin.copy:
@@ -64,7 +64,7 @@
     mode: "0644"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
-  notify: restart all
+  notify: restart tls
   when:
     - item.name != "root"
 

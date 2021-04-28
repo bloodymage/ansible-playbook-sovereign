@@ -5,6 +5,18 @@
   tags:
     - always
 
+- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
+  roles:
+    - role: bloodymage.autonomy.aliases
+      tags:
+        - aliases
+
+- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address:!mail_servers
+  roles:
+    - role: bloodymage.autonomy.exim
+      tags:
+        - exim
+
 - hosts: mail_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.spamassassin

@@ -16,7 +16,7 @@
     #       That will cause the realm to be recreated every time.
     - role: bloodymage.autonomy.config_realm_environment
 
-- name: "Configure baseline Kerberos"
+- name: "Configure baseline Kerberos Client"
   hosts: internal_network:!routeros
   roles:
     - role: bloodymage.autonomy.krb5_client_config
@@ -44,7 +44,8 @@
         - samba
         - recreate-realm
 
-- hosts: openldap_servers
+- name: "Configure OpenLDAP"
+  hosts: openldap_servers
   roles:
     - role: bloodymage.autonomy.openldap
       tags:
