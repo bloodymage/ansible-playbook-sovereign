@@ -22,8 +22,8 @@
         - ansible_network_os is undefined
         - inventory_hostname != 'localhost'
         - inventory_hostname not in groups['virtual_ip_address']
-        - inventory_hostname in groups['internal_zone']
-        - inventory_hostname in groups['dmz_zone']
+        - inventory_hostname in groups['internal_zone'] | default([])
+        - inventory_hostname in groups['dmz_zone'] | default([])
 
 - name: "Update NS host A records"
   community.general.nsupdate:
