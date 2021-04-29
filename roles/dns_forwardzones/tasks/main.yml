@@ -144,7 +144,7 @@
       - "{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
       - "{{ item.alt_name }}.{{ autonomy_domain }}"
   when:
-    - inventory_hostname not in groups ['public_zone']
+    - inventory_hostname not in groups ['public_zone'] | default([])
     - inventory_hostname in groups[item.name] | default([])
 
 - name: "Add or modify host CNAME records based on server role"
