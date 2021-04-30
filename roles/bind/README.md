@@ -26,6 +26,7 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 
 ### Dependencies
 ```
+- role: bloodymage.autonomy.config_defaults
 - role: bloodymage.autonomy.collection_handlers
 ```
 
@@ -49,6 +50,8 @@ Including an example of how to use your role (for instance, with variables passe
 Features and Advantages
 -----------------------
 
+- Configures local bind9 servers to be a caching server of all root zones.
+- 
 
 Similar Projects
 ----------------
@@ -57,6 +60,8 @@ Similar Projects
 
 References
 ----------
+- [BIND 9 Administrator Reference Manual](https://bind9.readthedocs.io/en/v9_16_15/)
+- [DNS for Rocket Scientists](http://www.zytrax.com/books/dns/)
 - [Samba Wiki: Setting up an BIND DNS Server](https://wiki.samba.org/index.php/Setting_up_a_BIND_DNS_Server)
 
 Contributing
