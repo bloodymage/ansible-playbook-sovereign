@@ -32,23 +32,31 @@
   listen:
     - "update pam"
 
-- name: "postfix tls"
-  ansible.builtin.copy:
-    src: /etc/ssl/certs/ca-certificates.crt
-    dest: /var/spool/postfix/etc/ssl/certs/ca-certificates.crt
-    owner: root
-    group: root
-    mode: "0644"
-    remote_src: yes
-  become: yes
-  notify: reload postfix
-  listen:
-    - "update system ca certificates"
-    - "update ca-certificates"
-    - "restart tls"
-    - "reload tls"
-  when:
-    - inventory_hostname in groups['postfix_servers'] | default([])
+# ==================================================================================================
+#
+# Disable for now.  This may no longer be needed.
+# Disabled because '/var/spool/postfix/etc/ssl' directory no longer exists.
+#
+# TODO: Need to investigate change in debian postfix package.
+#
+# ==================================================================================================
+# - name: "postfix tls"
+#   ansible.builtin.copy:
+#     src: /etc/ssl/certs/ca-certificates.crt
+#     dest: /var/spool/postfix/etc/ssl/certs/ca-certificates.crt
+#     owner: root
+#     group: root
+#     mode: "0644"
+#     remote_src: yes
+#   become: yes
+#   notify: reload postfix
+#   listen:
+#     - "update system ca certificates"
+#     - "update ca-certificates"
+#     - "restart tls"
+#     - "reload tls"
+#   when:
+#     - inventory_hostname in groups['postfix_servers'] | default([])
 
 - name: "Force systemd to reread configs"
   ansible.builtin.systemd:
