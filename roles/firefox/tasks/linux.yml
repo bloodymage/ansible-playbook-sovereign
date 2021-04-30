@@ -6,7 +6,7 @@
 - name: Install config preferences
   ansible.builtin.template:
     src: "{{ item }}.j2"
-    dest: "{{ firefox_share_path }}/browser/defaults/preferences/{{ item }}.js"
+    dest: "{{ firefox_path }}/browser/defaults/preferences/{{ item }}.js"
     owner: root
     group: root
     mode: "0644"
@@ -70,6 +70,11 @@
     - firefox_debug
     - firefox-debug
 
+# ==================================================================================================
+#
+# Really need to define failure here.
+#
+# ==================================================================================================
 - name: "Create a symbolic link 'libnssckbi.so' -> 'p11-kit-trust.so'"
   ansible.builtin.file:
     src: "/usr/lib/x86_64-linux-gnu/pkcs11/p11-kit-trust.so"
@@ -78,6 +83,7 @@
     group: root
     state: link
   become: yes
+  ignore_errors: yes
   tags:
     - firefox
     - firefox_debug

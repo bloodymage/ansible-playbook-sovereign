@@ -108,8 +108,8 @@
   ansible.builtin.copy:
     dest: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
-    owner: "{{ autonomy_user }}"
-    group: "{{ autonomy_user }}"
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
     mode: "0600"
   become: no
   delegate_to: localhost

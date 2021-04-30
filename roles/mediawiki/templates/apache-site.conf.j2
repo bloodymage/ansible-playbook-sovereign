@@ -105,9 +105,9 @@ SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
 SSLCertificateFile "{{ item.ssl_certificate_file }}"
 SSLCertificateChainFile "{{ item.ssl_certificate_chain_file }}"
 #SSLCACertificatePath /etc/ssl/certs/
-SSLCACertificateFile "{{ autonomy_component_ca_file }}"
+SSLCACertificateFile "{{ ownca_etc }}/certs/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component-ca-chain.pem"
 #SSLCARevocationPath /etc/apache2/ssl.crl/
-SSLCARevocationFile "{{ autonomy_component_crl_file }}"
+SSLCARevocationFile "{{ ownca_etc }}/crls/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component.crl"
 #SSLVerifyClient require
 #SSLVerifyDepth  10
 #SSLOptions +FakeBasicAuth +ExportCertData +StrictRequire

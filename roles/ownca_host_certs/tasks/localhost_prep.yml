@@ -66,13 +66,13 @@
     - ownca-host-certs-debug
     - ownca-all
 
-- name: Generate Host Private Key
+- name: "Generate Host Private Key."
   community.crypto.openssl_privatekey:
     path: "{{ ownca_hosts_directory }}/private/{{ autonomy_fqdn }}.key"
     type: "{{ ownca_privatekey_type }}"
     size: 4096
-    owner: "{{ autonomy_user }}"
-    group: "{{ autonomy_user }}"
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
     mode: "0640"
     force: no
   become: no
@@ -84,33 +84,12 @@
     - ownca-host-certs-debug
     - ownca-all
 
-- name: Print CSR Variables
-  ansible.builtin.debug:
-    msg:
-      - "country_name: {{ autonomy_country_code | default(country) }}"
-      - "state_or_province_name: {{ autonomy_region_name | default(region) }}"
-      - "locality_name: {{ loc_city | default(none) }}"
-      - "organization_name: {{ autonomy_org_name | title }}"
-      - "organizational_unit_name: {{ autonomy_org_unit_name | title }}"
-      - "common_name: {{ autonomy_fqdn }}"
-      - "key_usage: {{ ownca_host_certs_key_usage }}"
-      - "extended_key_usage: {{ ownca_host_certs_extended_key_usage }}"
-      - "privatekey_path: {{ ownca_hosts_directory }}/private/{{ autonomy_fqdn }}.key"
-      - "subject_alt_name: {{ ownca_host_certs_subject_alt_name }}"
-    verbosity: 1
-  become: no
-  delegate_to: localhost
-  tags:
-    - never
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-
 - name: "Generate Host CSR."
   community.crypto.openssl_csr:
     path: "{{ ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
     mode: "0644"
-    owner: "{{ autonomy_user }}"
-    group: "{{ autonomy_user }}"
     country_name: "{{ ownca_country_code | default(none) }}"
     state_or_province_name: "{{ autonomy_region | default(none) }}"
     locality_name: "{{ loc_city | default(none) }}"

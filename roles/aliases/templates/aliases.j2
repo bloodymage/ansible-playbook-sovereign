@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+
+{% for user in users %}
+{% if user.email_alias is defined -%}
+  {{ user.username }}: {{ user.email_alias }}
+{% endif %}
+{% endfor %}
+# Need a way to determine if these users exist on the host
+{% for user in aliases_local_user_maps -%}
+  {{ user.username }}: {{ user.email }}
+{% endfor %}

@@ -1,9 +1,21 @@
-- hosts: all:!localhost:!public_zone
+# ==================================================================================================
+#
+# This was split into a separate playbook as a way to 'reset' hosts that had previous failures.
+#
+# This should always run.
+#
+# QUESTION: Maybe there is a better way?
+#
+# ==================================================================================================
+- hosts: all:!localhost
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
       tags:
         - always
+
+- hosts: all:!localhost:!public_zone
+  roles:
     - role: bloodymage.autonomy.config_ownca_environment
       tags:
         - always

@@ -56,7 +56,6 @@
   become: yes
   loop:
     - mailname
-    - aliases
   tags:
     - postfix
     - postfix_debug

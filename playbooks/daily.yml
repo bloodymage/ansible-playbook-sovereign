@@ -1,3 +1,11 @@
+# ==================================================================================================
+#
+# This playbook is a small selection of tasks for daily execution.  Ensuring systems are up to date.
+# DNS is up to date with any possible changes.  User's dotfiles are updated.
+#
+# NOTE: This should only be run after everything is setup (site.yml)
+#
+# ==================================================================================================
 - hosts: all
   ignore_unreachable: true
   roles:
@@ -12,6 +20,7 @@
   tags:
     - dns
 
+# TODO: Find out why routeros fails on reverse zones.
 - hosts: all:!localhost:!routeros
   ignore_unreachable: true
   roles:

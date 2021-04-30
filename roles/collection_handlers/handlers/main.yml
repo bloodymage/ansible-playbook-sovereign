@@ -5,14 +5,26 @@
 # Misc Handlers
 #
 # ==================================================================================================
-- name: Update System CA Certificates
+# ==================================================================================================
+#
+# Update System CA Certificates
+#
+# Because handlers are run in order, we want this at the top to ensure all certs are properly
+# installed before restarting the services below.
+#
+# ==================================================================================================
+- name: "Update System CA Certificates."
   ansible.builtin.command:
     cmd: "update-ca-certificates"
   become: yes
   listen:
     - "update system ca certificates"
     - "update ca-certificates"
+    - "restart all"
+    - "restart tls"
+    - "reload tls"
 
+# TODO: Update this command to update pam config.
 - name: Update PAM
   ansible.builtin.command:
     cmd: "update-ca-certificates"
@@ -20,23 +32,31 @@
   listen:
     - "update pam"
 
-- name: "postfix tls"
-  ansible.builtin.copy:
-    src: /etc/ssl/certs/ca-certificates.crt
-    dest: /var/spool/postfix/etc/ssl/certs/ca-certificates.crt
-    owner: root
-    group: root
-    mode: "0644"
-    remote_src: yes
-  become: yes
-  notify: reload postfix
-  listen:
-    - "update system ca certificates"
-    - "update ca-certificates"
-    - "restart tls"
-    - "reload tls"
-  when:
-    - inventory_hostname in groups['postfix_servers'] | default([])
+# ==================================================================================================
+#
+# Disable for now.  This may no longer be needed.
+# Disabled because '/var/spool/postfix/etc/ssl' directory no longer exists.
+#
+# TODO: Need to investigate change in debian postfix package.
+#
+# ==================================================================================================
+# - name: "postfix tls"
+#   ansible.builtin.copy:
+#     src: /etc/ssl/certs/ca-certificates.crt
+#     dest: /var/spool/postfix/etc/ssl/certs/ca-certificates.crt
+#     owner: root
+#     group: root
+#     mode: "0644"
+#     remote_src: yes
+#   become: yes
+#   notify: reload postfix
+#   listen:
+#     - "update system ca certificates"
+#     - "update ca-certificates"
+#     - "restart tls"
+#     - "reload tls"
+#   when:
+#     - inventory_hostname in groups['postfix_servers'] | default([])
 
 - name: "Force systemd to reread configs"
   ansible.builtin.systemd:
@@ -44,13 +64,12 @@
   listen:
     - "daemon reload"
 
-
 # ==================================================================================================
 #
 # Restart Service Handlers
 #
 # ==================================================================================================
-- name: "restart apache"
+- name: "Restart Apache"
   ansible.builtin.service:
     name: apache2
     state: restarted
@@ -63,6 +82,7 @@
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
 
+# TODO: Check if this needs 'restart tls'
 - name: "Restart Bind9"
   ansible.builtin.service:
     name: bind9
@@ -121,6 +141,7 @@
   listen:
     - "restart all"
     - "restart tls"
+    - "restart mosquitto"
   when:
     - inventory_hostname in groups['mosquitto_servers'] | default([])
 
@@ -132,6 +153,7 @@
   listen:
     - "restart all"
     - "restart tls"
+    - "restart mysql"
   when:
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
 
@@ -143,6 +165,7 @@
   listen:
     - "restart all"
     - "restart tls"
+    - "restart nginx"
   when:
     - inventory_hostname in groups ['nginx_servers'] | default([])
 
@@ -168,6 +191,7 @@
     - "restart all"
     - "restart tls"
     - "restart samba-ad-dc"
+    - "restart samba"
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
 
@@ -180,8 +204,9 @@
     - "restart all"
     - "restart tls"
     - "restart samba file server"
+    - "restart samba"
   when:
-    - inventory_hostname in groups['samba_file_servers']
+    - inventory_hostname in groups['samba_file_servers'] | default([])
 
 - name: "Restart NMBD Server"
   ansible.builtin.service:
@@ -192,8 +217,9 @@
     - "restart all"
     - "restart tls"
     - "restart samba file server"
+    - "restart samba"
   when:
-    - inventory_hostname in groups['samba_file_servers']
+    - inventory_hostname in groups['samba_file_servers'] | default([])
 
 - name: "Restart SSH Server"
   ansible.builtin.service:
@@ -213,10 +239,12 @@
     - "restart all"
     - "restart tls"
     - "restart samba file server"
+    - "restart samba"
+    - "restart winbind"
   when:
-    - inventory_hostname in groups['samba_file_servers']
+    - inventory_hostname in groups['samba_file_servers'] | default([])
 
-- name: "restart sssd"
+- name: "Restart sssd."
   ansible.builtin.service:
     name: sssd
     state: restarted
@@ -224,33 +252,36 @@
   listen:
     - "restart all"
     - "restart tls"
+    - "restart sssd"
   when:
-    - inventory_hostname in groups['sssd']
+    - inventory_hostname in groups['sssd'] | default([])
 
-- name: "restart unattended-upgrades"
+- name: "Restart unattended-upgrades"
   ansible.builtin.service:
     name: unattended-upgrades
     state: restarted
   become: yes
   listen:
     - "restart all"
+    - "restart unattended-upgrades"
 
-- name: "restart spamassassin"
+- name: "Restart Spamassassin."
   ansible.builtin.service:
     name: spamassassin
     state: restarted
   become: yes
   listen:
     - "restart all"
+    - "restart spamassassin"
   when:
-    - inventory_hostname in groups['mail_servers']
+    - inventory_hostname in groups['mail_servers'] | default([])
 
 # ==================================================================================================
 #
 # Reload Handlers
 #
 # ==================================================================================================
-- name: "reload apache"
+- name: "Reload Apache."
   ansible.builtin.service:
     name: apache2
     state: reloaded
@@ -258,8 +289,9 @@
   listen:
     - "reload all"
     - "reload tls"
+    - "reload apache"
   when:
-    - inventory_hostname in groups['apache_servers']
+    - inventory_hostname in groups['apache_servers'] | default([])
 
 - name: "reload nginx"
   ansible.builtin.service:
@@ -269,10 +301,11 @@
   listen:
     - "reload all"
     - "reload tls"
+    - "reload nginx"
   when:
-    - inventory_hostname in groups['nginx_servers']
+    - inventory_hostname in groups['nginx_servers'] | default([])
 
-- name: "Reload Postfix"
+- name: "Reload Postfix."
   ansible.builtin.service:
     name: postfix
     state: reloaded
@@ -282,7 +315,7 @@
     - "reload tls"
     - "reload postfix"
   when:
-    - inventory_hostname in groups['postfix_servers']
+    - inventory_hostname in groups['postfix_servers'] | default([])
 
 - name: "Reload Samba Domain Controller"
   ansible.builtin.service:
@@ -307,14 +340,14 @@
     state: started
   become: yes
   when:
-    - inventory_hostname in groups['sssd']
+    - inventory_hostname in groups['sssd'] | default([])
 
 # ==================================================================================================
 #
 # Enable Handlers
 #
 # ==================================================================================================
-- name: "enable keycloak"
+- name: "Enable Keycloak."
   ansible.builtin.service:
     name: "keycloak"
     state: "{{ item }}"
@@ -322,3 +355,7 @@
     - enabled
     - started
   become: yes
+  listen:
+    - "enable keycloak"
+  when:
+    - inventory_hostname in groups['keycloak_servers'] | default([])

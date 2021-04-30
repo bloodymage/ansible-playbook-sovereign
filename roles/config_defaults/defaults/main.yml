@@ -1,11 +1,22 @@
 ---
 # defaults file for config_defaults
+# ==================================================================================================
+#
 # Decisions
+#
+# TODO: Make 'autonomy_realm_identity_management_system' definition based on defined inventory
+#       groups.
+#
+# Goals:
+#   - Ideally, these would be the only variables that anyone would need to define in their inventoy.
+#
+# ==================================================================================================
 autonomy_realm_identity_management_system: ""
 autonomy_smart_card_login: no
 autonomy_overwrite_password: no
 autonomy_use_source_code_repos: no
 autonomy_password_length: "42"
+autonomy_zone_type: "internal"
 
 #===================================================================================================
 #
@@ -52,13 +63,44 @@ autonomy_region: ""
 autonomy_state: "{{ autonomy_region }}"
 autonomy_city: ""
 
+# ==================================================================================================
+#
 # Host Information
+#
+# In some ways, this is a bit redundant.  The goal of these variables is to ensure consistant
+# definitions.  For example if the inventory format is:
+#
+# apache_servers:
+#   hosts:
+#     www:
+#
+# or:
+#
+# apache_servers:
+#   hosts:
+#     www.internal.example.com:
+#
+# These variables will end up having the same definition.
+#   'autonomy_hostname' will always have the short hostname. 'www'
+#   'autonomy_fqdn' will always have the fqdn. 'www.internal.example.com'
+#
+# ==================================================================================================
 autonomy_hostname: "{{ inventory_hostname_short }}"
 autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
 autonomy_ipv4_address: "{{ ansible_host }}"
 autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default(omit) }}"
 
+# ==================================================================================================
+#
 # Default Passwords
+#
+# For all passwords, set the default to 'password'
+#
+# In each instance, when configuring the actual service, a lookup is done, using
+# 'password_store' to set the actual password if the password hasn't been manually defined in
+# the inventory.
+#
+# ==================================================================================================
 mediawiki_db_password: "password"
 mysql_administrator_password: "password"
 mysql_system_maintenance_user_password: "password"
@@ -95,6 +137,7 @@ ownca_ca_certs_directory: "{{ ownca_ca_directory }}/certs"
 ownca_ca_crl_directory: "{{ ownca_ca_directory }}/crl"
 ownca_ca_csr_directory: "{{ ownca_ca_directory }}/csr"
 ownca_etc: "/etc/ssl"
+ownca_usr_directory: "/usr/local/share/ca-certificates"
 ownca_users_directory: "{{ ownca_directory }}/users"
 mysql_datadir: "/var/lib/mysql"
 ssh_config_dir: "{{ sysconf_dir }}/ssh"
@@ -220,17 +263,23 @@ ownca_format: 'pem'
 ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy
-ownca_intermediate_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
+ownca_intermediate_ca_key: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
+ownca_intermediate_ca_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key }}"
 ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+ownca_intermediate_ca_cert_path: "{{ ownca_ca_certs_directory }}/{{ ownca_intermediate_ca_cert_path }}"
 ownca_intermediate_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain.crt"
 ownca_intermediate_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}.crl"
 ownca_component_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
 ownca_component_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.crt"
+ownca_component_ca_chain_file_path: "{{ ownca_usr_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.crt"
 ownca_component_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
 ownca_component_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.key"
 ownca_identity_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crt"
+ownca_identity_ca_file_path: "{{ ownca_usr_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crt"
 ownca_identity_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.crt"
+ownca_identity_ca_chain_file_path: "{{ ownca_usr_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.crt"
 ownca_identity_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
+ownca_identity_crl_file_path: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
 ownca_identity_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.key"
 ownca_codesign_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.key"
 ownca_codesign_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.crt"
@@ -381,8 +430,6 @@ domain_user_nextcloud:
     - spn: "HTTP"
       host: "{{ dmz_www_host }}"
   account_expire: "--noexpiry"
-
-
 
 # ==================================================================================================
 #

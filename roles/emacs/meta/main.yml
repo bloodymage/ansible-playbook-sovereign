@@ -1,0 +1,32 @@
+galaxy_info:
+  author: G Derber
+  description: Installs and configures emacs
+  company: Bloodymage
+
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
+
+  license: MIT
+
+  min_ansible_version: 2.10
+
+  platforms:
+    - name: Rasbian
+      versions:
+        - 10
+        - 11
+    - name: Debian
+      versions:
+        - 10
+        - 11
+    - name: Ubuntu
+      versions:
+        - 18.04
+        - 20.04
+
+  galaxy_tags:
+    - bloodymage
+    - emacs
+
+dependencies:
+  - role: bloodymage.autonomy.config_defaults
+  - role: bloodymage.autonomy.collection_handlers

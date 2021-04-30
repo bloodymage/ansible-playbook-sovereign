@@ -1,0 +1,36 @@
+---
+# tasks file for emacs
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ packages }}"
+        state: present
+      become: yes
+
+- name: "Install Modified emacs.service file"
+  ansible.builtin.template:
+    src: service.j2
+    dest: "/usr/lib/systemd/user/emacs.service"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: "daemon reload"
+
+- name: "Enable service emacs and ensure it is not masked."
+  ansible.builtin.systemd:
+    name: emacs
+    enabled: yes
+    masked: no
+    scope: global
+  become: yes

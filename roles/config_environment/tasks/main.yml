@@ -1,5 +1,10 @@
 ---
 # tasks file for config_environment
+# ==================================================================================================
+#
+# First we create groups based on gathered facts about the system.
+#
+# ==================================================================================================
 - name: "Create groups based on the Network OS"
   group_by:
     key: "{{ ansible_network_os.split('.')[2] | lower }}"
@@ -24,6 +29,59 @@
   tags:
     - always
 
+# ==================================================================================================
+#
+# Create groups based on zone information.
+#
+# =================================================================================================
+- name: "Create group by zone type."
+  group_by:
+    key: "{{ autonomy_zone_type }}_zone"
+
+- name: "Create group by zone."
+  group_by:
+    key: "{{ autonomy_zone_name }}_zone"
+  when:
+    - autonomy_zone_name is defined
+
+# ==================================================================================================
+#
+# Now we create groups based on the host's role
+#
+# ==================================================================================================
+- name: "Create parent groups based on host's role."
+  group_by:
+    key: "{{ item.parent }}"
+  loop:
+    - name: "mariadb_servers"
+      parent: "mysql_compatible_servers"
+    - name: "mysql_compatible_servers"
+      parent: "db_servers"
+    - name: "postgresql_servers"
+      parent: "db_servers"
+    - name: "bind9_servers"
+      parent: "dns_servers"
+    - name: "keycloak_servers"
+      parent: "auth_servers"
+    - name: "openldap_servers"
+      parent: "ldap_servers"
+    - name: "dovecot_servers"
+      parent: "imap_servers"
+    - name: "postfix_servers"
+      parent: "smtp_servers"
+    - name: "smtp_servers"
+      parent: "mail_servers"
+    - name: "imap_servers"
+      parent: "mail_servers"
+    - name: "minidlna_servers"
+      parent: "dlna_servers"
+    - name: "apache_servers"
+      parent: "web_servers"
+    - name: "nginx_servers"
+      parent: "web_servers"
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+
 - name: "Create host groups based on zone and role."
   group_by:
     key: "{{ autonomy_zone_name }}_{{ item }}"
@@ -46,11 +104,18 @@
     - samba_domain_controllers
     - web_servers
   when:
-    - inventory_hostname in groups[item]
+    - inventory_hostname in groups[item] | default([])
 
+# ==================================================================================================
+#
+# Now we need to identify who is running ansible.
+#
+# TODO: Change the variable to "__autonomy_user"
+#
+# ==================================================================================================
 - name: "Identify User running ansible."
   ansible.builtin.set_fact:
-    autonomy_user: "{{ lookup('env','USER') }}"
+    __autonomy_user: "{{ lookup('env','USER') }}"
 
 #     - name: Check if we are using debug mode
 #       ansible.builtin.set_fact:

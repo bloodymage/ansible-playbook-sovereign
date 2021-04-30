@@ -78,7 +78,6 @@ bind_root_zones:
 
 bind_zones_dir: /etc/bind/zones
 
-bind_dnssec_enable: "yes"
 bind_dnssec_validation: "no"
 
 # SOA information
@@ -150,3 +149,22 @@ bind_zone_file_mode: "0640"
 bind_rpc_policies:
   - "zone 'accept.{{ autonomy_root_domain }}' policy passthru;"
   - "zone 'block.{{ autonomy_root_domain }}';"
+
+bind9_bogusnet_acl:
+  name: "bogusnet"
+  networks:
+    - 0.0.0.0/8
+    - 192.0.2.0/24
+    - 224.0.0.0/3
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+
+bind9_myipv4_acl:
+  name: myipv4
+  networks:
+    - 127.0.0.1
+    - "{{ ansible_host }}"
+
+bind9_myipv6_acl:
+  name: myipv6

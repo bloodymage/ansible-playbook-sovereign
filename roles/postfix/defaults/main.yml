@@ -15,36 +15,6 @@ postfix_sasl_relay_files:
   - filename: "sender_relay"
     mode: "0644"
 
-postfix_local_user_maps:
-  - username: webmaster
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: www
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: www-data
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: postmaster
-    email: "postmaster@{{ autonomy_root_domain }}"
-  - username: mailer-daemon
-    email: "postmaster@{{ autonomy_root_domain }}"
-  - username: abuse
-    email: "abuse@{{ autonomy_root_domain }}"
-  - username: nobody
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: hostmaster
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: usenet
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: news
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: ftp
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: noc
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: security
-    email: "webmaster@{{ autonomy_root_domain }}"
-  - username: clamav
-    email: "webmaster@{{ autonomy_root_domain }}"
-
 postfix_virtual_mailbox_users:
   - username: "webmaster@{{ autonomy_root_domain }}"
     email: "webmaster@{{ autonomy_root_domain }}"

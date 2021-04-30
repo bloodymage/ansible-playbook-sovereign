@@ -1,4 +1,15 @@
 ---
+# ==================================================================================================
+#
+# This playbook configures database servers.
+#
+# ==================================================================================================
+- hosts: all
+  roles:
+    - role: bloodymage.autonomy.config_environment
+  tags:
+    - always
+
 - hosts: mariadb_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.mariadb
@@ -6,4 +17,3 @@
 - hosts: mysql_compatable_servers
   roles:
     - role: bloodymage.autonomy.mysql_databases
-

@@ -88,7 +88,7 @@
     - keycloak_debug
     - keycloak-debug
 
-- name: "Ensure we have a password for the keycloak administrator user"
+- name: "Ensure we have a password for the keycloak administrator user."
   ansible.builtin.set_fact:
     keycloak_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
@@ -106,7 +106,7 @@
     - keycloak_debug
     - keycloak-debug
 
-- name: "Ensure we have a password for the keycloak keystore"
+- name: "Ensure we have a password for the keycloak keystore."
   ansible.builtin.set_fact:
     keycloak_keystore_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
@@ -124,7 +124,7 @@
     - keycloak_debug
     - keycloak-debug
 
-- name: "Install Service File"
+- name: "Install Service File."
   ansible.builtin.template:
     src: "service.conf.j2"
     dest: "/etc/systemd/system/keycloak.service"
@@ -278,7 +278,7 @@
 # -s 'config.uuidLDAPAttribute=["objectGUID"]'
 # -s 'config.userObjectClasses=["inetOrgPerson, organizationalPerson, user"]'
 # -s 'config.connectionUrl=["ldap://{{ __samba_schema_master }}"]'
-# -s 'config.usersDn=["{{ autonomy_users_dn }}"]'
+# -s 'config.usersDn=["{{ autonomy_user_dn }}"]'
 # -s 'config.authType=["simple"]'
 # -s 'config.bindDn=["{{ __keycloak_user }},{{ autonomy_user_dn }}"]'
 # -s 'config.bindCredential=["{{ __keycloak_password }}"]'

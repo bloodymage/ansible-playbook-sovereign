@@ -1,9 +1,9 @@
 # ==================================================================================================
 #
-# First we gather some information
+# Gather some information.  This is always done, as it'll create groups used later in this playbook.
 #
 # ==================================================================================================
-- hosts: all:!public_zone:!virtual_ip_address
+- hosts: all:!localhost
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
@@ -12,7 +12,7 @@
 
 # ==================================================================================================
 #
-# Next we configure setting applicable to ALL hosts
+# Configure setting applicable to ALL hosts.
 #
 # ==================================================================================================
 - hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_ip_address
@@ -31,7 +31,7 @@
 
 # ==================================================================================================
 #
-# Next we configure settings applicable based on OS:
+# Configure settings applicable based on OS:
 #   - Linux
 #   - Windows
 #
@@ -46,7 +46,10 @@
 
 # ==================================================================================================
 #
-# Next we configure setting applicable to ALL hosts
+# Create users for ALL hosts.  This is done after the OS settings (sshca_host_certs and openssh)
+# because the users role has tasks than depend on tasks being run that are part of the openssh role.
+#
+# Decision to make: Should I run those tasks inside the users role as well?
 #
 # ==================================================================================================
 - hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_ip_address
@@ -56,6 +59,11 @@
       tags:
         - users
 
+# ==================================================================================================
+#
+# Finish up settings based on OS:
+#
+# ==================================================================================================
 - hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
   strategy: linear
   roles:
@@ -87,6 +95,7 @@
     #  tags:
     #    - polkit
     - role: bloodymage.autonomy.screen
+      # make optional?
       tags:
         - screen
     - role: bloodymage.autonomy.global
@@ -123,11 +132,15 @@
       tags:
         - make
     - role: bloodymage.autonomy.uptimed
+      # make optional?
       tags:
         - uptimed
     - role: bloodymage.autonomy.htop
       tags:
         - htop
+    - role: bloodymage.autonomy.emacs
+      tags:
+        - emacs
     # - role: bloodymage.autonomy.trash_cli
     #   tags:
     #     - trash-cli
@@ -137,6 +150,11 @@
 # Finally, we configure settings based on OS Distribution Family:
 #
 # - Debian
+#
+# Planned edition:
+#   - arch
+#   - gentoo
+#   - redhat
 #
 # ==================================================================================================
 - hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address

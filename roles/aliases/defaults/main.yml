@@ -1,0 +1,33 @@
+---
+# defaults file for aliases
+packages: []
+
+aliases_local_user_maps:
+  - username: webmaster
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: www
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: www-data
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: postmaster
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: mailer-daemon
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: abuse
+    email: "abuse@{{ autonomy_root_domain }}"
+  - username: nobody
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: hostmaster
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: usenet
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: news
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: ftp
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: noc
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: security
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: clamav
+    email: "webmaster@{{ autonomy_root_domain }}"

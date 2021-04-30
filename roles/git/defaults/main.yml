@@ -1,3 +1,4 @@
 ---
 packages:
   - git
+  - git-flow=1.12.3-1

@@ -18,19 +18,18 @@
 {% endif %}
 
 options {
-directory "/var/cache/bind";
-recursion yes; #enable recursive queries
+  directory "/var/cache/bind";
+  recursion yes; #enable recursive queries
 
-listen-on { any; };
-listen-on-v6 { any; };
+  listen-on { any; };
+  listen-on-v6 { any; };
 
-allow-query { trusted; };
-allow-transfer { trusteddns; };
+  allow-query { trusted; };
+  allow-transfer { trusteddns; };
 
-dnssec-enable {{ bind_dnssec_enable }};
-dnssec-validation {{ bind_dnssec_validation }};
+  dnssec-validation {{ bind_dnssec_validation }};
 
-auth-nxdomain no;    # conform to RFC1035
+  auth-nxdomain no;    # conform to RFC1035
 
 {% if groups['samba_domain_controllers'] is defined %}
 {% if inventory_hostname in groups['samba_domain_controllers'] %}

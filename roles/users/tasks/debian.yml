@@ -16,53 +16,24 @@
 # ==================================================================================================
 - name: "Ensure we have user groups required by host role"
   ansible.builtin.set_fact:
-    user_groups: "{{ user_groups + [ user_mythtv_group ] }}"
+    user_groups: "{{ user_groups + [ item.group ] }}"
+  loop:
+    - name: "mythtv"
+      group: "{{ user_mythtv_group }}"
+    - name: "file_servers"
+      group: "{{ user_mythtv_group }}"
+    - name: "file_servers"
+      group: "{{ user_git_group }}"
+    - name: "minidlna_servers"
+      group: "{{ user_minidlna_group }}"
+    - name: "git_servers"
+      group: "{{ user_git_group }}"
+    - name: "homeassistant"
+      group: "{{ user_homeassistant_group }}"
+    - name: "mail_servers"
+      group: "{{ user_vmail_group }}"
   when:
-    - (inventory_hostname in groups ['mythtv']) or (inventory_hostname in groups['file_servers'])
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have user groups required by host role"
-  ansible.builtin.set_fact:
-    user_groups: "{{ user_groups + [ user_minidlna_group ] }}"
-  when:
-    - (inventory_hostname in groups ['minidlna_servers']) or (inventory_hostname in groups['file_servers'])
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have user groups required by host role"
-  ansible.builtin.set_fact:
-    user_groups: "{{ user_groups + [ user_git_group ] }}"
-  when:
-    - inventory_hostname in groups ['git_servers']
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have user groups required by host role"
-  ansible.builtin.set_fact:
-    user_groups: "{{ user_groups + [ user_homeassistant_group ] }}"
-  when:
-    - inventory_hostname in groups ['homeassistant']
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have user groups required by host role"
-  ansible.builtin.set_fact:
-    user_groups: "{{ user_groups + [ user_vmail_group ] }}"
-  when:
-    - inventory_hostname in groups ['mail_servers']
+    - inventory_hostname in groups [item.name] | default([])
   become: no
   tags:
     - users
@@ -71,53 +42,24 @@
 
 - name: "Ensure we have users required by host role"
   ansible.builtin.set_fact:
-    users: "{{ users + [ user_mythtv ] }}"
+    users: "{{ users + [ item.user ] }}"
+  loop:
+    - name: "mythtv"
+      user: "{{ user_mythtv }}"
+    - name: "file_servers"
+      user: "{{ user_mythtv }}"
+    - name: "file_servers"
+      user: "{{ user_git }}"
+    - name: "minidlna_servers"
+      user: "{{ user_minidlna }}"
+    - name: "git_servers"
+      user: "{{ user_git }}"
+    - name: "homeassistant"
+      user: "{{ user_homeassistant }}"
+    - name: "mail_servers"
+      user: "{{ user_vmail }}"
   when:
-    - (inventory_hostname in groups['mythtv']) or (inventory_hostname in groups['file_servers'])
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have users required by host role"
-  ansible.builtin.set_fact:
-    users: "{{ users + [ user_minidlna ] }}"
-  when:
-    - (inventory_hostname in groups['minidlna_servers']) or (inventory_hostname in groups['file_servers'])
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have users required by host role"
-  ansible.builtin.set_fact:
-    users: "{{ users + [ user_git ] }}"
-  when:
-    - inventory_hostname in groups ['git_servers']
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have users required by host role"
-  ansible.builtin.set_fact:
-    users: "{{ users + [ user_homeassistant ] }}"
-  when:
-    - inventory_hostname in groups ['homeassistant']
-  become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-
-- name: "Ensure we have users required by host role"
-  ansible.builtin.set_fact:
-    users: "{{ users + [ user_vmail ] }}"
-  when:
-    - inventory_hostname in groups ['mail_servers']
+    - inventory_hostname in groups [item.name] | default([])
   become: no
   tags:
     - users
@@ -137,11 +79,26 @@
     - users_debug
     - users-debug
 
+# ==================================================================================================
+#
+# This creates all local users.
+#
+# The user is added as a member of all groups defined in the user definition.  In addition, the user
+# is added to a group 'ansiblemanaged'.  This is to track which users were installed by ansible.
+# The end goal is, if a user is a member of the 'ansiblemanaged' group, and that user is no longer
+# defined in the user definitions, then remove the user from the local system.
+#
+# ==================================================================================================
+- name: Print variable "users"
+  debug:
+    msg:
+      - "Users: {{ users }}"
+
 - name: Create login users (Password Enabled)
   ansible.builtin.user:
     name: "{{ item['username'] }}"
     password: "{{ __password_hash }}"
-    groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"        # Empty by default, here we give it some groups
+    groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
     system: no                         # Defaults to no

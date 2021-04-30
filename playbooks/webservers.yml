@@ -1,3 +1,10 @@
+---
+- hosts: all
+  roles:
+    - role: bloodymage.autonomy.config_environment
+  tags:
+    - always
+
 - hosts: redis_servers
   roles:
     - role: bloodymage.autonomy.redis
@@ -29,15 +36,21 @@
     - role: bloodymage.autonomy.acmeca_challenge_site
       tags:
         - acmeca-challenge-site
+        - acmeca
     - role: bloodymage.autonomy.acmeca_host_certs
       tags:
         - acmeca_host_certs
         - acmeca-host-certs
+        - acmeca
     - role: bloodymage.autonomy.ownca_crl_distribution_points
       tags:
         - ownca-crl-distribution-points
         - ownca_crl_distribution_points
         - websites
+
+- hosts: nextcloud_servers:mediawiki_servers
+  roles:
+    - role: bloodymage.autonomy.php
 
 - hosts: nextcloud_severs:&public_zone
   roles:

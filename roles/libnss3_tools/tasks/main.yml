@@ -5,6 +5,22 @@
 # Smart Card Configuration
 #
 # ==================================================================================================
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+
+- name: "Install packages"
+  ansible.builtin.package:
+    pkg: "{{ packages }}"
+    state: present
+  become: yes
+  register: result
+
 - name: Create /etc/pki/nssdb directory
   ansible.builtin.file:
     path: "/etc/pki/nssdb"
@@ -13,8 +29,6 @@
     group: root
     mode: "0755"
   become: yes
-  tags:
-    - nssdb
 
 - name: "Create nssdb"
   ansible.builtin.command:
@@ -32,8 +46,6 @@
       -i /usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca.crt
   become: yes
   loop: "{{ ownca_certificate_authorities }}"
-  tags:
-    - nssdb
 
 # ==================================================================================================
 #

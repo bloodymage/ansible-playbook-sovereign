@@ -1,5 +1,12 @@
+# ==================================================================================================
+#
+# This playbook configures the ansible control node, the host you are running asible from, aka
+# localhost to be able to run the remaining playbooks.
+#
+# ==================================================================================================
 - hosts: localhost
   roles:
+    - role: bloodymage.autonomy.config_environment
     - role: bloodymage.autonomy.gnupg
     - role: bloodymage.autonomy.password_store
       tags:

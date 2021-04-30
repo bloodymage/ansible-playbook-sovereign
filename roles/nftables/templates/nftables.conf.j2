@@ -4,16 +4,27 @@
 
 flush ruleset
 
-{% for family in nftables_families %}
+{% for family in nftables_families -%}
   table {{ family.name }} {{ family.table_name }} {
-  {% for chain in family.chains %}
+  {% for chain in family.chains -%}
 	chain {{ chain.name }} {
     type {{ family.table_name }} hook input priority 0; policy {{ chain.policy }};
-
-    {% if chain.rules is defined %}
-    {% for rule in chain.rules %}
+    {% if chain.rules is defined -%}
+    {% for rule in chain.rules -%}
       {{ rule }}
+    {% endfor -%}
+    {% if chain.name == "input" -%}
+    {% for port in __nftable_ports -%}
+    tcp dport { {{ port }} } accept
     {% endfor %}
+    {% endif -%}
+    {% if chain.post_rules is defined -%}
+    {% for rule in chain.post_rules -%}
+      {{ rule }}
+    {% endfor -%}
     {% endif %}
-  {% endfor %}
+  {% endif -%}
+  }
+{% endfor %}
+}
 {% endfor %}

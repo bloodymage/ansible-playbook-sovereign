@@ -57,17 +57,17 @@
     sssd_pam_cert_auth: yes
     #sssd_soft_crl: yes
     #sssd_soft_ocsp: yes
-    #sssd_certificate_verification: "no_verification"
-    sssd_certificate_verification: "crl_file={{ ownca_identity_crl_file }}"
+    sssd_certificate_verification: "{{ sssd_certificate_verification | default(__sssd_certificate_verification) }}"
     sssd_pkinit_pool: "DIR:/etc/ssl/certs/"
     sssd_pkinit_identities: "PKCS11:opensc-pkcs11.so:slotid=0:certid=01"
     sssd_default_ccache_name: "KEYRING:persistent:%{uid}"
     sssd_enable_pkinit: "yes"
   when:
     - inventory_hostname in groups['workstations']
+    - autonomy_smart_card_login
 
 - name: "stop sssd"
-  service:
+  ansible.builtin.service:
     name: sssd
     state: stopped
   become: yes

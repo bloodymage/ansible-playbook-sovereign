@@ -1,0 +1,95 @@
+packages:
+  - acl
+  - attr
+  - samba
+  - samba-dsdb-modules
+  - samba-vfs-modules
+  - winbind
+  - libpam-winbind
+  - libnss-winbind
+  - libpam-krb5
+  - krb5-config
+  - krb5-user
+  - dnsutils
+  - unison
+  - rsync
+
+samba_domain_password_expiration: 90
+samba_dns_backend: "BIND9_DLZ"
+
+samba_schema_extensions:
+  - name: sshpubkey
+    dn: "CN=sshPublicKey,{{ autonomy_schema_dn }}"
+    change_type: "add"
+    object_class: "top"
+    object_class_detail: "attributeSchema"
+    attribute_id: "{{ oid_ssh_public_key }}"
+    cn: "sshPublicKey"
+    schema_name: "sshPublicKey"
+    ldap_display_name: "sshPublicKey"
+    description: "MANDATORY: OpenSSH Public key"
+    attribute_syntax: "2.5.5.10"
+    om_syntax: "4"
+    single_valued: "FALSE"
+    object_category: "CN=attribute-schema,{{ autonomy_schema_dn }}"
+    search_flags: "8"
+    schema_id_guid: "cjdazyexzu+/aki0egdw+g=="
+  - name: ldappubkey
+    dn: "cn=ldapPublicKey,{{ autonomy_schema_dn }}"
+    change_type: "add"
+    object_class: "top"
+    object_class_detail: "classschema"
+    governs_id: "{{ oid_ldap_public_key }}"
+    cn: "ldapPublicKey"
+    schema_name: "ldapPublicKey"
+    ldap_display_name: "ldapPublicKey"
+    description: "MANDATORY: OpenSSH lpk objectClass"
+    sub_class_of: "top"
+    object_class_category: "3"
+    object_category: "cn=class-schema,{{ autonomy_schema_dn }}"
+    default_object_category: "cn=ldapPublicKey,{{ autonomy_schema_dn }}"
+    may_contain: "sshPublicKey"
+    schema_id_guid: "+8nfq43rpkwtogbcccskqa=="
+  # - name: sshldapmod
+  #   dn: "CN=User,{{ autonomy_schema_dn }}"
+  #   change_type: "modify"
+  #   replace: "auxiliaryClass"
+  #   auxiliary_class:
+  #     - "ldapPublicKey"
+
+#packages:
+#  - winbind
+#  - libpam-winbind
+#  - libnss-winbind
+
+schema_update_allowed: no
+
+samba_log_level: 1
+
+winbind_enum_users: no
+winbind_enum_groups: no
+winbind_refresh_tickets: yes
+
+samba_security: user
+
+samba_services:
+    - winbind
+
+# ==================================================================================================
+#
+# Do not use in inventory!  These are settings that are modified via set_facts, or mandatory system
+# defaults.
+#
+# ==================================================================================================
+__samba_recreate_realm: no
+__samba_joined_as_domain_member: no
+__samba_smbd_bin: "/usr/sbin/smbd"
+__samba_joined_as_domain_controller: no
+
+__dc_samba_shares:
+  - name: "netlogon"
+    path: "/var/lib/samba/sysvol/{{ autonomy_domain }}/scripts"
+    read_only: "No"
+  - name: "sysvol"
+    path: "/var/lib/samba/sysvol"
+    read_only: "No"

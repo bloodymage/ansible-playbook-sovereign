@@ -30,9 +30,6 @@
     Require all granted
     AllowOverride All
     Options FollowSymLinks MultiViews
-    <IfModule mod_headers.c>
-      Header always set Strict-Transport-Security "max-age={{ nextcloud_hsts_max_age }}; includeSubDomains"
-    </IfModule>
     <IfModule mod_dav.c>
       Dav off
     </IfModule>

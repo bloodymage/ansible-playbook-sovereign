@@ -22,8 +22,8 @@
         - ansible_network_os is undefined
         - inventory_hostname != 'localhost'
         - inventory_hostname not in groups['virtual_ip_address']
-        - inventory_hostname in groups['internal_zone']
-        - inventory_hostname in groups['dmz_zone']
+        - inventory_hostname in groups['internal_zone'] | default([])
+        - inventory_hostname in groups['dmz_zone'] | default([])
 
 - name: "Update NS host A records"
   community.general.nsupdate:
@@ -144,8 +144,8 @@
       - "{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
       - "{{ item.alt_name }}.{{ autonomy_domain }}"
   when:
-    - inventory_hostname not in groups ['public_zone']
-    - inventory_hostname in groups[item.name]
+    - inventory_hostname not in groups ['public_zone'] | default([])
+    - inventory_hostname in groups[item.name] | default([])
 
 - name: "Add or modify host CNAME records based on server role"
   community.general.nsupdate:

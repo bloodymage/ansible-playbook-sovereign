@@ -1,0 +1,120 @@
+---
+# ==================================================================================================
+#
+# TODO: Test if domain controller is already part of the reverse zone.  If not, add it.
+#
+# TODO: Define failure rather than using 'ignore_errors'
+#
+# ==================================================================================================
+- name: "Add Domain Controller to Reverse Zone"
+  ansible.builtin.command:
+    cmd: >
+      samba-tool dns add localhost
+      "{{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa"
+      "{{ ansible_host.split('.')[3] }}.{{ ansible_host.split('.')[2] }}"
+      PTR "{{ autonomy_fqdn }}"
+      -U administrator
+      --password="{{ samba_administrator_password }}"
+  register: result
+  #failed_when: >
+  #  - result.rc != "0"
+  #  - "'Record already exist' not in result.stderr"
+  become: yes
+  ignore_errors: yes
+
+- name: "Harden domain"
+  include: "hardening.yml"
+  become: no
+  when:
+    - autonomy_fqdn == __samba_schema_master
+
+# ==================================================================================================
+#
+# Configure automated Sysvol Replication
+#
+# References:
+#   - https://wiki.samba.org/index.php/SysVol_replication_(DFS-R)
+#   - https://wiki.samba.org/index.php/Bidirectional_Rsync/Unison_based_SysVol_replication_workaround
+#
+# ==================================================================================================
+- name: "Make SSH Control Directory"
+  ansible.builtin.file:
+    path: "~/.ssh/ctl"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+
+- name: "Create SSH Control Configuration"
+  ansible.builtin.template:
+    src: "control_ssh.j2"
+    dest: "~/.ssh/ctl/config"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+
+- name: "Create Log File"
+  ansible.builtin.file:
+    path: "/var/log/sysvol-sync.log"
+    state: touch
+    owner: root
+    group: root
+    mode: "0640"
+  become: yes
+
+- name: "Ensure unison configuration directory exists"
+  ansible.builtin.file:
+    path: "~/.unison"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"
+  become: yes
+
+- name: Create Unison Preferences
+  ansible.builtin.template:
+    src: "unison.j2"
+    dest: "~/.unison/default.prf"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+
+- name: Create Backup of SysVol directory
+  ansible.builtin.archive:
+    path: /var/lib/samba/sysvol
+    dest: ~/sysvol.tar.xz
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: yes
+
+# This fails, not sure why.
+# - name: "Test Unison Synchronization"
+#   ansible.builtin.command: "/usr/bin/unison"
+#   become: yes
+#   register: success
+#   when:
+#     - autonomy_fqdn == __samba_schema_master
+
+- name: Create Cron Sync
+  ansible.builtin.cron:
+    name: "Syncronize SysVol Directories"
+    minute: "*/5"
+    hour: "*"
+    day: "*"
+    weekday: "*"
+    month: "*"
+    job: "/usr/bin/unison -silent"
+    user: "root"
+  become: yes
+  when:
+    - autonomy_fqdn == __samba_schema_master
+
+- name: "Update Schema"
+  include: "schema_updates.yml"
+  become: no
+  when:
+    - autonomy_fqdn == __samba_schema_master

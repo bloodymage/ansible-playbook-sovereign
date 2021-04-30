@@ -4,4 +4,4 @@ introspection_mode = post
 debug = yes
 rawlog_dir = /tmp/oauth2
 username_attribute = email
-tls_ca_cert_file = {{ autonomy_component_ca_chain_file }}
+tls_ca_cert_file = {{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.pem

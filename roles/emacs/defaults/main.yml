@@ -1,0 +1,4 @@
+---
+# defaults file for emacs
+packages:
+  - emacs-nox

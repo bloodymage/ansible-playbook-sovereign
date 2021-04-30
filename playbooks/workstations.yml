@@ -1,3 +1,10 @@
+- name: "Prepare playbook environment"
+  hosts: all
+  roles:
+    - role: bloodymage.autonomy.config_environment
+  tags:
+    - always
+
 - hosts: workstations
   roles:
     - role: bloodymage.autonomy.cups
@@ -5,6 +12,8 @@
       when:
         - autonomy_smart_card_login
     - role: bloodymage.autonomy.libnss3_tools
+      tags:
+        - nssdb
     - role: bloodymage.autonomy.evolution
       tags:
         - evolution

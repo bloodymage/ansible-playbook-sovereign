@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Creates SSH certificate authority
+  description: Creates user's SSH public key certificates from user's OpenSSL public keys.
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
@@ -13,12 +13,15 @@ galaxy_info:
     - name: Rasbian
       versions:
         - 10
+        - 11
     - name: Debian
       versions:
         - 10
+        - 11
     - name: Ubuntu
       versions:
         - 18.04
+        - 20.04
 
   galaxy_tags:
     - bloodymage
@@ -26,4 +29,4 @@ galaxy_info:
     - certificates
 
 dependencies:
-  - role: bloodymage.autonomy.collection_handlers
+  - role: bloodymage.autonomy.config_defaults

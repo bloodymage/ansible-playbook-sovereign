@@ -302,9 +302,9 @@
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     certificate_path: "{{ __pki_cert_file }}"
     other_certificates:
-      - "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.pem"
-      - "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.pem"
-      - "{{ ownca_etc }}/certs/{{ autonomy_org_name }}-root-ca.pem"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-root-ca.crt"
     state: present
     owner: "root"
     group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
