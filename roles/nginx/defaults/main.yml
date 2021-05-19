@@ -1,6 +1,6 @@
 ---
 # defaults file for nginx
-packages:
+autonomy_packages:
   - nginx
 
 nginx_proxy_pass: "http://localhost:8080"

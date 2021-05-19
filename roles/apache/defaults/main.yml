@@ -1,12 +1,12 @@
 ---
-packages:
+autonomy_packages:
   - apache2
 #  - libsemanage-python
 #  - libselinux-python
 
 #drupal_version:
 
-apache_krb5_packages:
+apache_krb5_autonomy_packages:
   - libapache2-mod-auth-kerb
   - libapache2-mod-auth-gssapi
 

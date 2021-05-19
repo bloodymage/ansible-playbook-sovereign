@@ -1,6 +1,6 @@
 ---
 # defaults file for firefox
-packages:
+autonomy_packages:
   - "{{ firefox }}"
   - libgssapi-krb5-2
   - p11-kit-modules

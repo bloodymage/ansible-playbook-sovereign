@@ -1,4 +1,4 @@
 ---
 # defaults file for fail2ban
-packages:
+autonomy_packages:
   - fail2ban

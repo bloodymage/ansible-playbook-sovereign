@@ -19,7 +19,7 @@
 
 - name: "Install packages"
   package:
-    name: "{{ packages }}"
+    name: "{{ autonomy_packages }}"
     state: present
   tags:
     - nginx

@@ -40,7 +40,7 @@
 # ==================================================================================================
 - name: "Install packages"
   ansible.builtin.package:
-    name: "{{ packages }}"
+    name: "{{ autonomy_packages }}"
     state: present
   loop: "{{ virtual_hosts }}"
   become: yes

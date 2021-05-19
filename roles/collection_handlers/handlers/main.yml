@@ -85,7 +85,7 @@
 # TODO: Check if this needs 'restart tls'
 - name: "Restart Bind9"
   ansible.builtin.service:
-    name: bind9
+    name: named
     state: restarted
   become: yes
   listen:
@@ -93,6 +93,7 @@
     - "restart bind"
     - "restart bind9"
     - "restart tls"
+    - "restart named"
   when:
     - inventory_hostname in groups['dns_servers'] | default([])
 

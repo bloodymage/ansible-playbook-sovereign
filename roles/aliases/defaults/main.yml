@@ -1,6 +1,6 @@
 ---
 # defaults file for aliases
-packages: []
+autonomy_packages: []
 
 aliases_local_user_maps:
   - username: webmaster

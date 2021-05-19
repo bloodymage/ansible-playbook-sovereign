@@ -1,6 +1,6 @@
 ---
 # defaults file for mail-server
-packages:
+autonomy_packages:
   - dovecot-core
   - dovecot-imapd
   - dovecot-lmtpd

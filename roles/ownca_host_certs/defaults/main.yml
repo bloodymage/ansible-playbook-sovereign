@@ -1,5 +1,5 @@
 ---
-packages:
+autonomy_packages:
   - python3-cryptography
   - python3-openssl
   - rng-tools

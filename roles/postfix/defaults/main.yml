@@ -1,6 +1,6 @@
 ---
 # defaults file for postfix-server
-packages:
+autonomy_packages:
   - postfix
 
 postfix_mailbox_users: []

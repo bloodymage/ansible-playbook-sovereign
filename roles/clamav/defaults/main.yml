@@ -1,6 +1,6 @@
 ---
 # defaults file for clamav
-packages:
+autonomy_packages:
   #- lha
   #- rar
   #- unrar

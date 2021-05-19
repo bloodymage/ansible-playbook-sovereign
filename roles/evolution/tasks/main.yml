@@ -16,7 +16,7 @@
 
 - name: "Install packages"
   package:
-    pkg: "{{ packages }}"
+    pkg: "{{ autonomy_packages }}"
     state: present
   become: yes
   register: result

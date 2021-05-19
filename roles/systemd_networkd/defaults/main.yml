@@ -1,9 +1,9 @@
 ---
 # defaults file for systemd_networkd
-packages:
+autonomy_packages:
   - libnss-resolve
 
-remove_packages:
+remove_autonomy_packages:
   - avahi-daemon
   - ifupdown
   - dhcpcd5

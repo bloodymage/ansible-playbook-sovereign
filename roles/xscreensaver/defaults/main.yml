@@ -1,6 +1,6 @@
 ---
 # defaults file for xscreensaver
-packages:
+autonomy_packages:
   - xscreensaver
   - xscreensaver-data-extra
   - xscreensaver-gl-extra

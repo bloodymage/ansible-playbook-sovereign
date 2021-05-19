@@ -1,6 +1,6 @@
 ---
 # defaults file for gnupg
-packages:
+autonomy_packages:
   - gnupg
   - parcimonie
   - dirmngr

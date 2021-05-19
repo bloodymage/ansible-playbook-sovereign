@@ -1,6 +1,6 @@
 ---
 # roles/bind/defaults/main.yml
-packages:
+autonomy_packages:
   - python3-netaddr
   - bind9
   - bind9utils
@@ -76,6 +76,7 @@ bind_root_zones:
     ipv4: 202.12.27.33
     ipv6: 2001:dc3::35
 
+bind_rpz_zones: []
 bind_zones_dir: /etc/bind/zones
 
 bind_dnssec_validation: "no"
@@ -93,6 +94,9 @@ bind_zone_negative_cache_ttl: "604800"
 bind_zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01"
 bind_reverse_zone_serial_number: "{{ bind_zone_serial_number }}"
 bind_log: "data/named.run"
+
+bind_primary_zone: "primary"
+bind_secondary_zone: "secondary"
 
 bind_zone_domains:
   - name: "example.com"

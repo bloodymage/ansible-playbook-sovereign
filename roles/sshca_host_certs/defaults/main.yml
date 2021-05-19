@@ -1,5 +1,5 @@
 ---
-# packages:
+# autonomy_packages:
 
 sshca_host_keyfile: "{{ sshca_domain }}_host_key"
 sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"

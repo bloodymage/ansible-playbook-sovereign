@@ -1,6 +1,6 @@
 ---
 # defaults file for users
-packages: []
+autonomy_packages: []
 
 users:
   - username: pi
