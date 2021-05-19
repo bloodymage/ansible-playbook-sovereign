@@ -1,6 +1,6 @@
 ---
 # defaults file for nftables
-packages:
+autonomy_packages:
   - nftables
 
 nftables_families:

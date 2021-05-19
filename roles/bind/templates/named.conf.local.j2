@@ -21,7 +21,7 @@ include "/etc/bind/rndc.key";
 
 {% for localzone in bind_reverse_zones -%}
 zone "{{ localzone.name.split('.')[1] }}.{{ localzone.name.split('.')[0] }}.in-addr.arpa" {
-  type primary;
+  type {{ bind_primary_zone }};
   notify no;
   allow-query { any; };
   allow-transfer { any; };

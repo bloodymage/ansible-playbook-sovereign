@@ -18,7 +18,7 @@
         - dns-update
 
 # TODO: Configure RouterOS reversezones
-- hosts: all:!localhost:!routeros
+- hosts: all:!localhost:!routeros:!virtual_ip_addresses
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.dns_reversezones

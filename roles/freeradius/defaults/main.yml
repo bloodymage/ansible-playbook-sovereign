@@ -1,6 +1,6 @@
 ---
 # defaults file for freeradius
-packages:
+autonomy_packages:
   - freeradius
   - freeradius-utils
 

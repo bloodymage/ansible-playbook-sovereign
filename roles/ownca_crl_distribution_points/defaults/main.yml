@@ -1,4 +1,4 @@
 ---
 # defaults file for ownca_crl_distribution_point
-packages:
+autonomy_packages:
   - python3-cryptography

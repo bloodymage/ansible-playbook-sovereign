@@ -1,6 +1,6 @@
 ---
 # defaults file for spamassassin
-packages:
+autonomy_packages:
   - spamassassin
   - spamass-milter
 

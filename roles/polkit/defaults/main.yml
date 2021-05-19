@@ -1,6 +1,6 @@
 ---
 # defaults file for polkit
-packages:
+autonomy_packages:
   - libpolkit-agent-1-0
   - libpolkit-gobject-1-0
 

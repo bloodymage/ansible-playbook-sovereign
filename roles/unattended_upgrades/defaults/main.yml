@@ -1,6 +1,6 @@
 ---
 # defaults file for unattended_upgrades
-packages:
+autonomy_packages:
   - unattended-upgrades
 
 unattended_upgrades_config_dir: "/etc/apt/apt.conf.d"

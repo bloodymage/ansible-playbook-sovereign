@@ -7,7 +7,7 @@
 # ==================================================================================================
 - name: "Pre-tasks"
   block:
-    - name: Include OS-specific variables.
+    - name: "Include OS-specific variables."
       include_vars: "{{ lookup('first_found', params) }}"
       vars:
         params:
@@ -21,9 +21,9 @@
         - bind-debug
         - install-packages
 
-    - name: "Install packages"
+    - name: "Install packages."
       ansible.builtin.package:
-        name: "{{ packages }}"
+        name: "{{ autonomy_packages }}"
         state: present
       become: yes
       tags:
@@ -37,7 +37,13 @@
 # Set Variables
 #
 # ==================================================================================================
-- name: Query DNS for zone SOA
+- name: "Check bind version."
+  ansible.builtin.debug:
+    msg:
+      - "{{ ansible_facts.packages['bind9'][0]['version'] }}"
+  when: "'bind9' in ansible_facts.packages"
+
+- name: "Query DNS for zone SOA."
   ansible.builtin.set_fact:
     __zone_soa: "{{ lookup('community.general.dig', bind_zone + '/SOA') }}"
     __zone_all: "{{ lookup('community.general.dig', bind_zone, 'qtype=NS', wantlist=True) }}"
@@ -49,7 +55,7 @@
     - bind_debug
     - bind-debug
 
-- name: Query DNS for reverse zone SOA
+- name: "Query DNS for reverse zone SOA."
   ansible.builtin.set_fact:
     __reverse_zone_soa: "{{ lookup('community.general.dig', bind_reverse_zone + '/SOA') }}"
     __reverse_zone_all: "{{ lookup('community.general.dig', bind_reverse_zone, 'qtype=NS', wantlist=True) }}"

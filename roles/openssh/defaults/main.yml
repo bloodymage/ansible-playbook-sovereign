@@ -1,5 +1,5 @@
 ---
-packages:
+autonomy_packages:
   - expect
   - python3-pexpect
   - openssh-client

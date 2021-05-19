@@ -1,6 +1,6 @@
 ---
 # defaults file for opendkim
-packages:
+autonomy_packages:
   - libmail-dkim-perl
   - opendkim
   - opendkim-tools

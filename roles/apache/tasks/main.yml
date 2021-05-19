@@ -21,7 +21,7 @@
 
 - name: "Check to determine if we need krb5 support"
   ansible.builtin.set_fact:
-    packages: "{{ packages + apache_krb5_packages }}"
+    autonomy_packages: "{{ autonomy_packages + apache_krb5_packages }}"
     apache_modules: "{{ apache_modules + apache_kerberos_ad_sso_modules }}"
   become: no
   when:
@@ -37,7 +37,7 @@
 
 - name: "Install packages"
   ansible.builtin.package:
-    name: "{{ packages }}"
+    name: "{{ autonomy_packages }}"
     state: present
   become: yes
 

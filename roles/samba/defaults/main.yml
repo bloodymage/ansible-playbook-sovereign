@@ -1,4 +1,4 @@
-packages:
+autonomy_packages:
   - acl
   - attr
   - samba
@@ -57,7 +57,7 @@ samba_schema_extensions:
   #   auxiliary_class:
   #     - "ldapPublicKey"
 
-#packages:
+#autonomy_packages:
 #  - winbind
 #  - libpam-winbind
 #  - libnss-winbind

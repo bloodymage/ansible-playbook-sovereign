@@ -1,4 +1,4 @@
 ---
 # defaults file for gpgsync
-packages:
+autonomy_packages:
   - python3

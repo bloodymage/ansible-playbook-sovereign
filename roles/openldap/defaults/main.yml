@@ -1,6 +1,6 @@
 ---
 # defaults file for openldap
-packages:
+autonomy_packages:
   - slapd
   - ldap-utils
   - nslcd

@@ -1,6 +1,6 @@
 ---
 # defaults file for keycloak
-packages:
+autonomy_packages:
   - openjdk-11-jre
   - python3-openssl
 

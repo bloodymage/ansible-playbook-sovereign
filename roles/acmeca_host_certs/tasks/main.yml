@@ -25,12 +25,12 @@
 # install the packages twice on the same host.
 #
 # Variables:
-#   - packages: a list, defined in roles/acmeca_host_certs/defaults/main.yml
+#   - autonomy_packages: a list, defined in roles/acmeca_host_certs/defaults/main.yml
 #
 # ==================================================================================================
 - name: "Install packages."
   ansible.builtin.package:
-    name: "{{ packages }}"
+    name: "{{ autonomy_packages }}"
     state: present
   become: yes
   when:

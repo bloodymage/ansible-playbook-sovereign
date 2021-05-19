@@ -1,6 +1,6 @@
 ---
 # defaults file for mariadb
-packages:
+autonomy_packages:
   - mariadb-server
   - mariadb-client
   - python3-pymysql

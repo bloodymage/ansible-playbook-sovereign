@@ -1,6 +1,6 @@
 ---
 # defaults file for acmeca_host_certs
-packages:
+autonomy_packages:
   - python3-cryptography
 
 letsencrypt_dir: /etc/letsencrypt

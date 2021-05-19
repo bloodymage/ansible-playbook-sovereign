@@ -1,6 +1,6 @@
 ---
 # defaults file for dns_forwardzones
-packages:
+autonomy_packages:
   - python3-dnspython
 
 __cname_records: []

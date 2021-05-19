@@ -1,6 +1,6 @@
 ---
 # defaults file for sssd
-packages:
+autonomy_packages:
   - adcli
   - libnss-sss
   - libpam-sss

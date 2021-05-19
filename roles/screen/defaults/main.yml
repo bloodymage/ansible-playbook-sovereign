@@ -1,4 +1,4 @@
 ---
 # defaults file for screen
-packages:
+autonomy_packages:
   - screen

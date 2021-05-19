@@ -22,7 +22,7 @@ __packages_gnupg:
 __packages_redis:
   - php-redis
 
-packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __packages_redis }}"
+autonomy_packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __packages_redis }}"
 
 # Required:
 # PHP (7.2, 7.3 or 7.4)
@@ -40,7 +40,7 @@ packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __packages_
 # PHP module XMLWriter
 # PHP module zlib
 
-# Recommended packages:
+# Recommended autonomy_packages:
 # PHP module fileinfo (highly recommended, enhances file analysis performance)
 # PHP module bz2 (recommended, required for extraction of apps)
 

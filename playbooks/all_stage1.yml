@@ -141,6 +141,9 @@
     - role: bloodymage.autonomy.emacs
       tags:
         - emacs
+    - role: bloodymage.autonomy.python
+      tags:
+        - python
     # - role: bloodymage.autonomy.trash_cli
     #   tags:
     #     - trash-cli
