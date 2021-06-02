@@ -6,7 +6,7 @@
     responses:
       (?i)password: "{{ __samba_administrator_password }}"
   become: yes
-  notify: start samba-domain-member
+  notify: restart samba file server
   vars:
     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
@@ -22,11 +22,13 @@
     - recreate-realm
     - recreate-realm-debug
 
-- name: "Set SeDiskOperatorPrivilege for unixadmins so they can set ACLs"
+# TODO: Configure nsswitch
+# TODO: Add flush handlers
+- name: "Set SeDiskOperatorPrivilege for unixadmins so they can set ACLs."
   ansible.builtin.expect:
     command: >
-      net rpc rights grant '{{ autonomy_org_unit_name | upper }}\unixadmins'
-      SeDiskOperatorPrivilege -U '{{ autonomy_org_unit_name | upper }}\Administrator'
+      net rpc rights grant "{{ autonomy_org_unit_name | upper }}\unixadmins"
+      SeDiskOperatorPrivilege -U "{{ autonomy_org_unit_name | upper }}\Administrator"
     responses:
       (?i)password: "{{ __samba_administrator_password }}"
   become: yes
