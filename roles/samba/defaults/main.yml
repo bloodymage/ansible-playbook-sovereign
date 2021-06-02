@@ -14,7 +14,7 @@ autonomy_packages:
   - unison
   - rsync
 
-samba_domain_password_expiration: 90
+samba_domain_password_expiration: "{{ __samba_domain_password_expiration }}"
 samba_dns_backend: "BIND9_DLZ"
 
 samba_schema_extensions:
@@ -93,3 +93,10 @@ __dc_samba_shares:
   - name: "sysvol"
     path: "/var/lib/samba/sysvol"
     read_only: "No"
+
+# ==================================================================================================
+#
+# Samba Default Configuration Options
+#
+# ==================================================================================================
+__samba_domain_password_expiration: 90
