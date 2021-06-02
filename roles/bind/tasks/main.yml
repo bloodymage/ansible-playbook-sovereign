@@ -292,6 +292,7 @@
     owner: root
     group: root
     mode: "0644"
+    validate: "/usr/sbin/named-checkconf %s"
   become: yes
   loop:
     - named.conf
@@ -389,6 +390,7 @@
     group: "{{ bind_group }}"
     mode: "0644"
     force: no
+    validate: "/usr/sbin/named-checkzone %s"
   become: yes
   register: forwardzone_refresh
   when:
@@ -408,6 +410,7 @@
     group: "{{ bind_group }}"
     mode: "0644"
     force: no
+    validate: "/usr/sbin/named-checkzone %s"
   become: yes
   register: reversezone_refresh
   when:
@@ -419,6 +422,14 @@
     - bind-debug
     - bind-zones
 
+# ==================================================================================================
+#
+# I choose 0775 permissions, why?  Why not 0755?  I am sure I had a reason, can't remember what it
+# was.
+#
+# TODO: Document why I am using 0775
+#
+# ==================================================================================================
 - name: "Ensure Bind can write to bind directories"
   ansible.builtin.file:
     path: "{{ item }}"
