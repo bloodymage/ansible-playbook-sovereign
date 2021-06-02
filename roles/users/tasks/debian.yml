@@ -208,10 +208,10 @@
 # ...
 #
 # ==================================================================================================
-- name: "Setup Sudoers file for user"
+- name: "Setup Sudoers file for users"
   ansible.builtin.template:
     src: "user_sudoers.j2"
-    dest: "/etc/sudoers.d/{{ item.username }}"
+    dest: "/etc/sudoers.d/user_{{ item.username }}"
     owner: "root"
     group: "root"
     mode: "0440"
@@ -225,6 +225,21 @@
     - users
     - users_debug
     - users-debug
+
+# - name: "Setup Sudoers file for applications"
+#   ansible.builtin.template:
+#     src: "user_sudoers.j2"
+#     dest: "/etc/sudoers.d/application_{{ item.application }}"
+#     owner: "root"
+#     group: "root"
+#     mode: "0440"
+#     validate: /usr/sbin/visudo -csf %s
+#   loop: "{{ users_sudoers_options }}"
+#   become: yes
+#   tags:
+#     - users
+#     - users_debug
+#     - users-debug
 
 # ==================================================================================================
 #

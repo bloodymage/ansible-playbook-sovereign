@@ -122,6 +122,12 @@ user_vmail_group:
   name: vmail
   gid: "{{ user_vmail_id_number }}"
 
+users_sudoers_options:
+  - application: "screen"
+    options:
+      - entity: "Default"
+        value: "env_keep += WINDOW" 
+
 __user_groups:
   - name: ansiblemanaged
     system: yes
