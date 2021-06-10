@@ -23,7 +23,14 @@
   loop: "{{ python_alternatives }}"
   when:
     - item.name in ansible_facts.packages
-    
+
+# ==================================================================================================
+#
+# Finally, we create a list of alternatives for python.
+#
+# Check if this is really only needed if both python2 and python3 are installed.
+#
+# ==================================================================================================
 - name: "Create alternative links for python."
   community.general.alternatives:
     name: python
@@ -32,3 +39,6 @@
     priority: "{{ item.priority }}"
   loop: "{{ __python_alternatives }}"
   become: yes
+  # when:
+  #   - 'python2' in ansible_facts.packages
+  #   - 'python3' in ansible_facts.packages
