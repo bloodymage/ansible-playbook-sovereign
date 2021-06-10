@@ -14,11 +14,16 @@
       tags:
         - always
 
+# ==================================================================================================
+#
+# We intentially do not set tags for config_ownca_environment because not all task are run every
+# time.  That role has tags set at the task level.
+#
+# ==================================================================================================
 - hosts: all:!localhost:!public_zone
   roles:
     - role: bloodymage.autonomy.config_ownca_environment
-      tags:
-        - always
+      tags: []
     - role: bloodymage.autonomy.ownca_host_certs
       tags:
         - ownca_host_certs
