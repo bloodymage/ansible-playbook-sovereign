@@ -17,11 +17,18 @@
         state: present
       become: yes
 
+- name: "Create list of alternative links for python"
+  ansible.builtin.set_fact:
+    __python_alternatives: "{{ __python_alternatives }} + [{{ item }}]"
+  loop: "{{ python_alternatives }}"
+  when:
+    - item.name in ansible_facts.packages
+    
 - name: "Create alternative links for python."
   community.general.alternatives:
     name: python
     link: /usr/bin/python
     path: "/usr/bin/{{ item.name }}"
     priority: "{{ item.priority }}"
-  loop: "{{ python_alternatives }}"
+  loop: "{{ __python_alternatives }}"
   become: yes
