@@ -6,7 +6,15 @@ autonomy_packages:
   - python3-setuptools
 
 python_alternatives:
-  - name: "python2"
-    priority: "10"
-  - name: "python3"
-    priority: "20"
+  - "{{ python2_alternative }}"
+  - "{{ python3_alternative }}"
+
+python2_alternative:
+  name: "python2"
+  priority: "10"
+
+python3_alternative:
+  name: "python3"
+  priority: "20"
+
+__python_alternatives: []

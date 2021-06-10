@@ -17,11 +17,28 @@
         state: present
       become: yes
 
+- name: "Create list of alternative links for python"
+  ansible.builtin.set_fact:
+    __python_alternatives: "{{ __python_alternatives }} + [{{ item }}]"
+  loop: "{{ python_alternatives }}"
+  when:
+    - item.name in ansible_facts.packages
+
+# ==================================================================================================
+#
+# Finally, we create a list of alternatives for python.
+#
+# Check if this is really only needed if both python2 and python3 are installed.
+#
+# ==================================================================================================
 - name: "Create alternative links for python."
   community.general.alternatives:
     name: python
     link: /usr/bin/python
     path: "/usr/bin/{{ item.name }}"
     priority: "{{ item.priority }}"
-  loop: "{{ python_alternatives }}"
+  loop: "{{ __python_alternatives }}"
   become: yes
+  # when:
+  #   - 'python2' in ansible_facts.packages
+  #   - 'python3' in ansible_facts.packages

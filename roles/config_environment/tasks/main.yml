@@ -79,6 +79,14 @@
       parent: "web_servers"
     - name: "nginx_servers"
       parent: "web_servers"
+    - name: "mythfrontend"
+      parent: "mythtv"
+    - name: "mythbackend"
+      parent: "mythtv"
+    - name: "nfs_file_servers"
+      parent: "file_servers"
+    - name: "samba_file_servers"
+      parent: "file_servers"
   when:
     - inventory_hostname in groups[item.name] | default([])
 
@@ -109,6 +117,8 @@
 # ==================================================================================================
 #
 # Now we need to identify who is running ansible.
+#
+# TODO: Test if this Can be set "run_once" and "delegate_to: localhost"
 #
 # ==================================================================================================
 - name: "Identify User running ansible."

@@ -1,5 +1,12 @@
 {{ ansible_managed | comment }}
 
+{% if item.sudoers is defined %}
 {% for path in item.sudoers -%}
   {{ item.username }} ALL=(ALL:ALL) NOPASSWD: {{ path }}
 {% endfor %}
+{% else %}
+{% for option in item.options -%}
+  {{ option.entity }} {{ option.value }}
+{% endfor %}
+{% endif %}
+

@@ -8,9 +8,13 @@
 - hosts: workstations
   roles:
     - role: bloodymage.autonomy.cups
+      tags:
+        - cups
     - role: bloodymage.autonomy.opensc
       when:
         - autonomy_smart_card_login
+      tags:
+        - opensc
     - role: bloodymage.autonomy.libnss3_tools
       tags:
         - nssdb

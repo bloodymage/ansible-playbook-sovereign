@@ -52,7 +52,7 @@
   roles:
     - role: bloodymage.autonomy.php
 
-- hosts: nextcloud_severs:&public_zone
+- hosts: nextcloud_servers:&public_zone
   roles:
     - role: bloodymage.autonomy.nextcloud
       tags:
