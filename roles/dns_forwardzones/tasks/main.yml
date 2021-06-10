@@ -136,7 +136,7 @@
       alt_name: "dc"
     - name: "web_servers"
       alt_name: "www"
-    - name: "zwavecontroller"
+    - name: "zwavecontrollers"
       alt_name: "zwave"
   vars:
     __group_id: "{{ autonomy_zone_name }}_{{ item.name }}"

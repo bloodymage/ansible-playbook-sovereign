@@ -111,6 +111,7 @@
     - redis_servers
     - samba_domain_controllers
     - web_servers
+    - zwavecontrollers
   when:
     - inventory_hostname in groups[item] | default([])
 
