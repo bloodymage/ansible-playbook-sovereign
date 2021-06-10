@@ -79,7 +79,7 @@ nextcloud_password_legnth: "{{ autonomy_password_length }}"
 nextcloud_post_max_size: "512M"
 nextcloud_upload_max_filesize: "512M"
 nextcloud_memory_limit: "512M"
-nextcloud_hsts_max_age: 15552000
+nextcloud_hosts_max_age: 15552000
 
 nextcloud_data_directory: "/srv/www-data"
 
