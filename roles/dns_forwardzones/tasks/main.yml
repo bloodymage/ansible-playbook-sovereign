@@ -136,6 +136,8 @@
       alt_name: "dc"
     - name: "web_servers"
       alt_name: "www"
+    - name: "zwavecontroller"
+      alt_name: "zwave"
   vars:
     __group_id: "{{ autonomy_zone_name }}_{{ item.name }}"
     __host_index: "{{ groups[__group_id].index(inventory_hostname) + 1 }}"
