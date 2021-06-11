@@ -9,7 +9,7 @@
   roles:
     - role: bloodymage.autonomy.redis
       tags:
-        redis
+        - redis
 
 # ==================================================================================================
 #
@@ -48,9 +48,14 @@
         - ownca_crl_distribution_points
         - websites
 
-- hosts: nextcloud_servers:mediawiki_servers
+- hosts: nextcloud_servers:mediawiki_servers:drupal_servers
   roles:
     - role: bloodymage.autonomy.php
+      tags:
+        - php
+    - role: bloodymage.autonomy.composer
+      tags:
+        - composer
 
 - hosts: nextcloud_servers:&public_zone
   roles:
@@ -65,5 +70,13 @@
       tags:
         - mediawiki
         - websites
-    # - role: bloodymage.autonomy.drush
+
+- hosts: drupal_servers
+  roles:
+    - role: bloodymage.autonomy.drush
+      tags:
+        - drush
     # - role: bloodymage.autonomy.drupal
+    #   tags:
+    #     - drupal
+    #     - websites

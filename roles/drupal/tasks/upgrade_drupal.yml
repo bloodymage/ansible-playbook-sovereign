@@ -1,0 +1,51 @@
+---
+- name: "Upgrade Drupal via Composer."
+  community.general.composer:
+    command: upgrade
+    arguments: 'drupal/core "drupal/core-*" /srv/www/{{ item.name }} --with-all-dependencies'
+    working_dir: "/srv/www/{{ item.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ virtual_hosts }}"
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "drupal"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - drupal
+
+- name: "Update Drupal's database."
+  ansible.builtin.command:
+    cmd: >
+      drush updatedb
+    chdir: "/srv/www/{{ item.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ virtual_hosts }}"
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "drupal"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - drupal
+
+- name: "Rebuild Drupal's cache."
+  ansible.builtin.command:
+    cmd: >
+      drush cache:rebuild
+    chdir: "/srv/www/{{ item.name }}"
+  become: yes
+  become_user: www-data
+  loop: "{{ virtual_hosts }}"
+  when:
+    - virtual_hosts is defined
+    - item.content is defined
+    - item.content == "drupal"
+    - item.enabled is defined
+    - item.enabled 
+  tags:
+    - drupal
