@@ -28,14 +28,14 @@
   tags:
     - dns
 
-- hosts: all:!localhost:!public_zone:!virtual_ip_address
+- hosts: all:!localhost:!public_zone:!virtual_hosts
   roles:
     - role: bloodymage.autonomy.system_upgrade
   tags:
     - system-upgrade
     - system_upgrade
 
-- hosts: all:!localhost:!public_zone:!routeros:!virtual_ip_address
+- hosts: all:!localhost:!public_zone:!routeros:!virtual_hosts
   roles:
     - role: bloodymage.autonomy.dotfiles
   tags:
