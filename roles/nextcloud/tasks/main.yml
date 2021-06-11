@@ -17,9 +17,6 @@
         - "vars"
   become: no
   tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
     - install-packages
 
 - name: "Install packages"
@@ -27,17 +24,6 @@
     name: "{{ autonomy_packages }}"
     state: present
   become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
     - install-packages
 
 # ==================================================================================================
@@ -48,42 +34,18 @@
 - name: Install Apache site.conf
   ansible.builtin.template:
     src: "apache-site.conf.j2"
-    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    dest: "/etc/apache2/sites-available/{{ inventory_hostname }}.conf"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ virtual_hosts }}"
   become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
   notify: reload apache
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: Check If this is a new install
   ansible.builtin.stat:
     path: "/srv/www/{{ item.name }}/config/config.php"
-  loop: "{{ virtual_hosts }}"
   register: install_status
   become: no
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: "Ensure we have a password for the nextcloud admin user"
   ansible.builtin.set_fact:
@@ -97,13 +59,7 @@
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   when:
-    - virtual_hosts is defined
     - nextcloud_admin_password == "password"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: "Complete fresh install"
   include: nextcloud_install.yml
@@ -117,32 +73,6 @@
     - item.installed is defined
     - install_status.results.item.exists is defined
     - install_status.results.item.exists is false
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
-
-- name: Update php.ini
-  ansible.builtin.template:
-    src: "php.ini.j2"
-    dest: "/etc/php/7.3/apache2/php.ini"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  notify: restart apache
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: "Ensure we have a password for the nextcloud ldap lookup user."
   ansible.builtin.set_fact:
