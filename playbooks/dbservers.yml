@@ -14,6 +14,6 @@
   roles:
     - role: bloodymage.autonomy.mariadb
 
-- hosts: mysql_compatable_servers
+- hosts: mysql_compatible_servers
   roles:
     - role: bloodymage.autonomy.mysql_databases

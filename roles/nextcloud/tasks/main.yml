@@ -90,7 +90,7 @@
     group: www-data
     mode: "0644"
   become: yes
-  
+
 - name: "Install Nextcloud apps."
   include: nextcloud_apps.yml
 
