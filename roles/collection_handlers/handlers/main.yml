@@ -58,24 +58,6 @@
 #   when:
 #     - inventory_hostname in groups['postfix_servers'] | default([])
 
-# ==================================================================================================
-#
-# I really want to have this reboot the system is necessary.  I haven't convinced myself to actually
-# try it yet.
-#
-# TODO: Change become from 'no' to 'yes' when I change this from debug to reboot modules.
-#
-# ==================================================================================================
-- name: "Reboot Hosts if /var/run/reboot-required exists"
-  #ansible.builtin.reboot:
-  ansible.builtin.debug:
-    msg: "Rebooting {{ inventory_hostname }} (Pretend)"
-  when:
-    - reboot_required_file.stat.exists
-  become: no
-  listen:
-    - "reboot"
-
 - name: "Force systemd to reread configs"
   ansible.builtin.systemd:
     scope: system
@@ -380,3 +362,32 @@
     - "enable keycloak"
   when:
     - inventory_hostname in groups['keycloak_servers'] | default([])
+
+# ==================================================================================================
+#
+# Reboot, shutdown handlers.
+#
+# We want to be very careful with these handlers.  Because handlers run in the order they are found
+# within this file, we want these at the very end.
+#
+# Further checks to be absolutely certain we wish to do this need to be added.
+#
+# ==================================================================================================
+# ==================================================================================================
+#
+# I really want to have this reboot the system is necessary.  I haven't convinced myself to actually
+# try it yet.
+#
+# TODO: Change become from 'no' to 'yes' when I change this from debug to reboot modules.
+#
+# ==================================================================================================
+- name: "Reboot Hosts if /var/run/reboot-required exists"
+  #ansible.builtin.reboot:
+  ansible.builtin.debug:
+    msg: "Rebooting {{ inventory_hostname }} (Pretend)"
+  when:
+    - reboot_required_file.stat.exists
+  become: no
+  listen:
+    - "reboot"
+
