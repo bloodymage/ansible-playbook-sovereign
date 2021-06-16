@@ -80,6 +80,7 @@ bind_rpz_zones: []
 bind_zones_dir: /etc/bind/zones
 
 bind_dnssec_validation: "no"
+bind_dnssec_secret: "secret"
 
 # SOA information
 bind_zone_time_to_refresh: "1D"

@@ -167,7 +167,7 @@
     - bind_debug
     - bind-debug
 
-- name: Set new Serial Number
+- name: "Set new Forward Zone Serial Number."
   ansible.builtin.set_fact:
     bind_zone_serial_number: "{{ __zone_current_serial_number | int + 1 }}"
   become: no
@@ -179,7 +179,7 @@
     - bind_debug
     - bind-debug
 
-- name: Set new Serial Number
+- name: "Set new Reverse Zone Serial Number."
   ansible.builtin.set_fact:
     bind_reverse_zone_serial_number: "{{ __reverse_zone_current_serial_number | int + 1 }}"
   become: no
