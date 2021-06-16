@@ -62,10 +62,15 @@
   when:
     - nextcloud_admin_password == "password"
 
-- name: "Complete fresh install."
+- name: "Install Nextcloud."
   include: nextcloud_install.yml
   when:
     - not install_status.stat.exists
+
+- name: "Upgrade Nextcloud."
+  include: "nextcloud_upgrade.yml"
+  when:
+    - install_status.stat.exists
 
 - name: "Ensure we have a password for the nextcloud ldap lookup user."
   ansible.builtin.set_fact:
