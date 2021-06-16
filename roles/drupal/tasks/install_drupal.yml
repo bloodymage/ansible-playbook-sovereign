@@ -2,17 +2,15 @@
 - name: "Install Drupal via Composer."
   community.general.composer:
     command: create-project
-    arguments: "drupal/recommended-project /srv/www/{{ item.name }}"
+    arguments: "drupal/recommended-project /srv/www/{{ __installed.item.name }}"
     working_dir: "/srv/www/{{ item.name }}"
   become: yes
   become_user: www-data
-  loop: "{{ virtual_hosts }}"
   when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "drupal"
-    - item.enabled is defined
-    - item.enabled 
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
   tags:
     - drupal
 
@@ -20,24 +18,22 @@
   ansible.builtin.command:
     cmd: >
       drush site:install
-      --db-url=mysql://{{ item.db_user}}:{{ item.db_password }}@{{ item.db_host }}:{{ mysql_port }}/{{ item.db_name }}
+      --db-url=mysql://{{ __installed.item.db_user}}:{{ __installed.item.db_password }}@{{ __installed.item.db_host }}:{{ mysql_port }}/{{ __installed.item.db_name }}
        --db-su={{ mysql_administrator_user }}
        --db-su-pw={{ mysql_administrator_password }}
-      --account-name : {{ item.administrator_account }}
-      --account-mail : {{ item.administrator_email }}
-      --account-pass : {{ item.administrator_password }}
-      --site-name : {{ item.site_name }}
-      --site-mail : {{ item.site_mail }}
-      --site-pass : {{ item.site_password }}
-    chdir: "/srv/www/{{ item.name }}"
+      --account-name : {{ __installed.item.administrator_account }}
+      --account-mail : {{ __installed.item.administrator_email }}
+      --account-pass : {{ __installed.item.administrator_password }}
+      --site-name : {{ __installed.item.site_name }}
+      --site-mail : {{ __installed.item.site_mail }}
+      --site-pass : {{ __installed.item.site_password }}
+    chdir: "/srv/www/{{ __installed.item.name }}"
   become: yes
   become_user: www-data
-  loop: "{{ virtual_hosts }}"
   when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "drupal"
-    - item.enabled is defined
-    - item.enabled 
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
   tags:
     - drupal

@@ -78,7 +78,7 @@
     - role: bloodymage.autonomy.drush
       tags:
         - drush
-    # - role: bloodymage.autonomy.drupal
-    #   tags:
-    #     - drupal
-    #     - websites
+    - role: bloodymage.autonomy.drupal
+      tags:
+        - drupal
+        - websites

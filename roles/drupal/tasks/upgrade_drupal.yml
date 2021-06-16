@@ -2,17 +2,15 @@
 - name: "Upgrade Drupal via Composer."
   community.general.composer:
     command: upgrade
-    arguments: 'drupal/core "drupal/core-*" /srv/www/{{ item.name }} --with-all-dependencies'
-    working_dir: "/srv/www/{{ item.name }}"
+    arguments: 'drupal/core "drupal/core-*" /srv/www/{{ __installed.item.name }} --with-all-dependencies'
+    working_dir: "/srv/www/{{ __installed.item.name }}"
   become: yes
   become_user: www-data
-  loop: "{{ virtual_hosts }}"
   when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "drupal"
-    - item.enabled is defined
-    - item.enabled 
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
   tags:
     - drupal
 
@@ -20,16 +18,14 @@
   ansible.builtin.command:
     cmd: >
       drush updatedb
-    chdir: "/srv/www/{{ item.name }}"
+    chdir: "/srv/www/{{ __installed.item.name }}"
   become: yes
   become_user: www-data
-  loop: "{{ virtual_hosts }}"
   when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "drupal"
-    - item.enabled is defined
-    - item.enabled 
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
   tags:
     - drupal
 
@@ -37,15 +33,13 @@
   ansible.builtin.command:
     cmd: >
       drush cache:rebuild
-    chdir: "/srv/www/{{ item.name }}"
+    chdir: "/srv/www/{{ __installed.item.name }}"
   become: yes
   become_user: www-data
-  loop: "{{ virtual_hosts }}"
   when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "drupal"
-    - item.enabled is defined
-    - item.enabled 
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
   tags:
     - drupal

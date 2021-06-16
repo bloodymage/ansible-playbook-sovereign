@@ -52,7 +52,7 @@
   loop_control:
     loop_var: __installed
   when:
-    - item.stat is not defined
+    - (__installed.stat.exists is not defined) or (not __installed.stat.exists)
 
 - name: "Upgrade Drupal"
   include: upgrade_drupal.yml
@@ -60,8 +60,8 @@
   loop_control:
     loop_var: __installed
   when:
-    - item.stat.exists is defined
-    - item.stat.exists
+    - __installed.stat.exists is defined
+    - __installed.stat.exists
 
 - name: "Update Apache Sites-Available .conf."
   ansible.builtin.template:
