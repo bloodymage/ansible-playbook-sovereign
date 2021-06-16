@@ -14,6 +14,13 @@
   tags:
     - drupal
 
+# ==================================================================================================
+#
+# NOTE:
+#  If drupal's database is up to date (no changes are necessary), this needs the 'command' module.
+#  If drupal's databese needs changes, this needs to be the 'expect' module.
+#
+# ==================================================================================================
 - name: "Update Drupal's database."
   ansible.builtin.command:
     cmd: >
