@@ -67,85 +67,7 @@
     - bind_debug
     - bind-debug
 
-- name: Print Zone SOA
-  ansible.builtin.debug:
-    msg:
-      - "Serial Number: {{ __zone_soa.split(' ')[2] | default(none) }}"
-    verbosity: 1
-  become: no
-  when:
-    - __zone_soa is defined
-  tags:
-    - never
-    - bind_debug
-    - bind-debug
-
-- name: Print Reverse Zone SOA
-  ansible.builtin.debug:
-    msg:
-      - "Serial Number: {{ __reverse_zone_soa.split(' ')[2] | default (none) }}"
-    verbosity: 1
-  become: no
-  when:
-    - __reverse_zone_soa is defined
-  tags:
-    - never
-    - bind_debug
-    - bind-debug
-
-- name: "Print Zone SOA"
-  ansible.builtin.debug:
-    msg:
-      - "{{ __zone_soa }}"
-    verbosity: 2
-  become: no
-  when:
-    - __zone_soa is defined
-  tags:
-    - never
-    - bind_debug
-    - bind-debug
-
-- name: "Print Reverse Zone SOA"
-  ansible.builtin.debug:
-    msg:
-      - "{{ __reverse_zone_soa }}"
-    verbosity: 2
-  become: no
-  when:
-    - __zone_soa is defined
-  tags:
-    - never
-    - bind_debug
-    - bind-debug
-
-- name: "Print Zone SOA"
-  ansible.builtin.debug:
-    msg:
-      - "{{ __zone_all }}"
-    verbosity: 4
-  become: no
-  when:
-    - __zone_soa is defined
-  tags:
-    - never
-    - bind_debug
-    - bind-debug
-
-- name: "Print Reverse Zone ALL"
-  ansible.builtin.debug:
-    msg:
-      - "{{ __reverse_zone_all }}"
-    verbosity: 4
-  become: no
-  when:
-    - __zone_soa is defined
-  tags:
-    - never
-    - bind_debug
-    - bind-debug
-
-- name: "Get Zone's Current Serial Number"
+- name: "Get Forward Zone's Current Serial Number."
   ansible.builtin.set_fact:
     __zone_current_serial_number: "{{ __zone_soa.split(' ')[2] }}"
   become: no
@@ -156,7 +78,7 @@
     - bind_debug
     - bind-debug
 
-- name: "Get Reverse Zone's Current Serial Number"
+- name: "Get Reverse Zone's Current Serial Number."
   ansible.builtin.set_fact:
     __reverse_zone_current_serial_number: "{{ __reverse_zone_soa.split(' ')[2] | default(bind_reverse_zone_serial_number) }}"
   become: no
@@ -191,7 +113,7 @@
     - bind_debug
     - bind-debug
 
-- name: Check new serial number
+- name: "Check new serial number."
   ansible.builtin.debug:
     msg:
       - "Current Serial Number: {{ __zone_current_serial_number }}"
@@ -285,7 +207,7 @@
 # Install Configuration files
 #
 # ==================================================================================================
-- name: "Install Bind Config Files"
+- name: "Install Bind Config Files."
   ansible.builtin.template:
     src: "{{ role_path }}/templates/{{ item }}.j2"
     dest: "{{ bind_conf_dir }}/{{ item }}"
@@ -314,9 +236,9 @@
 #
 #
 # ==================================================================================================
-- name: "Install Dynamic DNS Keys"
+- name: "Install Dynamic DNS Keys."
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/ddns_key.j2"
+    src: "ddns_key.j2"
     dest: "{{ bind_conf_dir }}/{{ item }}.key"
     owner: root
     group: root
@@ -338,7 +260,7 @@
 #
 #
 # ==================================================================================================
-- name: Ensure Zone Directory Exists
+- name: "Ensure Zone Directory Exists."
   ansible.builtin.file:
     dest: "{{ bind_zone_dir }}"
     state: directory
@@ -359,9 +281,9 @@
 # Install Zone Files
 #
 # ==================================================================================================
-- name: Download Root Zone file
+- name: "Download Root Zone file."
   ansible.builtin.get_url:
-    url: http://www.internic.net/domain/root.zone
+    url: "http://www.internic.net/domain/root.zone"
     dest: "{{ bind_cache_dir }}/db.root"
     owner: bind
     group: bind
