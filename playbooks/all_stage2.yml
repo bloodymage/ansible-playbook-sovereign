@@ -12,7 +12,7 @@
   roles:
     - role: bloodymage.autonomy.config_environment
       when:
-        - (not __autonomy_configuration_complete) OR (__autonomy_configuration_complete is undefined)
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
 
