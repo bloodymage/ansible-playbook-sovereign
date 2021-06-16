@@ -104,6 +104,11 @@
   become: no
   delegate_to: localhost
 
+# ==================================================================================================
+#
+# TODO: Need to identify if the chain has actually changed before writing the new chain file.
+#
+# ==================================================================================================
 - name: "Write complete chain to disk."
   ansible.builtin.copy:
     dest: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
