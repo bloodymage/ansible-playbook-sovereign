@@ -14,7 +14,7 @@
     - role: bloodymage.autonomy.ownca
       tags:
         - ownca
-    - role: bloodymage.autonomy.\ownca_crl
+    - role: bloodymage.autonomy.ownca_crl
       tags:
         - ownca_crl
         - ownca-crl
