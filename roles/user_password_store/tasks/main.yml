@@ -22,7 +22,7 @@
 - name: "Initiallize user password store."
   ansible.builtin.command:
     cmd: "pass init {{ item.stdout_lines[0] }}"
-    creates: "/home/{{ item.item.username }}/.password-store/.gpg-id"
+    creates: "{{ user_password_store_user_home }}/{{ item.item.username }}/.password-store/.gpg-id"
   loop: "{{ user_gpg_keys.results }}"
   become: yes
   become_user: "{{ item.item.username }}"
