@@ -1,9 +1,11 @@
-- name: "Prepare playbook environment"
+- name: "Prepare playbook environment."
   hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
-  tags:
-    - always
+      when:
+        - (not __autonomy_configuration_complete) OR (__autonomy_configuration_complete is undefined)
+      tags:
+        - always
 
 - hosts: workstations
   roles:

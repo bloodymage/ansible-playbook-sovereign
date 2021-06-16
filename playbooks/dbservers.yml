@@ -7,13 +7,20 @@
 - hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
-  tags:
-    - always
+      when:
+        - (not __autonomy_configuration_complete) OR (__autonomy_configuration_complete is undefined)
+      tags:
+        - always
 
 - hosts: mariadb_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.mariadb
+      tags:
+        - mariadb
 
 - hosts: mysql_compatible_servers
   roles:
     - role: bloodymage.autonomy.mysql_databases
+      tags:
+        - mysql-databases
+        - mysql_databases
