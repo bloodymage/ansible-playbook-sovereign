@@ -58,9 +58,29 @@
 #   when:
 #     - inventory_hostname in groups['postfix_servers'] | default([])
 
+# ==================================================================================================
+#
+# I really want to have this reboot the system is necessary.  I haven't convinced myself to actually
+# try it yet.
+#
+# TODO: Change become from 'no' to 'yes' when I change this from debug to reboot modules.
+#
+# ==================================================================================================
+- name: "Reboot Hosts if /var/run/reboot-required exists"
+  #ansible.builtin.reboot:
+  ansible.builtin.debug:
+    msg: "Rebooting {{ inventory_hostname }} (Pretend)"
+  when:
+    - reboot_required_file.stat.exists
+  become: no
+  listen:
+    - "reboot"
+
 - name: "Force systemd to reread configs"
   ansible.builtin.systemd:
+    scope: system
     daemon_reload: yes
+  become: yes
   listen:
     - "daemon reload"
 
