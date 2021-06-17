@@ -4,7 +4,7 @@
 # Set Group membership
 #
 # ==================================================================================================
-- name: "Get Group Membership for {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+- name: "Get Group Membership for {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}."
   ansible.builtin.command:
     cmd: >
       samba-tool group listmembers "{{ group.groupname }}"
@@ -15,7 +15,7 @@
   when:
     - group.groupname is defined
 
-- name: "Add new members to {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+- name: "Add new members to {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}."
   ansible.builtin.command:
     cmd: >
       samba-tool group addmembers "{{ group.groupname }}" "{{ item }}"
@@ -28,14 +28,14 @@
   when:
     - item not in existing_group_list.stdout_lines
 
-- name: "Identify members no longer part of {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+- name: "Identify members no longer part of {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}."
   ansible.builtin.set_fact:
     removed_members: "{{ existing_group_list.stdout_lines | difference(group.group_members) }}"
   delegate_to: "{{ __samba_schema_master }}"
   become: no
   run_once: yes
 
-- name: "List members no longer part of {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+- name: "List members no longer part of {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}."
   ansible.builtin.debug:
     msg:
       - "{{ item }}"
@@ -48,7 +48,7 @@
     - never
     - debug
 
-- name: "Remove members from group {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}"
+- name: "Remove members from group {{ group.groupname }}.  Group {{ group_index }} of {{ domain_groups | length }}."
   ansible.builtin.command:
     cmd: >
       samba-tool group removemembers "{{ group.groupname }}" "{{ item }}"
