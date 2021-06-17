@@ -1,7 +1,7 @@
 ---
 - name: "Upgrade nextcloud."
   ansible.builtin.command:
-    cmd: "php /var/www/nextcloud/updater/updater.phar --no-interaction"
+    cmd: "php updater/updater.phar --no-interaction"
     chdir: "/srv/www/{{ inventory_hostname }}"
   become: yes
   become_user: www-data
