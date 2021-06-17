@@ -432,6 +432,13 @@ domain_user_nextcloud:
       host: "{{ dmz_www_host }}"
   account_expire: "--noexpiry"
 
+# domain_user_nfs:
+#   username: ""
+#   spns:
+#     - spn: "nfs"
+#       host: "{{ internal_file_server }}"
+#   account_expire: "--noexpiry"
+
 # ==================================================================================================
 #
 # Do not modify

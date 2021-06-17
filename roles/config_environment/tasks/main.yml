@@ -55,8 +55,6 @@
   loop:
     - name: "mariadb_servers"
       parent: "mysql_compatible_servers"
-    - name: "mysql_compatible_servers"
-      parent: "db_servers"
     - name: "postgresql_servers"
       parent: "db_servers"
     - name: "bind9_servers"
@@ -69,10 +67,6 @@
       parent: "imap_servers"
     - name: "postfix_servers"
       parent: "smtp_servers"
-    - name: "smtp_servers"
-      parent: "mail_servers"
-    - name: "imap_servers"
-      parent: "mail_servers"
     - name: "minidlna_servers"
       parent: "dlna_servers"
     - name: "apache_servers"
@@ -87,6 +81,19 @@
       parent: "file_servers"
     - name: "samba_file_servers"
       parent: "file_servers"
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+
+- name: "Create parent groups based on host's role."
+  group_by:
+    key: "{{ item.parent }}"
+  loop:
+    - name: "mysql_compatible_servers"
+      parent: "db_servers"
+    - name: "smtp_servers"
+      parent: "mail_servers"
+    - name: "imap_servers"
+      parent: "mail_servers"
   when:
     - inventory_hostname in groups[item.name] | default([])
 
@@ -152,4 +159,3 @@
 - name: "Set environment configuration complete flag."
   ansible.builtin.set_fact:
     __autonomy_configuration_complete: yes
-
