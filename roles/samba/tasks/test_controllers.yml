@@ -9,7 +9,7 @@
 # the results were what we expected
 #
 # ==================================================================================================
-- name: "(Tests) Verify Sysvol Replication"
+- name: "(Tests) Verify Sysvol Replication."
   ansible.builtin.command:
     cmd: "samba-tool drs showrepl"
   become: yes
@@ -17,7 +17,7 @@
     - autonomy_fqdn != __samba_schema_master
   notify: restart bind
 
-- name: "(Tests) List all shares provided by the Domain Controller"
+- name: "(Tests) List all shares provided by the Domain Controller."
   ansible.builtin.command:
     cmd: "smbclient -L localhost -U%"
   register: shares
@@ -36,19 +36,19 @@
 #    var: success
 #    verbosity: 2
 
-- name: "(Tests) The A record of the domain controller"
+- name: "(Tests) The A record of the domain controller."
   ansible.builtin.command:
     cmd: "host -t A {{ ansible_fqdn }}."
   register: success
   become: yes
 
-- name: "(Tests) udp-based _kerberos SRV resource record in the domain"
+- name: "(Tests) udp-based _kerberos SRV resource record in the domain."
   ansible.builtin.command:
     cmd: "host -t SRV _kerberos._udp.{{ autonomy_domain }}."
   register: success
   become: yes
 
-- name: "(Tests) KDC get tickets"
+- name: "(Tests) KDC get tickets."
   expect:
     command: kinit administrator
     responses:
@@ -58,19 +58,10 @@
   when:
     - autonomy_fqdn != __samba_schema_master
 
-- name: "(Tests) KDC list tickets"
+- name: "(Tests) KDC list tickets."
   ansible.builtin.command:
     cmd: "klist"
   register: success
-  become: no
-  when:
-    - autonomy_fqdn != __samba_schema_master
-
-- name: Print Success
-  ansible.builtin.debug:
-    msg:
-      - "{{ success }}"
-    verbosity: 1
   become: no
   when:
     - autonomy_fqdn != __samba_schema_master
