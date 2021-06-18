@@ -337,11 +337,13 @@
 # Start Handlers
 #
 # ==================================================================================================
-- name: "start sssd"
+- name: "Start SSSD."
   ansible.builtin.service:
     name: sssd
     state: started
   become: yes
+  listen:
+    - "start sssd"
   when:
     - inventory_hostname in groups['sssd'] | default([])
 
