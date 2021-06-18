@@ -58,7 +58,7 @@
 #   when:
 #     - inventory_hostname in groups['postfix_servers'] | default([])
 
-- name: "Force systemd to reread configs"
+- name: "Force systemd to reread configs."
   ansible.builtin.systemd:
     scope: system
     daemon_reload: yes

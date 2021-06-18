@@ -9,6 +9,8 @@ autonomy_packages:
   - xscreensaver-screensaver-webcollage
   - rss-glx
 
+xscreensaver_service_sleep_time: "15"
+
 xscreensaver_mode: "random"
 xscreensaver_timeout: "0:10:00"
 xscreensaver_cycle: "0:10:00"
