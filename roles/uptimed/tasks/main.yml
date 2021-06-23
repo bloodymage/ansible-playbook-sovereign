@@ -25,4 +25,6 @@
     group: root
     mode: "0644"
   become: yes
+  notify:
+    - restart uptimed
 

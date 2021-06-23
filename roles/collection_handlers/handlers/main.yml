@@ -286,6 +286,15 @@
   when:
     - inventory_hostname in groups['mail_servers'] | default([])
 
+- name: "Restart UptimeD"
+  ansible.builtin.service:
+    name: uptimed
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+    - "restart uptimed"
+
 # ==================================================================================================
 #
 # Reload Handlers
