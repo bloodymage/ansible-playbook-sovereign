@@ -6,7 +6,8 @@ autonomy_packages:
 # Email address to mail milestones/records to.
 # Assumes sendmail compatible MTA installed as /usr/lib/sendmail.
 # You can enable this below or with the -e option on the commandline.
-uptimed_email_address: "{{ __uptimed_email_address }}"
+uptimed_email_address: "{{ autonomy_sysadmin_email_address }}"
+
 # Send email? (0 = no way, 1 = yes please!, 2 = only for milestones, 3 = only for records)
 uptimed_send_email: "{{ __uptimed_send_email }}"
 
