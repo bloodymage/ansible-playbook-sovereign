@@ -16,3 +16,13 @@
         name: "{{ autonomy_packages }}"
         state: present
       become: yes
+
+- name: "Install uptimed configuration file."
+  ansible.builtin.template:
+    src: "uptimed.conf.j2"
+    dest: "/etc/uptimed.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+
