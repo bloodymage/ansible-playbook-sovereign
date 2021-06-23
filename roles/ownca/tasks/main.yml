@@ -155,9 +155,9 @@
 # ==================================================================================================
 - name: "Generate CA Private Key."
   community.crypto.openssl_privatekey:
-    path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ item.private_key_path | default(__private_key_path) }}"
     passphrase: "{{ item.password }}"
-    type: "{{ ownca_privatekey_type }}"
+    type: "{{ item.key_type | default(ownca_privatekey_type) }}"
     cipher: "auto"
     owner: "{{ __autonomy_user }}"
     group: "{{ __autonomy_user }}"
@@ -165,6 +165,8 @@
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   become: no
+  vars:
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
   when:
     - inventory_hostname == "localhost"
   tags:
@@ -176,7 +178,7 @@
 - name: "Generate Certificate Authority Certificate Signing Requests (CSR)."
   community.crypto.openssl_csr:
     path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
-    privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
     privatekey_passphrase: "{{ item.password }}"
     common_name: "{{ item.common_name }}"
     country_name: "{{ autonomy_country_name | default(country) }}"
@@ -207,6 +209,8 @@
   delegate_to: localhost
   run_once: yes
   become: no
+  vars:
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
   when:
     - inventory_hostname == "localhost"
   tags:
@@ -251,7 +255,7 @@
     - ownca_debug
     - ownca-debug
 
-- name: "If self signed certificate was regenerated; force regeneration of the remaining certificates"
+- name: "If self signed certificate was regenerated; force regeneration of the remaining certificates."
   set_fact:
     __ownca_force_regeneration: yes
   become: no
