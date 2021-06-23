@@ -6,8 +6,7 @@
       tags:
         - always
     - role: bloodymage.autonomy.config_ownca_environment
-      tags:
-        - always
+      tags: []
     - role: bloodymage.autonomy.sshca
       tags:
         - sshca

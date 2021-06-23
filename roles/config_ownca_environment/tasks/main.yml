@@ -1,13 +1,14 @@
+
 ---
 # tasks file for config_ownca_environment
-- name: "Set ownca recreation variable to 'no'"
-  ansible.builtin.set_fact:
-    __ownca_regenerate: no
-  become: no
-  tags:
-    - always
+# - name: "Set ownca recreation variable to 'no'."
+#   ansible.builtin.set_fact:
+#     __ownca_regenerate: no
+#   become: no
+#   tags:
+#     - always
 
-- name: "Check if we are regenerating all ownca certs"
+- name: "Check if we are regenerating all ownca certs."
   ansible.builtin.set_fact:
     __ownca_regenerate: yes
   become: no

@@ -5,7 +5,7 @@
 #
 #
 # ==================================================================================================
-- name: Include OS-specific variables.
+- name: "Include OS-specific variables."
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
@@ -22,7 +22,7 @@
     - ownca-all
     - install-packages
 
-- name: "Install packages"
+- name: "Install packages."
   ansible.builtin.package:
     pkg: "{{ autonomy_packages }}"
     state: present
@@ -37,7 +37,7 @@
     - ownca-all
     - install-packages
 
-- name: "Get IP geolocation data"
+- name: "Get IP geolocation data."
   community.general.ipinfoio_facts:
   tags:
     - ownca
@@ -74,35 +74,7 @@
     - ownca_debug
     - ownca-debug
 
-# ==================================================================================================
-#
-# Create Database
-#
-# ==================================================================================================
-# - name: Create an index file
-#   file:
-#     path: '{{ ownca_ca_directory }}/index.txt'
-#     owner: root
-#     group: root
-#     mode: '0600'
-#   delegate_to: localhost
-#   run_once: true
-
-- name: Print Variable
-  ansible.builtin.debug:
-    msg:
-      - "{{ ownca_certificate_authorities }}"
-      - "{{ autonomy_org_unit_name }}"
-    verbosity: 2
-  delegate_to: localhost
-  become: no
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-    - ownca-all
-
-- name: Create crl serial file
+- name: "Create crl serial file."
   ansible.builtin.template:
     src: "{{ role_path }}/templates/serial.j2"
     dest: "{{ ownca_ca_directory }}/db/{{ autonomy_org_name }}-{{ item.name }}-ca.crl.srl"
@@ -124,7 +96,7 @@
 # Generate Passwords if they don't exist
 #
 # ==================================================================================================
-- name: "Ensure we have a password for the Root Certificate Authority"
+- name: "Ensure we have a password for the Root Certificate Authority."
   ansible.builtin.set_fact:
     ownca_root_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
@@ -144,7 +116,15 @@
     - ownca_debug
     - ownca-debug
 
-- name: "Ensure we have a password for the Intermediate and Issuing Certificate Authorities"
+# ==================================================================================================
+#
+# TODO: This generates a warning because of {{ }} inside a when clause.
+#
+# Technically, {{ }} should not exist within a when.  Since only part of the the name that is a
+# variable, I am not really sure how to fix this.
+#
+# ==================================================================================================
+- name: "Ensure we have a password for the Intermediate and Issuing Certificate Authorities."
   ansible.builtin.set_fact:
     ownca_{{ item }}_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
@@ -173,7 +153,7 @@
 # Task: Generate CA Private Key
 #
 # ==================================================================================================
-- name: Generate CA Private Key
+- name: "Generate CA Private Key."
   community.crypto.openssl_privatekey:
     path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
     passphrase: "{{ item.password }}"
@@ -193,7 +173,7 @@
     - ownca-debug
     - ownca-all
 
-- name: Generate Certificate Authority Certificate Signing Requests (CSR)
+- name: "Generate Certificate Authority Certificate Signing Requests (CSR)."
   community.crypto.openssl_csr:
     path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
     privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
@@ -235,7 +215,7 @@
     - ownca-debug
     - ownca-all
 
-- name: Generate Selfsigned Certificate
+- name: "Generate Selfsigned Certificate."
   community.crypto.x509_certificate:
     path: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"

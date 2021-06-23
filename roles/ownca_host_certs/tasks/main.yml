@@ -41,19 +41,19 @@
 # ==================================================================================================
 - name: "Get component CA certificate information."
   community.crypto.x509_certificate_info:
-    path: "{{ ownca_component_ca_file }}"
+    path: "{{ ownca_component_ca_path }}"
   become: no
   register: component_cert
   delegate_to: localhost
 
-- name: "Check if host cert exists"
+- name: "Check if host cert exists."
   ansible.builtin.stat:
     path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
   delegate_to: localhost
   become: no
   register: cert_file
 
-- name: "Get host certificate information"
+- name: "Get host certificate information."
   community.crypto.x509_certificate_info:
     path: "{{ cert_file.stat.path }}"
   become: no
@@ -79,11 +79,11 @@
     - host_cert.authority_key_identifier is defined
     - host_cert.authority_key_identifier != component_cert.subject_key_identifier
 
-- name: "Generate Host Certificate"
+- name: "Generate Host Certificate."
   community.crypto.x509_certificate:
     path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
     csr_path: "{{ ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
-    ownca_path: "{{ ownca_component_ca_file }}"
+    ownca_path: "{{ ownca_component_ca_path }}"
     ownca_privatekey_path: "{{ ownca_component_ca_key }}"
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
     provider: ownca
@@ -96,7 +96,7 @@
   community.crypto.certificate_complete_chain:
     input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + autonomy_fqdn + '.crt') }}"
     intermediate_certificates:
-      - "{{ ownca_component_ca_file }}"
+      - "{{ ownca_component_ca_path }}"
       - "{{ ownca_intermediate_ca_cert }}"
     root_certificates:
       - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
