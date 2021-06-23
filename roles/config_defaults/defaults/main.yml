@@ -64,6 +64,8 @@ autonomy_region: ""
 autonomy_state: "{{ autonomy_region }}"
 autonomy_city: ""
 
+autonomy_sysadmin_email_address: "admin@{{ autonomy_root_domain }}"
+
 # ==================================================================================================
 #
 # Host Information
@@ -171,6 +173,7 @@ ownca_certificate_authorities:
     ownca: "root"
     ownca_privatekey_passphrase: "{{ ownca_root_password }}"
     provider: "selfsigned"
+    private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name | lower }}-root-ca.key"
   - name: "{{ autonomy_org_unit_name }}"
     common_name: "{{ autonomy_org_name | title }} {{ autonomy_org_unit_name | title }} CA"
     password: "{{ ownca_intermediate_password }}"
@@ -183,6 +186,7 @@ ownca_certificate_authorities:
     keyusage_critical: yes
     basic_constraints:
       - 'CA:TRUE'
+    private_key_path: "{{ ownca_intermediate_ca_key_path }}"
   - name: "{{ autonomy_org_unit_name }}-component"
     common_name: "{{ autonomy_org_name | title }} {{ autonomy_org_unit_name | title}} Component CA"
     password: "{{ ownca_component_password }}"
@@ -195,6 +199,7 @@ ownca_certificate_authorities:
     keyusage_critical: yes
     basic_constraints:
       - 'CA:TRUE'
+    private_key_path: "{{ ownca_component_ca_key_path }}"
   - name: "{{ autonomy_org_unit_name }}-identity"
     common_name: "{{ autonomy_org_name | title }} {{ autonomy_org_unit_name | title }} Identity CA"
     password: "{{ ownca_identity_password }}"
@@ -207,6 +212,7 @@ ownca_certificate_authorities:
     keyusage_critical: yes
     basic_constraints:
       - 'CA:TRUE'
+    private_key_path: "{{ ownca_identity_ca_key_path }}"
   - name: "{{ autonomy_org_unit_name }}-codesign"
     common_name: "{{ autonomy_org_name | title }} {{ autonomy_org_unit_name | title }} Codesign CA"
     password: "{{ ownca_codesign_password }}"
@@ -219,6 +225,7 @@ ownca_certificate_authorities:
     keyusage_critical: yes
     basic_constraints:
       - 'CA:TRUE'
+    private_key_path: "{{ ownca_codesign_ca_key_path }}"
 
 ownca_issuing_authorities:
   - component
@@ -264,30 +271,52 @@ ownca_format: 'pem'
 ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy
-ownca_intermediate_ca_key: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
-ownca_intermediate_ca_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key }}"
-ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
-ownca_intermediate_ca_cert_path: "{{ ownca_ca_certs_directory }}/{{ ownca_intermediate_ca_cert_path }}"
-ownca_intermediate_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain.crt"
+
+# Intermediate CA Files
+ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
+ownca_intermediate_ca_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key_file }}"
+ownca_intermediate_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca"
+ownca_intermediate_ca_cert_path: "{{ ownca_ca_certs_directory }}/{{ ownca_intermediate_ca_cert_file }}.crt"
+ownca_intermediate_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain"
+ownca_intermediate_ca_chain_path: "{{ ownca_ca_certs_directory }}/{{ ownca_intermediate_ca_chain_file }}.crt"
+ownca_intermediate_etc_cert_path: "{{ ownca_etc }}/certs/{{ ownca_intermediate_ca_cert_file }}.pem"
+ownca_intermediate_etc_cert_path: "{{ ownca_etc }}/certs/{{ ownca_intermediate_ca_chain_file }}.pem"
+ownca_intermediate_usr_cert_path: "{{ ownca_usr_directory }}/{{ ownca_intermediate_ca_cert_file }}.crt"
+ownca_intermediate_usr_cert_path: "{{ ownca_usr_directory }}/{{ ownca_intermediate_ca_chain_file }}.crt"
 ownca_intermediate_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}.crl"
+
+# Component CA Files
+
+ownca_component_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.key"
+ownca_component_ca_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_component_ca_key_file }}"
+
 ownca_component_ca_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
 ownca_component_ca_path: "{{ ownca_ca_certs_directory }}/{{ ownca_component_ca_file }}"
 ownca_component_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain.crt"
 ownca_component_ca_chain_file_path: "{{ ownca_usr_directory }}/{{ ownca_component_ca_chain_file }}"
 ownca_component_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
-ownca_component_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.key"
+
+# Identity CA Files
+ownca_identity_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.key"
+ownca_identity_ca_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_identity_ca_key_file }}"
 ownca_identity_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crt"
 ownca_identity_ca_file_path: "{{ ownca_usr_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crt"
 ownca_identity_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.crt"
 ownca_identity_ca_chain_file_path: "{{ ownca_usr_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain.crt"
 ownca_identity_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
 ownca_identity_crl_file_path: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
-ownca_identity_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.key"
-ownca_codesign_ca_key: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.key"
+
+
+# Codesign CA Files
+ownca_codesign_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.key"
+ownca_codesign_ca_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_codesign_ca_key_file }}"
 ownca_codesign_ca_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.crt"
 ownca_codesign_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca-chain.crt"
 ownca_codesign_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign.crl"
 
+# Verify if these are still needed, then delete:
+ownca_intermediate_ca_key: "{{ ownca_intermediate_ca_key_file }}"
+ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
 # ==================================================================================================
 #
 # OIDs
