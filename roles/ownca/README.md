@@ -57,6 +57,9 @@ References
 ----------
 - [PKI Tutorial](https://pki-tutorial.readthedocs.io)
 - [Draft EDDSA PKI](https://tools.ietf.org/html/draft-moskowitz-eddsa-pki-00)
+- [Running Your Own Ansible Driven CA](https://tikalk.com/posts/2016/10/30/Running-Your-Own-Ansible-Driven-CA)
+- [Adding a new trusted Certificate Authority](https://blog.confirm.ch/adding-a-new-trusted-certificate-authority/)
+- [Debops: Anisble PKI](https://www.github.com/debops/ansible-pki)
 
 Contributing
 ------------
