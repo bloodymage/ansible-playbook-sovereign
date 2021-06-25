@@ -51,7 +51,6 @@
   roles:
     - role: bloodymage.autonomy.openldap
       tags:
-        - never
         - openldap
 
 - name: "Create realm users."

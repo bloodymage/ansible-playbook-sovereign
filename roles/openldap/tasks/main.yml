@@ -1,21 +1,15 @@
 ---
 # tasks file for openldap
-- name: Include OS-specific variables.
+- name: "Include OS-specific variables."
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
-      files:
-        - "{{ ansible_network_os | default(none) }}.yml"
-        - "{{ ansible_distribution | lower }}.yml"
-        - "{{ ansible_distribution.split(' ')[0] | lower }}.yml"
-        - "{{ ansible_os_family | lower }}_family.yml"
-        - "{{ ansible_system | lower }}.yml"
-        - main.yml
+      files: "{{ __os_variables_files }}"
       paths:
         - "vars"
   become: no
 
-- name: "Install packages"
+- name: "Install packages."
   ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present
@@ -26,7 +20,7 @@
 #
 #
 # ==================================================================================================
-- name: "Ensure ldap config dir exists"
+- name: "Ensure ldap config dir exists."
   ansible.builtin.file:
     path: "/etc/ldap/{{ item.name }}"
     state: directory
@@ -36,7 +30,7 @@
   become: yes
   loop: "{{ openldap_etc_folders }}"
 
-- name: "Create basic ldap.conf"
+- name: "Create basic ldap.conf."
   ansible.builtin.template:
     src: "ldap.conf.j2"
     dest: "/etc/ldap/ldap.conf"
@@ -83,7 +77,7 @@
 #     - ppolicy.ldif
 #     - ppolicy.schema
 
-- name: "Create Config Ldifs"
+- name: "Create Config Ldifs."
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/ldap/schema/{{ item }}"
@@ -94,7 +88,7 @@
   loop:
     - certinfo.ldif
 
-- name: "Create Backend schemas"
+- name: "Create Backend schemas."
   ansible.builtin.template:
     src: backend.ldif.j2
     dest: "/etc/ldap/schema/backend_{{ item.name }}.ldif"
@@ -104,7 +98,7 @@
   become: yes
   loop: "{{ openldap_backends }}"
 
-- name: "Create module ldif"
+- name: "Create module ldif."
   ansible.builtin.template:
     src: module.ldif.j2
     dest: "/etc/ldap/schema/module_{{ item }}.ldif"
@@ -114,7 +108,7 @@
   become: yes
   loop: "{{ openldap_modules }}"
 
-- name: "Add schema to ldap"
+- name: "Add schema to ldap."
   ansible.builtin.command:
     cmd: "ldapadd -Q -Y EXTERNAL -H ldapi:/// -f /etc/ldap/schema/{{ item }}.ldif"
   become: yes
