@@ -20,6 +20,10 @@ dovecot_sieve: "file:~/sieve;active=~/.dovecot.sieve"
 dovecot_sieve_before:
   - "/var/mail/vmail/sieve-before"
 
+dovecot_migration_users:
+  - account: "bob@example.com"
+    password: "password"
+
 dovecot_sieve_after:
   - "/var/mail/vmail/sieve-after"
 

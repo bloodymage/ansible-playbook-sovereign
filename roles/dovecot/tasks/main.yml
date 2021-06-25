@@ -222,3 +222,17 @@
     - dovecot
     - dovecot_debug
     - dovecot-debug
+
+- name: "Perform email migration"
+  ansible.builtin.command:
+    cmd: >-
+      doveadm -o imapc_password='{{ item.password }}'
+      backup
+      -a 'Virtual/All Mail'
+      -O '-$GmailHaveLabels'
+      -R
+      -u {{ item.account }} imapc:
+  become: yes
+  loop: "{{ dovecot_migration_users }}"
+  when:
+    - item.account != 'bob@example.com'
