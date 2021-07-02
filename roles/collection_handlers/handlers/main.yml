@@ -286,6 +286,18 @@
   when:
     - inventory_hostname in groups['mail_servers'] | default([])
 
+- name: "Restart Spamass-Milter."
+  ansible.builtin.service:
+    name: spamass-milter
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+    - "restart spamassassin"
+    - "restart spamass-milter"
+  when:
+    - inventory_hostname in groups['mail_servers'] | default([])
+
 - name: "Restart UptimeD"
   ansible.builtin.service:
     name: uptimed
