@@ -7,7 +7,7 @@
 # ==================================================================================================
 - name: "Pretasks"
   block:
-    - name: Include OS-specific variables.
+    - name: "Include OS-specific variables."
       include_vars: "{{ lookup('first_found', params) }}"
       vars:
         params:
@@ -21,7 +21,7 @@
         - dovecot-debug
         - install-packages
 
-    - name: "Install packages"
+    - name: "Install packages."
       ansible.builtin.package:
         name: "{{ autonomy_packages }}"
         state: present
@@ -32,7 +32,7 @@
         - dovecot-debug
         - install-packages
 
-- name: "Update password and auth mechanims"
+- name: "Update password and auth mechanims."
   ansible.builtin.set_fact:
     dovecot_password_databases: "{{ dovecot_password_databases + ['ldap'] }}"
     dovecot_auth_mechanisms: "{{ ['gssapi'] + dovecot_auth_mechanisms + ['oauthbearer xoauth2'] }}"
@@ -46,7 +46,7 @@
     - dovecot-debug
     - install-packages
 
-- name: "Get Users' password from password-store"
+- name: "Get Users' password from password-store."
   ansible.builtin.set_fact:
     __mail_user: "{{ mail_user }}"
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
@@ -67,7 +67,7 @@
 # Configuration tasks
 #
 # ==================================================================================================
-- name: "Install config files to /etc/dovecot"
+- name: "Install config files to /etc/dovecot."
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/dovecot/{{ item }}"
@@ -84,7 +84,7 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Install auth config files to /etc/dovecot"
+- name: "Install auth config files to /etc/dovecot."
   ansible.builtin.template:
     src: "dovecot-{{ item.name }}.conf.ext.j2"
     dest: "/etc/dovecot/dovecot-{{ item.name }}.conf.ext"
@@ -102,7 +102,7 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Install configuration files to /etc/dovecot/conf.d"
+- name: "Install configuration files to /etc/dovecot/conf.d."
   ansible.builtin.template:
     src: "{{ item }}.j2"
     dest: "/etc/dovecot/conf.d/{{ item }}"
@@ -139,7 +139,7 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Install authorization configuration files to /etc/dovecot/conf.d"
+- name: "Install authorization configuration files to /etc/dovecot/conf.d."
   ansible.builtin.template:
     src: "auth.conf.j2"
     dest: "/etc/dovecot/conf.d/auth-{{ item.name }}.conf.ext"
@@ -154,7 +154,12 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Ensure Virtual Directory definitions exist"
+# ==================================================================================================
+#
+# This section creates the virtual directories.
+#
+# ==================================================================================================
+- name: "Ensure Virtual Directory definitions exist."
   ansible.builtin.file:
     path: "/etc/dovecot/virtual/{{ item.name }}"
     owner: "{{ mail_user }}"
@@ -168,7 +173,7 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Install configuration files to /etc/dovecot/virtual"
+- name: "Install configuration files to /etc/dovecot/virtual."
   ansible.builtin.template:
     src: "dovecot-virtual.j2"
     dest: "/etc/dovecot/virtual/{{ item.name }}/dovecot-virtual"
@@ -182,7 +187,48 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Ensure Sieve Pipe Bin Dir exists"
+# ==================================================================================================
+#
+# If "dovecot_inboxzero_mailboxes" is defined, then create the inboxzero virtual directories.
+# It's definition is the exact same as 'dovecot_virtual_mailboxes'
+#
+# I use this to create 'inboxzero' style virtual directories at the top for my users.
+# Inboxzero/
+#   Inbox (Emails that are unread)
+#   Followup (Emails flagged as 'important')
+#   Hold (Emails that are ____________)
+#
+# ==================================================================================================
+- name: "Ensure 'Inboxzero' Virtual Directory definitions exist."
+  ansible.builtin.file:
+    path: "/etc/dovecot/inboxzero/{{ item.name }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0755"
+    state: directory
+  become: yes
+  loop: "{{ dovecot_inboxzero_mailboxes }}"
+  when:
+    - dovecot_inboxzero_mailboxes is defined
+
+- name: "Install configuration files to /etc/dovecot/inboxzero."
+  ansible.builtin.template:
+    src: "dovecot-virtual.j2"
+    dest: "/etc/dovecot/inboxzero/{{ item.name }}/dovecot-virtual"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_inboxzero_mailboxes }}"
+  when:
+    - dovecot_inboxzero_mailboxes is defined
+
+# ==================================================================================================
+#
+# Setup Dovecot Sieve
+#
+# ==================================================================================================
+- name: "Ensure Sieve Pipe Bin Dir exists."
   ansible.builtin.file:
     path: "{{ dovecot_sieve_pipe_bin_dir }}"
     owner: "{{ mail_user }}"
@@ -195,13 +241,13 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Install IMAPSieve Spam Update Filters"
+- name: "Install IMAPSieve Spam Update Filters."
   ansible.builtin.template:
     src: "report-sieve.j2"
     dest: "{{ dovecot_sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   become: yes
   loop: "{{ dovecot_imapsieve_mailboxes }}"
   tags:
@@ -209,7 +255,7 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Install IMAPSieve Spam Update Filters"
+- name: "Install IMAPSieve Spam Update Filters."
   ansible.builtin.template:
     src: "sa-learn.j2"
     dest: "{{ dovecot_sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
@@ -223,16 +269,70 @@
     - dovecot_debug
     - dovecot-debug
 
-- name: "Perform email migration"
-  ansible.builtin.command:
-    cmd: >-
-      doveadm -o imapc_password='{{ item.password }}'
-      backup
-      -a 'Virtual/All Mail'
-      -O '-$GmailHaveLabels'
-      -R
-      -u {{ item.account }} imapc:
+- name: "Ensure Dovecot Sieve Directories exists."
+  ansible.builtin.file:
+    path: "{{ dovecot_etc }}/sieve/{{ item }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0755"
+    state: directory
   become: yes
-  loop: "{{ dovecot_migration_users }}"
-  when:
-    - item.account != 'bob@example.com'
+  loop:
+    - before
+    - after
+    - global
+
+- name: "Install Sieve-before rules."
+  ansible.builtin.copy:
+    src: "etc/dovecot/sieve/before/{{ item }}"
+    dest: "{{ dovecot_etc }}/sieve/before/{{ item }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_sieve_before_files }}"
+
+- name: "Install Sieve-after rules."
+  ansible.builtin.copy:
+    src: "etc/dovecot/sieve/after/{{ item }}"
+    dest: "{{ dovecot_etc }}/sieve/after/{{ item }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_sieve_after_files }}"
+
+- name: "Install Sieve Global rules."
+  ansible.builtin.copy:
+    src: "etc/dovecot/sieve/global/{{ item }}"
+    dest: "{{ dovecot_etc }}/sieve/global/{{ item }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_sieve_global_files }}"
+
+# ==================================================================================================
+#
+# Email Migration
+#
+# I am considering changing this to a template that creates a script to do this.  Then setup cron to
+# run the script say every 5 minutues.
+#
+# That may only make sense if it's not a one time migration.
+#
+# ==================================================================================================
+# - name: "Perform email migration"
+#   ansible.builtin.command:
+#     cmd: >-
+#       doveadm -o imapc_password='{{ item.password }}'
+#       backup
+#       -1
+#       -a 'Virtual/All Mail'
+#       -O '-$GmailHaveLabels'
+#       -R
+#       -u {{ item.account }} imapc:
+#   become: yes
+#   loop: "{{ dovecot_migration_users }}"
+#   when:
+#     - item.account != 'bob@example.com'
