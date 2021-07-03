@@ -315,8 +315,10 @@ ownca_codesign_ca_chain_file: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_na
 ownca_codesign_crl_file: "{{ ownca_ca_crl_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign.crl"
 
 # Verify if these are still needed, then delete:
-ownca_intermediate_ca_key: "{{ ownca_intermediate_ca_key_file }}"
-ownca_intermediate_ca_cert: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+ownca_component_ca_key: "{{ ownca_component_ca_key_path }}"
+ownca_intermediate_ca_key: "{{ ownca_intermediate_ca_key_path }}"
+ownca_intermediate_ca_cert: "{{ ownca_intermediate_ca_cert_path }}"
+
 # ==================================================================================================
 #
 # OIDs
