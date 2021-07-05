@@ -18,6 +18,9 @@
 {% if postfix_compatibility_level != __postfix_compatibility_level -%}
   compatibility_level = {{ postfix_compatibility_level }}
 {% endif %}
+{% if postfix_smtp_header_checks != __postfix_smtp_header_checks -%}
+  smtp_header_checks = regexp:/etc/postfix/smtp_header_checks
+{% endif %}
 smtpd_helo_required = {{ postfix_smtpd_helo_required }}
 
 # TLS parameters

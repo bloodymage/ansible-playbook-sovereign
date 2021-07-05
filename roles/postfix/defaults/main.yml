@@ -88,6 +88,11 @@ postfix_postscreen_dnsbl_sites:
   - "b.barracudacentral.org"
   - "bl.spamcop.net"
 postfix_postscreen_greet_action: "enforce"
+postfix_smtp_header_checks:
+  - name: "Received"
+    status: "IGNORE"
+  - name: "User-Agent"
+    status: "IGNORE"
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 postfix_smtpd_banner: "$myhostname ESMTP"
 postfix_smtpd_tls_chain_files:
@@ -280,6 +285,7 @@ __postfix_recipient_delimiter: ""
 __postfix_relay_destination_concurrency_limit: "$default_destination_concurrency_limit"
 __postfix_relay_host: ""
 __postfix_sender_dependent_relayhost_maps: []
+__postfix_smtp_header_checks: ""
 __postfix_smtp_sasl_auth_enable: "no"
 __postfix_smtp_sasl_password_maps: []
 __postfix_smtp_sasl_security_options:
