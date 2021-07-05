@@ -6,7 +6,7 @@
     owner: root
     group: root
     mode: 0644
-    validate: "/usr/sbin/testparm"
+    validate: "/usr/sbin/testparm -s"
   become: yes
   notify: restart samba
 
