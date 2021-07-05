@@ -48,6 +48,118 @@ dovecot_sieve_global_files:
 
 # ==================================================================================================
 #
+# Virtual Mailbox
+#
+# ==================================================================================================
+dovecot_virtual_mailboxes:
+  - name: "All"
+    folders:
+      - "*"
+      - "Trash"
+      - "Trash/*"
+      - "Sent"
+      - "Sent/*"
+      - "Junk"
+      - "Junk/*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "all"
+  - name: "Flagged"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "flagged"
+  - name: "Important"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label1 KEYWORD $Labelimportant"
+  - name: "Work"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label2 KEYWORD $Labelwork"
+  - name: "Personal"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label3 KEYWORD $Labelpersonal"
+  - name: "Todo"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label4 KEYWORD $Labeltodo"
+  - name: "Later"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $Labellater KEYWORD $label5"
+  - name: "Recent"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "all younger 172800"
+  - name: "Unread"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "unseen"
+
+# ==================================================================================================
+#
 # Misc Settings
 #
 # ==================================================================================================
