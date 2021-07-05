@@ -10,7 +10,7 @@ plugin {
 {% if dovecot_sieve_default_name is defined %}
   sieve_default_name = {{ dovecot_sieve_default_name }}
 {% endif %}
-{% if dovecot_sieve_global is defined %}
+{% if dovecot_sieve_global != __dovecot_sieve_global %}
   sieve_global = {{ dovecot_sieve_global }}
 {% endif %}
 {% if dovecot_sieve_discard is defined %}

@@ -2,16 +2,18 @@
 - hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
-  tags:
-    - always
+      when:
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
+      tags:
+        - always
 
-- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address
+- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
   roles:
     - role: bloodymage.autonomy.aliases
       tags:
         - aliases
 
-- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_ip_address:!mail_servers
+- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts:!mail_servers
   roles:
     - role: bloodymage.autonomy.exim
       tags:

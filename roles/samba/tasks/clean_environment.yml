@@ -11,7 +11,7 @@
 #
 # Ref: https://stackoverflow.com/questions/46515704/how-to-kill-a-running-process-using-ansible
 # ==================================================================================================
-- name: Get running processes
+- name: "Get running processes."
   ansible.builtin.shell:
     cmd: >
       set -o pipefail &&
@@ -27,7 +27,7 @@
   when:
     - __samba_recreate_realm
 
-- name: "Kill running processes"
+- name: "Kill running processes."
   ansible.builtin.command:
     cmd: "kill {{ item }}"
   loop: "{{ running_processes.stdout_lines }}"
@@ -36,7 +36,7 @@
   when:
     - __samba_recreate_realm
 
-- name: "Wait for all processes to be killed"
+- name: "Wait for all processes to be killed."
   ansible.builtin.wait_for:
     path: "/proc/{{ item }}/status"
     state: absent
@@ -47,7 +47,7 @@
   when:
     - __samba_recreate_realm
 
-- name: Force kill stuck processes
+- name: "Force kill stuck processes."
   ansible.builtin.command:
     cmd: "kill -9 {{ item }}"
   loop: "{{ killed_processes.results | select('failed') | map(attribute='item') | list }}"
@@ -61,7 +61,7 @@
 # Ensure config file does not already exists
 #
 # ==================================================================================================
-- name: Identify config file if it exists
+- name: "Identify config file if it exists."
   ansible.builtin.shell:
     cmd: >
       set -o pipefail &&
@@ -75,15 +75,7 @@
   when:
     - __samba_recreate_realm
 
-- name: Print Variables
-  ansible.builtin.debug:
-    var: config_file
-    verbosity: 2
-  become: no
-  when:
-    - __samba_recreate_realm
-
-- name: Remove config file
+- name: "Remove config file."
   ansible.builtin.file:
     path: "{{ config_file }}"
     state: absent
@@ -115,26 +107,7 @@
   when:
     - __samba_recreate_realm
 
-- name: Show __database.results
-  ansible.builtin.debug:
-    msg:
-      - "{{ item }}"
-    verbosity: 3
-  loop: "{{ __database.results }}"
-  when:
-    - __samba_recreate_realm
-    - __database is defined
-
-- name: Show __database
-  ansible.builtin.debug:
-    msg:
-      - "{{ __database }}"
-    verbosity: 4
-  when:
-    - __samba_recreate_realm
-    - __database is defined
-
-- name: "Remove database files"
+- name: "Remove database files."
   include: "remove_files.yml"
   become: no
   loop: "{{ __database.results }}"
@@ -144,7 +117,7 @@
     - __samba_recreate_realm
     - __database is defined
 
-- name: "Remove old sysvol"
+- name: "Remove old sysvol."
   ansible.builtin.file:
     path: "/usr/lib/samba/sysvol"
     state: absent

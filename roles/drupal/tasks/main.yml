@@ -34,49 +34,43 @@
         - drupal
         - install-packages
 
-- name: Download Drupal
-  community.general.composer:
-    command: create-project
-    arguments: "drupal/recommended-project /srv/www/{{ item.name }}"
-    working_dir: "/srv/www/{{ item.name }}"
-  become: yes
-  become_user: www-data
-  loop: "{{ hosts }}"
+- name: "Check if drupal already installed."
+  ansible.builtin.stat:
+    path: "/srv/www/{{ item.name }}/web/sites/default/settings.php"
+  loop: "{{ virtual_hosts }}"
+  register: installed
   when:
+    - virtual_hosts is defined
+    - item.content is defined
     - item.content == "drupal"
-  tags:
-    - drupal
+    - item.enabled is defined
+    - item.enabled 
 
-- name: Install Drupal
-  command:
-    cmd: >
-      drush site:install
-      --db-url=mysql://{{ item.db_user}}:{{ item.db_password }}@{{ item.db_host }}:{{ mysql_port }}/{{ item.db_name }}
-       --db-su={{ mysql_administrator_user }}
-       --db-su-pw={{ mysql_administrator_password }}
-      --account-name : {{ item.administrator_account }}
-      --account-mail : {{ item.administrator_email }}
-      --account-pass : {{ item.administrator_password }}
-      --site-name : {{ item.site_name }}
-      --site-mail : {{ item.site_mail }}
-      --site-pass : {{ item.site_password }}
-    chdir: "/srv/www/{{ item.name }}"
-  become: yes
-  become_user: www-data
-  loop: "{{ hosts }}"
+- name: "Install Drupal"
+  include: install_drupal.yml
+  loop: "{{ installed.results }}"
+  loop_control:
+    loop_var: __installed
   when:
-    - item.content == "drupal"
-  tags:
-    - drupal
+    - (__installed.stat.exists is not defined) or (not __installed.stat.exists)
 
-- name: "Update Apache Sites-Available .conf"
-  template:
+- name: "Upgrade Drupal"
+  include: upgrade_drupal.yml
+  loop: "{{ installed.results }}"
+  loop_control:
+    loop_var: __installed
+  when:
+    - __installed.stat.exists is defined
+    - __installed.stat.exists
+
+- name: "Update Apache Sites-Available .conf."
+  ansible.builtin.template:
     src: "apache-site.conf.j2"
     dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
-  loop: "{{ hosts }}"
+  loop: "{{ virtual_hosts }}"
   become: yes
   when:
-    - hosts is defined
+    - virtual_hosts is defined
     - item.content is defined
     - item.content == "drupal"
     - item.enabled is defined
@@ -86,3 +80,6 @@
     - drupal
     - drupal-config
     - websites
+
+# TODO: Configure robots.txt
+# https://www.shapeblock.com/automating-deployment-of-drupal-using-ansible/

@@ -10,35 +10,21 @@
 # ==================================================================================================
 - name: Determine Existing App
   ansible.builtin.command:
-    cmd: 'ls /srv/www/{{ host.name }}/apps'
+    cmd: 'ls /srv/www/{{ inventory_hostname }}/apps'
   changed_when: false
   become: no
   register: existing_apps
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: Install Nextcloud Apps
   ansible.builtin.command:
     cmd: "php occ app:install {{ item }}"
-    chdir: "/srv/www/{{ host.name }}"
-    creates: "/srv/www/{{ host.name }}/apps/{{ item }}/appinfo/info.xml"
+    chdir: "/srv/www/{{ inventory_hostname }}"
+    creates: "/srv/www/{{ inventory_hostname }}/apps/{{ item }}/appinfo/info.xml"
   loop: "{{ nextcloud_apps }}"
   become: yes
   become_user: www-data
-  when:
-    - host.content == "nextcloud"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 # ==================================================================================================
-#
-# TODO: Update this to fully qualified collection name
 #
 # Potentially enable '--force' to allow using outdate apps?
 #
@@ -46,17 +32,10 @@
 - name: Enable Nextcloud Apps
   ansible.builtin.command:
     cmd: "php occ app:enable {{ item }}"
-    chdir: "/srv/www/{{ host.name }}"
+    chdir: "/srv/www/{{ inventory_hostname }}"
   loop: "{{ nextcloud_apps }}"
   become: yes
   become_user: www-data
-  when:
-    - host.content == "nextcloud"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 # ==================================================================================================
 #
@@ -71,20 +50,13 @@
 - name: Disable Nextcloud Apps
   ansible.builtin.command:
     cmd: "php occ app:disable {{ item }}"
-    chdir: "/srv/www/{{ host.name }}"
+    chdir: "/srv/www/{{ inventory_hostname }}"
   loop: "{{ __disabled_apps }}"
   become: yes
   become_user: www-data
   vars:
     __currently_selected_apps: "{{ existing_apps.stdout_lines | difference(nextcloud_apps) }}"
     __disabled_apps: "{{ __currently_selected_apps | difference(__nextcloud_mandatory_apps) }}"
-  when:
-    - host.content == "nextcloud"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 # ==================================================================================================
 #
@@ -93,7 +65,7 @@
 # ==================================================================================================
 - name: "Remove disabled nextcloud apps from the filesystem"
   ansible.builtin.file:
-    path: "/srv/www/{{ host.name }}/apps/{{ item }}"
+    path: "/srv/www/{{ inventory_hostname }}/apps/{{ item }}"
     state: absent
   loop: "{{ __removed_apps }}"
   become: yes
@@ -101,10 +73,10 @@
     __currently_selected_apps: "{{ existing_apps.stdout_lines | difference(nextcloud_apps) }}"
     __disabled_apps: "{{ __currently_selected_apps | difference(__nextcloud_mandatory_apps) }}"
     __removed_apps: "{{ __disabled_apps | difference(__nextcloud_default_apps) }}"
-  when:
-    - host.content == "nextcloud"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
+
+- name: "Upgrade Nextcloud Apps."
+  ansible.builtin.command:
+    cmd: "php occ app:update --all"
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data

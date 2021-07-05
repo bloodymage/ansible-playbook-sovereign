@@ -3,6 +3,8 @@
 #
 # We should do this only once!
 #
+# TODO: Texst if ldap has already been configured.
+#
 # ==================================================================================================
 # - name: Create initial config
 #   command:

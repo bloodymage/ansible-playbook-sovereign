@@ -1,4 +1,6 @@
-# spamass-milt startup defaults
+# {{ ansible_managed }}
+
+{# spamass-milt startup defaults #}
 
 # OPTIONS are passed directly to spamass-milter.
 # man spamass-milter for details
@@ -9,21 +11,20 @@
 
 # Default, use the spamass-milter user as the default user, ignore
 # messages from localhost
-#OPTIONS="-u spamass-milter -i 127.0.0.1"
-OPTIONS="-u spamass-milter -i 127.0.0.1 -m -I -- --socket=/var/spool/postfix/spamassassin/spamd.sock"
+OPTIONS="-u spamass-milter -i 127.0.0.1 -I"
 
 # Reject emails with spamassassin scores > 15.
 #OPTIONS="${OPTIONS} -r 15"
 
 # Do not modify Subject:, Content-Type: or body.
-#OPTIONS="${OPTIONS} -m"
+OPTIONS="${OPTIONS} -m"
 
 ######################################
 # If /usr/sbin/postfix is executable, the following are set by
 # default. You can override them by uncommenting and changing them
 # here.
 ######################################
-# SOCKET="/var/spool/postfix/spamass/spamass.sock"
-# SOCKETOWNER="postfix:postfix"
-# SOCKETMODE="0660"
+SOCKET="/var/spool/postfix/spamassassin/spamd.sock"
+SOCKETOWNER="{{ spamassassin_spamd_user }}":"{{ spamassassin_spamd_user }}"
+SOCKETMODE="0660"
 ######################################

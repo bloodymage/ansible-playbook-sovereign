@@ -65,9 +65,6 @@
 - name: Check if reboot is required
   ansible.builtin.stat:
     path: /var/run/reboot-required
-  register: reboot_required_file
-
-# - name: "Reboot Hosts if /var/run/reboot-required exists"
-#   ansible.builtin.reboot:
-#   when:
-#     - reboot_required_file.stat.exists
+  register: reboot_requuired_file
+  notify:
+    - reboot

@@ -21,7 +21,7 @@
         - "vars"
   become: no
 
-- name: "Install packages"
+- name: "Install packages."
   ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present

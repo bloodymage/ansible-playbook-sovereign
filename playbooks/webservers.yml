@@ -2,14 +2,16 @@
 - hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
-  tags:
-    - always
+      when:
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
+      tags:
+        - always
 
 - hosts: redis_servers
   roles:
     - role: bloodymage.autonomy.redis
       tags:
-        redis
+        - redis
 
 # ==================================================================================================
 #
@@ -48,9 +50,14 @@
         - ownca_crl_distribution_points
         - websites
 
-- hosts: nextcloud_servers:mediawiki_servers
+- hosts: nextcloud_servers:mediawiki_servers:drupal_servers
   roles:
     - role: bloodymage.autonomy.php
+      tags:
+        - php
+    - role: bloodymage.autonomy.composer
+      tags:
+        - composer
 
 - hosts: nextcloud_servers:&public_zone
   roles:
@@ -65,5 +72,13 @@
       tags:
         - mediawiki
         - websites
-    # - role: bloodymage.autonomy.drush
-    # - role: bloodymage.autonomy.drupal
+
+- hosts: drupal_servers
+  roles:
+    - role: bloodymage.autonomy.drush
+      tags:
+        - drush
+    - role: bloodymage.autonomy.drupal
+      tags:
+        - drupal
+        - websites

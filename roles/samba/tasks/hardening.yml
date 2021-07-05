@@ -14,7 +14,7 @@
 #   when: autonomy_fqdn == __samba_schema_master
 #   ignore_errors: yes
 
-- name: "Disable Guest Account"
+- name: "Disable Guest Account."
   ansible.builtin.command:
     cmd: "{{ item }}"
   register: success
@@ -27,13 +27,13 @@
 
 # ==================================================================================================
 #
-# Modify Password Policy: these should only be changed if we have a reason to suspect they are comprimised.
+# Modify Password Policy: these should only be changed if we have a reason to suspect they are compromised.
 #
 # https://dev.tranquil.it/samba/en/samba_advanced_methods/samba_password_policies.html
 # https://oitibs.com/samba4-domain-password-policy/
 #
 # ==================================================================================================
-- name: "Set Password Expiration"
+- name: "Set Password Expiration."
   ansible.builtin.command:
     cmd: "samba-tool domain passwordsettings set --max-pwd-age={{ samba_domain_password_expiration }}"
   register: success

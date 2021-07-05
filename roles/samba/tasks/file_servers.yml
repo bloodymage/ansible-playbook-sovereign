@@ -1,6 +1,6 @@
 ---
 # tasks file for 
-- name: Join Domain
+- name: "Join Domain."
   ansible.builtin.expect:
     command: "net ads join -U administrator"
     responses:

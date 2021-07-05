@@ -17,9 +17,6 @@
         - "vars"
   become: no
   tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
     - install-packages
 
 - name: "Install packages"
@@ -27,17 +24,7 @@
     name: "{{ autonomy_packages }}"
     state: present
   become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
   tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
     - install-packages
 
 # ==================================================================================================
@@ -48,42 +35,18 @@
 - name: Install Apache site.conf
   ansible.builtin.template:
     src: "apache-site.conf.j2"
-    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    dest: "/etc/apache2/sites-available/{{ inventory_hostname }}.conf"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ virtual_hosts }}"
   become: yes
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
   notify: reload apache
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: Check If this is a new install
   ansible.builtin.stat:
-    path: "/srv/www/{{ item.name }}/config/config.php"
-  loop: "{{ virtual_hosts }}"
+    path: "/srv/www/{{ inventory_hostname }}/config/config.php"
   register: install_status
   become: no
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
 - name: "Ensure we have a password for the nextcloud admin user"
   ansible.builtin.set_fact:
@@ -97,52 +60,17 @@
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   when:
-    - virtual_hosts is defined
     - nextcloud_admin_password == "password"
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
 
-- name: "Complete fresh install"
+- name: "Install Nextcloud."
   include: nextcloud_install.yml
-  loop: "{{ virtual_hosts }}"
-  loop_control:
-    loop_var: host
   when:
-    - virtual_hosts is defined
-    - host.content is defined
-    - host.content == "nextcloud"
-    - item.installed is defined
-    - install_status.results.item.exists is defined
-    - install_status.results.item.exists is false
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
+    - not install_status.stat.exists
 
-- name: Update php.ini
-  ansible.builtin.template:
-    src: "php.ini.j2"
-    dest: "/etc/php/7.3/apache2/php.ini"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
+- name: "Upgrade Nextcloud."
+  include: "nextcloud_upgrade.yml"
   when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
-  notify: restart apache
-  tags:
-    - nextcloud
-    - nextcloud_debug
-    - nextcloud-debug
-    - websites
+    - install_status.stat.exists
 
 - name: "Ensure we have a password for the nextcloud ldap lookup user."
   ansible.builtin.set_fact:
@@ -159,48 +87,25 @@
     - virtual_hosts is defined
     - nextcloud_ldap_password == "password"
 
-- name: Update nextcloud config
+- name: "Update nextcloud config."
   ansible.builtin.template:
     src: "config.php.j2"
-    dest: "/srv/www/{{ item.name }}/config/config.php"
+    dest: "/srv/www/{{ inventory_hostname }}/config/config.php"
     owner: www-data
     group: www-data
     mode: "0644"
   become: yes
-  loop: "{{ virtual_hosts }}"
-  when:
-    - virtual_hosts is defined
-    - item.content is defined
-    - item.content == "nextcloud"
-    - item.enabled is defined
-    - item.enabled
 
-- name: "Install Nextcloud apps"
+- name: "Install Nextcloud apps."
   include: nextcloud_apps.yml
-  loop: "{{ virtual_hosts }}"
-  loop_control:
-    loop_var: host
-  when:
-    - virtual_hosts is defined
-    - host.content is defined
-    - host.content == "nextcloud"
 
-- name: "Ensure we have a clean nextcloud state before we do anything else"
+- name: "Ensure we have a clean nextcloud state before we do anything else."
   ansible.builtin.command:
     cmd: >
       php occ upgrade
-    chdir: "/srv/www/{{ item.name }}"
+    chdir: "/srv/www/{{ inventory_hostname }}"
   become: yes
   become_user: www-data
-  loop: "{{ virtual_hosts }}"
-  when:
-    - virtual_hosts is defined
-    - item.content == "nextcloud"
-  tags:
-    - nextcloud_debug
-    - nextcloud-debug
-    - nextcloud
-    - websites
 
 # ==================================================================================================
 #
@@ -211,15 +116,5 @@
 # ==================================================================================================
 # - name: "Configure LDAP"
 #   include: nextcloud_ldap.yml
-#   loop: "{{ virtual_hosts }}"
-#   loop_control:
-#     loop_var: host
 #   when:
-#     - virtual_hosts is defined
-#     - host.content is defined
-#     - host.content == "nextcloud"
-#   tags:
-#     - nextcloud
-#     - nextcloud_debug
-#     - nextcloud-debug
-#     - websites
+#     - 'user_ldap' in nextcloud_apps

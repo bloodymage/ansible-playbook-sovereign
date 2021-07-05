@@ -17,29 +17,20 @@
       --adminpass="{{ samba_administrator_password }}"
   register: samba_ad_created
   become: yes
+  notify:
+    - "restart bind"
+    - "start samba-ad-dc"
   when:
     - __samba_recreate_realm
     - autonomy_fqdn == __samba_schema_master
 
-- name: "Restart bind"
-  service:
-    name: bind9
-    state: restarted
-  become: yes
-  when:
-    - __samba_recreate_realm
-    - autonomy_fqdn == __samba_schema_master
-
-- name: "start samba-ad-dc"
-  ansible.builtin.service:
-    name: samba-ad-dc
-    state: started
-  become: yes
+- name: "Ensure services are in proper state after package installation."
+  ansible.builtin.meta: flush_handlers
   when:
     - autonomy_fqdn == __samba_schema_master
     - __samba_recreate_realm
 
-- name: "Create Reverse Zone"
+- name: "Create Reverse Zone."
   ansible.builtin.command:
     cmd: >
       samba-tool dns zonecreate localhost
@@ -51,24 +42,12 @@
   when:
     - autonomy_fqdn == __samba_schema_master
 
-- name: "Add Domain Controller to Reverse Zone"
-  ansible.builtin.command:
-    cmd: >
-      samba-tool dns add localhost
-      "{{ ansible_host.split('.')[1] }}.{{ ansible_host.split('.')[0] }}.in-addr.arpa"
-      "{{ ansible_host.split('.')[3] }}.{{ ansible_host.split('.')[2] }}"
-      PTR "{{ autonomy_fqdn }}"
-      -U administrator
-      --password="{{ samba_administrator_password }}"
-  become: yes
-  ignore_errors: yes
-
 # ==================================================================================================
 #
 # Test Active Directory Domain Controller
 #
 # ==================================================================================================
-- name: "(Tests) List all shares provided by the DC"
+- name: "(Tests) List all shares provided by the DC."
   ansible.builtin.command:
     cmd: "smbclient -L localhost -U%"
   register: shares
@@ -87,7 +66,7 @@
 #    var: success
 #    verbosity: 2
 
-- name: "(Tests) Tcp-based _ldap SRV record in the domain"
+- name: "(Tests) Tcp-based _ldap SRV record in the domain."
   ansible.builtin.command:
     cmd: "host -t SRV _ldap._tcp.{{ autonomy_domain }}."
   register: success
@@ -95,7 +74,7 @@
   when:
     - autonomy_fqdn == __samba_schema_master
 
-- name: "(Tests) udp-based _kerberos SRV resource record in the domain"
+- name: "(Tests) udp-based _kerberos SRV resource record in the domain."
   ansible.builtin.command:
     cmd: "host -t SRV _kerberos._udp.{{ autonomy_domain }}."
   register: success
@@ -103,7 +82,7 @@
   when:
     - autonomy_fqdn == __samba_schema_master
 
-- name: "(Tests) The A record of the domain controller"
+- name: "(Tests) The A record of the domain controller."
   ansible.builtin.command:
     cmd: "host -t A {{ ansible_fqdn }}."
   register: success
@@ -111,7 +90,7 @@
   when:
     - autonomy_fqdn == __samba_schema_master
 
-- name: "(Tests) KDC get ticket"
+- name: "(Tests) KDC get ticket."
   expect:
     command: kinit administrator
     responses:
@@ -121,7 +100,7 @@
   when:
     - autonomy_fqdn == __samba_schema_master
 
-- name: "(Tests) KDC verify ticket"
+- name: "(Tests) KDC verify ticket."
   ansible.builtin.command:
     cmd: "klist"
   register: success
@@ -129,7 +108,7 @@
   when:
     - autonomy_fqdn == __samba_schema_master
 
-- name: "(Tests) The PTR record of the domain controller"
+- name: "(Tests) The PTR record of the domain controller."
   ansible.builtin.command:
     cmd: "host -t PTR {{ ansible_host }}"
   register: success
@@ -137,15 +116,7 @@
   when:
     - autonomy_fqdn == __samba_schema_master
 
-- name: "Print Success"
-  ansible.builtin.debug:
-    msg: "{{ success }}"
-    verbosity: 1
-  become: no
-  when:
-    - autonomy_fqdn == __samba_schema_master
-
-- name: "Ensure we have the correct permissionss on /var/lib/samba/usershares"
+- name: "Ensure we have the correct permissionss on /var/lib/samba/usershares."
   ansible.builtin.file:
     path: "/var/lib/samba/usershares"
     owner: "root"

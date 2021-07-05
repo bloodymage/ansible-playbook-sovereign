@@ -1,8 +1,10 @@
-- name: "Prepare playbook environment"
+- name: "Prepare playbook environment."
   hosts: all
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
+      when:
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
     - role: bloodymage.autonomy.config_realm_environment

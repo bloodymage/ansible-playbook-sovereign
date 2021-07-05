@@ -3,7 +3,7 @@
 # Test Kerberos
 #
 # ==================================================================================================
-- name: "Test Kerberos Logon to Active Directory Domain Controller"
+- name: "Test Kerberos Logon to Active Directory Domain Controller."
   ansible.builtin.expect:
     command: kinit administrator
     responses:
@@ -18,12 +18,5 @@
     cmd: "klist"
   register: success
   become: no
-  when:
-    - autonomy_fqdn != __samba_schema_master
-
-- name: Print Success
-  ansible.builtin.debug:
-    msg: "{{ success }}"
-    verbosity: 1
   when:
     - autonomy_fqdn != __samba_schema_master

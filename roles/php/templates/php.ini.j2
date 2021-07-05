@@ -308,7 +308,7 @@ max_input_time = 60
 
 ; Maximum amount of memory a script may consume (128MB)
 ; http://php.net/memory-limit
-memory_limit = {{ nextcloud_memory_limit }}
+memory_limit = {{ php_memory_limit }}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Error handling and logging ;
@@ -592,7 +592,7 @@ auto_globals_jit = On
 ; http://php.net/enable-post-data-reading
 ;enable_post_data_reading = Off
 
-post_max_size = {{ nextcloud_post_max_size }}
+post_max_size = {{ php_post_max_size }}
 
 ; Automatically add files before PHP document.
 ; http://php.net/auto-prepend-file
@@ -744,7 +744,7 @@ file_uploads = On
 
 ; Maximum allowed size for uploaded files.
 ; http://php.net/upload-max-filesize
-upload_max_filesize = {{ nextcloud_upload_max_filesize }}
+upload_max_filesize = {{ php_upload_max_filesize }}
 
 ; Maximum number of files that can be uploaded via a single request
 max_file_uploads = 20

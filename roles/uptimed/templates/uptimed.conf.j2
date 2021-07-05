@@ -1,0 +1,32 @@
+# {{ ansible_managed }}
+
+# Uptimed configuration file.
+
+# Interval to write the logfile with in seconds.
+UPDATE_INTERVAL=3600
+
+# Maximum number of entries in logfile. Set to 0 for unlimited.
+LOG_MAXIMUM_ENTRIES=500
+
+# Minimum uptime that must be reached for it to be considered a record.
+LOG_MINIMUM_UPTIME=1h
+
+# Minimum uptime before sending out e-mail.
+MAIL_MINIMUM_UPTIME=1d
+
+# Minimum position before sending out e-mail.
+MAIL_MINIMUM_POSITION=10
+
+EMAIL={{ uptimed_email_address }}
+
+SEND_EMAIL={{ uptimed_send_email }}
+
+# We need a sendmail compatible mailer, though.
+SENDMAIL=/usr/lib/sendmail -t
+
+# Where to note our PID
+PIDFILE=/run/uptimed/uptimed.pid
+
+{% for milestone in uptimed_milestones %}
+MILESTONE={{ milestone.name }}:{{ milestone.description }}
+{% endfor %}

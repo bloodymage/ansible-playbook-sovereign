@@ -1,0 +1,39 @@
+---
+- name: "Install Drupal via Composer."
+  community.general.composer:
+    command: create-project
+    arguments: "drupal/recommended-project /srv/www/{{ __installed.item.name }}"
+    working_dir: "/srv/www/{{ item.name }}"
+  become: yes
+  become_user: www-data
+  when:
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
+  tags:
+    - drupal
+
+- name: "Configure drupal's database."
+  ansible.builtin.command:
+    cmd: >
+      drush site:install
+      --db-url=mysql://{{ __installed.item.db_user}}:{{ __installed.item.db_password }}@{{ __installed.item.db_host }}:{{ mysql_port }}/{{ __installed.item.db_name }}
+       --db-su={{ mysql_administrator_user }}
+       --db-su-pw={{ mysql_administrator_password }}
+      --account-name : {{ __installed.item.administrator_account }}
+      --account-mail : {{ __installed.item.administrator_email }}
+      --account-pass : {{ __installed.item.administrator_password }}
+      --site-name : {{ __installed.item.site_name }}
+      --site-mail : {{ __installed.item.site_mail }}
+      --site-pass : {{ __installed.item.site_password }}
+    chdir: "/srv/www/{{ __installed.item.name }}"
+  become: yes
+  become_user: www-data
+  when:
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
+  tags:
+    - drupal

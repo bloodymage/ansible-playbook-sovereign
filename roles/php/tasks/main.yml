@@ -16,3 +16,13 @@
         name: "{{ autonomy_packages }}"
         state: present
       become: yes
+
+- name: Update php.ini
+  ansible.builtin.template:
+    src: "php.ini.j2"
+    dest: "/etc/php/{{ php_version }}/apache2/php.ini"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: restart apache
