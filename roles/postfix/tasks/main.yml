@@ -67,7 +67,6 @@
     - postfix_debug
     - postfix-debug
 
-
 - name: "Install configuration files"
   ansible.builtin.template:
     src: "{{ item }}.j2"
@@ -75,6 +74,7 @@
     owner: root
     group: root
     mode: "0644"
+    validate: "/usr/sbin/postfix check"
   become: yes
   loop:
     - dynamicmaps.cf
@@ -161,3 +161,15 @@
     - postfix
     - postfix_debug
     - postfix-debug
+
+- NAME: "Install SMTP Header Checks."
+  ansible.builtin.template:
+    src: "smtp_header_checks.j2"
+    dest: "/etc/postfix/smtp_header_checks"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  notify: restart postfix
+  when:
+    - postfix_smtp_header_checks != __postfix_smtp_header_checks
