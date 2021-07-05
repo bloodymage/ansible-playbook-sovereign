@@ -14,7 +14,7 @@
     - websites
     - install-packages
 
-- name: "Ensure we have a password for the database user"
+- name: "Ensure we have a password for the database user."
   ansible.builtin.set_fact:
     mediawiki_db_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
   vars:
@@ -24,6 +24,22 @@
   become: no
   when:
     - mediawiki_db_password == "password"
+  tags:
+    - mediawiki
+    - mediawiki_debug
+    - mediawiki-debug
+    - websites
+
+- name: "Ensure we have a password for the mail user."
+  ansible.builtin.set_fact:
+    mediawiki_mail_user_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
+  vars:
+    __password_store_id: "{{ autonomy_domain }}/olympus.drbr.org/domain_users/mediawiki/password "
+    __password_length: "{{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+  become: no
+  when:
+    - autonomy_realm_identity_management_system == "samba"
   tags:
     - mediawiki
     - mediawiki_debug
