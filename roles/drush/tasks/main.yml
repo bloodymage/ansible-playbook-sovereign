@@ -1,9 +1,32 @@
 ---
 # tasks file for drush
-- name: Install Drush
+- name: "Install Drush globally."
   community.general.composer:
     command: require
     global_command: yes
-    arguments: drush/drush
-  tags:
-    - drush
+    arguments: "drush/drush"
+  become: yes
+  become_user: www-data
+  register: success
+
+# - name: "Update drush."
+#   community.general.composer:
+#     command: update
+#     global_command: true
+#     arguments: "drush/drush --with-dependencies"
+#   become: yes
+#   become_user: www-data
+#   when:
+#     - not success.changed
+
+# ==================================================================================================
+#
+# Using '/usr/local' ...
+#
+# ==================================================================================================
+- name: "Ensure Drush is symlinked into bin dir."
+  ansible.builtin.file:
+    src: "/var/www/.composer/vendor/drush/drush/drush"
+    dest: "/usr/local/bin/drush"
+    state: link
+  become: yes

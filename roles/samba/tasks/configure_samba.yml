@@ -1,5 +1,5 @@
 ---
-- name: "Configure smb.conf file"
+- name: "Configure smb.conf file."
   ansible.builtin.template:
     src: "smb.conf.j2"
     dest: "/etc/samba/smb.conf"
@@ -9,7 +9,7 @@
   become: yes
   notify: restart samba
 
-- name: "Configure user.map file"
+- name: "Configure user.map file."
   ansible.builtin.template:
     src: "user_map.j2"
     dest: /etc/samba/user.map

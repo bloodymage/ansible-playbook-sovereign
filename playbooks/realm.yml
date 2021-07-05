@@ -1,13 +1,15 @@
 ---
-- name: "Prepare playbook environment"
+- name: "Prepare playbook environment."
   hosts: all
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
+      when:
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
 
-- name: "Prepare playbook environment"
+- name: "Prepare playbook environment. (Realm Specific)"
   hosts: all:!public_zone
   ignore_unreachable: yes
   roles:
@@ -49,7 +51,6 @@
   roles:
     - role: bloodymage.autonomy.openldap
       tags:
-        - never
         - openldap
 
 - name: "Create realm users."
@@ -67,7 +68,8 @@
 # TODO: Explicitly specify file server(s) with user home directories.
 #
 # ==================================================================================================
-- hosts: workstations:&linux:!mythfrontend
+- name: "Create realm users dotfiles."
+  hosts: workstations:&linux:!mythfrontend
   roles:
     - role: bloodymage.autonomy.dotfiles
       vars:
@@ -76,7 +78,8 @@
       tags:
         - dotfiles
 
-- hosts: samba_ownca_user_hosts
+- name: "Configure realm users certificates."
+  hosts: samba_ownca_user_hosts
   roles:
     - role: bloodymage.autonomy.ownca_user_certs
       tags:
@@ -86,7 +89,8 @@
         - ownca-user-certs-debug
         - recreate-realm
 
-- hosts: samba_ownca_user_hosts:workstations:&linux:!mythfrontend
+- name: "Create realm users ssh certificates."
+  hosts: samba_ownca_user_hosts:workstations:&linux:!mythfrontend
   roles:
     - role: bloodymage.autonomy.sshca_user_certs
       tags:
@@ -100,14 +104,16 @@
         - samba-domain-user-certs
         - recreate-realm
 
-- hosts: sssd
+- name: "Configure sssd."
+  hosts: sssd
   roles:
     - role: bloodymage.autonomy.sssd
       tags:
         - sssd
         - recreate-realm
 
-- hosts: keytabs
+- name: "Install krb5 keytabs."
+  hosts: keytabs
   roles:
     - role: bloodymage.autonomy.samba_domain_keytabs
       tags:

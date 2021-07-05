@@ -1,0 +1,52 @@
+---
+- name: "Upgrade Drupal via Composer."
+  community.general.composer:
+    command: upgrade
+    arguments: 'drupal/core "drupal/core-*" /srv/www/{{ __installed.item.name }} --with-all-dependencies'
+    working_dir: "/srv/www/{{ __installed.item.name }}"
+  become: yes
+  become_user: www-data
+  when:
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
+  tags:
+    - drupal
+
+# ==================================================================================================
+#
+# NOTE:
+#  If drupal's database is up to date (no changes are necessary), this needs the 'command' module.
+#  If drupal's databese needs changes, this needs to be the 'expect' module.
+#
+# ==================================================================================================
+- name: "Update Drupal's database."
+  ansible.builtin.command:
+    cmd: >
+      drush updatedb
+    chdir: "/srv/www/{{ __installed.item.name }}"
+  become: yes
+  become_user: www-data
+  when:
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
+  tags:
+    - drupal
+
+- name: "Rebuild Drupal's cache."
+  ansible.builtin.command:
+    cmd: >
+      drush cache:rebuild
+    chdir: "/srv/www/{{ __installed.item.name }}"
+  become: yes
+  become_user: www-data
+  when:
+    - __installed.item.content is defined
+    - __installed.item.content == "drupal"
+    - __installed.item.enabled is defined
+    - __installed.item.enabled 
+  tags:
+    - drupal

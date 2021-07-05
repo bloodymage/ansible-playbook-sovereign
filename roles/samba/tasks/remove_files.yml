@@ -1,4 +1,4 @@
-- name: "Show file path"
+- name: "Show file path."
   ansible.builtin.debug:
     msg:
       - File: "{{ item.path }}"
@@ -8,7 +8,7 @@
     - __samba_recreate_realm
     - __directory is defined
 
-- name: Show file information
+- name: "Show file information."
   ansible.builtin.debug:
     msg:
       - "{{ item }}"
@@ -18,7 +18,7 @@
     - __samba_recreate_realm
     - __directory is defined
 
-- name: Remove database files
+- name: "Remove database files."
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: absent

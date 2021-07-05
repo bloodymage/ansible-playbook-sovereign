@@ -40,7 +40,7 @@ autonomy_packages: "{{ __packages_base + __packages_ldap + __packages_gnupg + __
 # PHP module XMLWriter
 # PHP module zlib
 
-# Recommended autonomy_packages:
+# Recommended packages:
 # PHP module fileinfo (highly recommended, enhances file analysis performance)
 # PHP module bz2 (recommended, required for extraction of apps)
 
@@ -71,14 +71,12 @@ nextcloud_source_url:
     signature: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2.asc"
     checksum: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2.sha256"
 
+nextcloud_database: "mysql"
 nextcloud_admin_user: "administrator"
 nextcloud_admin_password: "password"
 nextcloud_ldap_password: "password"
 nextcloud_password_legnth: "{{ autonomy_password_length }}"
 
-nextcloud_post_max_size: "512M"
-nextcloud_upload_max_filesize: "512M"
-nextcloud_memory_limit: "512M"
 nextcloud_hosts_max_age: 15552000
 
 nextcloud_data_directory: "/srv/www-data"
@@ -132,8 +130,8 @@ nextcloud_samba_login_filter: "(&{{ samba_user_class }}{{ samba_enabled_users }}
 nextcloud_samba_group_filter: "(&{{ samba_group_class }}{{ nextcloud_group_members }}"
 
 nextcloud_ldap_config_ids:
-  - type: ldap
-    id: s01
+  - type: "ldap"
+    id: "s01"
     ldap_config:
       - ldap_attribute: "ldapBase"
         ldap_value: "cn=users,{{ autonomy_base_dn }}"
@@ -183,29 +181,52 @@ nextcloud_saml_config:
     saml_value: "1"
   - saml_attribute: "general-uid_mapping"
     saml_value: "userPrincipalName"
-            # "general-use_saml_auth_for_desktop": "1"
-            # "idp-entityId": "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}"
-            # "idp-singleLogoutService.url": "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}\/protocol\/saml"
-            # "idp-singleSignOnService.url": "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}\/protocol\/saml"
-            # "idp-x509cert": ""
-            # "installed_version": "3.3.1"
-            # "providerIds": "1"
-            # "security-authnRequestsSigned": "1"
-            # "security-logoutRequestSigned": "1"
-            # "security-logoutResponseSigned": "1"
-            # "security-lowercaseUrlencoding": "1"
-            # "security-nameIdEncrypted": "0"
-            # "security-signMetadata": "0"
-            # "security-wantAssertionsEncrypted": "0"
-            # "security-wantAssertionsSigned": "1"
-            # "security-wantMessagesSigned": "1"
-            # "security-wantNameId": "0"
-            # "security-wantXMLValidation": "0"
-            # "sp-name-id-format": "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
-            # "sp-privateKey": ""
-            # "sp-x509cert": ""
-            # "type": "saml"
-            # "types": "authentication"
+  - saml_attribute: "general-use_saml_auth_for_desktop"
+    saml_value: "1"
+  - saml_attribute: "idp-entityId"
+    saml_value: "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}"
+  - saml_attribute: "idp-singleLogoutService.url"
+    saml_value: "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}\/protocol\/saml"
+  - saml_attribute: "idp-singleSignOnService.url"
+    saml_value: "https:\/\/auth.{{ autonomy_root_domain }}\/auth\/realms\/{{ autonomy_internal_zone_name }}\/protocol\/saml"
+  - saml_attribute: "idp-x509cert"
+    saml_value: ""
+  - saml_attribute: "installed_version"
+    saml_value: "3.3.1"
+  - saml_attribute: "providerIds"
+    saml_value: "1"
+  - saml_attribute: "security-authnRequestsSigned"
+    saml_value: "1"
+  - saml_attribute: "security-logoutRequestSigned"
+    saml_value: "1"
+  - saml_attribute: "security-logoutResponseSigned"
+    saml_value: "1"
+  - saml_attribute: "security-lowercaseUrlencoding"
+    saml_value: "1"
+  - saml_attribute: "security-nameIdEncrypted"
+    saml_value: "0"
+  - saml_attribute: "security-signMetadata"
+    saml_value: "0"
+  - saml_attribute: "security-wantAssertionsEncrypted"
+    saml_value: "0"
+  - saml_attribute: "security-wantAssertionsSigned"
+    saml_value: "1"
+  - saml_attribute: "security-wantMessagesSigned"
+    saml_value: "1"
+  - saml_attribute: "security-wantNameId"
+    saml_value: "0"
+  - saml_attribute: "security-wantXMLValidation"
+    saml_value: "0"
+  - saml_attribute: "sp-name-id-format"
+    saml_value: "urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified"
+  - saml_attribute: "sp-privateKey"
+    saml_value: ""
+  - saml_attribute: "sp-x509cert"
+    saml_value: ""
+  - saml_attribute: "type"
+    saml_value: "saml"
+  - saml_attribute: "types"
+    saml_value: "authentication"
 
 
 # ==================================================================================================

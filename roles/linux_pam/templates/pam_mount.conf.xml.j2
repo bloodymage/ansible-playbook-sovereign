@@ -39,7 +39,7 @@
 		<!-- pam_mount parameters: Volume-related -->
     <volume
         fstype="cifs"
-        server="aphrodite.olympus.drbr.org"
+        server="{{ groups['samba_file_servers'][0] }}"
         path="Users/%(USER)"
         mountpoint="/mnt/"
         uid="100000-9999999"
@@ -48,7 +48,7 @@
 
     <volume
         fstype="fuse"
-        path="sshfs#%(USER)@olympus.drbr.org@aphrodite.olympus.drbr.org:"
+        path="sshfs#%(USER)@{{ ansible_domain }}@{{ groups['samba_file_servers'][0] }}:"
         uid="100000-9999999"
         mountpoint="~/ssh"
         />

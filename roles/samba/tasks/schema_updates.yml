@@ -1,4 +1,4 @@
-- name: "Copy schema extensions to schema master"
+- name: "Copy schema extensions to schema master."
   ansible.builtin.template:
     src: "schema.ldif.j2"
     dest: "/tmp/{{ item.name }}"
@@ -16,7 +16,7 @@
 # installed, and if so, don't install again.
 #
 # ==================================================================================================
-- name: "Install schema extensions"
+- name: "Install schema extensions."
   ansible.builtin.command:
     cmd: >
       ldbmodify

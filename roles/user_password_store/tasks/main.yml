@@ -1,0 +1,28 @@
+---
+# tasks file for user_password_store
+# ==================================================================================================
+#
+# NOTE: This task requires 'ansible.builtin.shell'; 'ansible.builtin.command' get's a non-zero
+#       return code.
+#
+# ==================================================================================================
+- name: "Identify user gpg key."
+  ansible.builtin.shell:
+    cmd: >
+      gpg -K |
+      grep -v expired |
+      grep -v revoked |
+      awk '/sec/{if (length($2) > 0) print $2}' |
+      sed 's|.*/0x||'
+  loop: "{{ user_password_store_users }}"
+  become: yes
+  become_user: "{{ item.username }}"
+  register: user_gpg_keys
+
+- name: "Initiallize user password store."
+  ansible.builtin.command:
+    cmd: "pass init {{ item.stdout_lines[0] }}"
+    creates: "{{ user_password_store_user_home }}/{{ item.item.username }}/.password-store/.gpg-id"
+  loop: "{{ user_gpg_keys.results }}"
+  become: yes
+  become_user: "{{ item.item.username }}"

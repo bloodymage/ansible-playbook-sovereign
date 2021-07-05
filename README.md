@@ -65,7 +65,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 ### Roles ([Full list](docs/ROLES.md))
 
 #### Identity Management
-##### [Samba Domain Controller](roles/samba_domain_controller/README.md)
+##### [Samba](roles/samba/README.md)
 ##### [Samba Domain Users](roles/samba_domain_users/README.md)
 
 #### Email
@@ -77,7 +77,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 
 #### Cloud Storage / File sync / Fileserver
 ##### [Nextcloud](roles/nextcloud/README.md)
-##### [Samba File Server](roles/samba_file_server/README.md)
+##### [Samba](roles/samba/README.md)
 
 ### Variables
 
@@ -110,8 +110,8 @@ If the username is not defined, then it will be created based on other defined v
 
 The following are optional choices that are not required to be defined.
 
-```smart_card_usage: no```        Options: yes\no
-```realm_management_system: ""``` Options: "" (not thoroughly tested), Samba, OpenLDAP (not implemented), FreeIPA (not implemented)
+- ```smart_card_usage: no```        Options: yes\no
+- ```realm_management_system: ""``` Options: "" (not tested), Samba, OpenLDAP (not implemented), FreeIPA (not implemented)
 
 #### Role variables
 Each role's variables are defined in their README.md file.

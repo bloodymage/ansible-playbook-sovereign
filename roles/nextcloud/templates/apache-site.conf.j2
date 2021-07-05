@@ -1,10 +1,10 @@
 # {{ ansible_managed }}
 <VirtualHost *:80>
-	ServerName {{ item.name }}
+	ServerName {{ inventory_hostname }}
 
   # ACME Certificate
-  DocumentRoot /srv/www/{{ item.name }}
-  <Directory /srv/www/{{ item.name }}/.well-known/>
+  DocumentRoot /srv/www/{{ inventory_hostname }}
+  <Directory /srv/www/{{ inventory_hostname }}/.well-known/>
     Options +FollowSymLinks
     AllowOverride All
     <IfModule !mod_authz_core.c>
@@ -17,16 +17,16 @@
     DirectoryIndex index.html
   </Directory>
 
-	Redirect / https://{{ item.name }}/
+	Redirect / https://{{ inventory_hostname }}/
 </VirtualHost>
 
 <VirtualHost *:443>
-	ServerName {{ item.name }}
-	ServerAdmin webmaster@{{ item.name }}
+	ServerName {{ inventory_hostname }}
+	ServerAdmin webmaster@{{ inventory_hostname }}
 
-	DocumentRoot /srv/www/{{ item.name }}
+	DocumentRoot /srv/www/{{ inventory_hostname }}
 
-  <Directory /srv/www/{{ item.name }}>
+  <Directory /srv/www/{{ inventory_hostname }}>
     Require all granted
     AllowOverride All
     Options FollowSymLinks MultiViews
@@ -39,10 +39,10 @@
   </Directory>
 
   SSLEngine on
-  SSLCertificateFile "{{ item.ssl_certificate_file }}"
-  SSLCertificateKeyFile "{{ item.ssl_certificate_key_file }}"
-  SSLCertificateChainFile "{{ item.ssl_certificate_chain_file }}"
+  SSLCertificateFile "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
+  SSLCertificateKeyFile "/etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem"
+  SSLCertificateChainFile "/etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem"
 
-  ErrorLog ${APACHE_LOG_DIR}/{{ item.name }}/error.log
-  CustomLog ${APACHE_LOG_DIR}/{{ item.name }}/access.log combined
+  ErrorLog ${APACHE_LOG_DIR}/{{ inventory_hostname }}/error.log
+  CustomLog ${APACHE_LOG_DIR}/{{ inventory_hostname }}/access.log combined
 </VirtualHost>

@@ -23,7 +23,7 @@ galaxy_info:
   galaxy_tags:
     - bloodymage
     - webservers
-    - apache
+    - composer
 
 dependencies:
   - role: bloodymage.autonomy.config_defaults

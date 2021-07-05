@@ -7,6 +7,166 @@ autonomy_packages:
   - dovecot-managesieved
   - dovecot-sieve
 
+# ==================================================================================================
+#
+# Directories
+#
+# ==================================================================================================
+dovecot_etc: "/etc/dovecot"
+dovecot_confd: "{{ dovecot_etc }}/conf.d"
+
+dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
+# ==================================================================================================
+#
+# Sieve Settings
+#
+# ==================================================================================================
+dovecot_sieve: "file:~/sieve;active=~/.dovecot.sieve"
+dovecot_sieve_before:
+  - "{{ dovecot_etc }}/sieve/before/"
+
+dovecot_sieve_after:
+  - "{{ dovecot_etc }}/sieve/after/"
+
+dovecot_sieve_global: "{{ dovecot_etc }}/sieve/global/"
+
+dovecot_sieve_before_files:
+  - 10-spam.sieve
+  - 20-mailbomb.sieve
+  - 30-duplicate.sieve
+
+dovecot_sieve_after_files:
+  - 40-mailinglists.sieve
+  - 90-subaddress.sieve
+
+dovecot_sieve_global_files:
+  - 61-google.sieve
+  - 70-system.sieve
+  - 80-social.sieve
+  - 90-mailinglists-archive.sieve
+  - 98-subaddress-archive.sieve
+
+# ==================================================================================================
+#
+# Virtual Mailbox
+#
+# ==================================================================================================
+dovecot_virtual_mailboxes:
+  - name: "All"
+    folders:
+      - "*"
+      - "Trash"
+      - "Trash/*"
+      - "Sent"
+      - "Sent/*"
+      - "Junk"
+      - "Junk/*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "all"
+  - name: "Flagged"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "flagged"
+  - name: "Important"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label1 KEYWORD $Labelimportant"
+  - name: "Work"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label2 KEYWORD $Labelwork"
+  - name: "Personal"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label3 KEYWORD $Labelpersonal"
+  - name: "Todo"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $label4 KEYWORD $Labeltodo"
+  - name: "Later"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $Labellater KEYWORD $label5"
+  - name: "Recent"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "all younger 172800"
+  - name: "Unread"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "unseen"
+
+# ==================================================================================================
+#
+# Misc Settings
+#
+# ==================================================================================================
+dovecot_migration_users:
+  - account: "bob@example.com"
+    password: "password"
+
 dovecot_auth_mechanisms:
   - plain
   - login
@@ -16,18 +176,10 @@ dovecot_password_databases: []
 dovecot_mail_plugins: "acl virtual"
 dovecot_mail_protocols:
   - name: "!indexer-worker"
-dovecot_sieve: "file:~/sieve;active=~/.dovecot.sieve"
-dovecot_sieve_before:
-  - "/var/mail/vmail/sieve-before"
-
-dovecot_sieve_after:
-  - "/var/mail/vmail/sieve-after"
 
 dovecot_imap_protocols:
   - name: imap
     mail_plugins: "$mail_plugins"
-
-dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
 
 dovecot_auth_conf:
   - "{{ dovecot_auth_conf_system }}"
@@ -37,7 +189,7 @@ dovecot_auth_deny:
   passdb:
     - driver: passwd-file
       deny: yes
-      args: /etc/dovecot/deny-users
+      args: "{{ dovecot_etc }}/deny-users"
 
 dovecot_auth_conf_system:
   name: "system"
@@ -46,7 +198,6 @@ dovecot_auth_conf_system:
   userdb:
     - driver: "static"
       args: "allow_all_users=yes uid={{ user_vmail_id_number }} gid={{ user_vmail_id_number }} home=/var/mail/vmail/%d/%n"
-
 
 dovecot_password_file: "/etc/dovecot/passwd.db"
 
@@ -90,3 +241,13 @@ dovecot_auth_conf_oauth2:
     - driver: "oauth2"
       mechanisms: "xoauth2 oauthbearer"
       args: "/etc/dovecot/dovecot-oauth2.conf.ext"
+
+# The following variables are not modified from the application defaults.
+
+
+# ==================================================================================================
+#
+# Dovecot Defaults
+#
+# ==================================================================================================
+__dovecot_sieve_global: ""

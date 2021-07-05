@@ -43,7 +43,7 @@
     scope: global
   become: yes
 
-- name: "Set gnome lockscreen to use xscreensaver lock"
+- name: "Set gnome lockscreen to use xscreensaver lock."
   ansible.builtin.file:
     src: "/usr/bin/xscreensaver-command"
     dest: "/usr/bin/gnome-screensaver-command"

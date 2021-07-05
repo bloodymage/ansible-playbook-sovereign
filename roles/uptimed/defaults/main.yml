@@ -2,3 +2,83 @@
 # defaults file for uptimed
 autonomy_packages:
   - uptimed
+
+# Email address to mail milestones/records to.
+# Assumes sendmail compatible MTA installed as /usr/lib/sendmail.
+# You can enable this below or with the -e option on the commandline.
+uptimed_email_address: "{{ autonomy_sysadmin_email_address }}"
+
+# Send email? (0 = no way, 1 = yes please!, 2 = only for milestones, 3 = only for records)
+uptimed_send_email: "{{ __uptimed_send_email }}"
+
+# Milestones are configurable now.
+# Syntax is pretty easy: MILESTONE=time:description
+# Default time is in seconds, but it can be postfixed with "d", "w" or "y"
+# for days/weeks/years.
+# Keep in mind that the description needs to fit in the window.
+uptimed_milestones: "{{ __uptimed_milestones }}"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ==================================================================================================
+#
+# System defaults
+#
+# The following variables are used to keep track of uptimed internal defaults for these
+# configuration options.
+#
+# ==================================================================================================
+__uptimed_email_address: "root@localhost"
+__uptimed_send_email: 0
+
+__uptimed_milestones:
+  - name: "5d"
+    description: "five days"
+  - name: "10d"
+    description: "ten days"
+  - name: "25d"
+    description: "twenty-five days"
+  - name: "50d"
+    description: "fifty days"
+  - name: "10w"
+    description: "ten weeks"
+  - name: "75d"
+    description: "seventy-five days"
+  - name: "100d"
+    description: "hundred days"
+  - name: "150d"
+    description: "hundred and fifty days"
+  - name: "25w"
+    description: "twenty-five weeks"
+  - name: "200d"
+    description: "two hundred days"
+  - name: "250d"
+    description: "250 days"
+  - name: "300d"
+    description: "three hundred days"
+  - name: "50w"
+    description: "fifty weeks"
+  - name: "1y"
+    description: "one year"
+  - name: "400d"
+    description: "four hundred days"
+  - name: "500d"
+    description: "five hundred days"
+  - name: "100w"
+    description: "hundred weeks"
+  - name: "750d"
+    description: "750 days"
+  - name: "1000d"
+    description: "thousand days"
+

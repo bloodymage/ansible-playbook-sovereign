@@ -37,8 +37,8 @@ username map = /etc/samba/user.map
 tls enabled  = yes
 tls certfile = {{ ownca_etc }}/certs/{{ autonomy_fqdn }}.pem
 tls keyfile  = {{ ownca_etc }}/private/{{ autonomy_fqdn }}.key
-tls cafile   = {{ ownca_etc }}/certs/{{ autonomy_org_name | lower }}-root-ca.pem
-tls crlfile  = {{ ownca_etc }}/crls/{{ autonomy_org_name }}-root.crl
+tls cafile   = {{ ownca_etc }}/certs/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component-ca-chain.pem
+tls crlfile  = {{ ownca_etc }}/crls/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component.crl
 tls dhparams file = {{ ownca_etc }}/dhparams/{{ autonomy_fqdn }}.pem
 {% else %}
 # Idmap Settings

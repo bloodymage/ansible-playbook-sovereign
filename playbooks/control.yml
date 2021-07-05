@@ -7,8 +7,22 @@
 - hosts: localhost
   roles:
     - role: bloodymage.autonomy.config_environment
+      when:
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is not defined)
+      tags:
+        - always
     - role: bloodymage.autonomy.gnupg
+      tags:
+        - gnupg
     - role: bloodymage.autonomy.password_store
       tags:
         - password_store
         - password-store
+    - role: bloodymage.autonomy.user_password_store
+      vars:
+        user_password_store_users:
+          - username: "{{ __autonomy_user }}"
+      tags:
+        - user-password-store
+        - user_password_store
+

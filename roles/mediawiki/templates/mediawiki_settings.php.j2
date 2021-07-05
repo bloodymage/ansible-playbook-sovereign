@@ -141,47 +141,56 @@ $wgRightsUrl = "";
 $wgRightsText = "";
 $wgRightsIcon = "";
 
-# Path to the GNU diff3 utility. Used for conflict resolution.
-$wgDiff3 = "/usr/bin/diff3";
-
 # The following permissions were set based on your choice in the installer
 $wgGroupPermissions['*']['createaccount'] = false;
 $wgGroupPermissions['*']['edit'] = false;
 $wgGroupPermissions['sysop']['interwiki'] = true;
 
+# Path to the GNU diff3 utility. Used for conflict resolution.
+$wgDiff3 = "/usr/bin/diff3";
+
 $wgDefaultSkin = "{{ mediawiki_default_skin | lower }}";
 
+$wgSMTP = [
+"host"     => "mail.{{ ansible_domain }}", // could also be an IP address. Where the SMTP server is located. If using SSL or TLS, add the prefix "ssl://" or "tls://".
+"IDHost"   => "{{ item.name }}",      // Generally this will be the domain name of your website (aka mywiki.org)
+"port"     => 587,                // Port to use when connecting to the SMTP server
+"auth"     => true,               // Should we use SMTP authentication (true or false)
+"username" => "mediawiki@{{ ansible_domain }}",     // Username to use for SMTP authentication (if being used)
+"password" => "{{ mediawiki_mail_user_password }}"       // Password to use for SMTP authentication (if being used)
+];
+
 {% for skin in mediawiki_skins_defaults %}
-  wfLoadSkin( '{{ skin }}' );
+  wfLoadSkin( "{{ skin }}" );
 {% endfor %}
 
 {% for extension in mediawiki_extensions_defaults -%}
-  wfLoadExtension( '{{ extension.name }}' );
+  wfLoadExtension( "{{ extension.name }}" );
 {% endfor %}
 
 {% for extension in mediawiki_extensions -%}
-  wfLoadExtension( '{{ extension.name }}' );
+  wfLoadExtension( "{{ extension.name }}" );
 {% endfor %}
 
 {% if mediawiki_ldap_config %}
   // Safe IP or not (for bypassing external login via AD)
-  $safeIPs = array('127.0.0.1','localhost');
-  $ipsVars = array('HTTP_X_FORWARDED_FOR','HTTP_X_REAL_IP','REMOTE_ADDR');
+  $safeIPs = array("127.0.0.1","localhost");
+  $ipsVars = array("HTTP_X_FORWARDED_FOR","HTTP_X_REAL_IP","REMOTE_ADDR");
   foreach ($ipsVars as $ipsVar) {
     if (isset($_SERVER[$ipsVar]) && mb_strlen($_SERVER[$ipsVar]) > 3 ) { $wikiRequestIP = $_SERVER[$ipsVar]; break; }
   }
   $wikiRequestSafe = (isset($wikiRequestIP) && ( in_array($wikiRequestIP,$safeIPs) ));
 
-  // Create Wiki-Group 'engineering' from default user group
-  $wgGroupPermissions['engineering'] = $wgGroupPermissions['user'];
+  // Create Wiki-Group "engineering" from default user group
+  $wgGroupPermissions["engineering"] = $wgGroupPermissions["user"];
 
   // Private Wiki. External LDAP login. Default NS requires login.
   $wgEmailConfirmToEdit = false;
-  $wgGroupPermissions['*']['edit'] = false;
-  $wgGroupPermissions['*']['read'] = false;
-  $wgGroupPermissions['*']['createaccount'] = false;
-  $wgGroupPermissions['sysop']['createaccount'] = false;
-  $wgGroupPermissions['*']['autocreateaccount'] = true;
+  $wgGroupPermissions["*"]["edit"] = false;
+  $wgGroupPermissions["*"]["read"] = false;
+  $wgGroupPermissions["*"]["createaccount"] = false;
+  $wgGroupPermissions["sysop"]["createaccount"] = false;
+  $wgGroupPermissions["*"]["autocreateaccount"] = true;
   $wgBlockDisablesLogin = true;
 
   $ldapConfig = false;
@@ -198,7 +207,7 @@ $wgDefaultSkin = "{{ mediawiki_default_skin | lower }}";
   if ( $ldapConfig ) {
 
   {% for extension in mediawiki_extensions_ldap %}
-    wfLoadExtension( '{{ extension.name }}' );
+    wfLoadExtension( "{{ extension.name }}" );
   {% endfor %}
 
     $LDAPProviderDomainConfigs = $ldapJsonFile;
@@ -206,10 +215,10 @@ $wgDefaultSkin = "{{ mediawiki_default_skin | lower }}";
     if ($wikiRequestSafe) { $LDAPAuthentication2AllowLocalLogin = true; }
   }
   {% if mediawiki_kerberos_ad_sso %}
-    wfLoadExtension( 'Auth_remoteuser' );
-    $wgAuthRemoteuserUserName = getenv( 'LOGON_USER' );
+    wfLoadExtension( "Auth_remoteuser" );
+    $wgAuthRemoteuserUserName = getenv( "LOGON_USER" );
     $wgAuthRemoteuserUserNameReplaceFilter = [
-    '@{{ autonomy_domain | upper }}$' => ''
+    "@{{ autonomy_domain | upper }}$" => ""
     ];
     {% endif %}
 {% endif %}
@@ -228,7 +237,7 @@ $wgDefaultSkin = "{{ mediawiki_default_skin | lower }}";
 $wgEnableAPI=true;
 
 $wgFileExtensions = array_merge( $wgFileExtensions,
-    array( 'doc', 'xls', 'mpp', 'pdf', 'ppt', 'xlsx', 'jpg',
-            'tiff', 'odt', 'odg', 'ods', 'odp','png', 'svg'
+    array( "doc", "xls", "mpp", "pdf", "ppt", "xlsx", "jpg",
+            "tiff", "odt", "odg", "ods", "odp","png", "svg"
             )
 );

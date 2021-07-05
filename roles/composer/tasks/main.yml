@@ -1,2 +1,26 @@
 ---
 # tasks file for composer
+# ==================================================================================================
+#
+# The first two tasks install required applications.
+#
+# Variables:
+#   __os_variables_files: Defined in role "bloodymage.autonomy.config_defaults" which this role has
+#                         as a dependency.
+#   autonomy_packages: Defined in defaults/main.yml
+#
+# ==================================================================================================
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: yes

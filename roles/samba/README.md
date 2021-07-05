@@ -57,6 +57,7 @@ Similar Projects
 
 References
 ----------
+- [Making Samba 4 the default LDAP Server](https://fy.blackhats.net.au/blog/html/2018/04/18/making_samba_4_the_default_ldap_server.html)
 
 Contributing
 ------------

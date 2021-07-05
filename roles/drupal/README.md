@@ -27,6 +27,11 @@ Including an example of how to use your role (for instance, with variables passe
       roles:
          - { role: username.rolename, x: 42 }
 
+
+Misc
+----
+
+Heavily inspired by geerlingguys role. https://github.com/geerlingguy/ansible-role-drupal
 License
 -------
 
