@@ -162,7 +162,7 @@
     - postfix_debug
     - postfix-debug
 
-- NAME: "Install SMTP Header Checks."
+- name: "Install SMTP Header Checks."
   ansible.builtin.template:
     src: "smtp_header_checks.j2"
     dest: "/etc/postfix/smtp_header_checks"
