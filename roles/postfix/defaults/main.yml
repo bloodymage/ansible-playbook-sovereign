@@ -3,6 +3,18 @@
 autonomy_packages:
   - postfix
 
+# ==================================================================================================
+#
+# Decisions
+#
+# ==================================================================================================
+postfix_use_mysql_backend: no
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
 postfix_mailbox_users: []
 
 postfix_virtual_mailbox_domain_maps:
@@ -67,9 +79,11 @@ postfix_ldap_map_debug_level: 0
 # Variables which our default is different from postfix's default.
 postfix_alias_maps:
   - "hash:/etc/aliases"
+  
 postfix_biff: "no"
 postfix_canonical_maps:
   - "hash:/etc/postfix/canonical"
+
 postfix_compatibility_level: "2"
 
 postfix_home_mailbox: "Maildir/"
