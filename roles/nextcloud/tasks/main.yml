@@ -118,3 +118,13 @@
 #   include: nextcloud_ldap.yml
 #   when:
 #     - 'user_ldap' in nextcloud_apps
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Configure User SAML."
+  include_tasks: nextcloud_user_saml.yml
+  # when:
+  #   - 'user_saml' in nextcloud_apps

@@ -24,6 +24,16 @@
     - "restart tls"
     - "reload tls"
 
+- name: "Update nextcloud certificates."
+  include_tasks: nextcloud_certificates.yml
+  listen:
+    - "update nextcloud certificates"
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
 # TODO: Update this command to update pam config.
 - name: Update PAM
   ansible.builtin.command:
