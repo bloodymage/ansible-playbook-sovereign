@@ -12,7 +12,6 @@ if exists "list-id" {
              }
           }
 
-
 # Listar and mailman like
 elsif exists "x-list-id" {
   if header :regex "x-list-id" "<([a-z_0-9-]+)\\\\." {

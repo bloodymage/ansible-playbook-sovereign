@@ -1,0 +1,93 @@
+---
+- name: "Set nextcloud user saml configuration."
+  ansible.builtin.command:
+    cmd: >-
+      php occ config:app:set
+      --value="{{ item.saml_value }}"
+      user_saml
+      {{ item.saml_attribute }}
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  loop: "{{ nextcloud_saml_config }}"
+  become: yes
+  become_user: www-data
+
+# ==================================================================================================
+#
+# The next three task get the keys and certificates required for the SAML configuration.
+#
+# This is done in a way to elimitane the '-----BEGIN ....------' and '-----END ....-----' lines from
+# the data capture.
+#
+# We are using 'ansible.builtin.shell' so we can use 'set pipefail'
+#
+# ==================================================================================================
+- name: "Get current identity provider certificate."
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      cat {{ nextcloud_identity_provider }}.crt |
+      grep -v "END" |
+      grep -v "BEGIN"
+    chdir: "{{ ownca_directory }}/hosts/certs/"
+  args:
+    executable: "/bin/bash"
+  become: no
+  register: __idp_certificate
+  delegate_to: localhost
+  when:
+    - nextcloud_identity_provider is truthy
+
+- name: "Get current nextcloud host private key."
+  ansible.builtin.shell:
+    cmd: "set -o pipefail && cat privkey.pem | grep -v 'END' | grep -v 'BEGIN'"
+    chdir: "/etc/letsencrypt/archive/{{ inventory_hostname }}/"
+  args:
+    executable: "/bin/bash"
+  become: yes
+  register: __sp_private_key
+
+- name: "Get current nextcloud host certificate."
+  ansible.builtin.shell:
+    cmd: "set -o pipefail && cat cert.pem | grep -v 'END' | grep -v 'BEGIN'"
+    chdir: "/etc/letsencrypt/archive/{{ inventory_hostname }}/"
+  args:
+    executable: "/bin/bash"
+  become: yes
+  register: __sp_certificate
+
+- name: "Update nextcloud configuration certificate."
+  ansible.builtin.shell:
+    cmd: >-
+      php occ config:app:set
+      --value="{{ __idp_certificate.stdout}}"
+      --update-only
+      user_saml
+      idp-x509cert
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data
+
+- name: "Update nextcloud configuration public key."
+  ansible.builtin.command:
+    cmd: >-
+      php occ config:app:set
+      --value="{{ __sp_private_key.stdout }}"
+      --update-only
+      user_saml
+      sp-privateKey
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data
+  no_log: yes
+
+- name: "Update nextcloud configuration certificate."
+  ansible.builtin.command:
+    cmd: >-
+      php occ config:app:set
+      --value="{{ __sp_certificate.stdout }}"
+      --update-only
+      user_saml
+      sp-x509cert
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data
