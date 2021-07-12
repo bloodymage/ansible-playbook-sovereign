@@ -80,7 +80,7 @@
     owner: root
     group: root
     mode: "0644"
-    validate: "/usr/sbin/postfix check"
+    #validate: "/usr/sbin/postfix check"
   become: yes
   loop:
     - dynamicmaps.cf
