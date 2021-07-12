@@ -4,6 +4,12 @@ require ["variables", "envelope", "fileinto", "subaddress", "mailbox","regex"];
 #
 # Google
 #
+# mail-noreply@google.com
+# noreply-daa26fef@plus.google.com
+# notifications-googleplay@google.com
+# privacy-noreply@google.com
+# no-reply@accounts.google.com
+#
 # ==================================================================================================
 if anyof (
           address :is "from" "no-reply@accounts.google.com",
@@ -22,7 +28,8 @@ if anyof (
 }
 
 if anyof (
-          address :is "from" "calendar-notification@google.com"
+          address :is "from" "calendar-notification@google.com",
+          address :is "from" "calendar-noreply@google.com"
           )
 {
  fileinto :create "Archive/Google/Calendar";
@@ -39,10 +46,19 @@ if anyof (
 }
 
 if anyof (
-          address :is "from" "noreply-googleplay@google.com"
+          address :is "from" "noreply-googleplay@google.com",
+          address :is "from" "googleplay-noreply@google.com"
           )
 {
  fileinto :create "Archive/Google/Play";
+  stop;
+}
+
+if anyof (
+          address :contains "from" "@plus.google.com"
+          )
+{
+ fileinto :create "Archive/Google/Plus";
   stop;
 }
 
@@ -52,7 +68,8 @@ if anyof (
           address :is "from" "news-noreply@google.com",
           address :is "from" "noreply@google.com",
           address :is "from" "photos-drive-noreply@google.com",
-          address :is "from" "noreply@plus.google.com"
+          address :is "from" "noreply@plus.google.com",
+          address :contains "from" "google.com"
           )
 {
  fileinto :create "Archive/Google";

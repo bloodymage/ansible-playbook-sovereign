@@ -1,0 +1,23 @@
+---
+# ==================================================================================================
+#
+# The following handlers update nextcloud certificates configuration.
+#
+# ==================================================================================================
+- name: "Get current nextcloud host certificate."
+  community.crypto.x509_certificate_info:
+    path: "/etc/letsencrypt/archive/{{ autonomy_fqdn }}/cert.pem"
+  become: yes
+  register: __certificate
+
+- name: "Update nextcloud configuration certificate."
+  ansible.builtin.command:
+    cmd: >
+      php occ config:app:set
+      user_saml
+      sp-x509cert
+      --value="{{ __certificate.public_key }}"
+      --update-only
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data
