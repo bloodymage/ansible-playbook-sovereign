@@ -40,7 +40,9 @@ dovecot_sieve_after_files:
   - 90-subaddress.sieve
 
 dovecot_sieve_global_files:
+  - 60-businesses.sieve
   - 61-google.sieve
+  - 61-openpgp.sieve
   - 70-system.sieve
   - 80-social.sieve
   - 90-mailinglists-archive.sieve
