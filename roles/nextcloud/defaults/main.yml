@@ -176,7 +176,7 @@ nextcloud_saml_config:
   - saml_attribute: "general-allow_multiple_user_back_ends"
     saml_value: "1"
   - saml_attribute: "general-idp0_display_name"
-    saml_value: "Keycloak"
+    saml_value: "{{ autonomy_internal_zone_name | title }}"
   - saml_attribute: "general-require_provisioned_account"
     saml_value: "1"
   - saml_attribute: "general-uid_mapping"
