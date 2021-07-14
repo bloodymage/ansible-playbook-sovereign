@@ -14,8 +14,128 @@ autonomy_packages:
 # ==================================================================================================
 dovecot_etc: "/etc/dovecot"
 dovecot_confd: "{{ dovecot_etc }}/conf.d"
+dovecot_sieve_dir: "{{ dovecot_etc }}/sieve"
+dovecot_sieve_global_dir: "{{ dovecot_sieve_dir }}/global"
 
 dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
+
+dovecot_use_inboxzero_namespace: no
+
+# ==================================================================================================
+#
+# Namespaces
+#
+# ==================================================================================================
+dovecot_private_namespace:
+  name: "private"
+  inbox: "yes"
+  type: private
+  separator: "/"
+  prefix:
+  #location:
+  #hidden: "no"
+  list: "yes"
+  subscriptions: "yes"
+  mailboxes:
+    - name: "Sent"
+      auto: "subscribe"
+      special_use: "\\Sent"
+    - name: Drafts
+      special_use: "\\Drafts"
+      auto: subscribe
+    - name: "Junk"
+      special_use: "\\Junk"
+      auto: "subscribe"
+    - name: "Trash"
+      special_use: "\\Trash"
+      autoexpunge: "30 days"
+      auto: "subscribe"
+    - name: "Archive"
+      special_use: "\\Archive"
+      auto: "subscribe"
+
+dovecot_virtual_namespace:
+  name: "virtual"
+  prefix: "Virtual/"
+  separator: "/"
+  hidden: "no"
+  list: "yes"
+  subscriptions: "no"
+  location: "virtual:/etc/dovecot/virtual:INDEX=/var/mail/vmail/%d/%n/virtual"
+  mailboxes:
+    - name: "All"
+      special_use: "\\All"
+      comment: All my messages
+      auto: create
+    - name: "Flagged"
+      special_use: "\\Flagged"
+      comment: "All my flagged messages"
+      auto: "create"
+    - name: Important
+      comment: "All my important messages"
+      auto: "create"
+    - name: Recent
+      comment: "All my recent messages"
+      auto: "create"
+    - name: Unread
+      comment: All my unread messages
+      auto: "create"
+    # - name: Later
+    #   comment: All my unread messages
+    #   auto: "create"
+    # - name: Personal
+    #   comment: All my unread messages
+    #   auto: "create"
+    # - name: Todo
+    #   comment: All my unread messages
+    #   auto: "create"
+    # - name: Work
+    #   comment: All my unread messages
+    #   auto: "create"
+
+dovecot_inboxzero_name: "0-Inbox"
+
+dovecot_inboxzero_namespace:
+  name: "inboxzero"
+  prefix: "{{ dovecot_inboxzero_name }}/"
+  separator: "/"
+  hidden: "no"
+  list: "yes"
+  subscriptions: "no"
+  location: "virtual:/etc/dovecot/inboxzero:INDEX=/var/mail/vmail/%d/%n/inboxzero"
+  mailboxes:
+    - name: "{{ dovecot_inboxzero_name }}"
+      comment: "All my unread messages."
+      auto: "create"
+    - name: "1-FollowUp"
+      comment: "Messages I need to follow up on."
+      auto: "create"
+    - name: "2-Hold"
+      comment: "Messages for upcoming tasks and events."
+      auto: "create"
+
+dovecot_shared_namespace:
+  name: "shared"
+  type: "shared"
+  separator: "/"
+  prefix: "shared/%%u/"
+  #location: maildir:%%h/Maildir:INDEX=~/Maildir/shared/%%u
+  #subscriptions: "no"
+  #list: children
+
+dovecot_public_namespace:
+  names: "public"
+  type: "public"
+  separator: "/"
+  prefix: "public/%%u/"
+  #location: maildir:%%h/Maildir:INDEX=~/Maildir/shared/%%u
+  #subscriptions: "no"
+  #list: children
+
+dovecot_namespaces:
+  - "{{ dovecot_private_namespace }}"
+  - "{{ dovecot_virtual_namespace }}"
+
 # ==================================================================================================
 #
 # Sieve Settings
@@ -27,8 +147,7 @@ dovecot_sieve_before:
 
 dovecot_sieve_after:
   - "{{ dovecot_etc }}/sieve/after/"
-
-dovecot_sieve_global: "{{ dovecot_etc }}/sieve/global/"
+dovecot_sieve_global: "{{ dovecot_sieve_global_dir }}/"
 
 dovecot_sieve_before_files:
   - 10-spam.sieve
@@ -48,6 +167,7 @@ dovecot_sieve_global_files:
   - 90-mailinglists-archive.sieve
   - 98-subaddress-archive.sieve
 
+dovecot_sieve_plugins: "sieve_imapsieve sieve_extprograms"
 # ==================================================================================================
 #
 # Virtual Mailbox
@@ -160,6 +280,41 @@ dovecot_virtual_mailboxes:
     search:
       - "unseen"
 
+dovecot_inboxzero_mailboxes:
+  - name: "0-Inbox"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "unseen"
+  - name: "1-FollowUp"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR (OR (OR KEYWORD $label1 KEYWORD $Labelimportant) (OR KEYWORD $label4 KEYWORD $Labeltodo)) flagged"
+  - name: "2-Hold"
+    folders:
+      - "*"
+      - "-Inbox/Trash"
+      - "-Inbox/Trash/*"
+      - "-Inbox/Junk"
+      - "-Inbox/Junk/*"
+      - "-Inbox/Sent"
+      - "-Inbox/Sent/*"
+    search:
+      - "OR KEYWORD $Labellater KEYWORD $label5"
+
 # ==================================================================================================
 #
 # Misc Settings
@@ -176,12 +331,26 @@ dovecot_auth_mechanisms:
 dovecot_password_databases: []
 
 dovecot_mail_plugins: "acl virtual"
+dovecot_imap_mail_plugins: "imap_sieve"
+dovecot_lmtp_mail_plugins: "sieve"
+dovecot_lda_mail_plugins: "sieve"
+
 dovecot_mail_protocols:
   - name: "!indexer-worker"
 
 dovecot_imap_protocols:
   - name: imap
-    mail_plugins: "$mail_plugins"
+
+dovecot_imapsieve_mailboxes:
+  - name: "Junk"
+    causes: "COPY"
+    timing: "before"
+    type: "spam"
+  - name: "*"
+    from: "Junk"
+    causes: "COPY"
+    timing: "before"
+    type: "ham"
 
 dovecot_auth_conf:
   - "{{ dovecot_auth_conf_system }}"

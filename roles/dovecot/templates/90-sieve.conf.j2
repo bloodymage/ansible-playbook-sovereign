@@ -31,13 +31,13 @@ plugin {
 {% if dovecot_sieve_plugins is defined %}
   sieve_plugins = {{ dovecot_sieve_plugins }}
 
-  {% for mailbox in dovecot_imapsieve_mailboxes -%}
-    imapsieve_mailbox{{ loop.index }}_name = {{ mailbox.name }}
-    {% if mailbox.from is defined %}
-      imapsieve_mailbox{{ loop.index }}_from = {{ mailbox.from }}
-    {% endif %}
-    imapsieve_mailbox{{ loop.index }}_causes = COPY
-    imapsieve_mailbox{{ loop.index }}_{{ mailbox.timing }} = file:{{ dovecot_sieve_pipe_bin_dir }}/report-{{ mailbox.type }}.sieve
+{% for mailbox in dovecot_imapsieve_mailboxes %}
+  imapsieve_mailbox{{ loop.index }}_name = {{ mailbox.name }}
+  {% if mailbox.from is defined -%}
+  imapsieve_mailbox{{ loop.index }}_from = {{ mailbox.from }}
+  {% endif -%}
+  imapsieve_mailbox{{ loop.index }}_causes = COPY
+  imapsieve_mailbox{{ loop.index }}_{{ mailbox.timing }} = file:/etc/dovecot/report-{{ mailbox.type }}.sieve
 
 {% endfor %}
 {% endif %}

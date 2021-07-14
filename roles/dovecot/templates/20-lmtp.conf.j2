@@ -10,6 +10,6 @@ lmtp_save_to_detail_mailbox = yes
 #lmtp_hdr_delivery_address = final
 
 protocol lmtp {
-mail_plugins = $mail_plugins sieve
-postmaster_address = postmaster@{{ autonomy_domain }}
+  mail_plugins = $mail_plugins {{ dovecot_imap_mail_plugins }}
+  postmaster_address = postmaster@{{ autonomy_domain }}
 }

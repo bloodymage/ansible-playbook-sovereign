@@ -69,7 +69,8 @@ if anyof (
           address :is "from" "noreply@google.com",
           address :is "from" "photos-drive-noreply@google.com",
           address :is "from" "noreply@plus.google.com",
-          address :contains "from" "google.com"
+          address :contains "from" "google.com",
+          address :is "from" "mailer-daemon@googlemail.com"
           )
 {
  fileinto :create "Archive/Google";
