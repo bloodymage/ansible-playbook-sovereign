@@ -234,6 +234,8 @@
   delegate_to: localhost
   run_once: yes
   become: no
+  notify:
+    - regenerate certificates
   when:
     - inventory_hostname == "localhost"
     - item.provider == "selfsigned"
@@ -244,27 +246,8 @@
     - ownca-debug
     - ownca-all
 
-- name: Check if Selfsigned Certificate was a success
-  ansible.builtin.debug:
-    msg:
-      - "{{ __new_root }}"
-    verbosity: 1
-  become: no
-  tags:
-    - never
-    - ownca_debug
-    - ownca-debug
-
-- name: "If self signed certificate was regenerated; force regeneration of the remaining certificates."
-  set_fact:
-    __ownca_force_regeneration: yes
-  become: no
-  when:
-    - __new_root.changed or ( __ownca_regenerate is defined and __ownca_regenerate )
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
 
 - name: Generate OwnCA Signed Certificate
   community.crypto.x509_certificate:
@@ -281,6 +264,8 @@
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
   become: no
+  notify:
+    - regenerate issuing ca certificates
   when:
     - item.provider == "ownca"
     - inventory_hostname != "localhost"
@@ -289,6 +274,9 @@
     - ownca_debug
     - ownca-debug
     - ownca-all
+
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
 
 # ==================================================================================================
 #

@@ -1,0 +1,36 @@
+---
+# ==================================================================================================
+#
+# OwnCA Handlers
+#
+# ==================================================================================================
+- name: "Regenerate intermediate CA certificate."
+  ansible.builtin.set_fact:
+    __ownca_force_regenerate: yes
+  become: no
+  listen:
+    - regenerate certificates
+
+- name: "Regenerate issuing CA certificate."
+  ansible.builtin.set_fact:
+    __ownca_force_regenerate: yes
+  become: no
+  listen:
+    - regenerate certificates
+    - regenerate issuing ca certificates
+
+- name: "Regenerate user certificates."
+  ansible.builtin.set_fact:
+    __user_cert_force_regeneration: yes
+  become: no
+  listen:
+    - regenerate certificates
+    - regenerate user certificates
+
+- name: "Regenerate host certificates."
+  ansible.builtin.set_fact:
+    __host_cert_force_regeneration: yes
+  become: no
+  listen:
+    - regenerate certificates
+    - regenerate host certificates
