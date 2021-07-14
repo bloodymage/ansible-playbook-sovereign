@@ -1,3 +1,4 @@
+---
 - hosts: certificate_authorities
   roles:
     - role: bloodymage.autonomy.config_environment
@@ -5,15 +6,6 @@
         - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
-    - role: bloodymage.autonomy.config_ownca_environment
-      tags: []
     - role: bloodymage.autonomy.sshca
       tags:
         - sshca
-    - role: bloodymage.autonomy.ownca
-      tags:
-        - ownca
-    - role: bloodymage.autonomy.ownca_crl
-      tags:
-        - ownca_crl
-        - ownca-crl

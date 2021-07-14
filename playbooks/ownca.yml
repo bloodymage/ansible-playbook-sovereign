@@ -1,10 +1,8 @@
+---
 # ==================================================================================================
 #
-# This was split into a separate playbook as a way to 'reset' hosts that had previous failures.
-#
-# This should always run.
-#
-# QUESTION: Maybe there is a better way?
+# We intentially do not set tags for config_ownca_environment because not all task are run every
+# time.  That role has tags set at the task level.
 #
 # ==================================================================================================
 - hosts: all:!localhost
@@ -16,12 +14,18 @@
       tags:
         - always
 
-# ==================================================================================================
-#
-# We intentially do not set tags for config_ownca_environment because not all task are run every
-# time.  That role has tags set at the task level.
-#
-# ==================================================================================================
+- hosts: certificate_authorities
+  roles:
+    - role: bloodymage.autonomy.config_ownca_environment
+      tags: []
+    - role: bloodymage.autonomy.ownca
+      tags:
+        - ownca
+    - role: bloodymage.autonomy.ownca_crl
+      tags:
+        - ownca_crl
+        - ownca-crl
+
 - hosts: all:!localhost:!public_zone
   roles:
     - role: bloodymage.autonomy.config_ownca_environment

@@ -440,4 +440,3 @@
   become: no
   listen:
     - "reboot"
-
