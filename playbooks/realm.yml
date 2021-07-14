@@ -46,12 +46,12 @@
         - samba
         - recreate-realm
 
-- name: "Configure OpenLDAP."
-  hosts: openldap_servers
-  roles:
-    - role: bloodymage.autonomy.openldap
-      tags:
-        - openldap
+# - name: "Configure OpenLDAP."
+#   hosts: openldap_servers
+#   roles:
+#     - role: bloodymage.autonomy.openldap
+#       tags:
+#         - openldap
 
 - name: "Create realm users."
   hosts: samba_schema_master
