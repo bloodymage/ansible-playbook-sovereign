@@ -1,0 +1,191 @@
+---
+# ==================================================================================================
+#
+# Default Postfix Master Configuration
+#
+# Note for all services, if the type is 'inet', private cannot be 'yes'.
+#
+# Refs
+#  - http://www.postfix.org/master.5.html
+#
+# ==================================================================================================
+__postfix_master_input_smtp_service_type: "inet"
+__postfix_master_input_smtp_service_command: "smtpd"
+__postfix_master_input_smtp_service_args: ""
+
+__postfix_master_smtpd_service_type: "pass"
+__postfix_master_smtpd_service_command: "smtpd"
+__postfix_master_smtpd_service_args: ""
+
+__postfix_master_dnsblog_service_type: "unix"
+__postfix_master_dnsblog_service_command: "dnsblog"
+__postfix_master_dnsblog_service_args: ""
+
+__postfix_master_tlsproxy_service_type: "unix"
+__postfix_master_tlsproxy_service_command: "tlsproxy"
+__postfix_master_tlsproxy_service_args: ""
+
+__postfix_master_submission_service_type: "inet"
+__postfix_master_submission_service_command: "smtpd"
+__postfix_master_submission_service_args:
+  - "-o smtpd_tls_security_level=encrypt"
+  - "-o smtpd_sasl_auth_enable=yes"
+  - "-o smtpd_sasl_type=dovecot"
+  - "-o smtpd_sasl_path=private/auth"
+  - "-o smtpd_sasl_security_options=noanonymous"
+  - "-o smtpd_sasl_local_domain=$myhostname"
+  - "-o smtpd_client_restrictions=permit_sasl_authenticated,reject"
+  - "-o smtpd_sender_login_maps=hash:/etc/postfix/virtual"
+  - "-o smtpd_sender_restrictions=reject_sender_login_mismatch"
+  - "-o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject"
+
+__postfix_master_smtps_service_type: "inet"
+__postfix_master_smtps_service_command: "smtpd"
+__postfix_master_smtps_service_args:
+  - "-o smtpd_tls_wrappermode=yes"
+  - "-o smtpd_sasl_auth_enable=yes"
+
+__postfix_master_628_service_type: "inet"
+__postfix_master_628_service_command: "qmqpd"
+__postfix_master_628_service_args: ""
+
+__postfix_master_pickup_service_type: "unix"
+__postfix_master_pickup_service_command: "pickup"
+__postfix_master_pickup_service_args: ""
+
+__postfix_master_cleanup_service_type: "unix"
+__postfix_master_cleanup_service_command: "cleanup"
+__postfix_master_cleanup_service_args: ""
+
+__postfix_master_qmgr_service_type: "unix"
+__postfix_master_qmgr_service_command: "qmgr"
+__postfix_master_qmgr_service_args: ""
+
+__postfix_master_tlsmgr_service_type: "unix"
+__postfix_master_tlsmgr_service_command: "tlsmgr"
+__postfix_master_tlsmgr_service_args: ""
+
+__postfix_master_rewrite_service_type: "unix"
+__postfix_master_rewrite_service_command: "trivial-rewrite"
+__postfix_master_rewrite_service_args: ""
+
+__postfix_master_bounce_service_type: "unix"
+__postfix_master_bounce_service_command: "bounce"
+__postfix_master_bounce_service_args: ""
+
+__postfix_master_defer_service_type: "unix"
+__postfix_master_defer_service_command: "bounce"
+__postfix_master_defer_service_args: ""
+
+__postfix_master_trace_service_type: "unix"
+__postfix_master_trace_service_command: "bounce"
+__postfix_master_trace_service_args: ""
+
+__postfix_master_verify_service_type: "unix"
+__postfix_master_verify_service_command: "verify"
+__postfix_master_verify_service_args: ""
+
+__postfix_master_flush_service_type: "unix"
+__postfix_master_flush_service_command: "flush"
+__postfix_master_flush_service_args: ""
+
+__postfix_master_proxymap_service_type: "unix"
+__postfix_master_proxymap_service_command: "proxymap"
+__postfix_master_proxymap_service_args: ""
+
+__postfix_master_proxywrite_service_type: "unix"
+__postfix_master_proxywrite_service_command: "proxywrite"
+__postfix_master_proxywrite_service_args: ""
+
+__postfix_master_output_smtp_service_type: "unix"
+__postfix_master_output_smtp_service_command: "smtp"
+__postfix_master_output_smtp_service_args: ""
+
+__postfix_master_relay_service_type: "unix"
+__postfix_master_relay_service_command: "smtp"
+__postfix_master_relay_service_args:
+  - "-o syslog_name=postfix/$service_name"
+
+__postfix_master_showq_service_type: "unix"
+__postfix_master_showq_service_command: "showq"
+__postfix_master_showq_service_args: ""
+
+__postfix_master_error_service_type: "unix"
+__postfix_master_error_service_command: "error"
+__postfix_master_error_service_args: ""
+
+__postfix_master_retry_service_type: "unix"
+__postfix_master_retry_service_command: "retry"
+__postfix_master_retry_service_args: ""
+
+__postfix_master_discard_service_type: "unix"
+__postfix_master_discard_service_command: "discard"
+__postfix_master_discard_service_args: ""
+
+__postfix_master_local_service_type: "unix"
+__postfix_master_local_service_command: "local"
+__postfix_master_local_service_args: ""
+
+__postfix_master_virtual_service_type: "unix"
+__postfix_master_virtual_service_command: "virtual"
+__postfix_master_virtual_service_args: ""
+
+__postfix_master_lmtp_service_type: "unix"
+__postfix_master_lmtp_service_command: "lmtp"
+__postfix_master_lmtp_service_args: ""
+
+__postfix_master_anvil_service_type: "unix"
+__postfix_master_anvil_service_command: "anvil"
+__postfix_master_anvil_service_args: ""
+
+__postfix_master_scache_service_type: "unix"
+__postfix_master_scache_service_command: "scache"
+__postfix_master_scache_service_args: ""
+
+__postfix_master_postlog_service_type: "unix-dgram"
+__postfix_master_postlog_service_command: "postlogd"
+__postfix_master_postlog_service_args: ""
+
+__postfix_master_maildrop_service_type: "unix"
+__postfix_master_maildrop_service_command: "pipe"
+__postfix_master_maildrop_service_args:
+  - "flags=DRhu user=vmail argv=/usr/bin/maildrop -d ${recipient}"
+
+__postfix_master_uucp_service_type: "unix"
+__postfix_master_uucp_service_command: "pipe"
+__postfix_master_uucp_service_args:
+  - "flags=Fqhu user=uucp argv=uux -r -n -z -a$sender - $nexthop!rmail ($recipient)"
+
+__postfix_master_ifmail_service_type: "unix"
+__postfix_master_ifmail_service_command: "pipe"
+__postfix_master_ifmail_service_args:
+  - "flags=F user=ftn argv=/usr/lib/ifmail/ifmail -r $nexthop ($recipient)"
+
+__postfix_master_bsmtp_service_type: "unix"
+__postfix_master_bsmtp_service_command: "pipe"
+__postfix_master_bsmtp_service_args:
+  - "flags=Fq. user=bsmtp argv=/usr/lib/bsmtp/bsmtp -t$nexthop -f$sender $recipient"
+
+__postfix_master_scalemail_backend_service_type: "unix"
+__postfix_master_scalemail_backend_service_command: "pipe"
+__postfix_master_scalemail_backend_service_args:
+  - "flags=R user=scalemail argv=/usr/lib/scalemail/bin/scalemail-store ${nexthop} ${user} ${extension}"
+
+__postfix_master_mailman_service_type: "unix"
+__postfix_master_mailman_service_command: "pipe"
+__postfix_master_mailman_service_args:
+  - "flags=FR user=list argv=/usr/lib/mailman/bin/postfix-to-mailman.py"
+  - "${nexthop} ${user}"
+
+__postfix_master_dovecot_service_type: "unix"
+__postfix_master_dovecot_service_command: "pipe"
+__postfix_master_dovecot_service_args:
+  - "flags=DRhu user=vmail:vmail argv=/usr/lib/dovecot/deliver"
+  - "-f ${sender} -d ${user}@${nexthop} -a ${original_recipient}"
+
+__postfix_master_default_service_private: yes
+__postfix_master_default_service_run_unprivileged: yes
+__postfix_master_default_service_run_chroot: no
+__postfix_master_default_service_wakeup_time: "0"
+__postfix_master_default_service_process_limit: "$default_process_limit"
+

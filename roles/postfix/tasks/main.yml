@@ -38,6 +38,12 @@
         - postfix-debug
         - install-packages
 
+- name: "Check if we are using dovecot."
+  ansible.builtin.set_fact:
+    __postfix_master_service_configuration: "{{ __postfix_master_service_configuration + [__postfix_master_dovecot_service_configuration] }}"
+  when:
+    - inventory_hostname in groups['dovecot_servers']
+
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
     __mail_user: "{{ mail_user }}"

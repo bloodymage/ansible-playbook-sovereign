@@ -1,0 +1,433 @@
+---
+# ==================================================================================================
+#
+# Postfix master.cf defaults
+#
+# References:
+#   - https://serverfault.com/questions/688422/minimal-postfix-master-cf
+#
+# ==================================================================================================
+# Services status, enabled or disabled
+postfix_master_input_smtp_service_enabled: yes
+postfix_master_smtpd_service_enabled: yes
+postfix_master_dnsblog_service_enabled: yes
+postfix_master_tlsproxy_service_enabled: yes
+postfix_master_submission_service_enabled: yes
+postfix_master_smtps_service_enabled: yes
+postfix_master_628_service_enabled: no
+postfix_master_pickup_service_enabled: yes
+postfix_master_cleanup_service_enabled: yes
+postfix_master_qmgr_service_enabled: yes
+postfix_master_tlsmgr_service_enabled: yes
+postfix_master_rewrite_service_enabled: yes
+postfix_master_bounce_service_enabled: yes
+postfix_master_defer_service_enabled: yes
+postfix_master_trace_service_enabled: yes
+postfix_master_verify_service_enabled: yes
+postfix_master_flush_service_enabled: yes
+postfix_master_proxymap_service_enabled: yes
+postfix_master_proxywrite_service_enabled: yes
+postfix_master_output_smtp_service_enabled: yes
+postfix_master_relay_service_enabled: yes
+postfix_master_showq_service_enabled: yes
+postfix_master_error_service_enabled: yes
+postfix_master_retry_service_enabled: yes
+postfix_master_discard_service_enabled: yes
+postfix_master_local_service_enabled: yes
+postfix_master_virtual_service_enabled: yes
+postfix_master_lmtp_service_enabled: yes
+postfix_master_anvil_service_enabled: yes
+postfix_master_scache_service_enabled: yes
+postfix_master_postlog_service_enabled: yes
+postfix_master_maildrop_service_enabled: yes
+postfix_master_uucp_service_enabled: yes
+postfix_master_ifmail_service_enabled: yes
+postfix_master_bsmtp_service_enabled: yes
+postfix_master_scalemail_backend_service_enabled: yes
+postfix_master_mailman_service_enabled: yes
+postfix_master_dovecot_service_enabled: yes
+
+# Variables we are changing from the internal defaults
+postfix_master_input_smtp_service_run_chroot: yes
+postfix_master_input_smtp_service_process_limit: "1"
+postfix_master_input_smtp_service_command: "postscreen"
+
+postfix_master_smtpd_service_run_chroot: yes
+
+postfix_master_dnsblog_service_run_chroot: yes
+postfix_master_dnsblog_service_process_limit: "0"
+
+postfix_master_tlsproxy_service_run_chroot: yes
+postfix_master_tlsproxy_service_process_limit: "0"
+
+postfix_master_submission_service_run_chroot: yes
+
+postfix_master_smtps_service_run_chroot: yes
+
+postfix_master_628_service_run_chroot: yes
+
+postfix_master_pickup_service_private: no
+postfix_master_pickup_service_run_chroot: yes
+postfix_master_pickup_service_wakeup_time: "60"
+postfix_master_pickup_service_process_limit: "1"
+
+postfix_master_cleanup_service_private: no
+postfix_master_cleanup_service_run_chroot: yes
+postfix_master_cleanup_service_process_limit: "1"
+
+postfix_master_qmgr_service_private: no
+postfix_master_qmgr_service_wakeup_time: "300"
+postfix_master_qmgr_service_process_limit: "1"
+
+postfix_master_tlsmgr_service_run_chroot: yes
+postfix_master_tlsmgr_service_wakeup_time: "1000?"
+postfix_master_tlsmgr_service_process_limit: "1"
+
+postfix_master_rewrite_service_run_chroot: yes
+
+postfix_master_bounce_service_run_chroot: yes
+postfix_master_bounce_service_process_limit: "0"
+
+postfix_master_defer_service_run_chroot: yes
+postfix_master_defer_service_process_limit: "0"
+
+postfix_master_trace_service_run_chroot: yes
+postfix_master_trace_service_process_limit: "0"
+
+postfix_master_verify_service_run_chroot: yes
+postfix_master_verify_service_process_limit: "1"
+
+postfix_master_flush_service_private: no
+postfix_master_flush_service_run_chroot: yes
+postfix_master_flush_service_wakeup_time: "1000?"
+postfix_master_flush_service_process_limit: "0"
+
+postfix_master_proxywrite_service_process_limit: "1"
+
+postfix_master_output_smtp_service_run_chroot: yes
+
+postfix_master_relay_service_run_chroot: yes
+
+postfix_master_showq_service_private: no
+postfix_master_showq_service_run_chroot: yes
+
+postfix_master_error_service_run_chroot: yes
+
+postfix_master_retry_service_run_chroot: yes
+
+postfix_master_discard_service_run_chroot: yes
+
+postfix_master_local_service_run_unprivileged: no
+postfix_master_local_service_run_chroot: no
+
+postfix_master_virtual_service_run_unprivileged: no
+postfix_master_virtual_service_run_chroot: no
+
+postfix_master_lmtp_service_run_chroot: yes
+
+postfix_master_anvil_service_run_chroot: yes
+postfix_master_anvil_service_process_limit: "1"
+
+postfix_master_scache_service_run_chroot: yes
+postfix_master_scache_service_process_limit: "1"
+
+postfix_master_postlog_service_private: no
+postfix_master_postlog_service_run_chroot: no
+postfix_master_postlog_service_process_limit: "1"
+
+postfix_master_maildrop_service_run_unprivileged: no
+postfix_master_maildrop_service_run_chroot: no
+
+postfix_master_uucp_service_run_unprivileged: no
+postfix_master_uucp_service_run_chroot: no
+
+postfix_master_ifmail_service_run_unprivileged: no
+postfix_master_ifmail_service_run_chroot: no
+
+postfix_master_bsmtp_service_run_unprivileged: no
+postfix_master_bsmtp_service_run_chroot: no
+
+postfix_master_scalemail_backend_service_run_unprivileged: no
+postfix_master_scalemail_backend_service_run_chroot: no
+postfix_master_scalemail_backend_service_process_limit: "2"
+
+postfix_master_mailman_service_run_unprivileged: no
+postfix_master_mailman_service_run_chroot: no
+
+postfix_master_dovecot_service_run_unprivileged: no
+postfix_master_dovecot_service_run_chroot: no
+
+
+
+
+# Variables which remain the same as the internal defaults
+postfix_master_input_smtp_service_type: "{{ __postfix_master_input_smtp_service_type }}"
+postfix_master_input_smtp_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_input_smtp_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_input_smtp_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_input_smtp_service_args: "{{ __postfix_master_input_smtp_service_args }}"
+
+postfix_master_smtpd_service_type: "{{ __postfix_master_smtpd_service_type }}"
+postfix_master_smtpd_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_smtpd_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_smtpd_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_smtpd_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_smtpd_service_command: "{{ __postfix_master_smtpd_service_command }}"
+postfix_master_smtpd_service_args: "{{ __postfix_master_smtpd_service_args }}"
+
+postfix_master_dnsblog_service_type: "{{ __postfix_master_dnsblog_service_type }}"
+postfix_master_dnsblog_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_dnsblog_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_dnsblog_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_dnsblog_service_command: "{{ __postfix_master_dnsblog_service_command }}"
+postfix_master_dnsblog_service_args: "{{ __postfix_master_dnsblog_service_args }}"
+
+postfix_master_tlsproxy_service_type: "{{ __postfix_master_tlsproxy_service_type }}"
+postfix_master_tlsproxy_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_tlsproxy_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_tlsproxy_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_tlsproxy_service_command: "{{ __postfix_master_tlsproxy_service_command }}"
+postfix_master_tlsproxy_service_args: "{{ __postfix_master_tlsproxy_service_args }}"
+
+postfix_master_submission_service_type: "{{ __postfix_master_submission_service_type }}"
+postfix_master_submission_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_submission_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_submission_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_submission_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_submission_service_command: "{{ __postfix_master_submission_service_command }}"
+postfix_master_submission_service_args: "{{ __postfix_master_submission_service_args }}"
+
+postfix_master_smtps_service_type: "{{ __postfix_master_smtps_service_type }}"
+postfix_master_smtps_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_smtps_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_smtps_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_smtps_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_smtps_service_command: "{{ __postfix_master_smtps_service_command }}"
+postfix_master_smtps_service_args: "{{ __postfix_master_smtps_service_args }}"
+
+postfix_master_628_service_type: "{{ __postfix_master_628_service_type }}"
+postfix_master_628_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_628_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_628_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_628_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_628_service_command: "{{ __postfix_master_628_service_command }}"
+postfix_master_628_service_args: "{{ __postfix_master_628_service_args }}"
+
+postfix_master_pickup_service_type: "{{ __postfix_master_pickup_service_type }}"
+postfix_master_pickup_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_pickup_service_command: "{{ __postfix_master_pickup_service_command }}"
+postfix_master_pickup_service_args: "{{ __postfix_master_pickup_service_args }}"
+
+postfix_master_cleanup_service_type: "{{ __postfix_master_cleanup_service_type }}"
+postfix_master_cleanup_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_cleanup_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_cleanup_service_command: "{{ __postfix_master_cleanup_service_command }}"
+postfix_master_cleanup_service_args: "{{ __postfix_master_cleanup_service_args }}"
+
+postfix_master_qmgr_service_type: "{{ __postfix_master_qmgr_service_type }}"
+postfix_master_qmgr_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_qmgr_service_run_chroot: "{{ __postfix_master_default_service_run_chroot }}"
+postfix_master_qmgr_service_command: "{{ __postfix_master_qmgr_service_command }}"
+postfix_master_qmgr_service_args: "{{ __postfix_master_qmgr_service_args }}"
+
+postfix_master_tlsmgr_service_type: "{{ __postfix_master_tlsmgr_service_type }}"
+postfix_master_tlsmgr_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_tlsmgr_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_tlsmgr_service_command: "{{ __postfix_master_tlsmgr_service_command }}"
+postfix_master_tlsmgr_service_args: "{{ __postfix_master_tlsmgr_service_args }}"
+
+postfix_master_rewrite_service_type: "{{ __postfix_master_rewrite_service_type }}"
+postfix_master_rewrite_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_rewrite_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_rewrite_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_rewrite_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_rewrite_service_command: "{{ __postfix_master_rewrite_service_command }}"
+postfix_master_rewrite_service_args: "{{ __postfix_master_rewrite_service_args }}"
+
+postfix_master_bounce_service_type: "{{ __postfix_master_bounce_service_type }}"
+postfix_master_bounce_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_bounce_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_bounce_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_bounce_service_command: "{{ __postfix_master_bounce_service_command }}"
+postfix_master_bounce_service_args: "{{ __postfix_master_bounce_service_args }}"
+
+postfix_master_defer_service_type: "{{ __postfix_master_defer_service_type }}"
+postfix_master_defer_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_defer_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_defer_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_defer_service_command: "{{ __postfix_master_defer_service_command }}"
+postfix_master_defer_service_args: "{{ __postfix_master_defer_service_args }}"
+
+postfix_master_trace_service_type: "{{ __postfix_master_trace_service_type }}"
+postfix_master_trace_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_trace_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_trace_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_trace_service_command: "{{ __postfix_master_trace_service_command }}"
+postfix_master_trace_service_args: "{{ __postfix_master_trace_service_args }}"
+
+postfix_master_verify_service_type: "{{ __postfix_master_verify_service_type }}"
+postfix_master_verify_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_verify_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_verify_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_verify_service_command: "{{ __postfix_master_verify_service_command }}"
+postfix_master_verify_service_args: "{{ __postfix_master_verify_service_args }}"
+
+postfix_master_flush_service_type: "{{ __postfix_master_flush_service_type }}"
+postfix_master_flush_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_flush_service_command: "{{ __postfix_master_flush_service_command }}"
+postfix_master_flush_service_args: "{{ __postfix_master_flush_service_args }}"
+
+postfix_master_proxymap_service_type: "{{ __postfix_master_proxymap_service_type }}"
+postfix_master_proxymap_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_proxymap_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_proxymap_service_run_chroot: "{{ __postfix_master_default_service_run_chroot }}"
+postfix_master_proxymap_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_proxymap_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_proxymap_service_command: "{{ __postfix_master_proxymap_service_command }}"
+postfix_master_proxymap_service_args: "{{ __postfix_master_proxymap_service_args }}"
+
+postfix_master_proxywrite_service_type: "{{ __postfix_master_proxywrite_service_type }}"
+postfix_master_proxywrite_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_proxywrite_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_proxywrite_service_run_chroot: "{{ __postfix_master_default_service_run_chroot }}"
+postfix_master_proxywrite_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_proxywrite_service_command: "{{ __postfix_master_proxywrite_service_command }}"
+postfix_master_proxywrite_service_args: "{{ __postfix_master_proxywrite_service_args }}"
+
+postfix_master_output_smtp_service_type: "{{ __postfix_master_output_smtp_service_type }}"
+postfix_master_output_smtp_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_output_smtp_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_output_smtp_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_output_smtp_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_output_smtp_service_command: "{{ __postfix_master_output_smtp_service_command }}"
+postfix_master_output_smtp_service_args: "{{ __postfix_master_output_smtp_service_args }}"
+
+postfix_master_relay_service_type: "{{ __postfix_master_relay_service_type }}"
+postfix_master_relay_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_relay_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_relay_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_relay_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_relay_service_command: "{{ __postfix_master_relay_service_command }}"
+postfix_master_relay_service_args: "{{ __postfix_master_relay_service_args }}"
+
+postfix_master_showq_service_type: "{{ __postfix_master_showq_service_type }}"
+postfix_master_showq_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_showq_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_showq_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_showq_service_command: "{{ __postfix_master_showq_service_command }}"
+postfix_master_showq_service_args: "{{ __postfix_master_showq_service_args }}"
+
+postfix_master_error_service_type: "{{ __postfix_master_error_service_type }}"
+postfix_master_error_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_error_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_error_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_error_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_error_service_command: "{{ __postfix_master_error_service_command }}"
+postfix_master_error_service_args: "{{ __postfix_master_error_service_args }}"
+
+postfix_master_retry_service_type: "{{ __postfix_master_retry_service_type }}"
+postfix_master_retry_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_retry_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_retry_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_retry_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_retry_service_command: "{{ __postfix_master_retry_service_command }}"
+postfix_master_retry_service_args: "{{ __postfix_master_retry_service_args }}"
+
+postfix_master_discard_service_type: "{{ __postfix_master_discard_service_type }}"
+postfix_master_discard_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_discard_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_discard_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_discard_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_discard_service_command: "{{ __postfix_master_discard_service_command }}"
+postfix_master_discard_service_args: "{{ __postfix_master_discard_service_args }}"
+
+postfix_master_local_service_type: "{{ __postfix_master_local_service_type }}"
+postfix_master_local_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_local_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_local_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_local_service_command: "{{ __postfix_master_local_service_command }}"
+postfix_master_local_service_args: "{{ __postfix_master_local_service_args }}"
+
+postfix_master_virtual_service_type: "{{ __postfix_master_virtual_service_type }}"
+postfix_master_virtual_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_virtual_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_virtual_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_virtual_service_command: "{{ __postfix_master_virtual_service_command }}"
+postfix_master_virtual_service_args: "{{ __postfix_master_virtual_service_args }}"
+
+postfix_master_lmtp_service_type: "{{ __postfix_master_lmtp_service_type }}"
+postfix_master_lmtp_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_lmtp_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_lmtp_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_lmtp_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_lmtp_service_command: "{{ __postfix_master_lmtp_service_command }}"
+postfix_master_lmtp_service_args: "{{ __postfix_master_lmtp_service_args }}"
+
+postfix_master_anvil_service_type: "{{ __postfix_master_anvil_service_type }}"
+postfix_master_anvil_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_anvil_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_anvil_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_anvil_service_command: "{{ __postfix_master_anvil_service_command }}"
+postfix_master_anvil_service_args: "{{ __postfix_master_anvil_service_args }}"
+
+postfix_master_scache_service_type: "{{ __postfix_master_scache_service_type }}"
+postfix_master_scache_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_scache_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_scache_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_scache_service_command: "{{ __postfix_master_scache_service_command }}"
+postfix_master_scache_service_args: "{{ __postfix_master_scache_service_args }}"
+
+postfix_master_postlog_service_type: "{{ __postfix_master_postlog_service_type }}"
+postfix_master_postlog_service_run_unprivileged: "{{ __postfix_master_default_service_run_unprivileged }}"
+postfix_master_postlog_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_postlog_service_command: "{{ __postfix_master_postlog_service_command }}"
+postfix_master_postlog_service_args: "{{ __postfix_master_postlog_service_args }}"
+
+postfix_master_maildrop_service_type: "{{ __postfix_master_maildrop_service_type }}"
+postfix_master_maildrop_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_maildrop_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_maildrop_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_maildrop_service_command: "{{ __postfix_master_maildrop_service_command }}"
+postfix_master_maildrop_service_args: "{{ __postfix_master_maildrop_service_args }}"
+
+postfix_master_uucp_service_type: "{{ __postfix_master_uucp_service_type }}"
+postfix_master_uucp_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_uucp_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_uucp_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_uucp_service_command: "{{ __postfix_master_uucp_service_command }}"
+postfix_master_uucp_service_args: "{{ __postfix_master_uucp_service_args }}"
+
+postfix_master_ifmail_service_type: "{{ __postfix_master_ifmail_service_type }}"
+postfix_master_ifmail_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_ifmail_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_ifmail_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_ifmail_service_command: "{{ __postfix_master_ifmail_service_command }}"
+postfix_master_ifmail_service_args: "{{ __postfix_master_ifmail_service_args }}"
+
+postfix_master_bsmtp_service_type: "{{ __postfix_master_bsmtp_service_type }}"
+postfix_master_bsmtp_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_bsmtp_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_bsmtp_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_bsmtp_service_command: "{{ __postfix_master_bsmtp_service_command }}"
+postfix_master_bsmtp_service_args: "{{ __postfix_master_bsmtp_service_args }}"
+
+postfix_master_scalemail_backend_service_type: "{{ __postfix_master_scalemail_backend_service_type }}"
+postfix_master_scalemail_backend_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_scalemail_backend_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_scalemail_backend_service_command: "{{ __postfix_master_scalemail_backend_service_command }}"
+postfix_master_scalemail_backend_service_args: "{{ __postfix_master_scalemail_backend_service_args }}"
+
+postfix_master_mailman_service_type: "{{ __postfix_master_mailman_service_type }}"
+postfix_master_mailman_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_mailman_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_mailman_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_mailman_service_command: "{{ __postfix_master_mailman_service_command }}"
+postfix_master_mailman_service_args: "{{ __postfix_master_mailman_service_args }}"
+
+postfix_master_dovecot_service_type: "{{ __postfix_master_dovecot_service_type }}"
+postfix_master_dovecot_service_private: "{{ __postfix_master_default_service_private }}"
+postfix_master_dovecot_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
+postfix_master_dovecot_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
+postfix_master_dovecot_service_command: "{{ __postfix_master_dovecot_service_command }}"
+postfix_master_dovecot_service_args: "{{ __postfix_master_dovecot_service_args }}"
+
