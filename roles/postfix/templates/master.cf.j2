@@ -9,13 +9,13 @@
 # Do not forget to execute "postfix reload" after editing this file.
 #
 #}
-# ==========================================================================
-# service           type  private unpriv  chroot  wakeup  maxproc command + args
-#                         (yes)   (yes)   (no)    (never) (100)
-# ==========================================================================
+# ==================================================================================================
+# service           type        private unpriv  chroot  wakeup  maxproc command + args
+#                               (yes)   (yes)   (no)    (never) (100)
+# ==================================================================================================
 {% for service in __postfix_master_service_configuration %}
 {%- if service.enabled is defined and service.enabled is false -%}#{%- endif -%}
-{{ service.name.ljust(20) }}{{ service.type.ljust(6) }}
+{{ service.name.ljust(20) }}{{ service.type.ljust(12) }}
   {%- if service.type == "inet" -%}
     {{ "n".ljust(8) }}
   {%- elif service.private == __postfix_master_default_service_private -%}
@@ -56,5 +56,3 @@
 {% endfor %}
 {% endif %}
 {% endfor %}
-
-#postlog   unix-dgram n  -       n       -       1       postlogd

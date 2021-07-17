@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
 
 {% for check in postfix_smtp_header_checks %}
-  /^{{ check.name }}: .*/ {{ check.status }}
+/^{{ check.name }}: .*/ {{ check.status }}
 {% endfor %}

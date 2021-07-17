@@ -73,7 +73,7 @@ postfix_master_pickup_service_process_limit: "1"
 
 postfix_master_cleanup_service_private: no
 postfix_master_cleanup_service_run_chroot: yes
-postfix_master_cleanup_service_process_limit: "1"
+postfix_master_cleanup_service_process_limit: "0"
 
 postfix_master_qmgr_service_private: no
 postfix_master_qmgr_service_wakeup_time: "300"
