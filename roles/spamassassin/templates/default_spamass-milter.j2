@@ -24,7 +24,7 @@ OPTIONS="${OPTIONS} -m"
 # default. You can override them by uncommenting and changing them
 # here.
 ######################################
-SOCKET="/var/spool/postfix/spamassassin/spamd.sock"
+SOCKET="{{ mail_spamassassin_socket }}"
 SOCKETOWNER="{{ spamassassin_spamd_user }}":"{{ spamassassin_spamd_user }}"
 SOCKETMODE="0660"
 ######################################

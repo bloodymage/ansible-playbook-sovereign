@@ -7,7 +7,7 @@ autonomy_packages:
 spamassassin_spamd_user: "debian-spamd"
 
 spamassassin_directories:
-  - name: /var/spool/postfix/spamassassin
+  - name: "{{ mail_spamassassin_sock_dir }}"
     owner: "{{ spamassassin_spamd_user }}"
     group: root
     mode: "0755"
