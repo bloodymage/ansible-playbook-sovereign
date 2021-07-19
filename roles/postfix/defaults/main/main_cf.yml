@@ -62,7 +62,7 @@ postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 postfix_smtpd_banner: "$myhostname ESMTP"
 
 postfix_smtpd_milters:
-  - "unix:/spamassassin/spamd.sock"
+  - "{{ mail_spamassassin_unix_socket }}"
 
 postfix_smtpd_tls_chain_files:
   - "/etc/ssl/private/{{ autonomy_fqdn }}.key"

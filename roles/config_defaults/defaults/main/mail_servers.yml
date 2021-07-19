@@ -8,5 +8,12 @@ mail_recipient_delimiter: "+"
 mail_user: vmail
 mail_group: "{{ mail_user }}"
 
-mail_spamassassin_sock_dir: "/var/spool/postfix/spamassassin"
+mail_spamassassin_sock_loc_name: "spamassassin"
+mail_spamassassin_sock_dir: "/var/spool/postfix/{{ mail_spamassassin_sock_loc_name }}"
 mail_spamassassin_socket: "{{ mail_spamassassin_sock_dir }}/spamd.sock"
+mail_spamassassin_unix_socket: "unix:{{ mail_spamassassin_sock_loc_name }}/spamd.sock"
+
+mail_opendkim_sock_loc_name: "opendkim"
+mail_opendkim_sock_dir: "/var/spool/postfix/{{ mail_opendkim_sock_loc_name }}"
+mail_opendkim_socket: "{{ mail_opendkim_sock_dir }}/opendkim.sock"
+mail_opendkim_unix_socket: "unix:{{ mail_opendkim_sock_loc_name }}/opendkim.sock"

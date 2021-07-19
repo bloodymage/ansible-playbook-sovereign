@@ -44,6 +44,12 @@
   when:
     - inventory_hostname in groups['dovecot_servers']
 
+- name: "Check if we are using OpenDKIM."
+  ansible.builtin.set_fact:
+    postfix_smtpd_milters: "{{ postfix_smtpd_milters + [mail_opendkim_unix_socket] }}"
+  when:
+    - inventory_hostname in groups['opendkim_servers']
+
 - name: "Get Users' password from password-store"
   ansible.builtin.set_fact:
     __mail_user: "{{ mail_user }}"

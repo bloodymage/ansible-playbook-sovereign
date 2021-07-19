@@ -28,6 +28,12 @@
     #  tags:
     #    - clamav
 
+- hosts: opendkim_servers
+  roles:
+    - role: bloodymage.autonomy.opendkim
+      tags:
+        - opendkim
+
 - hosts: imap_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.dovecot
