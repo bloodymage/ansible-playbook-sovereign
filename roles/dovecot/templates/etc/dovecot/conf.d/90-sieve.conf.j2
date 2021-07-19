@@ -37,7 +37,7 @@ plugin {
   imapsieve_mailbox{{ loop.index }}_from = {{ mailbox.from }}
   {% endif -%}
   imapsieve_mailbox{{ loop.index }}_causes = COPY
-  imapsieve_mailbox{{ loop.index }}_{{ mailbox.timing }} = file:/etc/dovecot/report-{{ mailbox.type }}.sieve
+  imapsieve_mailbox{{ loop.index }}_{{ mailbox.timing }} = file:{{ dovecot_sieve_global_dir }}/report-{{ mailbox.type }}.sieve
 
 {% endfor %}
 {% endif %}

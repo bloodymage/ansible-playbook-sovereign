@@ -15,7 +15,7 @@ if anyof (
           address :contains "from" "dropboxmail.com"
           )
 {
- fileinto :create "Archive/Dropbox";
+ fileinto :create "{{ __main_folder }}/Dropbox";
   stop;
 }
 
@@ -30,7 +30,7 @@ if anyof (
           address :contains "from" "firefox.com"
           )
 {
- fileinto :create "Archive/Firefox";
+ fileinto :create "{{ __main_folder }}/Firefox";
   stop;
 }
 
@@ -47,6 +47,6 @@ if anyof (
     address :contains "from" "troopid.com"
           )
 {
- fileinto :create "Archive/ID.me";
+ fileinto :create "{{ __main_folder }}/ID.me";
   stop;
 }

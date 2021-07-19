@@ -10,7 +10,7 @@ if anyof (
           address :contains "from" "facebookmail.com"
           )
 {
- fileinto :create "Archive/Facebook";
+ fileinto :create "{{ __main_folder }}/Facebook";
   stop;
 }
 
@@ -40,7 +40,7 @@ if anyof (
           address :contains "from" "linkedin.com"
           )
 {
- fileinto :create "Archive/LinkedIn";
+ fileinto :create "{{ __main_folder }}/LinkedIn";
   stop;
 }
 
@@ -60,7 +60,7 @@ if anyof (
           address :contains "from" "pinterest.com"
           )
 {
- fileinto :create "Archive/Pinterest";
+ fileinto :create "{{ __main_folder }}/Pinterest";
   stop;
 }
 
@@ -74,7 +74,7 @@ if anyof (
           address :is "from" "noreply@redditmail.com"
           )
 {
- fileinto :create "Archive/Reddit";
+ fileinto :create "{{ __main_folder }}/Reddit";
   stop;
 }
 
@@ -90,7 +90,7 @@ if anyof (
           address :contains "from" "twitter.com"
           )
 {
- fileinto :create "Archive/Twitter";
+ fileinto :create "{{ __main_folder }}/Twitter";
   stop;
 }
 
@@ -104,6 +104,6 @@ if anyof (
           address :is "from" "noreply@youtube.com"
           )
 {
- fileinto :create "Archive/Google/Youtube";
+ fileinto :create "{{ __main_folder }}/Google/Youtube";
   stop;
 }

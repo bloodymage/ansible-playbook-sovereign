@@ -1,3 +1,5 @@
+# {{ ansible_managed }}
+
 require ["variables", "envelope", "fileinto", "subaddress", "mailbox","regex"];
 
 # ==================================================================================================
@@ -23,7 +25,7 @@ if anyof (
           address :is "from" "privacy-noreply@google.com"
           )
 {
- fileinto :create "Archive/Google/Account";
+ fileinto :create "{{ __main_folder }}/Google/Account";
   stop;
 }
 
@@ -32,7 +34,7 @@ if anyof (
           address :is "from" "calendar-noreply@google.com"
           )
 {
- fileinto :create "Archive/Google/Calendar";
+ fileinto :create "{{ __main_folder }}/Google/Calendar";
   stop;
 }
 
@@ -41,7 +43,7 @@ if anyof (
           address :contains "from" "@txt.voice.google.com"
           )
 {
- fileinto :create "Archive/Google/Voice";
+ fileinto :create "{{ __main_folder }}/Google/Voice";
   stop;
 }
 
@@ -50,7 +52,7 @@ if anyof (
           address :is "from" "googleplay-noreply@google.com"
           )
 {
- fileinto :create "Archive/Google/Play";
+ fileinto :create "{{ __main_folder }}/Google/Play";
   stop;
 }
 
@@ -58,7 +60,7 @@ if anyof (
           address :contains "from" "@plus.google.com"
           )
 {
- fileinto :create "Archive/Google/Plus";
+ fileinto :create "{{ __main_folder }}/Google/Plus";
   stop;
 }
 
@@ -73,6 +75,6 @@ if anyof (
           address :is "from" "mailer-daemon@googlemail.com"
           )
 {
- fileinto :create "Archive/Google";
+ fileinto :create "{{ __main_folder }}/Google";
   stop;
 }

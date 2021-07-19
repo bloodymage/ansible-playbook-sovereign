@@ -1,15 +1,18 @@
+# {{ ansible_managed }}
+
 require ["variables", "envelope", "fileinto", "subaddress", "mailbox","regex"];
 
 # ==================================================================================================
 #
-# Openpgp
+# Mailer Daemon (Auto responders)
 #
 # ==================================================================================================
 if anyof (
-          address :is "from" "keyserver@keys.openpgp.org"
+          address :contains "from" "mailer-daemon@",
+          address :contains "from" "postmaster@"
           )
 {
- fileinto :create "Archive/Openpgp";
+  fileinto :create "{{ __main_folder }}/Mailer Daemon";
   stop;
-
 }
+

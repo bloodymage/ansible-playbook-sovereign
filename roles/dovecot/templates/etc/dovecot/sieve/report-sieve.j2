@@ -3,16 +3,16 @@
 require ["vnd.dovecot.pipe", "copy" "imapsieve" "environment", "variables"];
 
 {% if item.type == "ham" %}
-  if environment :matches "imap.mailbox" "*" {
+if environment :matches "imap.mailbox" "*" {
   set  "mailbox" "${1}";
-  }
+}
 
-  if string "${mailbox}" "Trash" {
+if string "${mailbox}" "Trash" {
   stop;
-  }
+}
 {% endif %}
 if environment :matches "imap.user" "*" {
-set "username" "${1}";
+  set "username" "${1}";
 }
 
 pipe :copy "sa-learn-{{ item.type }}.sh" [ "${username}" ];

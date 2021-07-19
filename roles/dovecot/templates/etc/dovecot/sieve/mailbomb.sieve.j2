@@ -1,3 +1,5 @@
+# {{ ansible_managed }}
+
 require ["fileinto", "mailbox"];
 
 if header :contains "Subject" [
@@ -6,12 +8,10 @@ if header :contains "Subject" [
                                "subscription confirmation",
                                "please confirm subscription",
                                "confirmation instructions",
-                                 "confirm mailing list subscription"
+                               "confirm mailing list subscription"
 ]
 {
- fileinto :create "Signups";
-
- # Requires 3rd party plugin
- #expire "day" "10";
-
+  fileinto :create "{{ __main_folder }}/Signups";
+  # Requires 3rd party plugin
+  #expire "day" "10";
 }
