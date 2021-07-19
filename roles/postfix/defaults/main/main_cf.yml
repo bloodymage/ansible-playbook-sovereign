@@ -61,6 +61,9 @@ postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 
 postfix_smtpd_banner: "$myhostname ESMTP"
 
+postfix_smtpd_milters:
+  - "unix:/spamassassin/spamd.sock"
+
 postfix_smtpd_tls_chain_files:
   - "/etc/ssl/private/{{ autonomy_fqdn }}.key"
   - "/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem"
@@ -147,7 +150,6 @@ postfix_unknown_client_reject_code: "{{ __postfix_unknown_client_reject_code }}"
 postfix_unknown_hostname_reject_code: "{{ __postfix_unknown_hostname_reject_code }}"
 postfix_virtual_mailbox_domains: "{{ __postfix_virtual_mailbox_domains }}"
 postfix_virtual_transport: "{{ __postfix_virtual_transport }}"
-postfix_smtpd_milters: "{{ __postfix_smtpd_milters }}"
 postfix_milter_connect_macros: "{{ __postfix_milter_connect_macros }}"
 postfix_milter_default_action: "{{ __postfix_milter_default_action }}"
 
