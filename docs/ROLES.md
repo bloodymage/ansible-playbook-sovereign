@@ -3,7 +3,7 @@
 ## Main Services
 ### Identity Management
 #### [Samba Domain Controller](../roles/samba/README.md)
-#### [Samba Domain Users](../roles/samba_domain_users/README.md)
+#### [Realm Users](../roles/realm_users/README.md)
 
 ### Email
 #### [Dovecot](../roles/dovecot/README.md)
