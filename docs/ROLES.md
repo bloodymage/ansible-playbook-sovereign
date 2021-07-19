@@ -2,7 +2,7 @@
 
 ## Main Services
 ### Identity Management
-#### [Samba Domain Controller](../roles/samba_domain_controller/README.md)
+#### [Samba Domain Controller](../roles/samba/README.md)
 #### [Samba Domain Users](../roles/samba_domain_users/README.md)
 
 ### Email
