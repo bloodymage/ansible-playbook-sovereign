@@ -51,6 +51,12 @@ git clone https://github.com/bloodymage/ansible-collection-autonomy autonomy
 
 ## Usage
 
+### Create GPG
+
+Create a GPG key for the user that will be using ansible and the collection playbooks.
+
+### Create your [inventory](docs/INVENTORY.md).
+
 Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
 For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) for more information.
 
@@ -66,7 +72,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 
 #### Identity Management
 ##### [Samba](roles/samba/README.md)
-##### [Samba Domain Users](roles/samba_domain_users/README.md)
+##### [Realm Users](roles/realm_users/README.md)
 
 #### Email
 ##### [Dovecot](roles/dovecot/README.md)
@@ -79,7 +85,7 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 ##### [Nextcloud](roles/nextcloud/README.md)
 ##### [Samba](roles/samba/README.md)
 
-### Variables
+### [Variables](docs/VARIABLES.md)
 
 Note: This is still in early development.  Some of the variable descriptions and requirements listed below pertain more to how it is planned to eventually work, than how it works right now.
 
@@ -111,7 +117,6 @@ If the username is not defined, then it will be created based on other defined v
 The following are optional choices that are not required to be defined.
 
 - ```smart_card_usage: no```        Options: yes\no
-- ```realm_management_system: ""``` Options: "" (not tested), Samba, OpenLDAP (not implemented), FreeIPA (not implemented)
 
 #### Role variables
 Each role's variables are defined in their README.md file.
