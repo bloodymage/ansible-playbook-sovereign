@@ -1,0 +1,12 @@
+---
+# Mail Servers
+mail_location: "mbox:~/mail:INBOX=/var/mail/%u"
+mail_uid: "{{ user_vmail_id_number }}"
+mail_gid: "{{ user_vmail_id_number }}"
+mail_privileged_group:  mail
+mail_recipient_delimiter: "+"
+mail_user: vmail
+mail_group: "{{ mail_user }}"
+
+mail_spamassassin_sock_dir: "/var/spool/postfix/spamassassin"
+mail_spamassassin_socket: "{{ mail_spamassassin_sock_dir }}/spamd.sock"

@@ -133,12 +133,6 @@ sysconf_dir: "/etc"
 
 keycloak_name: "keycloak"
 keycloak_home: "/opt/{{ keycloak_name }}"
-mysql_datadir: "/var/lib/mysql"
-ssh_config_dir: "{{ sysconf_dir }}/ssh"
-sshca_key_directory: "~/.ssh/ca"
-sshca_cert_directory: "{{ ssh_config_dir }}/ca"
-sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
-
 
 
 # ==================================================================================================
@@ -157,18 +151,10 @@ user_homeassistant_id_number: 503
 user_vmail_id_number:  504
 user_odoo_id_number: 505
 
-# Mail Servers
-mail_location: "mbox:~/mail:INBOX=/var/mail/%u"
-mail_uid: "{{ user_vmail_id_number }}"
-mail_gid: "{{ user_vmail_id_number }}"
-mail_privileged_group:  mail
-mail_recipient_delimiter: "+"
-mail_user: vmail
-mail_group: "{{ mail_user }}"
-
 # MySQL / MariaDB
 mysql_administrator: "root"
 mysql_system_maintenance_user: "debian-sys-maint"
+mysql_datadir: "/var/lib/mysql"
 
 # ==================================================================================================
 #
@@ -184,30 +170,6 @@ samba_group_class: "(objectClass=group)"
 samba_search: "(|(userPrincipalName=%uid)(sAMAccountName=%uid)(mail=%uid))"
 samba_enabled_users: "(! (userAccountControl:1.2.840.113556.1.4.803:=2))"
 samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
-
-# ==================================================================================================
-#
-# SSH
-#
-# ==================================================================================================
-# SSH
-sshca_domain_list: "{{ autonomy_domain_list }}"
-sshca_cert_identity: "{{ autonomy_domain_list | join('_') }}"
-
-sshca_domain: "{{ sshca_cert_identity }}"
-sshca_host_key_type: "ed25519"
-sshca_user_key_type: "ed25519"
-sshca_host_keyfile: "{{ sshca_domain }}_host_key"
-sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"
-sshca_hostca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_host_pubfile }}"
-sshca_user_keyfile: "{{ sshca_domain }}_user_key"
-sshca_user_pubfile: "{{ sshca_domain }}_user_key.pub"
-sshca_userca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_user_pubfile }}"
-
-sshca_host_certificate_file: "{{ ssh_config_dir }}/ssh_host_ed25519_key-cert.pub"
-sshca_user_certificate_file: "{{ ssh_config_dir }}/ssh_user_ed25519_key-cert.pub"
-sshca_authorized_keys: "authorized_keys"
-sshca_authorized_principals: "%u"
 
 # ==================================================================================================
 #
@@ -304,7 +266,6 @@ __letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directo
 __letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
 __buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
 __buypass_production_directory: "https://api.buypass.com/acme/directory"
-
 
 # ==================================================================================================
 #
