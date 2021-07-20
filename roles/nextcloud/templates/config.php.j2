@@ -10,7 +10,8 @@ $CONFIG = array (
   'datadirectory' => '{{ nextcloud_data_directory }}/{{ inventory_hostname }}',
   'dbtype' => '{{ nextcloud_database }}',
   'version' => '{{ nextcloud_version }}',
-  'overwrite.cli.url' => 'https://{{ inventory_hostname }}',
+  'overwrite.cli.url' => 'https://{{ autonomy_fqdn }}/',
+  'htaccess.RewriteBase' => '/',
   'dbname' => '{{ nextcloud_db_name }}',
   'dbhost' => '{{ nextcloud_db_server }}',
   'dbport' => '',
@@ -29,4 +30,4 @@ $CONFIG = array (
   'mail_smtphost' => 'mail.{{ autonomy_root_domain }}',
   'mail_smtpport' => '25',
   'default_phone_region' => 'US',
-);
+ );
