@@ -27,6 +27,7 @@ dovecot_use_inboxzero_namespace: no
 #
 # ==================================================================================================
 dovecot_junk_mail_folder: "Junk"
+dovecot_infected_mail_folder: "Infected"
 
 dovecot_private_namespace:
   name: "private"

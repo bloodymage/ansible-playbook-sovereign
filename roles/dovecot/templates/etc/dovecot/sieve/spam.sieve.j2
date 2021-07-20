@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-require ["envelope", "subaddress", "fileinto", "imap4flags", "regex"];
+require ["envelope", "subaddress", "fileinto", "imap4flags", "regex", "mailbox"];
 
 # I don't even want to see spam higher than level 10
 if header :contains "X-Spam-Level" "**********" {
@@ -24,7 +24,7 @@ if anyof (header :contains "X-Spam-Level" "*****",
       stop;
     }
   else {
-    fileinto :create "Infected";
+    fileinto :create "{{ dovecot_infected_mail_folder }}";
     stop;
   }
 }
