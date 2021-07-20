@@ -51,7 +51,7 @@ Host *.{{ autonomy_root_domain }}
   {% endfor %}
 {% endif %}
 
-{# Host * #}
-{#   CanonicalizeHostname yes #}
-{#   CanonicalDomains {{ autonomy_root_domain }} #}
+Host *
+  CanonicalizeHostname yes
+{#  CanonicalDomains {{ autonomy_root_domain }} #}
 {#   CanonicalizeMaxDots 2 #}
