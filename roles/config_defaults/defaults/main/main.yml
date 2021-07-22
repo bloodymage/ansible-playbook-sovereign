@@ -67,6 +67,8 @@ autonomy_city: ""
 
 autonomy_sysadmin_email_address: "admin@{{ autonomy_root_domain }}"
 
+autonomy_default_encryption_type: "ed25519"
+
 # ==================================================================================================
 #
 # Host Information

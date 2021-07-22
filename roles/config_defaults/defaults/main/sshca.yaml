@@ -1,21 +1,19 @@
 ---
+# ==================================================================================================
+#
+# SSH
+#
+# ==================================================================================================
+# SSH
+
 ssh_config_dir: "{{ sysconf_dir }}/ssh"
 sshca_key_directory: "~/.ssh/ca"
 sshca_cert_directory: "{{ ssh_config_dir }}/ca"
 sshca_authorized_principals_dir: "{{ ssh_config_dir }}/auth_principals"
 
-# ==================================================================================================
-#
-# SSH
-#
-# ==================================================================================================
-# SSH
-sshca_domain_list: "{{ autonomy_domain_list }}"
-sshca_cert_identity: "{{ autonomy_domain_list | join('_') }}"
-
-sshca_domain: "{{ sshca_cert_identity }}"
-sshca_host_key_type: "ed25519"
-sshca_user_key_type: "ed25519"
+sshca_domain: "{{ autonomy_org_name }}"
+sshca_host_key_type: "{{ autonomy_default_encryption_type }}"
+sshca_user_key_type: "{{ autonomy_default_encryption_type }}"
 sshca_host_keyfile: "{{ sshca_domain }}_host_key"
 sshca_host_pubfile: "{{ sshca_domain }}_host_key.pub"
 sshca_hostca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_host_pubfile }}"
@@ -23,7 +21,7 @@ sshca_user_keyfile: "{{ sshca_domain }}_user_key"
 sshca_user_pubfile: "{{ sshca_domain }}_user_key.pub"
 sshca_userca_certificate: "{{ ssh_config_dir }}/ca/{{ sshca_user_pubfile }}"
 
-sshca_host_certificate_file: "{{ ssh_config_dir }}/ssh_host_ed25519_key-cert.pub"
-sshca_user_certificate_file: "{{ ssh_config_dir }}/ssh_user_ed25519_key-cert.pub"
+sshca_host_certificate_file: "{{ ssh_config_dir }}/ssh_host_{{ sshca_host_key_type }}_key-cert.pub"
+sshca_user_certificate_file: "{{ ssh_config_dir }}/ssh_user_{{ sshca_user_key_type }}_key-cert.pub"
 sshca_authorized_keys: "authorized_keys"
 sshca_authorized_principals: "%u"

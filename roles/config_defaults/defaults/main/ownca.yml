@@ -128,6 +128,8 @@ ownca_etc_group: "root"
 
 # File
 ownca_format: 'pem'
+# Currently RSA is needed for testing windows smart card authorization.
+# ownca_privatekey_type: "{{ autonomy_default_encryption_type }}"
 ownca_privatekey_type: "RSA"
 
 # Cert Authoritiy

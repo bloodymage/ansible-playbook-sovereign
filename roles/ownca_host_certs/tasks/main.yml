@@ -10,6 +10,84 @@
             - "vars"
       become: no
 
+- name: "Add subject alt names based on ipv6."
+  ansible.builtin.set_fact:
+    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + [__alt_name] }}"
+  vars:
+    __alt_name: "IP:{{ autonomy_ipv6_address }}"
+  when:
+    - autonomy_ipv6_address is defined
+    - autonomy_ipv6_address is truthy
+
+- name: "Add subject alt names based on role."
+  ansible.builtin.set_fact:
+    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
+  become: no
+  loop:
+    - name: "db_servers"
+      alt_name: "db"
+    - name: "dns_servers"
+      alt_name: "ns"
+    - name: "file_servers"
+      alt_name: "fs"
+    - name: "git_servers"
+      alt_name: "git"
+    - name: "homeassistant"
+      alt_name: "home"
+    - name: "auth_servers"
+      alt_name: "auth"
+    - name: "ldap_servers"
+      alt_name: "ldap"
+    - name: "mail_servers"
+      alt_name: "mail"
+    - name: "dovecot_servers"
+      alt_name: "imap"
+    - name: "postfix_servers"
+      alt_name: "smtp"
+    - name: "dlna_servers"
+      alt_name: "dlna"
+    - name: "mosquitto_servers"
+      alt_name: "mqtt"
+    - name: "radius_servers"
+      alt_name: "radius"
+    - name: "redis_servers"
+      alt_name: "redis"
+    - name: "samba_domain_controllers"
+      alt_name: "dc"
+    - name: "web_servers"
+      alt_name: "www"
+    - name: "zwavecontrollers"
+      alt_name: "zwave"
+  vars:
+    __group_id: "{{ autonomy_zone_name }}_{{ item.name }}"
+    __host_index: "{{ groups[__group_id].index(inventory_hostname) + 1 }}"
+    __padded_index: "{{ '%02d' % __host_index | int }}"
+    __alt_name:
+      - "DNS:{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
+      - "DNS:{{ item.alt_name }}.{{ autonomy_domain }}"
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+
+- name: "Add additional subject alt names for samba domain controllers."
+  ansible.builtin.set_fact:
+    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
+  vars:
+    __alt_name:
+      - "DNS:{{ autonomy_domain }}"
+      - "otherName:{{ ownca_msadguid_oid }};UTF8:{{ ownca_objectguid }}"
+  when:
+    - inventory_hostname in groups['samba_domain_controllers'] | default([])
+
+- name: "Set extended key usage based on role."
+  ansible.builtin.set_fact:
+    ownca_host_certs_extended_key_usage: "{{ ownca_host_certs_extended_key_usage + [item.extended_key_uasge] }}"
+  become: no
+  loop:
+    - name: "samba_domain_controllers"
+      extended_key_uasge: "{{ ownca_mskdc_oid }}"
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+
 - name: "Include OS Family Preparation Tasks."
   include: "{{ ansible_os_family | lower }}_prep.yml"
   when:
