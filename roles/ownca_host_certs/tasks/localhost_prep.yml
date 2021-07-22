@@ -115,10 +115,4 @@
           - aa_compromise
   become: no
   delegate_to: localhost
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 

@@ -54,7 +54,16 @@
     force: no
   become: yes
 
-- name: "Set subject alt name based on role."
+- name: "Add subject alt names based on ipv6."
+  ansible.builtin.set_fact:
+    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + [__alt_name] }}"
+  vars:
+    __alt_name: "IP:{{ autonomy_ipv6_address }}"
+  when:
+    - autonomy_ipv6_address is defined
+    - autonomy_ipv6_address is truthy
+
+- name: "Add subject alt names based on role."
   ansible.builtin.set_fact:
     ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
   become: no
@@ -100,6 +109,26 @@
     __alt_name:
       - "DNS:{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
       - "DNS:{{ item.alt_name }}.{{ autonomy_domain }}"
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+
+- name: "Add additional subject alt names for samba domain controllers."
+  ansible.builtin.set_fact:
+    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
+  vars:
+    __alt_name:
+      - "DNS:{{ autonomy_domain }}"
+      - "otherName:{{ ownca_msadguid_oid }};UTF8:{{ ownca_objectguid }}"
+  when:
+    - inventory_hostname in groups['samba_domain_controllers'] | default([])
+
+- name: "Set extended key usage based on role."
+  ansible.builtin.set_fact:
+    ownca_host_certs_extended_key_usage: "{{ ownca_host_certs_extended_key_usage + [item.extended_key_uasge] }}"
+  become: no
+  loop:
+    - name: "samba_domain_controllers"
+      extended_key_uasge: "{{ ownca_mskdc_oid }}"
   when:
     - inventory_hostname in groups[item.name] | default([])
 

@@ -1,38 +1,31 @@
+- name: "Create list of cert authorities."
+  ansible.builtin.set_fact:
+    ownca_crl_distribution_points: "{{ ownca_crl_distribution_points + [__additional_cert_auth] }}"
+  loop: "{{ autonomy_zones | product(__ownca_certificate_authorities_id) }}"
+  vars:
+    __additional_cert: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}"
+  become: no
+
 - name: Copy CRLs to server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/crl/{{ item }}"
-    dest: "/srv/www/{{ vhost.name }}/{{ item }}"
+    src: "{{ ownca_ca_directory }}/crl/{{ item }}.crl"
+    dest: "/srv/www/{{ vhost.name }}/{{ item }}.crl"
     owner: root
     group: root
     mode: "0644"
-  loop:
-    - "{{ autonomy_org_name }}-root.crl"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}.crl"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component.crl"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-identity.crl"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}.crl"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component.crl"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-identity.crl"
+  loop: "{{ ownca_crl_distribution_points }}"
   become: yes
   tags:
     - ownca-crl-distribution-points
     - ownca_crl_distribution_points
 
 - name: Copy CA Certs to server.
-  ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
-    dest: "/srv/www/{{ vhost.name }}/{{ item }}"
+    src: "{{ ownca_ca_directory }}/crl/{{ item }}.crc"
+    dest: "/srv/www/{{ vhost.name }}/{{ item }}.crc"
     owner: root
     group: root
     mode: "0644"
-  loop:
-    - "{{ autonomy_org_name }}-root-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-identity-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-identity-ca.crt"
+  loop: "{{ ownca_crl_distribution_points }}"
   become: yes
   tags:
     - ownca-crl-distribution-points

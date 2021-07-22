@@ -174,6 +174,26 @@
     - never
     - keycloak-admin-user
 
+- name: "Create list of certs to add into the combined pkcs12 file. (Part 1)"
+  ansible.builtin.set_fact:
+    keycloak_pkcs12_other_certificates: "{{ keycloak_pkcs12_other_certificates + [__additional_cert] }}"
+  loop: "{{ autonomy_zones | product(__keycloak_certificate_authorities_id) }}"
+  vars:
+    __etc_certs: "/etc/ssl/certs"
+    __additional_cert: "{{ __etc_certs }}/{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}.pem"
+  become: no
+
+- name: "Add to list of certs to add into the combined pkcs12 file. (Part 2)"
+  ansible.builtin.set_fact:
+    keycloak_pkcs12_other_certificates: "{{ keycloak_pkcs12_other_certificates + [__additional_cert] }}"
+  loop: "{{ groups['samba_domain_controllers'] }}"
+  when:
+    - groups['samba_domain_controllers'] is defined
+  vars:
+    __etc_certs: "/etc/ssl/certs"
+    __additional_cert: "{{ __etc_certs }}/{{ item }}.pem"
+  become: no
+
 # ==================================================================================================
 #
 # TODO: Add way to determine if this should be 'force' overwriten.
@@ -185,14 +205,7 @@
     friendly_name: "{{ keycloak_keystore_alias }}"
     privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
     certificate_path: "{{ ownca_etc }}/certs/{{ autonomy_fqdn }}-chain.pem"
-    other_certificates:
-      - "/etc/ssl/certs/zeus.olympus.drbr.org.pem"
-      - "/etc/ssl/certs/hera.olympus.drbr.org.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-root-ca.pem"
+    other_certificates: "{{ keycloak_pkcs12_other_certificates }}"
     action: export
     passphrase: "{{ keycloak_keystore_password }}"
     state: present

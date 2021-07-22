@@ -113,11 +113,6 @@
     mode: '0600'
     force: "{{ __ownca_regenerate_csr }}"
   become: yes
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
 
 # ==================================================================================================
 #

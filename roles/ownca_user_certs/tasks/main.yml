@@ -186,7 +186,7 @@
 
 - name: "Get identity certificate information"
   community.crypto.x509_certificate_info:
-    path: "{{ ownca_identity_ca_file }}"
+    path: "{{ ownca_identity_ca_cert_path }}"
   become: no
   register: identity_cert
   delegate_to: localhost
@@ -231,7 +231,7 @@
   community.crypto.x509_certificate:
     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ __username }}_{{ item[1].name }}.csr"
-    ownca_path: "{{ ownca_identity_ca_file }}"
+    ownca_path: "{{ ownca_identity_ca_cert_path }}"
     ownca_privatekey_path: "{{ ownca_identity_ca_key }}"
     ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     provider: ownca

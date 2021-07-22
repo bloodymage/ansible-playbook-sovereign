@@ -33,6 +33,8 @@ ownca_host_certs_key_usage:
   - digitalSignature
   - keyEncipherment
 
+ownca_objectguid: ""
+
 # ==================================================================================================
 #
 # The following variables are modified based on system information (host groups, OS Family, etc).

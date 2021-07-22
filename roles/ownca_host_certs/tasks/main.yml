@@ -41,7 +41,7 @@
 # ==================================================================================================
 - name: "Get component CA certificate information."
   community.crypto.x509_certificate_info:
-    path: "{{ ownca_component_ca_path }}"
+    path: "{{ ownca_component_ca_cert_path }}"
   become: no
   register: component_cert
   delegate_to: localhost
@@ -83,8 +83,8 @@
   community.crypto.x509_certificate:
     path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
     csr_path: "{{ ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
-    ownca_path: "{{ ownca_component_ca_path }}"
-    ownca_privatekey_path: "{{ ownca_component_ca_key }}"
+    ownca_path: "{{ ownca_component_ca_cert_path }}"
+    ownca_privatekey_path: "{{ ownca_component_ca_key_path }}"
     ownca_privatekey_passphrase: "{{ ownca_component_password }}"
     provider: ownca
     backup: yes
@@ -96,8 +96,8 @@
   community.crypto.certificate_complete_chain:
     input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + autonomy_fqdn + '.crt') }}"
     intermediate_certificates:
-      - "{{ ownca_component_ca_path }}"
-      - "{{ ownca_intermediate_ca_cert }}"
+      - "{{ ownca_component_ca_cert_path }}"
+      - "{{ ownca_intermediate_ca_cert_path }}"
     root_certificates:
       - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
   register: parent_cert_authorities

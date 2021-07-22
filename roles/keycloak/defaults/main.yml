@@ -51,3 +51,10 @@ keycloak_source_url:
 keycloak_samba_federation:
   - name: "{{ autonomy_org_unit_name }} Active Directory"
     edit_mode: "READONLY"
+
+keycloak_pkcs12_other_certificates:
+  - "/etc/ssl/certs/{{ autonomy_org_name }}-root-ca.pem"
+
+__keycloak_certificate_authorities_id:
+  - "ca"
+  - "component-ca"

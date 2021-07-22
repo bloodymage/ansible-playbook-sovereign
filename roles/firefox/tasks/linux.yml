@@ -36,6 +36,14 @@
     mode: "0755"
   become: yes
 
+- name: "Create list of certs to copy into the firefox directory."
+  ansible.builtin.set_fact:
+    firefox_certificates: "{{ firefox_certificates + [__additional_cert] }}"
+  loop: "{{ autonomy_zones | product(__firefox_certificate_authorities_id) }}"
+  vars:
+    __additional_cert: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}.crt"
+  become: no
+
 # ==================================================================================================
 #
 # TODO: Really need to re-write this loop to allow for more zones
@@ -43,19 +51,12 @@
 # ==================================================================================================
 - name: "Copy certificates to the Firefox Certificate folder."
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ item }}"
+    src: "{{ ownca_usr_directory }}/{{ item }}"
     dest: "{{ firefox_certificate_path }}/{{ item }}"
     owner: root
     group: root
     mode: "0644"
-  loop:
-    - "{{ autonomy_org_name }}-root-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-identity-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca.crt"
-    - "{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-identity-ca.crt"
+  loop: "{{ firefox_certificates }}"
   become: yes
 
 # ==================================================================================================

@@ -16,7 +16,6 @@ autonomy_smart_card_login: no
 autonomy_overwrite_password: no
 autonomy_use_source_code_repos: no
 autonomy_password_length: "42"
-autonomy_zone_type: "internal"
 autonomy_virtual_host: no
 
 #===================================================================================================
@@ -40,19 +39,21 @@ autonomy_virtual_host: no
 # The defaults assume one of each zone.
 #
 # ==================================================================================================
-# Domain Information
+# Zone Information
 autonomy_root_domain: "example.com"
-autonomy_internal_zone_name: "internal"
-autonomy_dmz_zone_name: "dmz"
 autonomy_zone_name: "internal"
-autonomy_zones:
-  - internal
-  - dmz
+autonomy_zone_type: "internal"
 
-autonomy_default_domain: "internal.{{ autonomy_root_domain }}"
-autonomy_domain: "{{ ansible_domain | default(autonomy_default_domain) }}"
-autonomy_domain_list: "{{ autonomy_domain.split('.')[-2:] }}"
-autonomy_realm: "{{ autonomy_domain | upper }}"
+autonomy_zones:
+  - name: internal
+    type: internal
+  - name: dmz
+    type: dmz
+  - name: root
+    type: public
+
+autonomy_domain: "{{ autonomy_zone_name }}.{{ autonomy_root_domain }}"
+autonomy_realm: "{{ autonomy_zone_name | upper }}"
 autonomy_tld: "{{ autonomy_domain.split('.')[-1] }}"
 autonomy_min_domain_id_number: 10000
 
@@ -91,7 +92,7 @@ autonomy_sysadmin_email_address: "admin@{{ autonomy_root_domain }}"
 autonomy_hostname: "{{ inventory_hostname_short }}"
 autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
 autonomy_ipv4_address: "{{ ansible_host }}"
-autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default(omit) }}"
+autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default('') }}"
 
 # ==================================================================================================
 #
@@ -141,7 +142,7 @@ keycloak_home: "/opt/{{ keycloak_name }}"
 #
 # ==================================================================================================
 # Misc
-autonomy_raspberrypi_distribution_release: "buster"
+autonomy_raspberrypi_distribution_release: "{{ ansible_distribution }}"
 
 # Users
 user_mythtv_id_number: 500
@@ -155,6 +156,9 @@ user_odoo_id_number: 505
 mysql_administrator: "root"
 mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: "/var/lib/mysql"
+
+nextcloud_db_user: nextcloud
+nextcloud_db_password: "password"
 
 # ==================================================================================================
 #
@@ -202,10 +206,10 @@ domain_user_keycloak:
   spns:
     - spn: "HTTP"
       host: "{{ internal_keycloak_host }}"
-      keytab_file: "/opt/keycloak/standalone/configuration/keycloak.keytab"
+      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
     - spn: "HTTP"
       host: "{{ dmz_keycloak_host }}"
-      keytab_file: "/opt/keycloak/standalone/configuration/keycloak.keytab"
+      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
   account_expire: "--noexpiry"
 
 domain_user_nextcloud:
@@ -226,15 +230,11 @@ domain_user_nextcloud:
 #
 # Do not modify
 #
-# The following variables are defaults that can be modified via tags (eg, the
-# 'regenerate-private-key' will change '__acmeca_regenerate_private_key' to 'yes') or they are
-# constants that if changed will  cause this playbook to fail.
-#
-# ==================================================================================================
-# ==================================================================================================
-#
-# The following varibles are defaults that can be modified through tag usage
-#
+# The following variables fall into two categories:
+# 1. They are defaults that can be modified via tags (eg, the 'regenerate-private-key' will change
+#    '__acmeca_regenerate_private_key' to 'yes')
+# 2. They are constants that define playbook behavior and modifications will cause the playbooks to
+#    fail.
 #
 # ==================================================================================================
 __debug_mode: no

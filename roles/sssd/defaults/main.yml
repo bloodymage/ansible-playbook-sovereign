@@ -21,4 +21,4 @@ sssd_pam_default: "yes"
 sssd_pam_priority: "128"
 sssd_pam_auth_initial: "pam_sss.so forward_pass"
 
-__sssd_certificate_verification: "crl_file={{ ownca_identity_crl_file_path }}"
+__sssd_certificate_verification: "crl_file={{ ownca_identity_crl_etc_path }}"

@@ -2,3 +2,12 @@
 # defaults file for ownca_crl_distribution_point
 autonomy_packages:
   - python3-cryptography
+
+ownca_crl_distribution_points:
+  - "{{ autonomy_org_name }}-root-ca"
+
+__ownca_certificate_authorities_id:
+  - "ca"
+  - "component-ca"
+  - "identity-ca"
+

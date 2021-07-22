@@ -41,15 +41,6 @@
     - ownca-all
     - install-packages
 
-- name: Get IP geolocation data
-  community.general.ipinfoio_facts:
-  become: no
-  tags:
-    - ownca_crl
-    - ownca-crl
-    - ownca_crl_debug
-    - ownca-crl-debug
-
 - name: "Create SSL CRL Directory"
   ansible.builtin.file:
     path: "/etc/ssl/crls"
@@ -66,102 +57,23 @@
 
 # ==================================================================================================
 #
-# Generate Passwords if they don't exist
-#
-# ==================================================================================================
-- name: "Ensure we have a password for the Root CA"
-  ansible.builtin.set_fact:
-    ownca_root_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ autonomy_org_name }}_common/ownca/ownca_root_password"
-    overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-  become: no
-  delegate_to: localhost
-  run_once: yes
-  when:
-    - ownca_root_password == "password"
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-- name: "Ensure we have a password for the Intermediate CA"
-  ansible.builtin.set_fact:
-    ownca_intermediate_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ autonomy_domain }}/ownca/ownca_intermediate_password"
-    overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-  become: no
-  when:
-    - ownca_intermediate_password == "password"
-  delegate_to: localhost
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-- name: "Ensure we have a password for the Component Issuing CA"
-  ansible.builtin.set_fact:
-    ownca_component_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ autonomy_domain }}/ownca/ownca_component_password"
-    overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-  become: no
-  when:
-    - ownca_component_password == "password"
-  delegate_to: localhost
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-- name: "Ensure we have a password for the Identity Issuing CA"
-  ansible.builtin.set_fact:
-    ownca_identity_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ autonomy_domain }}/ownca/ownca_identity_password"
-    overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-  become: no
-  delegate_to: localhost
-  when:
-    - ownca_identity_password == "password"
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-- name: "Ensure we have a password for the Code Sign Issuing CA"
-  ansible.builtin.set_fact:
-    ownca_codesign_password: "{{ lookup('community.general.passwordstore', password_store_id + ' create=true length=42 nosymbols=true ' + overwrite) }}"
-  vars:
-    password_store_id: "{{ autonomy_domain }}/ownca/ownca_codesign_password"
-    overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-  become: no
-  when:
-    - ownca_codesign_password == "password"
-  delegate_to: localhost
-  tags:
-    - ownca
-    - ownca_debug
-    - ownca-debug
-
-# ==================================================================================================
-#
 # Create CRLs
 #
 # ==================================================================================================
 - name: Generate a CRL
   community.crypto.x509_crl:
-    path: "{{ ownca_directory }}/certificate_authorities/crl/{{ autonomy_org_name }}-{{ item.name }}.crl"
+    path: "{{ ownca_directory }}/certificate_authorities/crl/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
     privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
-    privatekey_passphrase: "{{ item.password }}"
+    privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     issuer:
       CN: "{{ item.common_name }}"
     last_update: "+0s"
     next_update: "+7d"
     revoked_certificates: "{{ item.revoked_certificates | default(ownca_revoked_certificates) }}"
   loop: "{{ ownca_certificate_authorities }}"
-  #vars:
+  vars:
+    __password_store_id: "{{ item.zone_name }}{{ autonomy_root_domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_lookup: "{{ __password_store_id }}"
   #  __revoked_certificate_serials: "{{ lookup('file', ownca_directory + '/certificate_authorities/db/' + autonomy_org_name + '-' + item.name +'-ca.crl.srl').splitlines() }}"
   become: no
   delegate_to: localhost
