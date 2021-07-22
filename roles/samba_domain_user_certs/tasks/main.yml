@@ -87,7 +87,7 @@
 # ==================================================================================================
 #
 # This fails miserably.
-# "attribute 'sshPublicKey' on entry 'CN={{ __dn }},CN=users,DC=OLYMPUS,DC=DRBR,DC=ORG' was not
+# "attribute 'sshPublicKey' on entry 'CN={{ __dn }},CN=users,DC={{ autonomy_org_unit_name }},DC={{ autonomy_org_name }},DC={{ autonomy_tld }}' was not
 # found in the schema!"
 #
 # ==================================================================================================
