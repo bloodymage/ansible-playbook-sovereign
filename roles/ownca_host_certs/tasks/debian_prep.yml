@@ -5,7 +5,7 @@
     state: present
   become: yes
   when:
-    - inventory_hostname not in groups['virtual_ip_address']
+    - inventory_hostname not in groups['virtual_hosts']
 
 # ==================================================================================================
 #
