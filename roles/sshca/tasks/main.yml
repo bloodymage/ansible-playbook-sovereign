@@ -101,16 +101,7 @@
 
 # ==================================================================================================
 #
-# Generate Host CA key
-#
-# Notes:
-#
-# 1. Looked at openssh_keypair module.
-#    https://docs.ansible.com/ansible/latest/collections/community/crypto/openssh_keypair_module.html
-#    The module does not allow for using passwords
-#
-# 2. "echo -e 'n' |" is added because ssh-keygen will ask to overwrite
-#    the file if it already exists.  'n' for No 'y' for Yes
+# Generate CA keys
 #
 # ==================================================================================================
 - name: "Generate Host CA keys."
@@ -122,27 +113,7 @@
     owner: "{{ __autonomy_user }}"
     group: "{{ __autonomy_user }}"
 
-# - name: "Generate Host CA keys."
-#   ansible.builtin.command: ssh-keygen -t "{{ sshca_host_key_type }}"
-#              -f "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
-#              -C "{{ sshca_host_key_comment }}"
-#              -N "{{ sshca_host_key_password }}"
-#   args:
-#     creates: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
-#   #no_log: true
-#   delegate_to: localhost
-#   become: no
-#   tags:
-#     - sshca
-#     - sshca_debug
-#     - sshca-debug
-
-# ==================================================================================================
-#
-# Generate User CA key
-#
-# ==================================================================================================
-- name: "Generate Host CA keys."
+- name: "Generate User CA keys."
   openssh_keypair:
     path: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
     type: "{{ sshca_user_key_type }}"
@@ -150,18 +121,3 @@
     passphrase: "{{ sshca_user_key_password }}"
     owner: "{{ __autonomy_user }}"
     group: "{{ __autonomy_user }}"
-
-# - name: Generate User CA key
-#   ansible.builtin.command: ssh-keygen -t "{{ sshca_user_key_type }}"
-#              -f "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
-#              -C "{{ sshca_user_key_comment }}"
-#              -N "{{ sshca_user_key_password }}"
-#   args:
-#     creates: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
-#   no_log: true
-#   delegate_to: localhost
-#   become: no
-#   tags:
-#     - sshca
-#     - sshca_debug
-#     - sshca-debug
