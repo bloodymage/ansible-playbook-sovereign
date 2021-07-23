@@ -5,7 +5,8 @@
 # time.  That role has tags set at the task level.
 #
 # ==================================================================================================
-- hosts: all
+- name: "Configure the environment for the Certificate Authorities."
+  hosts: all
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
@@ -16,7 +17,8 @@
     - role: bloodymage.autonomy.config_ownca_environment
       tags: []
 
-- hosts: certificate_authorities
+- name: "Setup the TLS Certificate Authorities."
+  hosts: certificate_authorities
   roles:
     - role: bloodymage.autonomy.ownca
       tags:
@@ -28,7 +30,8 @@
         - ownca_crl
         - ownca-crl
 
-- hosts: all:!localhost:!public_zone
+- name: "Create the host certificates."
+  hosts: all:!localhost:!public_zone
   roles:
     - role: bloodymage.autonomy.ownca_host_certs
       tags:

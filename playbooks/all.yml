@@ -4,7 +4,8 @@
 # Gather some information.  This is always done, as it'll create groups used later in this playbook.
 #
 # ==================================================================================================
-- hosts: all:!localhost
+- name: "Configure the environment for basic host configuration."
+  hosts: all:!localhost
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
@@ -18,7 +19,8 @@
 # Configure setting applicable to ALL hosts.
 #
 # ==================================================================================================
-- hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
+- name: "Basic host configuration for all hosts."
+  hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.hostname
@@ -39,7 +41,8 @@
 #   - Windows
 #
 # ==================================================================================================
-- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+- name: "Linux Host SSH configuration."
+  hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.sshca_host_certs
@@ -55,7 +58,8 @@
 # Decision to make: Should I run those tasks inside the users role as well?
 #
 # ==================================================================================================
-- hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
+- name: "Setup users on all hosts."
+  hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.users
@@ -67,7 +71,8 @@
 # Finish up settings based on OS:
 #
 # ==================================================================================================
-- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+- name: "Basic settings for all Linux hosts."
+  hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.nftables
@@ -167,7 +172,8 @@
 #  - "!tpeap" is included because otherwise TP-Link EAP devices are included.
 #
 # ==================================================================================================
-- hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+- name: "Basic settings for Debian Family Hosts."
+  hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
   roles:
     - role: bloodymage.autonomy.aptitude
       tags:

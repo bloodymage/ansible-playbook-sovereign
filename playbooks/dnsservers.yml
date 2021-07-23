@@ -1,4 +1,6 @@
-- hosts: all
+---
+- name: "Configure the environment for DNS configuration."
+  hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
       when:
@@ -6,11 +8,13 @@
       tags:
         - always
 
-- hosts: dns_servers:!public_zone
+- name: "Configure Bind9 Servers."
+  hosts: dns_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.bind
 
-- hosts: all:!localhost
+- name: "Set Forward Zone information."
+  hosts: all:!localhost
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.dns_forwardzones
@@ -20,7 +24,8 @@
         - dns-update
 
 # TODO: Configure RouterOS reversezones
-- hosts: all:!localhost:!routeros:!virtual_hosts
+- name: "Set Reverse Zone information."
+  hosts: all:!localhost:!routeros:!virtual_hosts
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.dns_reversezones

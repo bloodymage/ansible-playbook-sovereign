@@ -11,7 +11,8 @@
       tags:
         - always
 
-- hosts: samba_file_servers
+- name: "Configure Samba Fileservers."
+  hosts: samba_file_servers
   roles:
     - role: bloodymage.autonomy.samba
       when:

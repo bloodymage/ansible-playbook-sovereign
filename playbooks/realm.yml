@@ -120,14 +120,16 @@
         - samba-domain-keytabs
         - recreate-realm
 
-- hosts: keycloak_servers:!public_zone
+- name: "Configure Keycloak."
+  hosts: keycloak_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.keycloak
       tags:
         - keycloak
         - recreate-realm
 
-- hosts: freeradius_servers
+- name: "Configure FreeRadius."
+  hosts: freeradius_servers
   roles:
     - role: bloodymage.autonomy.freeradius
       tags:

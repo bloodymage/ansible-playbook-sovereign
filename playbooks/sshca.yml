@@ -1,5 +1,6 @@
 ---
-- hosts: certificate_authorities
+- name: "Setup the SSH Certificate Authority."
+  hosts: certificate_authorities
   roles:
     - role: bloodymage.autonomy.config_environment
       when:

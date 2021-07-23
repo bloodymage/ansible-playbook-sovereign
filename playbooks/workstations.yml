@@ -7,7 +7,8 @@
       tags:
         - always
 
-- hosts: workstations
+- name: "Configure workstations."
+  hosts: workstations
   roles:
     - role: bloodymage.autonomy.cups
       tags:
