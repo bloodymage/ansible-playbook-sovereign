@@ -304,9 +304,9 @@
 # dns_forwardzone or dns_reversezone roles.
 #
 # ==================================================================================================
-- name: "Installing Forward Zone files"
+- name: "Installing Forward Zone files."
   ansible.builtin.template:
-    src: "var/lib/forwardzone.j2"
+    src: "var/lib/bind/forwardzone.j2"
     dest: "{{ bind_zone_dir }}/db.{{ bind_zone }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
@@ -324,9 +324,9 @@
     - bind-debug
     - bind-zones
 
-- name: "Installing Reverse Zone files"
+- name: "Installing Reverse Zone files."
   ansible.builtin.template:
-    src: "var/lib/reversezone.j2"
+    src: "var/lib/bind/reversezone.j2"
     dest: "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
@@ -352,7 +352,7 @@
 # TODO: Document why I am using 0775
 #
 # ==================================================================================================
-- name: "Ensure Bind can write to bind directories"
+- name: "Ensure Bind can write to bind directories."
   ansible.builtin.file:
     path: "{{ item }}"
     owner: "{{ bind_owner }}"
