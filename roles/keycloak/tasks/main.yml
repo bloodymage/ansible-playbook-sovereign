@@ -147,10 +147,6 @@
     mode: "0644"
   become: yes
   notify: restart keycloak
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 # ==================================================================================================
 #
@@ -182,6 +178,8 @@
     __etc_certs: "/etc/ssl/certs"
     __additional_cert: "{{ __etc_certs }}/{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}.pem"
   become: no
+  when:
+    - item[0].type != "public"
 
 - name: "Add to list of certs to add into the combined pkcs12 file. (Part 2)"
   ansible.builtin.set_fact:
@@ -225,46 +223,43 @@
 
 # ==================================================================================================
 #
-# This next command will fail if a server isn't actually running
+# We need to ensure we have a running keycloak server, because if it's not running, all
+# subsequent tasks will fail.
 #
 # ==================================================================================================
-# - name: "Login to keycloak server"
-#   ansible.builtin.command:
-#     cmd: >-
-#       {{ keycloak_binary_dir }}/kcadm.sh config credentials
-#       --server http://localhost:8080/auth
-#       --realm master
-#       --user {{ keycloak_admin_user }}
-#       --password {{ keycloak_admin_password }}
-#   become: no
-#   tags:
-#     - keycloak
-#     - keycloak_debug
-#     - keycloak-debug
+- name: "Ensure we have a running keycloak server."
+  ansible.builtin.meta: flush_handlers
 
-# ==================================================================================================
-#
-# TODO: Loop this, we may have multiple realms
-#
-# Note: need to debug, it creates the realm, the realm is accessible, but has weird behavior.
-#
-# When you select the realm, an error message appears along the lines of "Realm not found"
-# There is a link to refresh, which when you click that link, the realm loads perfectly.
-#
-# Note 2: This does not set the frontend url.  How is that accomplished?
-#
-# ==================================================================================================
-# - name: "Create realm"
-#   ansible.builtin.command:
-#     cmd: >-
-#       {{ keycloak_binary_dir }}/kcadm.sh create realms
-#       -s realm="{{ autonomy_org_unit_name | lower }}"
-#       -s enabled=true
-#   become: no
-#   tags:
-#     - keycloak
-#     - keycloak_debug
-#     - keycloak-debug
+- name: "Test Login to keycloak server."
+  ansible.builtin.command:
+    cmd: >-
+      {{ keycloak_binary_dir }}/kcadm.sh config credentials
+      --server http://localhost:8080/auth
+      --realm master
+      --user {{ keycloak_admin_user }}
+      --password {{ keycloak_admin_password }}
+  become: no
+  tags:
+    - keycloak
+    - keycloak_debug
+    - keycloak-debug
+
+- name: "Create realms."
+  community.general.keycloak_realm:
+    id: "{{ item.name }}"
+    auth_client_id: "admin-cli"
+    auth_username: "{{ keycloak_admin_user }}"
+    auth_password: "{{ keycloak_admin_password }}"
+    auth_realm: "master"
+    state: present
+  loop: "{{ autonomy_zones }}"
+  become: no
+  when:
+    - item.type == "internal"
+  tags:
+    - keycloak
+    - keycloak_debug
+    - keycloak-debug
 
 # Create User Federation
 #
