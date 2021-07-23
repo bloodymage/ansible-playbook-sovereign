@@ -47,7 +47,7 @@
       private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key_file }}"
       org_unit_name: "{{ item.name }}"
   when:
-    - item.name != "root"
+    - item.type != "public"
 
 - name: "Add issuing Certificate Authorities."
   ansible.builtin.set_fact:
@@ -71,7 +71,7 @@
       private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_issuing_ca_key_file }}"
       org_unit_name: "{{ item[0].name }}"
   when:
-    - item[0].name != "root"
+    - item[0].type != "public"
 
 # ==================================================================================================
 #

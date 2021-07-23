@@ -18,27 +18,6 @@ autonomy_use_source_code_repos: no
 autonomy_password_length: "42"
 autonomy_virtual_host: no
 
-#===================================================================================================
-#
-# This needs to be rewritten
-#
-# This should stem from the most basic definition: root_domain
-#
-# Next it should take into account the zone type: Internal, DMZ, Public.
-# The internal zone can not be accessed from the outside world.  The DMZ zone is the for systems
-# that are available from the outside world, or directly support those systems.
-# For example:
-#   - web servers
-#   - database servers for the websites
-#
-# The Public zone, is the publicly available urls.
-#
-# So, you may have www.example.com is publicly available.  The DMZ zone fqdn may be
-# www.dmz.example.com.
-#
-# The defaults assume one of each zone.
-#
-# ==================================================================================================
 # Zone Information
 autonomy_root_domain: "example.com"
 autonomy_zone_name: "internal"
@@ -55,7 +34,10 @@ autonomy_zones:
 autonomy_domain: "{{ autonomy_zone_name }}.{{ autonomy_root_domain }}"
 autonomy_realm: "{{ autonomy_zone_name | upper }}"
 autonomy_tld: "{{ autonomy_domain.split('.')[-1] }}"
-autonomy_min_domain_id_number: 10000
+autonomy_hostname: "{{ inventory_hostname_short }}"
+autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
+autonomy_ipv4_address: "{{ ansible_host }}"
+autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default('') }}"
 
 # Organization Info
 autonomy_org_name: "{{ autonomy_domain.split('.')[1] }}"
@@ -65,36 +47,11 @@ autonomy_region: ""
 autonomy_state: "{{ autonomy_region }}"
 autonomy_city: ""
 
-autonomy_sysadmin_email_address: "admin@{{ autonomy_root_domain }}"
+autonomy_sysadmin_email_userid: "admin"
+autonomy_sysadmin_email_address: "{{ autonomy_sysadmin_email_userid }}@{{ autonomy_root_domain }}"
+autonomy_min_domain_id_number: 10000
 
 autonomy_default_encryption_type: "ed25519"
-
-# ==================================================================================================
-#
-# Host Information
-#
-# In some ways, this is a bit redundant.  The goal of these variables is to ensure consistant
-# definitions.  For example if the inventory format is:
-#
-# apache_servers:
-#   hosts:
-#     www:
-#
-# or:
-#
-# apache_servers:
-#   hosts:
-#     www.internal.example.com:
-#
-# These variables will end up having the same definition.
-#   'autonomy_hostname' will always have the short hostname. 'www'
-#   'autonomy_fqdn' will always have the fqdn. 'www.internal.example.com'
-#
-# ==================================================================================================
-autonomy_hostname: "{{ inventory_hostname_short }}"
-autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
-autonomy_ipv4_address: "{{ ansible_host }}"
-autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default('') }}"
 
 # ==================================================================================================
 #
@@ -110,11 +67,12 @@ autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default('') }}"
 mediawiki_db_password: "password"
 mysql_administrator_password: "password"
 mysql_system_maintenance_user_password: "password"
-ownca_root_password: "password"
-ownca_intermediate_password: "password"
+nextcloud_db_password: "password"
+ownca_codesign_password: "password"
 ownca_component_password: "password"
 ownca_identity_password: "password"
-ownca_codesign_password: "password"
+ownca_intermediate_password: "password"
+ownca_root_password: "password"
 samba_administrator_password: "password"
 sshca_host_key_password: "password"
 sshca_user_key_password: "password"
@@ -137,14 +95,13 @@ sysconf_dir: "/etc"
 keycloak_name: "keycloak"
 keycloak_home: "/opt/{{ keycloak_name }}"
 
-
 # ==================================================================================================
 #
 #
 #
 # ==================================================================================================
 # Misc
-autonomy_raspberrypi_distribution_release: "{{ ansible_distribution }}"
+autonomy_raspberrypi_distribution_release: "{{ ansible_distribution_release }}"
 
 # Users
 user_mythtv_id_number: 500
@@ -160,7 +117,7 @@ mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: "/var/lib/mysql"
 
 nextcloud_db_user: nextcloud
-nextcloud_db_password: "password"
+
 
 # ==================================================================================================
 #

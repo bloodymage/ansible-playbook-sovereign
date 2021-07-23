@@ -209,7 +209,7 @@
 # ==================================================================================================
 - name: "Install Bind Config Files."
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/{{ item }}.j2"
+    src: "etc/bind/{{ item }}.j2"
     dest: "{{ bind_conf_dir }}/{{ item }}"
     owner: root
     group: root
@@ -238,7 +238,7 @@
 # ==================================================================================================
 - name: "Install Dynamic DNS Keys."
   ansible.builtin.template:
-    src: "ddns_key.j2"
+    src: "etc/bind/ddns_key.j2"
     dest: "{{ bind_conf_dir }}/{{ item }}.key"
     owner: root
     group: root
@@ -306,7 +306,7 @@
 # ==================================================================================================
 - name: "Installing Forward Zone files"
   ansible.builtin.template:
-    src: "forwardzone.j2"
+    src: "var/lib/forwardzone.j2"
     dest: "{{ bind_zone_dir }}/db.{{ bind_zone }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
@@ -326,7 +326,7 @@
 
 - name: "Installing Reverse Zone files"
   ansible.builtin.template:
-    src: "reversezone.j2"
+    src: "var/lib/reversezone.j2"
     dest: "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"

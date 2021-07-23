@@ -49,12 +49,12 @@ subjectAltName          = @alt_names
   {% endfor %}
 {% endif %}
 {% if inventory_hostname in groups['samba_domain_controllers'] -%}
-  otherName = {{ msADGUID }};FORMAT:HEX,OCTETSTRING:{{ openssl_objectguid }}
+  otherName = {{ ownca_msadguid_oid }};FORMAT:HEX,OCTETSTRING:{{ openssl_objectguid }}
 
   #  [ openssl_init ]
   #  oid_section     = additional_oids
 
   #  [ additional_oids ]
-  #  msKDC=1.3.6.1.5.2.3.5
-  #  msADGUID=1.3.6.1.4.1.311.25.1
+  #  msKDC={{ ownca_mskdc_oid }}
+  #  msADGUID={{ ownca_msadguid_oid }}
 {%- endif %}
