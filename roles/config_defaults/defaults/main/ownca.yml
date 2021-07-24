@@ -57,7 +57,7 @@ ownca_identity_usr_cert_path: "{{ ownca_usr_directory }}/{{ ownca_identity_ca_ce
 ownca_identity_usr_chain_path: "{{ ownca_user_directory }}/{{ ownca_identity_ca_chain_file }}.crt"
 ownca_identity_crl_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
 ownca_identity_crl_path: "{{ ownca_ca_crl_directory }}/{{ ownca_identity_crl_file }}"
-ownca_identity_crl_etc_path: "{{ ownca_etc }}/crls/{{ ownca_idenitity_crl_file }}"
+ownca_identity_crl_etc_path: "{{ ownca_etc }}/crls/{{ ownca_identity_crl_file }}"
 
 # Codesign CA Files
 ownca_codesign_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.key"

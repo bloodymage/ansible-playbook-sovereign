@@ -107,6 +107,54 @@
   when:
     - inventory_hostname in groups[item.name] | default([])
 
+- name: "Add intermediate Certificate Authorities."
+  ansible.builtin.set_fact:
+    ownca_certificate_authorities: "{{ ownca_certificate_authorities + [__certificate_authority] }}"
+  loop: "{{ autonomy_zones }}"
+  vars:
+    ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    __certificate_authority:
+      name: "{{ item.name }}"
+      common_name: "{{ autonomy_org_name | title }} {{ item.name | title }} CA"
+      ownca: "root"
+      provider: "ownca"
+      ca_id: "intermediate"
+      zone_name: "{{ item.name }}."
+      keyusage:
+        - keyCertSign
+        - cRLSign
+      keyusage_critical: yes
+      basic_constraints:
+        - 'CA:TRUE'
+      private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key_file }}"
+      org_unit_name: "{{ item.name }}"
+  when:
+    - item.type != "public"
+
+- name: "Add issuing Certificate Authorities."
+  ansible.builtin.set_fact:
+    ownca_certificate_authorities: "{{ ownca_certificate_authorities + [__certificate_authority] }}"
+  loop: "{{ autonomy_zones | product(ownca_issuing_authorities) }}"
+  vars:
+    ownca_issuing_ca_key_file: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}-ca.key"
+    __certificate_authority:
+      name: "{{ item[0].name }}-{{ item[1] }}"
+      common_name: "{{ autonomy_org_name | title }} {{ item[0].name | title }} {{ item[1] | title}} CA"
+      ownca: "intermediate"
+      provider: "ownca"
+      ca_id: "{{ item[1] }}"
+      zone_name: "{{ item[0].name }}."
+      keyusage:
+        - keyCertSign
+        - cRLSign
+      keyusage_critical: yes
+      basic_constraints:
+        - 'CA:TRUE'
+      private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_issuing_ca_key_file }}"
+      org_unit_name: "{{ item[0].name }}"
+  when:
+    - item[0].type != "public"
+
 - name: "Include OS Family Preparation Tasks."
   include: "{{ ansible_os_family | lower }}_prep.yml"
   when:

@@ -18,7 +18,7 @@
     - "{{ autonomy_fqdn }}-chain"
   notify: restart tls
 
-- name: Copy domain controllers' certificate to server.
+- name: "Copy domain controllers' certificate to server."
   ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
     dest: "/usr/local/share/ca-certificates/{{ item }}.crt"
@@ -31,7 +31,7 @@
     - autonomy_realm_identity_management_system is truthy
   notify: restart tls
 
-- name: Copy domain controllers' certificate chain to server.
+- name: "Copy domain controllers' certificate chain to server."
   ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
     dest: "/usr/local/share/ca-certificates/{{ item }}-chain.crt"
@@ -44,7 +44,7 @@
     - autonomy_realm_identity_management_system is truthy
   notify: restart tls
 
-- name: Copy CA Certificates to server.
+- name: "Copy CA Certificates to server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
@@ -55,7 +55,7 @@
   become: yes
   notify: restart tls
 
-- name: Copy CA Chains Certificates to server.
+- name: "Copy CA Chains Certificates to server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"

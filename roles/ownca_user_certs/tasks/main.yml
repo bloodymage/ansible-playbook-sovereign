@@ -106,6 +106,8 @@
 #
 # Create Network CA Certificate
 #
+# mode is '0770' to key the samba file server happy with 'ADS' authentication.
+#
 # ==================================================================================================
 - name: "Generate User CSRs."
   community.crypto.openssl_csr:
@@ -138,7 +140,7 @@
     group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     mode: "0770"
     backup: yes
-    force: no
+    force: "{{ __user_cert_force_regeneration }}"
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:

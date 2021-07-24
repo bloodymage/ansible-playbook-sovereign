@@ -227,39 +227,39 @@
 # subsequent tasks will fail.
 #
 # ==================================================================================================
-- name: "Ensure we have a running keycloak server."
-  ansible.builtin.meta: flush_handlers
+# - name: "Ensure we have a running keycloak server."
+#   ansible.builtin.meta: flush_handlers
 
-- name: "Test Login to keycloak server."
-  ansible.builtin.command:
-    cmd: >-
-      {{ keycloak_binary_dir }}/kcadm.sh config credentials
-      --server http://localhost:8080/auth
-      --realm master
-      --user {{ keycloak_admin_user }}
-      --password {{ keycloak_admin_password }}
-  become: no
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
+# - name: "Test Login to keycloak server."
+#   ansible.builtin.command:
+#     cmd: >-
+#       {{ keycloak_binary_dir }}/kcadm.sh config credentials
+#       --server http://localhost:8080/auth
+#       --realm master
+#       --user {{ keycloak_admin_user }}
+#       --password {{ keycloak_admin_password }}
+#   become: no
+#   tags:
+#     - keycloak
+#     - keycloak_debug
+#     - keycloak-debug
 
-- name: "Create realms."
-  community.general.keycloak_realm:
-    id: "{{ item.name }}"
-    auth_client_id: "admin-cli"
-    auth_username: "{{ keycloak_admin_user }}"
-    auth_password: "{{ keycloak_admin_password }}"
-    auth_realm: "master"
-    state: present
-  loop: "{{ autonomy_zones }}"
-  become: no
-  when:
-    - item.type == "internal"
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
+# - name: "Create realms."
+#   community.general.keycloak_realm:
+#     id: "{{ item.name }}"
+#     auth_client_id: "admin-cli"
+#     auth_username: "{{ keycloak_admin_user }}"
+#     auth_password: "{{ keycloak_admin_password }}"
+#     auth_realm: "master"
+#     state: present
+#   loop: "{{ autonomy_zones }}"
+#   become: no
+#   when:
+#     - item.type == "internal"
+#   tags:
+#     - keycloak
+#     - keycloak_debug
+#     - keycloak-debug
 
 # Create User Federation
 #
