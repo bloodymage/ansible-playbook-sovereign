@@ -8,6 +8,7 @@
   when:
     - item[0].name != "root"
     - (item[1] != "component-ca" or item[1] != "identity-ca")
+    - item[0].type != "public"
 
 - name: "Copy CRLs to server."
   ansible.builtin.copy:
