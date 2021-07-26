@@ -40,8 +40,8 @@ autonomy_ipv4_address: "{{ ansible_host }}"
 autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default('') }}"
 
 # Organization Info
-autonomy_org_name: "{{ autonomy_domain.split('.')[1] }}"
-autonomy_org_unit_name: "{{ autonomy_domain.split('.')[0] }}"
+autonomy_org_name: "{{ autonomy_domain.split('.')[-2] }}"
+autonomy_org_unit_name: "{{ autonomy_zone_name }}"
 autonomy_country: ""
 autonomy_region: ""
 autonomy_state: "{{ autonomy_region }}"
