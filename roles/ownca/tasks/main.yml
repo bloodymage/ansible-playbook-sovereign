@@ -129,10 +129,13 @@
   become: no
   vars:
     __password_store_id: "{{ item.zone_name }}{{ autonomy_root_domain }}/ownca/ownca_{{ item.ca_id }}_password"
-    __password_lookup: "{{ __password_store_id }}"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
-  when:
-    - inventory_hostname == "localhost"
 
 - name: "Generate Certificate Authority Certificate Signing Requests (CSR)."
   community.crypto.openssl_csr:
@@ -172,8 +175,6 @@
     __password_store_id: "{{ item.zone_name }}{{ autonomy_root_domain }}/ownca/ownca_{{ item.ca_id }}_password"
     __password_lookup: "{{ __password_store_id }}"
     __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
-  when:
-    - inventory_hostname == "localhost"
 
 - name: "Generate Selfsigned Certificate."
   community.crypto.x509_certificate:
@@ -196,7 +197,6 @@
   notify:
     - "regenerate certificates"
   when:
-    - inventory_hostname == "localhost"
     - item.provider == "selfsigned"
   register: __new_root
 
