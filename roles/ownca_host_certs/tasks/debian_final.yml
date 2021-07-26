@@ -70,7 +70,7 @@
 
 - name: Copy CRLs to server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/crl/{{ autonomy_org_name }}-{{ item.name }}.crl"
+    src: "{{ ownca_ca_directory }}/crl/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
     dest: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
     owner: root
     group: root

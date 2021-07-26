@@ -4,7 +4,7 @@ autonomy_packages:
   - spamassassin
   - spamass-milter
 
-spamassassin_spamd_user: "debian-spamd"
+spamassassin_spamd_user: "spamass-milter"
 
 spamassassin_directories:
   - name: "{{ mail_spamassassin_sock_dir }}"

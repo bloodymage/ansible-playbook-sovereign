@@ -7,11 +7,13 @@ mail_privileged_group:  mail
 mail_recipient_delimiter: "+"
 mail_user: vmail
 mail_group: "{{ mail_user }}"
+mail_postfix_user: "postfix"
 
-mail_spamassassin_sock_loc_name: "spamassassin"
+mail_spamassassin_sock_loc_name: "spamass"
+mail_spamassassin_socket_name: "spamass"
 mail_spamassassin_sock_dir: "/var/spool/postfix/{{ mail_spamassassin_sock_loc_name }}"
-mail_spamassassin_socket: "{{ mail_spamassassin_sock_dir }}/spamd.sock"
-mail_spamassassin_unix_socket: "unix:{{ mail_spamassassin_sock_loc_name }}/spamd.sock"
+mail_spamassassin_socket: "{{ mail_spamassassin_sock_dir }}/{{ mail_spamassassin_socket_name }}.sock"
+mail_spamassassin_unix_socket: "unix:{{ mail_spamassassin_sock_loc_name }}/{{ mail_spamassassin_socket_name }}.sock"
 
 mail_opendkim_sock_loc_name: "opendkim"
 mail_opendkim_sock_dir: "/var/spool/postfix/{{ mail_opendkim_sock_loc_name }}"

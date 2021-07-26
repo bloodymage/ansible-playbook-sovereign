@@ -25,6 +25,6 @@ OPTIONS="${OPTIONS} -m"
 # here.
 ######################################
 SOCKET="{{ mail_spamassassin_socket }}"
-SOCKETOWNER="{{ spamassassin_spamd_user }}":"{{ spamassassin_spamd_user }}"
+SOCKETOWNER="{{ mail_postfix_user }}":"{{ mail_postfix_user }}"
 SOCKETMODE="0660"
 ######################################
