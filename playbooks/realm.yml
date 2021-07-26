@@ -71,12 +71,14 @@
 - name: "Create realm users dotfiles."
   hosts: workstations:&linux:!mythfrontend
   roles:
-    - role: bloodymage.autonomy.dotfiles
+    - role: bloodymage.autonomy.user_dotfiles
       vars:
         dotfiles_users: "{{ domain_users }}"
         dotfiles_home: "/home/{{ autonomy_org_unit_name | upper }}"
       tags:
         - dotfiles
+        - user-dotfiles
+        - user_dotfiles
 
 - name: "Configure realm users certificates."
   hosts: samba_ownca_user_hosts

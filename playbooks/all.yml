@@ -93,9 +93,11 @@
     - role: bloodymage.autonomy.skel
       tags:
         - skel
-    - role: bloodymage.autonomy.dotfiles
+    - role: bloodymage.autonomy.user_dotfiles
       tags:
         - dotfiles
+        - user-dotfiles
+        - user_dotfiles
     - role: bloodymage.autonomy.etckeeper
       tags:
         - etckeeper
