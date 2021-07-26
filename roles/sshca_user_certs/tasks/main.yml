@@ -64,27 +64,6 @@
 
 # ==================================================================================================
 #
-# We could remove this next task by moving the lookup to the next task, and doing the lookup each
-# time a key is signed.  That would reduce the number of overall tasks, simplifying this role,
-# not sure if it'd make things any faster (or slower).  It would complicate the next task.
-#
-# ==================================================================================================
-- name: "Ensure we have a password for the User CA Key"
-  ansible.builtin.set_fact:
-    sshca_user_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  vars:
-    __password_store_id: "{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
-    __password_lookup: "{{ __password_store_id }}"
-  become: no
-  delegate_to: localhost
-  run_once: yes
-  changed_when:
-    - sshca_user_key_password != "password"
-  when:
-    - sshca_user_key_password == "password"
-
-# ==================================================================================================
-#
 # Currently we use shell instead of 'community.crypto.openssh_cert' because that module does not
 # support certificate authorities with a password.
 #
@@ -96,7 +75,7 @@
              -n "{{ __ssh_principals }}"
              "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
     responses:
-      (?i)passphrase: "{{ sshca_user_key_password }}"
+      (?i)passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   loop: "{{ domain_users }}"
   changed_when: false
   become: no
@@ -104,6 +83,9 @@
   run_once: yes
   #no_log: yes
   vars:
+  vars:
+    __password_store_id: "{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
+    __password_lookup: "{{ __password_store_id }}"
     __ssh_principals_list: "{% if item.ssh_principals is defined %}{{ item.ssh_principals + [item.username] }}{% else %}{{ [item.username] }}{% endif %}"
     __ssh_principals: "{% for principal in __ssh_principals_list %}{{ principal }}{{ ',' if not loop.last else '' }}{% endfor %}"
   when:
