@@ -58,6 +58,7 @@
 - name: "Basic host configuration for all hosts."
   hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
   strategy: linear
+  roles:
     - role: bloodymage.autonomy.users
       tags:
         - users
@@ -67,7 +68,7 @@
     - role: bloodymage.autonomy.git
       tags:
         - git
-   - role: bloodymage.autonomy.unzip
+    - role: bloodymage.autonomy.unzip
       tags:
         - unzip
  
