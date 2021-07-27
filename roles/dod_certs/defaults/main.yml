@@ -1,0 +1,10 @@
+---
+# defaults file for dod_certs
+dod_certs_dir: "{{ ownca_usr_directory }}"
+dod_certs_version: ""
+dod_certs_url:
+  - source: "https://dl.dod.cyber.mil/wp-content/uploads/pki-pke/zip/unclass-certificates_pkcs7_v5-6_dod.zip"
+    file: "unclass-certificates_pkcs7_v5-6_dod.zip"
+
+dod_certs_exlude:
+  - "README.txt"
