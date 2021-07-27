@@ -38,3 +38,16 @@
   become: yes
   notify:
     - "update ca-certificates"
+
+- name: "Rename pem files."
+  ansible.builtin.copy:
+    src: "{{ dod_certs_dir }}/{{ item }}.pem"
+    dest: "{{ dod_certs_dir }}/{{ item }}.crt"
+    owner: root
+    group: root
+    mode: "0644"
+    remote_src: yes
+  loop: "{{ dod_certs_pem_files }}"
+  become: yes
+  notify:
+    - "update ca-certificates"

@@ -8,3 +8,6 @@ dod_certs_url:
 
 dod_certs_exlude:
   - "README.txt"
+
+dod_certs_pem_files:
+  - "DoD_PKE_CA_chain"
