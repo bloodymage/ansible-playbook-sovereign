@@ -52,19 +52,21 @@
 
 # ==================================================================================================
 #
-# Create users for ALL hosts.  This is done after the OS settings (sshca_host_certs and openssh)
-# because the users role has tasks than depend on tasks being run that are part of the openssh role.
-#
-# Decision to make: Should I run those tasks inside the users role as well?
+# Additional basic configuration for all hosts.
 #
 # ==================================================================================================
-- name: "Setup users on all hosts."
+- name: "Basic host configuration for all hosts."
   hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
   strategy: linear
-  roles:
     - role: bloodymage.autonomy.users
       tags:
         - users
+    - role: bloodymage.autonomy.emacs
+      tags:
+        - emacs
+    - role: bloodymage.autonomy.git
+      tags:
+        - git
 
 # ==================================================================================================
 #
@@ -117,9 +119,6 @@
     - role: bloodymage.autonomy.curl
       tags:
         - curl
-    - role: bloodymage.autonomy.git
-      tags:
-        - git
     - role: bloodymage.autonomy.keychain
       tags:
         - keychain
@@ -148,12 +147,12 @@
     - role: bloodymage.autonomy.htop
       tags:
         - htop
-    - role: bloodymage.autonomy.emacs
-      tags:
-        - emacs
     - role: bloodymage.autonomy.python
       tags:
         - python
+    - role: bloodymage.autonomy.unzip
+      tags:
+        - unzip
     # - role: bloodymage.autonomy.trash_cli
     #   tags:
     #     - trash-cli

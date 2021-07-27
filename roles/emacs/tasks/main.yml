@@ -11,26 +11,7 @@
             - "vars"
       become: no
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-
-- name: "Install Modified emacs.service file"
-  ansible.builtin.template:
-    src: service.j2
-    dest: "/usr/lib/systemd/user/emacs.service"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  notify: "daemon reload"
-
-- name: "Enable service emacs and ensure it is not masked."
-  ansible.builtin.systemd:
-    name: emacs
-    enabled: yes
-    masked: no
-    scope: global
-  become: yes
+- name: "Include OS Specific Tasks"
+  include: "{{ ansible_system | lower }}.yml"
+  when:
+    - ansible_system
