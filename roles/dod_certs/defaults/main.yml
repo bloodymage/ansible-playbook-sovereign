@@ -6,7 +6,7 @@ dod_certs_url:
   - source: "https://dl.dod.cyber.mil/wp-content/uploads/pki-pke/zip/unclass-certificates_pkcs7_v5-6_dod.zip"
     file: "unclass-certificates_pkcs7_v5-6_dod.zip"
 
-dod_certs_exlude:
+dod_certs_exclude:
   - "README.txt"
 
 dod_certs_pem_files:
