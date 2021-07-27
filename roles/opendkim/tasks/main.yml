@@ -46,3 +46,4 @@
   become: yes
   notify:
     - "restart opendkim"
+    - "restart postfix"

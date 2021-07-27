@@ -41,4 +41,6 @@
     mode: "0644"
   become: yes
   loop: "{{ spamassassin_default_files }}"
-  notify: restart spamassassin
+  notify:
+    - "restart spamassassin"
+    - "restart postfix"
