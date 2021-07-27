@@ -23,11 +23,16 @@
     - "restart all"
     - "restart tls"
     - "reload tls"
+  when:
+    - ansible_network_os is not defined
+    - inventory_hostname in groups['linux'] | default([])
 
 - name: "Update nextcloud certificates."
   include_tasks: nextcloud_certificates.yml
   listen:
     - "update nextcloud certificates"
+  when:
+    - inventory_hostname in groups['nextcloud_servers'] | default([])
 
 # ==================================================================================================
 #
@@ -41,6 +46,8 @@
   become: yes
   listen:
     - "update pam"
+  when:
+    - inventory_hostname in groups['linux'] | default([])
 
 - name: "Reset Samba ACLs on Sysvol for New Controller."
   ansible.builtin.command:
@@ -48,6 +55,8 @@
   become: yes
   listen:
     - "sysvolreset"
+  when:
+    - inventory_hostname in groups['samba_domain_controllers'] | default([])
 
 # ==================================================================================================
 #
@@ -82,6 +91,8 @@
   become: yes
   listen:
     - "daemon reload"
+  when:
+    - inventory_hostname in groups['linux'] | default([])
 
 # ==================================================================================================
 #
@@ -114,13 +125,15 @@
     - "restart tls"
     - "restart named"
   when:
-    - inventory_hostname in groups['dns_servers'] | default([])
+    - inventory_hostname in groups['bind9_servers'] | default([])
 
 - name: restart cron
   ansible.builtin.service:
     name: "{{ ntp_cron_daemon }}"
     state: restarted
-  when: ntp_cron_handler_enabled | bool
+  when:
+    - ntp_cron_handler_enabled | bool
+    - inventory_hostname in groups['linux'] | default([])
 
 - name: "Restart DDclient."
   service:
@@ -130,6 +143,8 @@
   listen:
     - "restart all"
     - "restart ddclient"
+  when:
+    - inventory_hostname in groups['ddclient_hosts'] | default([])
 
 - name: "Restart Dovecot."
   ansible.builtin.service:
@@ -209,7 +224,9 @@
   ansible.builtin.service:
     name: "{{ ntp_daemon }}"
     state: restarted
-  when: ntp_enabled | bool
+  when:
+    - ntp_enabled | bool
+    - inventory_hostname in groups['ntp'] | default([])
 
 - name: "Restart OpenDKIM."
   ansible.builtin.service:
@@ -282,6 +299,8 @@
   listen:
     - "restart all"
     - "restart ssh"
+  when:
+    - inventory_hostname in groups['linux'] | default([])
 
 - name: "Restart Winbind Server."
   ansible.builtin.service:
@@ -317,6 +336,8 @@
   listen:
     - "restart all"
     - "restart unattended-upgrades"
+  when:
+    - inventory_hostname in groups['linux'] | default([])
 
 - name: "Restart Spamassassin."
   ansible.builtin.service:
@@ -349,6 +370,8 @@
   listen:
     - "restart all"
     - "restart uptimed"
+  when:
+    - inventory_hostname in groups['linux'] | default([])
 
 # ==================================================================================================
 #
@@ -466,6 +489,8 @@
   loop: "{{ users }}"
   listen:
     - "enable emacs"
+  when:
+    - inventory_hostname in groups['linux'] | default([])
 
 # ==================================================================================================
 #
@@ -485,11 +510,12 @@
 # TODO: Change become from 'no' to 'yes' when I change this from debug to reboot modules.
 #
 # ==================================================================================================
-- name: "Reboot Hosts if /var/run/reboot-required exists"
+- name: "Reboot Hosts."
   #ansible.builtin.reboot:
   ansible.builtin.debug:
     msg: "Rebooting {{ inventory_hostname }} (Pretend)"
   when:
+
     - reboot_required_file.stat.exists
   become: no
   listen:
