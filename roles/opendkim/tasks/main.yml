@@ -47,3 +47,11 @@
   notify:
     - "restart opendkim"
     - "restart postfix"
+
+- name: "Add postfix to opendkim group."
+  ansible.builtin.user:
+    name: "{{ mail_postfix_user }}"
+    groups: "{{ opendkim_group }}"
+    append: yes
+  when:
+    - inventory_hostname in groups['postfix_servers']
