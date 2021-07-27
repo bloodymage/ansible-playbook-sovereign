@@ -17,6 +17,7 @@ autonomy_overwrite_password: no
 autonomy_use_source_code_repos: no
 autonomy_password_length: "42"
 autonomy_virtual_host: no
+autonomy_dod_certs_install: no
 
 # Zone Information
 autonomy_root_domain: "example.com"
@@ -177,13 +178,6 @@ domain_user_nextcloud:
     - spn: "HTTP"
       host: "{{ dmz_www_host }}"
   account_expire: "--noexpiry"
-
-# domain_user_nfs:
-#   username: ""
-#   spns:
-#     - spn: "nfs"
-#       host: "{{ internal_file_server }}"
-#   account_expire: "--noexpiry"
 
 # ==================================================================================================
 #
