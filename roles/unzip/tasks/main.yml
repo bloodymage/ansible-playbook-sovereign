@@ -11,8 +11,8 @@
             - "vars"
       become: no
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
+- name: "Include OS Specific Tasks."
+  include: "{{ ansible_system | lower }}.yml"
+  when:
+    - ansible_system
+

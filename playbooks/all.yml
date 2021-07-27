@@ -67,6 +67,26 @@
     - role: bloodymage.autonomy.git
       tags:
         - git
+   - role: bloodymage.autonomy.unzip
+      tags:
+        - unzip
+ 
+- name: "Install certificates on all host."
+  hosts: all:!localhost:!public_zone
+  roles:
+    - role: bloodymage.autonomy.ownca_host_certs
+      tags:
+        - regenerate-ownca
+        - ownca_host_certs
+        - ownca-host-certs
+        - ownca_host_certificates
+        - ownca-host-certificates
+    - role: bloodymage.autonomy.dod_certs
+      when:
+        - autonomy_dod_certs_install
+      tags:
+        - dod-certs
+        - dod_certs
 
 # ==================================================================================================
 #
@@ -150,9 +170,6 @@
     - role: bloodymage.autonomy.python
       tags:
         - python
-    - role: bloodymage.autonomy.unzip
-      tags:
-        - unzip
     # - role: bloodymage.autonomy.trash_cli
     #   tags:
     #     - trash-cli
