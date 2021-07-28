@@ -171,6 +171,9 @@
     - role: bloodymage.autonomy.python
       tags:
         - python
+    - role: bloodymage.autonomy.cron
+      tags:
+        - cron
     # - role: bloodymage.autonomy.trash_cli
     #   tags:
     #     - trash-cli
