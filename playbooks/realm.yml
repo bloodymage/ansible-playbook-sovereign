@@ -69,7 +69,7 @@
 #
 # ==================================================================================================
 - name: "Create realm users dotfiles."
-  hosts: workstations:&linux:!mythfrontend
+  hosts: samba_ownca_user_hosts:workstations:&linux:!mythfrontend
   roles:
     - role: bloodymage.autonomy.user_dotfiles
       vars:
