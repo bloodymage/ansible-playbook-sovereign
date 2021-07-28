@@ -14,14 +14,14 @@ ownca_user_pkcs12_dir: "{{ ownca_user_pki_dir }}/pkcs12"
 
 ownca_user_pki_dirs:
   - name: private
-    mode: "0770"
+    mode: "0755"
   - name: csr
-    mode: "0770"
+    mode: "0755"
   - name: "certs"
-    mode: "0770"
+    mode: "0755"
   - name: "pkcs12"
-    mode: "0770"
+    mode: "0755"
   - name: "ssh"
-    mode: "0770"
+    mode: "0755"
 
 __user_cert_force_regeneration: no
