@@ -21,18 +21,12 @@
     - role: bloodymage.autonomy.libnss3_tools
       tags:
         - nssdb
-    - role: bloodymage.autonomy.evolution
-      tags:
-        - evolution
     - role: bloodymage.autonomy.firefox
       tags:
         - firefox
     - role: bloodymage.autonomy.chromium
       tags:
         - chromium
-    - role: bloodymage.autonomy.gpgsync
-      tags:
-        - gpgsync
     - role: bloodymage.autonomy.devilspie2
       tags:
         - devilspie2
@@ -40,3 +34,14 @@
     - role: bloodymage.autonomy.xscreensaver
       tags:
         - xscreensaver
+
+- name: "Configure workstations (not mythtv related)."
+  hosts: workstations:!mythfrontend
+  roles:
+    - role: bloodymage.autonomy.gpgsync
+      tags:
+        - gpgsync
+    - role: bloodymage.autonomy.evolution
+      tags:
+        - evolution
+

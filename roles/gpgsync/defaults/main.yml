@@ -1,4 +1,29 @@
 ---
 # defaults file for gpgsync
 autonomy_packages:
-  - python3
+  - python-all
+  - dh-python
+  - python3-pytest
+  - python3-pytest-runner
+  - python3-stdeb
+  - python3-pyside2.qtcore
+  - python3-pyside2.qtwidgets
+  - python3-pyside2.qtgui
+  - python3-requests
+  - python3-socks
+  - python3-packaging
+  - python3-dateutil
+  - gnupg2
+
+gpgsync_version: "0.3.6"
+gpgsync_url:
+  - source: "https://github.com/firstlookmedia/gpgsync/archive/refs/tags/v{{ gpgsync_version }}.tar.gz"
+    file: "v{{ gpgsync_version }}.tar.gz"
+    #signature: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2.asc"
+    #checksum: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2.sha256"
+    type: "tarball"
+  - source: "https://github.com/firstlookmedia/gpgsync/archive/refs/tags/v{{ gpgsync_version }}.zip"
+    file: "v{{ gpgsync_version }}.zip"
+    type: "zip"
+
+gpgsync_build_dir: "/tmp/gpgsync"
