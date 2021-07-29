@@ -14,14 +14,10 @@ $TTL	{{ bind_zone_ttl }}
 {{ bind_zone_negative_cache_ttl.ljust(20) }}  ; Negative Cache TTL
 )  
 
-{% for ns in bind_zone_dnsservers -%}
-  {{ bind_reverse_zone.split('.')[1] }}.{{ bind_reverse_zone.split('.')[0] }}.in-addr.arpa.  {{ 'IN NS'.ljust(6) }}{{ ns.name }}.{{ bind_zone }}.
+{% for ns in groups[autonomy_zone_name + '_dns_servers'] -%}
+  {{ hostvars[ns]['ansible_host'].split('.')[1] }}.{{ hostvars[ns]['ansible_host'].split('.')[0] }}.in-addr.arpa.  {{ 'IN NS'.ljust(6) }}{{ hostvars[ns]['inventory_hostname_short'] }}.{{ autonomy_domain }}.
 {% endfor %}
 
-{% for ns in bind_zone_dnsservers -%}
-{% if bind_reverse_zone == "10.3" -%}
-  {{ ns.address_ipv4.split('.')[3] }}.{{ ns.address_ipv4.split('.')[2] }}.{{ ns.address_ipv4.split('.')[1] }}.{{ ns.address_ipv4.split('.')[0] }}      IN PTR  {{ ns.name }}.{{ bind_zone }}.
-{% else -%}
-  {{ ns.address_ipv4.split('.')[3] }}.{{ ns.address_ipv4.split('.')[2] }}.{{ ns.address_ipv4.split('.')[1] }}.{{ ns.address_ipv4.split('.')[0] }}      IN PTR  {{ ns.name }}.{{ autonomy_domain }}.
-{% endif %}
+{% for ns in groups[autonomy_zone_name + '_dns_servers'] -%}
+  {{ hostvars[ns]['ansible_host'].split('.')[3] }}.{{ hostvars[ns]['ansible_host'].split('.')[2] }}.{{ hostvars[ns]['ansible_host'].split('.')[1] }}.{{ hostvars[ns]['ansible_host'].split('.')[0] }}      IN PTR  {{ hostvars[ns]['inventory_hostname_short'] }}.{{ autonomy_domain }}.
 {% endfor %}
