@@ -127,10 +127,12 @@
   when:
     - inventory_hostname in groups['bind9_servers'] | default([])
 
-- name: restart cron
+- name: "Restart cron."
   ansible.builtin.service:
     name: "{{ ntp_cron_daemon }}"
     state: restarted
+  listen:
+    - "restart cron"
   when:
     - ntp_cron_handler_enabled | bool
     - inventory_hostname in groups['linux'] | default([])
@@ -159,6 +161,15 @@
   when:
     - inventory_hostname in groups['dovecot_servers'] | default([])
 
+- name: "Restart etckeeper."
+  ansible.builtin.service:
+    name: etckeeper
+    state: restarted
+  become: yes
+  listen:
+    - "restart all"
+    - "restart etckeeper"
+
 - name: "Restart Freeradius."
   ansible.builtin.service:
     name: freeradius
@@ -184,7 +195,7 @@
   when:
     - inventory_hostname in groups['keycloak_servers'] | default([])
 
-- name: "Restart Mosquitto"
+- name: "Restart Mosquitto."
   ansible.builtin.service:
     name: mosquitto
     state: restarted
@@ -196,7 +207,7 @@
   when:
     - inventory_hostname in groups['mosquitto_servers'] | default([])
 
-- name: "Restart MySQL"
+- name: "Restart MySQL."
   ansible.builtin.service:
     name: mysql
     state: restarted
@@ -220,10 +231,13 @@
   when:
     - inventory_hostname in groups ['nginx_servers'] | default([])
 
-- name: restart ntp
+- name: "Restart NTP."
   ansible.builtin.service:
     name: "{{ ntp_daemon }}"
     state: restarted
+  listen:
+    - "restart all"
+    - "restart ntp"
   when:
     - ntp_enabled | bool
     - inventory_hostname in groups['ntp'] | default([])
@@ -239,7 +253,7 @@
   when:
     - inventory_hostname in groups['opendkim_servers'] | default([])
 
-- name: "Restart Postfix"
+- name: "Restart Postfix."
   ansible.builtin.service:
     name: postfix
     state: restarted
