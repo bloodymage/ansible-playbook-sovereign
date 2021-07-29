@@ -171,5 +171,8 @@
 #   vars:
 #     __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
 #   when:
+#     - autonomy_github_users is truthy
+#     - autonomy_github_user is truthy
+#     - autonomy_github_oauth_token is truthy
 #     - item.id_number is defined
 #     - item.username in autonomy_github_users
