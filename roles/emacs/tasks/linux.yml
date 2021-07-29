@@ -22,3 +22,20 @@
     masked: no
     scope: global
   become: yes
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Install Emacsclient.desktop"
+  ansible.builtin.copy:
+    src: "emacsclient.desktop"
+    dest: "/usr/share/applications/emacsclient.desktop"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  tags:
+    - global-packages
+    - global-packages
