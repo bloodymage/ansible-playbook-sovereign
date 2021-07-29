@@ -1,0 +1,93 @@
+# {{ ansible_managed }}
+
+# The VCS to use.
+VCS="{{ etckeeper_vcs }}"
+
+{% if etckeeper_vcs == "git" -%}
+  # Options passed to git commit when run by etckeeper.
+  {% if etckeeper_git_commit_options != __etckeeper_git_commit_options -%}
+    GIT_COMMIT_OPTIONS="{{ etckeeper_git_commit_options }}"
+  {% else -%}
+    GIT_COMMIT_OPTIONS=""
+  {% endif %}
+{% elif etckeeper_vcs == "hg" -%}
+  # Options passed to hg commit when run by etckeeper.
+  {% if etckeeper_hg_commit_options != __etckeeper_hg_commit_options -%}
+    HG_COMMIT_OPTIONS="{{ etckeeper_hg_commit_options }}"
+  {% else -%}
+    HG_COMMIT_OPTIONS=""
+  {% endif %}
+{% elif etckeeper_vcs == "bzr" -%}
+# Options passed to bzr commit when run by etckeeper.
+  {% if etckeeper_bzr_commit_options != __etckeeper_bzr_commit_options -%}
+    BZR_COMMIT_OPTIONS="{{ etckeeper_bzr_commit_options }}"
+  {% else -%}
+    BZR_COMMIT_OPTIONS=""
+  {% endif %}
+{% endif %}
+
+# Options passed to darcs record when run by etckeeper.
+DARCS_COMMIT_OPTIONS="-a"
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# Etckeeper includes both a cron job and a systemd timer, which each                             #}
+{# can commit exiting changes to /etc automatically once per day.                                 #}
+{# To enable the systemd timer, run: systemctl enable etckeeper.timer                             #}
+{# The cron job is enabled by default; to disable it, uncomment this next line.                   #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if etckeeper_avoid_daily_autocommits != __etckeeper_avoid_daily_autocommits -%}
+  AVOID_DAILY_AUTOCOMMITS={{ etckeeper_avoid_daily_autocommits }}
+{% endif %}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# Uncomment the following to avoid special file warning                                          #}
+{# (the option is enabled automatically for daily autocommits regardless).                        #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if etckeeper_avoid_special_file_warning != __etckeeper_avoid_special_file_warning -%}
+  AVOID_SPECIAL_FILE_WARNING={{ etckeeper_avoid_special_file_warning }}
+{% endif %}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# Uncomment to avoid etckeeper committing existing changes to                                    #}
+{# /etc before installation. It will cancel the installation,                                     #}
+{# so you can commit the changes by hand.                                                         #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if etckeeper_avoid_commit_before_install != __etckeeper_avoid_commit_before_install -%}
+  AVOID_COMMIT_BEFORE_INSTALL={{ etckeeper_avoid_commit_before_install }}
+{% endif %}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# The high-level package manager that's being used.                                              #}
+{# (apt, pacman, pacman-g2, yum, dnf, zypper, apk etc)                                            #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+HIGHLEVEL_PACKAGE_MANAGER={{ etckeeper_highlevel_package_manager }}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# # The low-level package manager that's being used.                                             #}
+{# # (dpkg, rpm, pacman, pacmatic, pacman-g2, apk etc)                                            #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+LOWLEVEL_PACKAGE_MANAGER={{ etckeeper_lowlevel_package_manager }}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# To push each commit to a remote, put the name of the remote here.                              #}
+{# (eg, "origin" for git). Space-separated lists of multiple remotes                              #}
+{# also work (eg, "origin gitlab github" for git).                                                #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if etckeeper_push_remote != __etckeeper_push_remote -%}
+  PUSH_REMOTE="{{ etckeeper_push_remote }}"
+{% else -%}
+  PUSH_REMOTE=""
+{% endif %}
+
