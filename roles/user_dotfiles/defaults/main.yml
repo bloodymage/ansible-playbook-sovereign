@@ -27,3 +27,5 @@ dotfiles_gpg_keyid_format: "0xlong"
 dotfiles_users: "{{ users }}"
 dotfiles_home: "/home"
 dotfiles_mode: "0700"
+
+dotfiles_default_git_branch: "main"

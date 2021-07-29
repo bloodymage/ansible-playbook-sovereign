@@ -9,6 +9,9 @@
   {% endif %}
 {% endif %}
 
+[init]
+defaultBranch {{ dotfiles_default_git_branch }}
+
 [core]
 editor = emacsclient -t
 pager = less -FRSX
@@ -16,16 +19,17 @@ whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
 excludesfile = ~/.gitignore # Creates a global git ignore
 
 [github]
-user = {{ item.github_user | default(autonomy_github_user) }}
-oauth-token = {{ item.oauth_token | default(autonomy_github_oauth_token) }}
+{% if item.github_user is defined %}
+  user = {{ item.github_user }}
+  oauth-token = {{ item.oauth_token }}
+{% elif autonmy_github_user is truthy and autonomy_github_oauth_token is truthy %}
+  user = autonomy_github_user }}
+  oauth-token = autonomy_github_oauth_token }}
+{% endif %}
 
-[branch "master"]
+[branch "{{ dotfiles_default_git_branch }}"]
 remote = origin
-merge = refs/heads/master
-
-[branch "main"]
-remote = origin
-merge = refs/heads/main
+merge = refs/heads/{{ dotfiles_default_git_branch }}
 
 [color]
 branch = always
