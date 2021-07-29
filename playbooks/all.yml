@@ -63,12 +63,16 @@
       tags:
         - users
     - role: bloodymage.autonomy.emacs
+      when:
+        - autonomy_enable_emacs
       tags:
         - emacs
     - role: bloodymage.autonomy.git
       tags:
         - git
     - role: bloodymage.autonomy.unzip
+      when:
+        - (autonomy_dod_certs_install or autonomy_enable_unzip)
       tags:
         - unzip
  
@@ -122,13 +126,16 @@
         - user-dotfiles
         - user_dotfiles
     - role: bloodymage.autonomy.etckeeper
+      when:
+        - autonomy_enable_etckeeper
       tags:
         - etckeeper
     #- role: bloodymage.autonomy.polkit
     #  tags:
     #    - polkit
     - role: bloodymage.autonomy.screen
-      # make optional?
+      when:
+        - autonomy_enable_screen
       tags:
         - screen
     - role: bloodymage.autonomy.global
@@ -141,6 +148,8 @@
       tags:
         - curl
     - role: bloodymage.autonomy.keychain
+      when:
+        - autonomy_enable_keychain
       tags:
         - keychain
     - role: bloodymage.autonomy.man
@@ -162,7 +171,8 @@
       tags:
         - make
     - role: bloodymage.autonomy.uptimed
-      # make optional?
+      when:
+        - autonomy_enable_uptimed
       tags:
         - uptimed
     - role: bloodymage.autonomy.htop
@@ -174,9 +184,11 @@
     - role: bloodymage.autonomy.cron
       tags:
         - cron
-    # - role: bloodymage.autonomy.trash_cli
-    #   tags:
-    #     - trash-cli
+    - role: bloodymage.autonomy.trash_cli
+      when:
+        - autonomy_enable_trash_cli
+      tags:
+        - trash-cli
 
 # ==================================================================================================
 #
