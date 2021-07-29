@@ -1,6 +1,6 @@
 ; ==================================================================================================
 ;
-; BIND data file for {{ bind_zone }}
+; BIND data file for {{ autonomy_domain }}
 ;
 ; {{ ansible_managed }}
 ;
@@ -14,13 +14,13 @@ $TTL	{{ bind_zone_ttl }}
 {{ bind_zone_negative_cache_ttl.ljust(20) }}  ; Negative Cache TTL
 )  
 ;
-{% for ns in bind_zone_dnsservers -%}
-  {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'NS'.ljust(6) }}{{ ns.name }}.{{ bind_zone }}.
+{% for ns in groups[autonomy_zone_name + '_dns_servers'] -%}
+  {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'NS'.ljust(6) }}{{ hostvars[ns]['inventory_hostname_short'] }}.{{ autonomy_domain }}.
 {% endfor %}
 
 
-{% for ns in bind_zone_dnsservers -%}
-  {{ ns.name }}.{{ bind_zone }}.      IN A      {{ ns.address_ipv4 }}
+{% for ns in groups[autonomy_zone_name + '_dns_servers'] -%}
+  {{ ns.name }}.{{ bind_zone }}.      IN A      {{ hostvars[ns]['ansible_host'] }}
 {% endfor %}
 {% if zone_address_ipv4 is defined -%}
   {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'A'.ljust(6) }}{{ zone_address_ipv4 }}

@@ -118,6 +118,9 @@ mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: "/var/lib/mysql"
 
 nextcloud_db_user: nextcloud
+nextcloud_db_hosts:
+  - "{{ autonomy_fqdn }}"
+  - "localhost"
 
 
 # ==================================================================================================

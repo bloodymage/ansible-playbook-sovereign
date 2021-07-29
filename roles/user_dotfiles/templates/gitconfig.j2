@@ -22,7 +22,7 @@ excludesfile = ~/.gitignore # Creates a global git ignore
 {% if item.github_user is defined %}
   user = {{ item.github_user }}
   oauth-token = {{ item.oauth_token }}
-{% elif autonmy_github_user is truthy and autonomy_github_oauth_token is truthy %}
+{% elif autonomy_github_user is truthy and autonomy_github_oauth_token is truthy %}
   user = autonomy_github_user }}
   oauth-token = autonomy_github_oauth_token }}
 {% endif %}
