@@ -178,6 +178,20 @@
   when:
     - postfix_sender_relay is truthy
 
+- name: "Get defaulut relay users password."
+  ansible.builtin.set_fact:
+    postfix_sasl_auth_user_password: "{{ __password }}"
+  vars:
+    __password_store_id: "{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ postfix_sasl_auth_user }}"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  when:
+    - postfix_sender_relay is truthy
+
 - name: "Install Configuration files (postmap update required)"
   ansible.builtin.template:
     src: "{{ item.filename }}.j2"
@@ -190,6 +204,7 @@
   notify: map {{ item.filename }}
   when:
     - __postfix_sasl_auth_users_list is defined
+    - postfix_sender_relay is truthy
   tags:
     - postfix
     - postfix_debug
