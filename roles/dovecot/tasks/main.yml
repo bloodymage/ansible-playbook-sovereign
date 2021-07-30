@@ -312,7 +312,7 @@
 # - name: "Perform email migration"
 #   ansible.builtin.command:
 #     cmd: >-
-#       doveadm -o imapc_password='{{ item.password }}'
+#       doveadm -o imapc_password='{{ item.password | default(__password) }}'
 #       backup
 #       -1
 #       -a 'Virtual/All Mail'
@@ -321,5 +321,13 @@
 #       -u {{ item.account }} imapc:
 #   become: yes
 #   loop: "{{ dovecot_migration_users }}"
+#   vars:
+#     __password_store_id: "{{ autonomy_domain }}/external_services/{{ dovecot_migration_users }}/{{ item.account }}"
+#     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+#     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+#     __password_create: "create=true"
+#     __password_symbols: "nosymbols=true"
+#     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+#     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
 #   when:
 #     - item.account != 'bob@example.com'
