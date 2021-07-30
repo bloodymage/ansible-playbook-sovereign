@@ -15,11 +15,10 @@ opendkim_trustedhosts: "TrustedHosts"
 opendkim_trustedhosts_path: "{{ opendkim_config_dir }}/{{ opendkim_trustedhosts }}"
 opendkim_signing_keytable: "SigningTable"
 opendkim_signing_keytable_path: "{{ opendkim_config_dir }}/{{ opendkim_signing_keytable }}"
-
 opendkim_mail_privatekey: "{{ opendkim_mail_service }}.private"
 opendkim_mail_privatekey_path: "{{ opendkim_key_dir }}/{{ opendkim_mail_privatekey }}"
-
 opendkim_pid_path: "/run/opendkim/opendkim.pid"
+
 
 opendkim_mail_service: "{{ ansible_date_time.year }}_mail"
 

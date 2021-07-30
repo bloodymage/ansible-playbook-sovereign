@@ -122,6 +122,15 @@
   when:
     - inventory_hostname in groups[item] | default([])
 
+# ==================================================================================================
+#
+# We try to identify all hosts within the domain.
+#
+# Samba Domain Controllers, by definition are.
+# Samba File Servers, and SSSD connected hosts are if they are in the same zone as the domain
+# controllers.
+#
+# ==================================================================================================
 - name: "Check if we have a samba domain, add hosts if it exists."
   group_by:
     key: "{{ item.parent }}"
@@ -130,9 +139,13 @@
       parent: "samba_domain"
     - name: "samba_file_servers"
       parent: "samba_domain"
+    - name: "sssd"
+      parent: "samba_domain"
   when:
     - inventory_hostname in groups[item.name] | default([])
     - groups['samba_domain_controllers'] is defined
+    - inventory_hostname in groups[autonomy_zone_name] | default([])
+    - groups['samba_domain_controllers'] is groups[autonomy_zone_name] | default([])
 
 - name: "Create virtual_hosts group."
   group_by:
