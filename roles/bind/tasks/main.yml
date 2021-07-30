@@ -203,6 +203,33 @@
 
 # ==================================================================================================
 #
+#
+#
+# ==================================================================================================
+- name: "Install Dynamic DNS Keys."
+  ansible.builtin.template:
+    src: "etc/bind/ddns_key.j2"
+    dest: "{{ bind_conf_dir }}/{{ item }}.key"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop:
+    - ansible
+  notify: restart bind
+  vars:
+    __nameserver: "{{ inventory_hostname_short }}"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    bind_dnssec_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  tags:
+    - bind
+    - bind_debug
+    - bind-debug
+    - bind-config
+
+# ==================================================================================================
+#
 # Install Configuration files
 #
 # ==================================================================================================
@@ -223,30 +250,6 @@
   when:
     - bind_dnssec_secret is defined
     - bind_zones is defined
-  notify: restart bind
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-config
-
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
-- name: "Install Dynamic DNS Keys."
-  ansible.builtin.template:
-    src: "etc/bind/ddns_key.j2"
-    dest: "{{ bind_conf_dir }}/{{ item }}.key"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  when:
-    - bind_dnssec_secret is defined
-  loop:
-    - ansible
   notify: restart bind
   tags:
     - bind
