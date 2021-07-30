@@ -16,6 +16,46 @@
 #
 # ==================================================================================================
 # Variables which our default is different from postfix's default.
+
+# Input Services
+postfix_smtpd_banner: "$myhostname ESMTP"
+
+postfix_smtpd_milters:
+  - "{{ mail_spamassassin_unix_socket }}"
+
+postfix_smtpd_tls_chain_files:
+  - "/etc/ssl/private/{{ autonomy_fqdn }}.key"
+  - "/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem"
+
+postfix_smtpd_helo_required: "yes"
+
+postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
+
+postfix_smtpd_use_tls: "yes"
+
+# Processing Services
+
+# Output Services
+
+# Helpers
+
+# Recipient/Sender Verification
+
+# TLS Cache Manager
+
+# Anvil
+
+# Needed by Mailq command
+
+# Needed by postqueue -f
+
+# Proxymap
+
+# Other
+
+postfix_non_smtpd_milters: "$smtpd_milters"
+
+
 postfix_alias_maps:
   - "hash:/etc/aliases"
 
@@ -31,6 +71,7 @@ postfix_line_length_limit: "6144"
 
 postfix_mailbox_size_limit: "0"
 
+# Set this to 50MB
 postfix_message_size_limit: "52428800"
 
 postfix_mydestination:
@@ -39,8 +80,6 @@ postfix_mydestination:
   - "localhost"
 
 postfix_myhostname: "{{ autonomy_fqdn }}"
-
-postfix_non_smtpd_milters: "$smtpd_milters"
 
 postfix_postscreen_dnsbl_action: "enforce"
 
@@ -59,20 +98,6 @@ postfix_smtp_header_checks:
 
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
 
-postfix_smtpd_banner: "$myhostname ESMTP"
-
-postfix_smtpd_milters:
-  - "{{ mail_spamassassin_unix_socket }}"
-
-postfix_smtpd_tls_chain_files:
-  - "/etc/ssl/private/{{ autonomy_fqdn }}.key"
-  - "/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem"
-
-postfix_smtpd_helo_required: "yes"
-
-postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
-
-postfix_smtpd_use_tls: "yes"
 
 postfix_virtual_alias_maps:
   - "hash:/etc/postfix/virtual-mailbox-user-aliases"
@@ -82,38 +107,23 @@ postfix_virtual_mailbox_maps:
 
 # Variables which have the same default as postfix
 postfix_alias_database: "{{ __postfix_alias_database }}"
-
 postfix_append_dot_mydomain: "{{ __postfix_append_dot_mydomain }}"
-
 postfix_default_destination_concurrency_limit: "{{ __postfix_default_destination_concurrency_limit }}"
-
 postfix_delay_warning_time: "{{ __postfix_delay_warning_time }}"
-
 postfix_disable_vrfy_command: "{{ __postfix_disable_vrfy_command }}"
-
 postfix_inet_interfaces: "{{ __postfix_inet_interfaces }}"
-
 postfix_inet_protocols: "{{ __postfix_inet_interfaces }}"
-
 postfix_local_recipient_maps: "{{ __postfix_local_recipient_maps }}"
-
 postfix_mailbox_transport: "{{ __postfix_mailbox_transport }}"
-
 postfix_mynetworks: "{{ __postfix_mynetworks }}"
-
 postfix_mynetworks_style: "{{ __postfix_mynetworks_style }}"
-
 postfix_myorigin: "{{ __postfix_myorigin }}"
-
 postfix_postscreen_access_list: "{{ __postfix_postscreen_access_list }}"
-
 postfix_readme_directory: "{{ __postfix_readme_directory }}"
-
 postfix_relay_destination_concurrency_limit: "{{ __postfix_relay_destination_concurrency_limit }}"
-
 postfix_relay_host: "{{ __postfix_relay_host }}"
-
 postfix_sender_dependent_relayhost_maps: "{{ __postfix_sender_dependent_relayhost_maps }}"
+postfix_smtp_helo_name: "{{ __postfix_smtp_helo_name }}"
 postfix_smtp_sasl_auth_enable: "{{ __postfix_smtp_sasl_auth_enable }}"
 postfix_smtp_sasl_password_maps: "{{ __postfix_smtp_sasl_password_maps }}"
 postfix_smtp_sasl_security_options: "{{ __postfix_smtp_sasl_security_options }}"
@@ -228,6 +238,7 @@ __postfix_relay_destination_concurrency_limit: "$default_destination_concurrency
 __postfix_relay_host: ""
 __postfix_sender_dependent_relayhost_maps: []
 __postfix_smtp_header_checks: ""
+__postfix_smtp_helo_name: "$myhostname"
 __postfix_smtp_sasl_auth_enable: "no"
 __postfix_smtp_sasl_password_maps: []
 __postfix_smtp_sasl_security_options:
