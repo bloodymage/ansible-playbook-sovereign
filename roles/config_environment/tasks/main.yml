@@ -44,6 +44,12 @@
   when:
     - autonomy_zone_name is defined
 
+- name: "Create group by zone."
+  group_by:
+    key: "{{ autonomy_zone_name }}"
+  when:
+    - autonomy_zone_name is defined
+
 # ==================================================================================================
 #
 # Now we create groups based on the host's role
@@ -130,6 +136,12 @@
 # Samba File Servers, and SSSD connected hosts are if they are in the same zone as the domain
 # controllers.
 #
+# Note: if we check to see if the domain controller is in the same zone as the sssd host, and we
+# are using '--limit' to only run the playbook on the sssd host, then this fails.  So if later we
+# are checking that the host is in the samba domain, then that task will fail.
+#
+# Disabling zone check for until I can find a better way.
+#
 # ==================================================================================================
 - name: "Check if we have a samba domain, add hosts if it exists."
   group_by:
@@ -144,8 +156,8 @@
   when:
     - inventory_hostname in groups[item.name] | default([])
     - groups['samba_domain_controllers'] is defined
-    - inventory_hostname in groups[autonomy_zone_name] | default([])
-    - groups['samba_domain_controllers'] is groups[autonomy_zone_name] | default([])
+    #- inventory_hostname in groups[autonomy_zone_name] | default([])
+    #- groups['samba_domain_controllers'][0] in groups[autonomy_zone_name] | default([])
 
 - name: "Create virtual_hosts group."
   group_by:
