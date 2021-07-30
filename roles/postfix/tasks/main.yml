@@ -56,11 +56,7 @@
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
-    __password_length: "length={{ autonomy_password_length }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password_lookup: "{{ __password_store_id }}"
   no_log: yes
   become: no
   delegate_to: localhost
@@ -163,6 +159,25 @@
 # authentication to an external relay server
 #
 # ==================================================================================================
+- name: "Get relay users password."
+  ansible.builtin.set_fact:
+    __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
+  loop: "{{ postfix_sasl_auth_users_list }}"
+  vars:
+    __user:
+      - origin: "{{ item.origin }}"
+        destination: "{{ item.destination }}"
+        password: "{{ item.password | default(__password) }}"
+    __password_store_id: "{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  when:
+    - postfix_sender_relay is truthy
+
 - name: "Install Configuration files (postmap update required)"
   ansible.builtin.template:
     src: "{{ item.filename }}.j2"
@@ -174,7 +189,7 @@
   loop: "{{ postfix_sasl_relay_files }}"
   notify: map {{ item.filename }}
   when:
-    - postfix_sasl_auth_users_list is defined
+    - __postfix_sasl_auth_users_list is defined
   tags:
     - postfix
     - postfix_debug

@@ -9,7 +9,7 @@ autonomy_packages:
 #
 # ==================================================================================================
 postfix_use_mysql_backend: no
-
+postfix_sender_relay: ""
 # ==================================================================================================
 #
 #
@@ -60,6 +60,10 @@ postfix_canonical_mappings:
 postfix_ldap_maps: []
 postfix_ldap_map_debug_level: 0
 
+postfix_sasl_auth_user: ""
+postfix_sasl_auth_user_password: ""
+postfix_relay_host: []
+
 # ==================================================================================================
 #
 #
@@ -74,3 +78,5 @@ __postfix_virtual_mailboxes:
     data: "{{ postfix_virtual_mailbox_users }}"
   - type: "virtual-mailbox-user-aliases"
     data: "{{ postfix_virtual_mailbox_user_aliases }}"
+
+__postfix_sasl_auth_users_list: []
