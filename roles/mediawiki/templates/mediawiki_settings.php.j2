@@ -157,7 +157,7 @@ $wgSMTP = [
 "port"     => 587,                // Port to use when connecting to the SMTP server
 "auth"     => true,               // Should we use SMTP authentication (true or false)
 "username" => "mediawiki@{{ ansible_domain }}",     // Username to use for SMTP authentication (if being used)
-"password" => "{{ mediawiki_mail_user_password }}"       // Password to use for SMTP authentication (if being used)
+"password" => "{{ mediawiki_ldap_password }}"       // Password to use for SMTP authentication (if being used)
 ];
 
 {% for skin in mediawiki_skins_defaults %}
