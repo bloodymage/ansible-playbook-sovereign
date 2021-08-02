@@ -32,7 +32,9 @@ There are three reasons I had with creating this with this project.
 2. I wanted to better control my data.
 3. I wanted a way to quickly and easily rebuild my network if absolutely necessary.
 
-Some smaller goals that I have for this project is minimizing the variables I have to define in my inventory.  For each role, having sensible defaults, and the fine tuning done in the inventory requires the least amount of definitions as possible.  In addition, I have set it up to simplify password management for various services by using ansible's passwordstore lookup to generate and save any passwords necessary.
+So far, each server is configured without using docker containers or any other group packages, for example: dovecot and postfix vs iRedMail.  I chose this route to learn as much as possible about each service and it's requirements.
+
+Some smaller goals that I have for this project is minimizing the variables I have to define in my inventory.  For each role, having sensible defaults which can be modified at runtime based on other configuration settings.  For example if you are using smart cards, enable smart card required settings.  These basic options can be set via inventories.  In addition, I have set it up to simplify password management for various services by using ansible's passwordstore lookup to generate and save any passwords necessary.
 
 Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
 
@@ -87,9 +89,29 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 
 ### [Variables](docs/VARIABLES.md)
 
+This section provides the bare minimum listing of variables that need to be defined.  For the full listing see [docs/VARIABLES.md](docs/VARIABLES.md).
 Note: This is still in early development.  Some of the variable descriptions and requirements listed below pertain more to how it is planned to eventually work, than how it works right now.
 
 #### Global Variables
+
+##### Network structure
+```
+autonomy_root_domain: "example.com"
+autonomy_internal_zone_name: "internal"
+
+autonomy_zones:
+  - name: "internal"
+    type: "internal"
+  - name: "dmz"
+    type: "dmz"
+  - name: "root"
+    type: "public"
+```
+
+```
+autonomy_sysadmin_email_userid: "admin"
+autonomy_sysadmin_email_address: "{{ autonomy_sysadmin_email_userid }}@{{ autonomy_root_domain }}"
+```
 
 ##### Users
 ```
@@ -110,13 +132,7 @@ domain_users:
     password:              (optional)
 ```
 
-If the username is not defined, then it will be created based on other defined variables (given_name, surname if available, middle_name if available, and a random number.  If password is defined, the defined password will be used, otherwise a password will be generated (see [Passwords](#Passwords))
-
-##### Choices
-
-The following are optional choices that are not required to be defined.
-
-- ```smart_card_usage: no```        Options: yes\no
+For domain users, if the username is not defined, then it will be created based on other defined variables (given_name, surname if available, middle_name if available, and a random number.  If password is defined, the defined password will be used, otherwise a password will be generated (see [Passwords](#Passwords))
 
 #### Role variables
 Each role's variables are defined in their README.md file.
@@ -174,6 +190,13 @@ Not yet implemented advantages:
 Each role is built with the idea of do one thing, and do it well.  So there will be many more roles than other projects might have.  The advantage is that you don't have to run every role every time.  Each role can be selected individually by using '--tag' with the role's name, for example '--tag dovecot' will run the dovecot role.  If you wish to run all roles related to email servers, you would run the playbook 'mailservers.yml'
 
 ### Similar Projects
+
+Each of these projects are excellent projects, they didn't quite meet my needs.
+
+1. Again, I wanted to actually learn how to use ansible.
+2. I am in a mixed linux/windows environment.  So, I wanted a Samba AD Domain, which none provide.
+3. I wanted smart card support, which none provided.
+
 #### Ansible Based
 ##### [Debops](https://docs.debops.org/en/master/) ([DebOps Github Repo](https://github.com/debops/debops))
 
