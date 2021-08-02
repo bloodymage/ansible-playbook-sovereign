@@ -220,7 +220,7 @@
   vars:
     __nameserver: "{{ inventory_hostname_short }}"
     __password_store_id: "{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password_lookup: "{{ __password_store_id }}"
     bind_dnssec_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   tags:
     - bind
