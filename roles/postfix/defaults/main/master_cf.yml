@@ -61,6 +61,9 @@ postfix_master_tlsproxy_service_run_chroot: yes
 postfix_master_tlsproxy_service_process_limit: "0"
 
 postfix_master_submission_service_run_chroot: yes
+postfix_master_submission_service_args:
+  - "-o syslog_name=postfix/$service_name"
+  - "-o smtpd_tls_security_level=encrypt"
 
 postfix_master_smtps_service_run_chroot: yes
 
@@ -195,7 +198,6 @@ postfix_master_submission_service_run_unprivileged: "{{ __postfix_master_default
 postfix_master_submission_service_wakeup_time: "{{ __postfix_master_default_service_wakeup_time }}"
 postfix_master_submission_service_process_limit: "{{ __postfix_master_default_service_process_limit }}"
 postfix_master_submission_service_command: "{{ __postfix_master_submission_service_command }}"
-postfix_master_submission_service_args: "{{ __postfix_master_submission_service_args }}"
 
 postfix_master_smtps_service_type: "{{ __postfix_master_smtps_service_type }}"
 postfix_master_smtps_service_private: "{{ __postfix_master_default_service_private }}"
