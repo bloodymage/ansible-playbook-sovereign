@@ -202,6 +202,15 @@
     - item[0].id_number is defined
     - item[0].spns is not defined
 
+- name: "Check if we are regenerating host certs."
+  ansible.builtin.set_fact:
+    __user_cert_force_regeneration: yes
+  become: no
+  changed_when: __user_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-host-certs
+
 - name: "Generate User Certificates."
   community.crypto.x509_certificate:
     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"

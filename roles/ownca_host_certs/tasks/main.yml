@@ -216,6 +216,15 @@
 # host's certificate has not.
 #
 # ==================================================================================================
+- name: "Check if we are regenerating host certs."
+  ansible.builtin.set_fact:
+    __host_cert_force_regeneration: yes
+  become: no
+  changed_when: __host_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-host-certs
+
 - name: "Check if the host's cert authority_key_identifier matches the Component CA's subject_key_identifier."
   ansible.builtin.set_fact:
     __host_cert_force_regeneration: yes

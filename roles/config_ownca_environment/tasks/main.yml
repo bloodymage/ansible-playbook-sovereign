@@ -2,8 +2,29 @@
 - name: "Check if we are regenerating all ownca certs."
   ansible.builtin.set_fact:
     __ownca_regenerate: yes
+    __ownca_force_regenerate_intermediate_ca: yes
+    __ownca_force_regenerate_issuing_ca: yes
   become: no
   changed_when: __ownca_regenerate
   tags:
     - never
     - regenerate-ownca
+
+- name: "Check if we are regenerating intermediate CA certs."
+  ansible.builtin.set_fact:
+    __ownca_force_regenerate_intermediate_ca: yes
+    __ownca_force_regenerate_issuing_ca: yes
+  become: no
+  changed_when: __ownca_force_regenerate_intermediate_ca
+  tags:
+    - never
+    - regenerate-intermediate-ca
+
+- name: "Check if we are regenerating issuing CA certs."
+  ansible.builtin.set_fact:
+    __ownca_force_regenerate_issuing_ca: yes
+  become: no
+  changed_when: __ownca_force_regenerate_issuing_ca
+  tags:
+    - never
+    - regenerate-intermediate-ca
