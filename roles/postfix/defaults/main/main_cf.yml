@@ -55,7 +55,6 @@ postfix_smtpd_use_tls: "yes"
 
 postfix_non_smtpd_milters: "$smtpd_milters"
 
-
 postfix_alias_maps:
   - "hash:/etc/aliases"
 
@@ -64,6 +63,8 @@ postfix_canonical_maps:
   - "hash:/etc/postfix/canonical"
 
 postfix_compatibility_level: "2"
+
+postfix_disable_vrfy_command: "yes"
 
 postfix_home_mailbox: "Maildir/"
 
@@ -110,7 +111,6 @@ postfix_alias_database: "{{ __postfix_alias_database }}"
 postfix_append_dot_mydomain: "{{ __postfix_append_dot_mydomain }}"
 postfix_default_destination_concurrency_limit: "{{ __postfix_default_destination_concurrency_limit }}"
 postfix_delay_warning_time: "{{ __postfix_delay_warning_time }}"
-postfix_disable_vrfy_command: "{{ __postfix_disable_vrfy_command }}"
 postfix_inet_interfaces: "{{ __postfix_inet_interfaces }}"
 postfix_inet_protocols: "{{ __postfix_inet_interfaces }}"
 postfix_local_recipient_maps: "{{ __postfix_local_recipient_maps }}"
