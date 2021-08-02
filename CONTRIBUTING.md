@@ -10,4 +10,8 @@ var_name: "This is a variable that it is expected a user will want to be able to
 __var_name: "This name format is used for variables that are not to be changed by an end user.  For 
             example, either a variable that is only for the collection usage,
             (__autonomy_variables_files), or set by a task 'set_fact'"
+            
+            
+Refs:
+- https://polarsquad.com/blog/ansible-best-practices-part-2
 
