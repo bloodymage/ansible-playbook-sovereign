@@ -9,7 +9,7 @@
 
 - hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
   roles:
-    - role: bloodymage.autonomy.aliases
+    - role: bloodymage.autonomy.etc_aliases
       tags:
         - aliases
 
