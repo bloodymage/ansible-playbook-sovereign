@@ -106,6 +106,9 @@ postfix_virtual_alias_maps:
 postfix_virtual_mailbox_maps:
   - "hash:/etc/postfix/virtual-mailbox-users"
 
+postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
+postfix_milter_default_action: "accept"
+
 # Variables which have the same default as postfix
 postfix_alias_database: "{{ __postfix_alias_database }}"
 postfix_append_dot_mydomain: "{{ __postfix_append_dot_mydomain }}"
@@ -160,8 +163,6 @@ postfix_unknown_client_reject_code: "{{ __postfix_unknown_client_reject_code }}"
 postfix_unknown_hostname_reject_code: "{{ __postfix_unknown_hostname_reject_code }}"
 postfix_virtual_mailbox_domains: "{{ __postfix_virtual_mailbox_domains }}"
 postfix_virtual_transport: "{{ __postfix_virtual_transport }}"
-postfix_milter_connect_macros: "{{ __postfix_milter_connect_macros }}"
-postfix_milter_default_action: "{{ __postfix_milter_default_action }}"
 
 # Variables which aren't documented except in 'how-to' guides, need further research
 postfix_dovecot_destination_recipient_limit: 1

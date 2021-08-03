@@ -38,9 +38,54 @@
         - postfix-debug
         - install-packages
 
+- name: "Check if we are using Active Directory."
+  ansible.builtin.set_fact:
+    postfix_virtual_alias_maps:
+      - "proxy:ldap:/etc/postfix/ad_virtual_user_maps.cf"
+      - "proxy:ldap:/etc/postfix/ad_virtual_user_aliases_maps.cf"
+      - "proxy:ldap:/etc/postfix/ad_virtual_group_maps.cf"
+    postfix_virtual_mailbox_maps:
+      - "hash:/etc/postfix/virtual-mailbox-users"
+      - "proxy:ldap:/etc/postfix/ad_virtual_mailbox_maps.cf"
+    postfix_smtpd_sender_login_maps:
+      - "proxy:ldap:/etc/postfix/ad_sender_login_maps.cf"
+      - "$virtual_mailbox_maps"
+    postfix_ldap_maps:
+      - name: ad_sender_login_maps
+        query_filter: "(&(objectclass=person)(!(userAccountControl:1.2.840.113556.1.4.903:=2))(|(mail=%s)(userPrincipalName=%s)(otherMailbox=%s)(proxyAddresses=smtp:%s)))"
+        result_attribute: "userPrincipalName"
+        scope: "one"
+      - name: ad_virtual_group_maps
+        query_filter: "(&(objectclass=group)(mail=%s))"
+        result_attribute: "userPrincipalName"
+        special_result_attribute: "member"
+        scope: "sub"
+      - name: ad_virtual_mailbox_maps
+        scope: "sub"
+        query_filter: "(&(objectclass=person)(userPrincipalName=%s))"
+        result_attribute: "mail"
+        result_format: "%d/%u/Maildir/"
+      - name: ad_virtual_user_aliases_maps
+        scope: "sub"
+        query_filter: "(&(objectclass=person)(otherMailbox=%s))"
+        result_attribute: "userPrincipalName"
+      - name: ad_virtual_user_maps
+        query_filter: "(&(objectclass=person)(mail=%s))"
+        result_attribute: "userPrincipalName"
+        leaf_result_attribute: "mail"
+        scope: "sub"
+  become: no
+  when:
+    - autonomy_realm_identity_management_system == "samba"
+
 - name: "Check if we are using dovecot."
   ansible.builtin.set_fact:
     __postfix_master_service_configuration: "{{ __postfix_master_service_configuration + [__postfix_master_dovecot_service_configuration] }}"
+    postfix_mailbox_transport: "lmtp:unix:private/dovecot-lmtp"
+    postfix_smtpd_sasl_path: "private/auth"
+    postfix_smtpd_sasl_type: "dovecot"
+    postfix_virtual_transport: "dovecot"
+  become: no
   when:
     - inventory_hostname in groups['dovecot_servers']
 
@@ -61,6 +106,8 @@
   become: no
   delegate_to: localhost
   register: domain_user_list
+  when:
+    - autonomy_realm_identity_management_system == "samba"
   tags:
     - postfix
     - postfix_debug
