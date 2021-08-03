@@ -190,6 +190,13 @@
       tags:
         - trash-cli
 
+- name: "Basic settings for all linux hosts (including virtual hosts and public zone hosts)."
+  hosts: linux:!localhost:!routeros:!tpeap:!printers
+  roles:
+    - role: bloodymage.autonomy.ownca_host_dhparams
+      tags:
+        - ownca-host-dhparams
+
 # ==================================================================================================
 #
 # Finally, we configure settings based on OS Distribution Family:
