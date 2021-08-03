@@ -46,6 +46,7 @@
         - 'CA:TRUE'
       private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key_file }}"
       org_unit_name: "{{ item.name }}"
+      domain: "{{ item.domain }}"
   when:
     - item.type != "public"
 
@@ -70,6 +71,7 @@
         - 'CA:TRUE'
       private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_issuing_ca_key_file }}"
       org_unit_name: "{{ item[0].name }}"
+      domain: "{{ item[0].domain }}"
   when:
     - item[0].type != "public"
 
@@ -128,7 +130,7 @@
   delegate_to: localhost
   become: no
   vars:
-    __password_store_id: "{{ item.zone_name }}{{ autonomy_root_domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_store_id: "{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
     __password_length: "length={{ autonomy_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -172,7 +174,7 @@
   run_once: yes
   become: no
   vars:
-    __password_store_id: "{{ item.zone_name }}{{ autonomy_root_domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_store_id: "{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
     __password_lookup: "{{ __password_store_id }}"
     __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
 
@@ -252,7 +254,7 @@
   delegate_to: localhost
   become: no
   vars:
-    __password_store_id: "{{ item.zone_name }}{{ autonomy_root_domain }}/ownca/ownca_intermediate_password"
+    __password_store_id: "{{ item.domain }}/ownca/ownca_intermediate_password"
     __password_lookup: "{{ __password_store_id }}"
   notify:
     - "regenerate host certificates"

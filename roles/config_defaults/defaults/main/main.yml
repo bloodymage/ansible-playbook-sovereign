@@ -27,10 +27,13 @@ autonomy_zone_type: "internal"
 autonomy_zones:
   - name: internal
     type: internal
+    domain: "internal.{{ autonomy_root_domain }}"
   - name: dmz
     type: dmz
+    domain: "dmz.{{ autonomy_root_domain }}"
   - name: root
     type: public
+    domain: "{{ autonomy_root_domain }}"
 
 autonomy_domain: "{{ autonomy_zone_name }}.{{ autonomy_root_domain }}"
 autonomy_realm: "{{ autonomy_zone_name | upper }}"

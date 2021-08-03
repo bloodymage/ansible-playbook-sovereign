@@ -182,6 +182,7 @@ __ownca_root_ca:
   password_store_id_base: "{{ autonomy_root_domain }}"
   ca_id: "root"
   zone_name: ""
+  domain: "{{ autonomy_root_domain }}"
 
 __ownca_regenerate: no
 __ownca_regenerate_csr: no
