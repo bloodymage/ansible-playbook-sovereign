@@ -101,6 +101,19 @@ below pertain more to how it is planned to eventually work, than how it works ri
 
 #### Global Variables
 
+##### Decisions
+```
+autonomy_realm_identity_management_system: ""
+```
+
+Options:
+ - "" (Not set)
+ - samba
+ - openldap (planned for the future)
+ - freeipa (planned for the future)
+ 
+So far, this collection has really only been tested with this variable set to ```samba```.  You must set it yourself.  Things can, and most likely will go wrong if it's not set to ```samba```.
+
 ##### Network structure
 ```
 autonomy_root_domain: "example.com"

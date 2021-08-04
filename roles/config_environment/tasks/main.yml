@@ -103,9 +103,34 @@
   when:
     - inventory_hostname in groups[item.name] | default([])
 
-- name: "Create host groups based on zone and role."
+- name: "Create host groups based on zone name and role."
   group_by:
     key: "{{ autonomy_zone_name }}_{{ item }}"
+  loop:
+    - db_servers
+    - dns_servers
+    - file_servers
+    - git_servers
+    - ha_proxy
+    - homeassistant
+    - auth_servers
+    - ldap_servers
+    - mail_servers
+    - dovecot_servers
+    - postfix_servers
+    - dlna_servers
+    - mosquitto_servers
+    - radius_servers
+    - redis_servers
+    - samba_domain_controllers
+    - web_servers
+    - zwavecontrollers
+  when:
+    - inventory_hostname in groups[item] | default([])
+
+- name: "Create host groups based on zone type and role."
+  group_by:
+    key: "{{ autonomy_zone_type }}_{{ item }}"
   loop:
     - db_servers
     - dns_servers
@@ -182,12 +207,21 @@
   when:
     - inventory_hostname in groups['linux']
 
-- name: "Update password and auth mechanims."
-  ansible.builtin.set_fact:
-    autonomy_realm_identity_management_system: "samba"
-  become: no
-  when:
-    - groups['samba_domain_controllers'] is defined
+# ==================================================================================================
+#
+# This variable is crucial.  Things can go wrong if it's improperly set.  This may be a problem if
+# we are using the 'limit' flag to only run on certain hosts, and a domain controller is not part
+# of that list.
+#
+# Disabling for now.
+#
+# ==================================================================================================
+# - name: "Update password and auth mechanims."
+#   ansible.builtin.set_fact:
+#     autonomy_realm_identity_management_system: "samba"
+#   become: no
+#   when:
+#     - groups['samba_domain_controllers'] is defined
 
 #     - name: Check if we are using debug mode
 #       ansible.builtin.set_fact:
