@@ -76,7 +76,7 @@
     __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
-    - nextcloud_db_password == "password"
+    - nextcloud_passwordsalt == "password"
 
 - name: "Install Nextcloud."
   include: nextcloud_install.yml
