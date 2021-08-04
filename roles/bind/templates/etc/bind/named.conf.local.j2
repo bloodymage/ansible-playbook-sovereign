@@ -28,7 +28,6 @@ include "/etc/bind/rndc.key";
 {% endif %}
 };
 
-{% endif %}
 {% elif localzone.type == "public" and autonomy_zone_type == "dmz" -%}
   zone "{{ localzone.domain }}" {
   type primary;
@@ -43,6 +42,7 @@ include "/etc/bind/rndc.key";
 {% endif %}
 };
 
+{% endif %}
 {% endif %}
 {% endfor %}
 

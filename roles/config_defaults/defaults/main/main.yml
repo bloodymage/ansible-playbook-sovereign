@@ -134,6 +134,7 @@ nextcloud_db_hosts:
 # ==================================================================================================
 # Samba
 samba_password_legnth: "{{ autonomy_password_length }}"
+samba_domain: no
 
 # Samba LDAP lookups
 samba_user_class: "(objectClass=person)"

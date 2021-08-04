@@ -29,6 +29,8 @@
     __password_lookup: "{{ __password_store_id }}"
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
+  when:
+    - not samba_domain
 
 - name: "Add or modify host AAAA records."
   community.general.nsupdate:
@@ -48,9 +50,11 @@
     __password_store_id: "{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
     __password_lookup: "{{ __password_store_id }}"
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  delegate_to: "{{ hostvars[item]['ansible_host'] }}"
   when:
     - autonomy_ipv6_address is defined
-  delegate_to: "{{ hostvars[item]['ansible_host'] }}"
+    - not samba_domain
+
 
 # ==================================================================================================
 #
@@ -81,10 +85,10 @@
     state: "present"
   loop: "{{ groups[autonomy_zone_name + '_dns_servers'] | product(__cname_records) | list }}"
   become: yes
-  when:
-    - bind_zone is defined
-  remote_user: root
   delegate_to: "{{ hostvars[item[0]]['ansible_host'] }}"
+  when:
+    - not samba_domain
+    - bind_zone is defined
 
 # - name: "Add or modify host CNAME records based on defined virtual hosts"
 #   community.general.nsupdate:

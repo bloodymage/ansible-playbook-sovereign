@@ -168,7 +168,7 @@
     mode: "0644"
     force: no
     validate: "/usr/sbin/named-checkzone {{ item['domain'] }} %s"
-  loop: "{{ __bind_dns_zones }}"
+  loop: "{{ __bind_ddns_zones }}"
   become: yes
   register: forwardzone_refresh
   when:

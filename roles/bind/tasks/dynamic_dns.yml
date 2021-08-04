@@ -35,7 +35,7 @@
       set -o pipefail &&
       cat "{{ item['invocation']['module_args']['path'] }}" |
       grep algorithm |
-      cut -d\  -f2 |
+      cut -d\  -f4 |
       cut -d\; -f1
     executable: /bin/bash
   loop: "{{ existing_ddns_keys.results }}"
@@ -44,9 +44,9 @@
   when:
     - item['stat']['exists']
 
-- name: "Get existing algorithm."
+- name: "Add existing algorithm and keyfile status to zone information."
   ansible.builtin.set_fact:
-    __bind_dns_zones: "{{ __bind_dns_zones + [__zone] }}"
+    __bind_ddns_zones: "{{ __bind_ddns_zones + [__zone] }}"
   loop: "{{ existing_ddns_keys.results | product(algorithms.results) }}"
   vars:
     __existing_keys_name: "{{ item[0]['item']['name'] }}"
@@ -68,6 +68,7 @@
   become: no
   when:
     - __existing_keys_name == __algorithm_name
+    - item[1].skipped is not defined
 
 # ==================================================================================================
 #
@@ -82,13 +83,13 @@
       grep secret |
       cut -d\" -f2
     executable: /bin/bash
-  loop: "{{ __bind_dns_zones }}"
+  loop: "{{ __bind_ddns_zones }}"
   become: yes
   register: bind_ddns_keys
   when:
-    - (not item.keyfile_status or item.existing_algorithm != bind_ddns_algorithm)
-    - item.nameserver_zone_type == item.type
-    - not item.samba_domain
+    - (not item['keyfile_status'] or item['existing_algorithm'] != autonomy_ddns_key_algorithm)
+    - item['nameserver_zone_type'] == item['type']
+    - not item['samba_domain']
 
 # ==================================================================================================
 #
@@ -112,12 +113,12 @@
   notify: restart bind
   vars:
     __nameserver: "{{ inventory_hostname_short }}"
-    __force: "{% if existing_algorithm != autonomy_ddns_key_algorithm %}yes{% else %}no{% endif %}"
+    __force: "{% if item['item']['existing_algorithm'] != autonomy_ddns_key_algorithm %}yes{% else %}no{% endif %}"
     __password_userpass: "userpass={{ item['stdout'] }}"
     __password_create: "create=true"
-    __password_overwrite: "overwrite={{ __force }} backup=yes"
+    __password_overwrite: "overwrite={{ __force }} backup={{ __force }}"
     __password_store_id: "{{ item['item']['domain'] }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
-    __password_lookup: "{{ __password_store_id }} {{ __password_userpass }} {{ __password_create }}"
+    __password_lookup: "{{ __password_store_id }} {{ __password_userpass }} {{ __password_create }} {{__password_overwrite }}"
     bind_dnssec_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   when:
     - bind_ddns_keys['results'] is defined

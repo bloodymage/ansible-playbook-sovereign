@@ -184,7 +184,7 @@ bind9_myipv6_acl:
 # System Defaults
 #
 # ==================================================================================================
-__bind_dns_zones: []
+__bind_ddns_zones: []
 __complete_bind_dns_zones: []
 __bind_dns_zone_samba_domain: no
 __tmp_keyfiles: []
