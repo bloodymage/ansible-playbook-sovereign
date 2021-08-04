@@ -1,71 +1,13 @@
 ---
 # tasks file for dns-update
-- name: "Pre-tasks"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
-
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-      when:
-        - ansible_os_family is defined
-        - ansible_os_family == "Debian"
-        - ansible_network_os is undefined
-        - inventory_hostname != 'localhost'
-        - inventory_hostname not in groups['virtual_hosts'] | default([])
-        - inventory_hostname in groups['internal_zone'] | default([])
-        - inventory_hostname in groups['dmz_zone'] | default([])
-
-- name: "Add or modify host A records."
-  community.general.nsupdate:
-    key_name: "ansible"
-    key_secret: "{{ __key_secret }}"
-    key_algorithm: "hmac-sha256"
-    server: "{{ hostvars[item]['ansible_host'] }}"
-    zone: "{{ autonomy_domain }}"
-    record: "{{ inventory_hostname_short }}"
-    value: "{{ ansible_host }}"
-    type: "A"
-    state: present
-  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
-  become: yes
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
   vars:
-    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
-    __password_lookup: "{{ __password_store_id }}"
-    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  delegate_to: "{{ hostvars[item]['ansible_host'] }}"
-
-- name: "Add or modify host AAAA records."
-  community.general.nsupdate:
-    key_name: "ansible"
-    key_secret: "{{ __key_secret }}"
-    key_algorithm: "hmac-sha256"
-    server: "{{ hostvars[item]['ansible_host'] }}"
-    zone: "{{ autonomy_domain }}"
-    record: "{{ inventory_hostname_short }}"
-    value: "{{ autonomy_ipv6_address }}"
-    type: "AAAA"
-    state: present
-  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
-  become: yes
-  vars:
-    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
-    __password_lookup: "{{ __password_store_id }}"
-    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  when:
-    - autonomy_ipv6_address is defined
-  delegate_to: "{{ hostvars[item]['ansible_host'] }}"
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
 
 # ==================================================================================================
 #
@@ -121,77 +63,9 @@
     - inventory_hostname in groups[item.name] | default([])
     - item.alt_name != inventory_hostname_short
 
-# ==================================================================================================
-#
-# TODO: Fix role cname for multiple values.  For example, the desired end result is:
-#
-# www      CNAME www01
-#          CNAME www02
-#
-# Currently, each host overwrites the setting of the other host.
-#
-# www CNAME www01
-# is replaced by:
-# www CNAME www02
-#
-# Not really sure how to get this to work.
-#
-# ==================================================================================================
-- name: "Add or modify host CNAME records based on server role"
-  community.general.nsupdate:
-    key_name: "ansible"
-    key_secret: "{{ __key_secret }}"
-    key_algorithm: "hmac-sha256"
-    server: "{{ hostvars[item[0]]['ansible_host'] }}"
-    zone: "{{ autonomy_domain }}"
-    record: "{{ item[1] }}"
-    value: "{{ inventory_hostname }}."
-    type: "CNAME"
-    state: "present"
-  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] | product(__cname_records) | list }}"
-  become: yes
+- name: "Include OS Family Tasks."
+  include: "{{ ansible_system | lower }}.yml"
   when:
-    - bind_zone is defined
-  remote_user: root
-  delegate_to: "{{ hostvars[item[0]]['ansible_host'] }}"
-
-# - name: "Add or modify host CNAME records based on defined virtual hosts"
-#   community.general.nsupdate:
-#     key_name: "ansible"
-#     key_secret: "{{ item[0].bind_dnssec_secret }}"
-#     key_algorithm: "hmac-sha256"
-#     server: "{{ item[0].address_ipv4 }}"
-#     zone: "{{ bind_zone }}"
-#     record: "{{ item[1].name.split('.')[0] }}"
-#     value: "{{ inventory_hostname }}."
-#     type: "CNAME"
-#   loop: "{{ bind_zone_dnsservers | product(virtual_hosts) | list }}"
-#   become: yes
-#   when:
-#     - bind_zone is defined
-#     - virtual_hosts is defined
-#   remote_user: root
-#   delegate_to: "{{ item[0].address_ipv4 }}"
-
-# - name: "Add or modify MX records"
-#   community.general.nsupdate:
-#     key_name: "ansible"
-#     key_secret: "{{ item.bind_dnssec_secret }}"
-#     key_algorithm: "hmac-sha256"
-#     server: "{{ item.address_ipv4 }}"
-#     zone: "{{ zone }}"
-#     record: "{{ zone }}."
-#     value: "{{ ansible_fqdn }}."
-#     type: "MX"
-#   loop: "{{ zone_dnsservers }}"
-#   become: yes
-#   when:
-#     - bind_zone is defined
-#     - bind_mx_record is defined
-#   remote_user: root
-#   delegate_to: "{{ item.address_ipv4 }}"
-#   tags:
-#     - dns_forwardzones
-#     - dns-forwardzones
-#     - dns_forwardzones_debug
-#     - dns-forwardzones-debug
+    - ansible_network_os is not defined
+    - ansible_os_family is defined
+  become: no
