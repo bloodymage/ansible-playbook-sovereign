@@ -9,9 +9,12 @@
         - always
 
 - name: "Configure Bind9 Servers."
-  hosts: dns_servers:!public_zone
+  hosts: dns_servers
   roles:
     - role: bloodymage.autonomy.bind
+      tags:
+        - bind
+        - bind9
 
 - name: "Set Forward Zone information."
   hosts: all:!localhost
@@ -21,6 +24,7 @@
       tags:
         - dns_forwardzones
         - dns-forwardzones
+        - dns-forwardzone
         - dns-update
 
 # TODO: Configure RouterOS reversezones
@@ -32,4 +36,5 @@
       tags:
         - dns_reversezones
         - dns-reversezones
+        - dns-reversezone
         - dns-update

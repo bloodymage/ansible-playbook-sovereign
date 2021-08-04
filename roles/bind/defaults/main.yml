@@ -13,10 +13,12 @@ bind_conf_dir: "/etc/bind"
 bind_key_dir: "{{ bind_conf_dir }}/keys"
 auth_file: "auth_transfer.conf"
 bind_auth_file: "{{ bind_conf_dir }}/{{ auth_file }}"
+# Custom location for zone files
+bind_zone_dir: "{{ bind_dir }}"
+bind_cache_dir: "/var/cache/bind"
 
 # Main config file
 bind_config: "{{ bind_conf_dir }}/named.conf"
-
 bind_default_zone_file: "{{ bind_conf_dir }}/named.conf.default-zones"
 bind_options_file: "{{ bind_conf_dir }}/named.conf.options"
 bind_local_file: "{{ bind_conf_dir }}/named.conf.local"
@@ -29,9 +31,8 @@ bind_bindkeys_file: "/etc/named.iscdlv.key"
 bind_pid_file: "/run/named/named.pid"
 bind_session_keyfile: "/run/named/session.key"
 
-# Custom location for zone files
-bind_zone_dir: "{{ bind_dir }}"
-bind_cache_dir: "/var/cache/bind"
+# Commands
+bind_ddns_confgen: "/usr/sbin/ddns-confgen"
 
 # defaults file for ansible-bind
 # Define acls for defining ip addresses or networks allowed to query bind
@@ -77,10 +78,12 @@ bind_root_zones:
     ipv6: 2001:dc3::35
 
 bind_rpz_zones: []
-bind_zones_dir: /etc/bind/zones
 
 bind_dnssec_validation: "no"
 bind_dnssec_secret: "secret"
+
+
+bind_ddns_algorithm: "hmac-sha512"
 
 # SOA information
 bind_zone_time_to_refresh: "1D"
@@ -175,3 +178,13 @@ bind9_myipv4_acl:
 
 bind9_myipv6_acl:
   name: myipv6
+
+# ==================================================================================================
+#
+# System Defaults
+#
+# ==================================================================================================
+__bind_dns_zones: []
+__complete_bind_dns_zones: []
+__bind_dns_zone_samba_domain: no
+__tmp_keyfiles: []

@@ -15,45 +15,33 @@
           paths:
             - "vars"
       become: no
-      tags:
-        - bind
-        - bind_debug
-        - bind-debug
-        - install-packages
+      when:
+        - inventory_hostname not in groups['public_zone']
 
     - name: "Install packages."
       ansible.builtin.package:
         name: "{{ autonomy_packages }}"
         state: present
       become: yes
-      tags:
-        - bind
-        - bind_debug
-        - bind-debug
-        - install-packages
+      when:
+        - inventory_hostname not in groups['public_zone']
 
 # ==================================================================================================
 #
 # Set Variables
 #
 # ==================================================================================================
-- name: "Check bind version."
-  ansible.builtin.debug:
-    msg:
-      - "{{ ansible_facts.packages['bind9'][0]['version'] }}"
-  when: "'bind9' in ansible_facts.packages"
+# - name: "Check bind version."
+#   ansible.builtin.debug:
+#     msg:
+#       - "{{ ansible_facts.packages['bind9'][0]['version'] }}"
+#   when: "'bind9' in ansible_facts.packages"
 
 - name: "Query DNS for zone SOA."
   ansible.builtin.set_fact:
-    __zone_soa: "{{ lookup('community.general.dig', bind_zone + '/SOA') }}"
-    __zone_all: "{{ lookup('community.general.dig', bind_zone, 'qtype=NS', wantlist=True) }}"
+    __zone_soa: "{{ lookup('community.general.dig', autonomy_domain + '/SOA') }}"
+    __zone_all: "{{ lookup('community.general.dig', autonomy_domain, 'qtype=NS', wantlist=True) }}"
   become: no
-  when:
-    - bind_zone is defined
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
 
 - name: "Query DNS for reverse zone SOA."
   ansible.builtin.set_fact:
@@ -62,10 +50,6 @@
   become: no
   when:
     - bind_reverse_zone is defined
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
 
 - name: "Get Forward Zone's Current Serial Number."
   ansible.builtin.set_fact:
@@ -73,10 +57,6 @@
   become: no
   when:
     - __zone_soa is defined
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
 
 - name: "Get Reverse Zone's Current Serial Number."
   ansible.builtin.set_fact:
@@ -84,10 +64,6 @@
   become: no
   when:
     - __reverse_zone_soa is defined
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
 
 - name: "Set new Forward Zone Serial Number."
   ansible.builtin.set_fact:
@@ -96,10 +72,6 @@
   when:
     - __zone_current_serial_number is defined
     - __zone_current_serial_number >= bind_zone_serial_number
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
 
 - name: "Set new Reverse Zone Serial Number."
   ansible.builtin.set_fact:
@@ -108,10 +80,6 @@
   when:
     - __reverse_zone_current_serial_number is defined
     - __reverse_zone_current_serial_number >= bind_reverse_zone_serial_number
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
 
 - name: "Check new serial number."
   ansible.builtin.debug:
@@ -122,111 +90,9 @@
   become: no
   when:
     - __zone_current_serial_number is defined
-  tags:
-    - never
-    - bind_debug
-    - bind-debug
 
-# ==================================================================================================
-#
-# Generate DNSSEC keys
-#
-# tasks/dnssec-keygen.yml
-# Generate DNSSEC key, inspired by Michele Salerno (@mikysal78)
-#
-# ==================================================================================================
-# - name: DNSSEC keygen | Ensure keys directory is present
-#   file:
-#     path: "{{ bind_dnssec_key_dir }}"
-#     state: directory
-#     owner: "{{ bind_owner }}"
-#     group: "{{ bind_group }}"
-#     mode: '0750'
-#   tags:
-#     - bind
-#     - bind-dnssec
-
-# - name: DNSSEC keygen | Create key file for each zone (This may take a long time)
-#     shell: >-
-#         dnssec-keygen -a HMAC-MD5 -b 512 -n HOST "{{ item.name }}"
-#     args:
-#       chdir: "{{ bind_dnssec_key_dir }}"
-#     creates:
-#       - "K{{ item.name }}.+[0-9][0-9][0-9].+[0-9][0-9][0-9][0-9][0-9].key"
-#       - "K{{ item.name }}.+[0-9][0-9][0-9].+[0-9][0-9][0-9][0-9][0-9].private"
-#     loop:
-#       - "{{ bind_zone_domains }}"
-#     tags:
-#       - bind
-#       - bind-dnssec
-
-# - name: DNSSEC keygen | Ensure proper permissions on DNSSEC keys
-#   file:
-#     path: "{{ item }}"
-#     mode: '0640'
-#     owner: "{{ bind_owner }}"
-#     group: "{{ bind_group }}"
-#   with_fileglob:
-#     - "{{ bind_dnssec_key_dir }}/K*.{key,private}"
-#   tags:
-#     - bind
-#     - bind-dnssec
-
-# - name: DNSSEC keygen | Gather keys from key files
-#   shell: >-
-#       set -o nounset -o pipefail -o errexit &&
-#       grep 'Key:' "{{ bind_dnssec_key_dir }}/K{{ item.name }}".*.private | cut -d ' ' -f 2
-#   args:
-#     executable: /bin/bash
-#   with_items:
-#     - "{{ bind_zone_domains }}"
-#   register:
-#     bind_dnssec_keys
-#   tags:
-#     - bind
-#     - bind-dnssec
-
-# - name: DNSSEC keygen | Show keys (debug)
-#   debug:
-#     var: bind_dnssec_keys
-# - name: "Create DDNS Key files"
-#   template:
-#     src: "{{ role_path }}/templates/ddns_key.j2"
-#     dest: "{{ bind_conf_dir }}/ddns.key"
-#     owner: root
-#     group: root
-#     mode: "0644"
-#   become: yes
-#   tags:
-#     - bind
-#     - bind-dnssec
-
-# ==================================================================================================
-#
-#
-#
-# ==================================================================================================
-- name: "Install Dynamic DNS Keys."
-  ansible.builtin.template:
-    src: "etc/bind/ddns_key.j2"
-    dest: "{{ bind_conf_dir }}/{{ item }}.key"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  loop:
-    - ansible
-  notify: restart bind
-  vars:
-    __nameserver: "{{ inventory_hostname_short }}"
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
-    __password_lookup: "{{ __password_store_id }}"
-    bind_dnssec_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-config
+- name: "Configure Dynamic DNS Keys."
+  include: dynamic_dns.yml
 
 # ==================================================================================================
 #
@@ -249,13 +115,8 @@
     - named.conf.local
   when:
     - bind_dnssec_secret is defined
-    - bind_zones is defined
+    - inventory_hostname not in groups['public_zone']
   notify: restart bind
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-config
 
 # ==================================================================================================
 #
@@ -272,11 +133,7 @@
   become: yes
   when:
     - bind_dnssec_secret is defined
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-zones
+    - inventory_hostname not in groups['public_zone']
 
 # ==================================================================================================
 #
@@ -293,11 +150,7 @@
   become: yes
   when:
     - bind_dnssec_secret is defined
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-zones
+    - inventory_hostname not in groups['public_zone']
 
 # ==================================================================================================
 #
@@ -309,22 +162,19 @@
 - name: "Installing Forward Zone files."
   ansible.builtin.template:
     src: "var/lib/bind/forwardzone.j2"
-    dest: "{{ bind_zone_dir }}/db.{{ bind_zone }}"
+    dest: "{{ bind_zone_dir }}/db.{{ item['domain'] }}.test"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "0644"
     force: no
-    validate: "/usr/sbin/named-checkzone %s"
+    validate: "/usr/sbin/named-checkzone {{ item['domain'] }} %s"
+  loop: "{{ __bind_dns_zones }}"
   become: yes
   register: forwardzone_refresh
   when:
-    - bind_zone is defined
+    - item['nameserver_zone_type'] == item['type']
+    - not item['samba_domain']
   notify: restart bind
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-zones
 
 - name: "Installing Reverse Zone files."
   ansible.builtin.template:
@@ -334,17 +184,12 @@
     group: "{{ bind_group }}"
     mode: "0644"
     force: no
-    validate: "/usr/sbin/named-checkzone %s"
+    validate: "/usr/sbin/named-checkzone {{ bind_reverse_zone }} %s"
   become: yes
   register: reversezone_refresh
   when:
     - bind_reverse_zone is defined
   notify: restart bind
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-zones
 
 # ==================================================================================================
 #
@@ -365,8 +210,5 @@
   loop:
     - "{{ bind_zone_dir }}"
     - "{{ bind_cache_dir }}"
-  tags:
-    - bind
-    - bind_debug
-    - bind-debug
-    - bind-zones
+  when:
+    - inventory_hostname not in groups['public_zone']

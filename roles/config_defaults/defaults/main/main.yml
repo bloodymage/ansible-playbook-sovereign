@@ -25,13 +25,13 @@ autonomy_zone_name: "internal"
 autonomy_zone_type: "internal"
 
 autonomy_zones:
-  - name: internal
+  - name: "internal"
     type: internal
     domain: "internal.{{ autonomy_root_domain }}"
-  - name: dmz
+  - name: "dmz"
     type: dmz
     domain: "dmz.{{ autonomy_root_domain }}"
-  - name: root
+  - name: "example"
     type: public
     domain: "{{ autonomy_root_domain }}"
 
@@ -56,6 +56,7 @@ autonomy_sysadmin_email_address: "{{ autonomy_sysadmin_email_userid }}@{{ autono
 autonomy_min_domain_id_number: 10000
 
 autonomy_default_encryption_type: "ed25519"
+autonomy_ddns_key_algorithm: "hmac-sha512"
 
 # ==================================================================================================
 #
@@ -266,3 +267,5 @@ __os_variables_files:
   - "{{ __os_family | lower }}_family.yml"
   - "{{ __system | lower }}.yml"
   - main.yml
+
+__autonomy_ddns_key_algorithm: "hmac-sha256"

@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-key "ansible" {
-algorithm hmac-sha256;
-secret "{{ bind_dnssec_secret }}";
+key "{{ item['item']['name'] }}" {
+  algorithm {{ autonomy_ddns_key_algorithm }};
+  secret "{{ bind_dnssec_secret }}";
 };

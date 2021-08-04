@@ -20,7 +20,7 @@ $TTL	{{ bind_zone_ttl }}
 
 
 {% for ns in groups[autonomy_zone_name + '_dns_servers'] -%}
-  {{ ns.name }}.{{ bind_zone }}.      IN A      {{ hostvars[ns]['ansible_host'] }}
+  {{ hostvars[ns]['inventory_hostname_short'] }}.{{ autonomy_domain }}.      IN A      {{ hostvars[ns]['ansible_host'] }}
 {% endfor %}
 {% if zone_address_ipv4 is defined -%}
   {{ '@'.ljust(10) }}{{ 'IN'.ljust(4) }}{{ 'A'.ljust(6) }}{{ zone_address_ipv4 }}
