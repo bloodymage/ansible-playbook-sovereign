@@ -72,7 +72,7 @@
     revoked_certificates: "{{ item.revoked_certificates | default(ownca_revoked_certificates) }}"
   loop: "{{ ownca_certificate_authorities }}"
   vars:
-    __password_store_id: "{{ item.zone_name }}{{ autonomy_root_domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_store_id: "{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
     __password_lookup: "{{ __password_store_id }}"
   #  __revoked_certificate_serials: "{{ lookup('file', ownca_directory + '/certificate_authorities/db/' + autonomy_org_name + '-' + item.name +'-ca.crl.srl').splitlines() }}"
   become: no
