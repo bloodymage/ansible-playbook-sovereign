@@ -58,18 +58,19 @@ zone "{{ localzone.name.split('.')[1] }}.{{ localzone.name.split('.')[0] }}.in-a
 
 {% endfor %}
 
-{% if bind_secondary_zones is defined -%}
-{% for localzone in bind_secondary_zones -%}
-zone "{{ localzone.name }}" {
+{% for localzone in autonomy_zones -%}
+{% if localzone['type'] != "internal" and autonomy_zone_type == "internal" -%}
+zone "{{ localzone['domain'] }}" {
   type secondary;
   notify no;
   allow-query { any; };
   primaries {
-    192.168.2.1;
-    192.168.2.2;
+  {% for ns in groups[localzone.type + '_dns_servers'] -%}
+    {{ hostvars[ns]['ansible_host'] }};
+  {% endfor %}
   };
   file "{{ bind_cache_dir }}/db.{{ localzone.name }}"; # zone file path
 };
-
-{% endfor %}
 {% endif %}
+{% endfor %}
+
