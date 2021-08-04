@@ -59,8 +59,13 @@ Create a GPG key for the user that will be using ansible and the collection play
 
 ### Create your [inventory](docs/INVENTORY.md).
 
-Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
-For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) for more information.
+Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables 
+are designed to be optional.  For the network zone it expects a naming scheme along the lines of: 
+"zone.example.com"
+
+For example, your internal network will be internal.example.com, and a dmz zone would be 
+dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) 
+for more information.
 
 ```
 ansible-playbook bloodymage/autonomy/playbooks/site.yml
@@ -68,7 +73,8 @@ ansible-playbook bloodymage/autonomy/playbooks/site.yml
 
 This will create your site.
 
-Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, otherwise it will use internal certificate authority certs.
+Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, 
+otherwise it will use internal certificate authority certs.
 
 ### Roles ([Full list](docs/ROLES.md))
 
@@ -90,28 +96,50 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 ### [Variables](docs/VARIABLES.md)
 
 This section provides the bare minimum listing of variables that need to be defined.  For the full listing see [docs/VARIABLES.md](docs/VARIABLES.md).
-Note: This is still in early development.  Some of the variable descriptions and requirements listed below pertain more to how it is planned to eventually work, than how it works right now.
+Note: This is still in early development.  Some of the variable descriptions and requirements listed 
+below pertain more to how it is planned to eventually work, than how it works right now.
 
 #### Global Variables
 
 ##### Network structure
 ```
 autonomy_root_domain: "example.com"
-autonomy_internal_zone_name: "internal"
+```
 
+This next variable, I hope to eliminate one day.  To do so, I need to set the values based on the 
+zone group_vars.  For now, it may seem redundant, but it is required.
+
+within each dictionary, the 'samba_domain' variable is semi-optional, if undefined it defaults to 
+'no'.  It needs to be set to yes if you have a samba domain in that zone.
+
+The 'type' variable, and the 'autonomy_zone_type' variable below it have the following options:
+- internal
+- dmz
+- public
+
+```
 autonomy_zones:
   - name: "internal"
     type: "internal"
+    domain: "internal.{{ autonomy_root_domain }}"
+    samba_domain: yes                                         
   - name: "dmz"
     type: "dmz"
-  - name: "root"
+    domain: "dmz.{{ autonomy_root_domain }}"
+  - name: "example"
     type: "public"
+    domain: "{{ autonomy_root_domain }}"
 ```
 
+For each zone, you'll need to set the following group variables:
+
 ```
-autonomy_sysadmin_email_userid: "admin"
-autonomy_sysadmin_email_address: "{{ autonomy_sysadmin_email_userid }}@{{ autonomy_root_domain }}"
+autonomy_zone_type: "internal"
+autonomy_zone_name: "internal"
 ```
+
+These are required to match the 'name' and 'type' set in the autonomy_zones listing.
+
 
 ##### Users
 ```
@@ -132,9 +160,12 @@ domain_users:
     password:              (optional)
 ```
 
-For domain users, if the username is not defined, then it will be created based on other defined variables (given_name, surname if available, middle_name if available, and a random number.  If password is defined, the defined password will be used, otherwise a password will be generated (see [Passwords](#Passwords))
+For domain users, if the username is not defined, then it will be created based on other defined 
+variables (given_name, surname if available, middle_name if available, and a random number.  If 
+password is defined, the defined password will be used, otherwise a password will be generated 
+(see [Passwords](#Passwords))
 
-#### Role variables
+#### [Role](docs/ROLES.md) variables
 Each role's variables are defined in their README.md file.
 
 #### Passwords
