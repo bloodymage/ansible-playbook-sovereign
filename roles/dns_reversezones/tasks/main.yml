@@ -1,13 +1,13 @@
 ---
 - name: "Add or modify host PTR records (IPv4)"
   community.general.nsupdate:
-    key_name: "ansible"
+    key_name: "{{ autonomy_zone_name }}"
     key_secret: "{{ __key_secret }}"
-    key_algorithm: "hmac-sha256"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
     server: "{{ hostvars[item]['ansible_host'] }}"
     zone: "{{ bind_reverse_zone.split('.')[1] }}.{{ bind_reverse_zone.split('.')[0] }}.in-addr.arpa"
     record: "{{ bind_ipv4_ptr_record }}"
-    value: "{{ ansible_fqdn | default(inventory_hostname) }}."
+    value: "{{ autonomy_fqdn | default(inventory_hostname) }}."
     type: "PTR"
   loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
   become: yes

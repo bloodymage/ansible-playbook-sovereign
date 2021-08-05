@@ -52,7 +52,7 @@ zone "{{ localzone.name.split('.')[1] }}.{{ localzone.name.split('.')[0] }}.in-a
   notify no;
   allow-query { any; };
   allow-transfer { any; };
-  allow-update { key ansible; };
+  allow-update { key {{ autonomy_zone_name }}; };
   file "{{ bind_zone_dir }}/db.{{ localzone.name }}"; # zone file path
 };
 
