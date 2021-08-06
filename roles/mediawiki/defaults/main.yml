@@ -54,6 +54,7 @@ mediawiki_skins_defaults:
   - Vector
 
 mediawiki_cookie_domain: "{{ autonomy_domain }}"
+mediawiki_db_server: "db.{{ autonomy_domain }}"
 mediawiki_db_name: "my_wiki"
 mediawiki_db_user: "wikiuser"
 

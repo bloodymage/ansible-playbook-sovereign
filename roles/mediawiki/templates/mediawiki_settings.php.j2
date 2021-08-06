@@ -79,12 +79,12 @@ $wgEmailAuthentication = true;
 
 {## Database settings #}
 $wgDBtype = "mysql";
-$wgDBserver = "{{ item.db_server }}";
-$wgDBname = "{{ item.db_name }}";
-$wgDBuser = "{{ item.db_user }}";
+$wgDBserver = "{{ mediawiki_db_server }}";
+$wgDBname = "{{ mediawiki_db_name }}";
+$wgDBuser = "{{ mediawiki_db_user }}";
 $wgDBpassword = "{{ mediawiki_db_password }}";
 $wgDBprefix = "{{ item.db_prefix }}";
-$wgSharedDB = "{{ item.shared_db }}";
+$wgSharedDB = "{{ mediawiki_shared_db }}";
 $wgSharedPrefix = "{{ item.shared_prefix }}";
 $wgSecretKey = "{{ item.secret_key }}";
 
