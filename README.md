@@ -18,10 +18,14 @@ Looking for help.  Let me know if you are interested.
 ## Description
 This collection is a set of ansible playbooks that you can use to build and maintain your own personal self-hosted services.
 Initial services are:
-1. Email (Postfix and Dovecot)
-2. Address Book and Calendars (Nextcloud)
-3. Cloud Storage (Nextcloud)
-4. File server (Samba)
+1. [Certificate Authorities](docs/CERTIFICATE_AUTHORITIES.md) (Internal and ACME)
+2. An SSH Certificate Authority
+3. DNS (Bind9)
+4. Identity Management (Samba Active Directory)
+5. Email (Postfix and Dovecot)
+6. Address Book and Calendars (Nextcloud)
+7. Cloud Storage (Nextcloud)
+8. File server (Samba / NFS)
 
 For access to these services, a focus on centralized user management with a goal of single sign on across all services.  Eventually I will add smart card capabilities to minimize password requirements. 
 
@@ -198,6 +202,14 @@ If you wish to manually generate your passwords, the following passwords can be 
 - samba_administrator_password
 
 For more information see: [Password Storage](#password-storage)
+
+#### Post run configuration.
+
+Not everything is configured via ansible.  There are a few things that can't be done (yet, hopefully?) that you will need to configure manually yourself.
+
+1. [Smartcards](docs/SMARTCARDS.md)
+2. [Keycloak](roles/keycloak/README.md)
+3. [Windows ACLs](roles/samba/README.md)
 
 ## Features and Advantages
 
