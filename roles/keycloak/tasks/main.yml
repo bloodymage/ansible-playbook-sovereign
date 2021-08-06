@@ -132,7 +132,9 @@
     group: root
     mode: "0644"
   become: yes
-  notify: enable keycloak
+  notify:
+    - "enable keycloak"
+    - "daemon reload"
   tags:
     - keycloak
     - keycloak_debug
@@ -147,29 +149,9 @@
     mode: "0644"
   become: yes
   notify: restart keycloak
-
-# ==================================================================================================
-#
-# I really need a way to test if the admin user is already created.  If so, don't run the command.
-#
-# As far as I can tell, no new file is created as a result.
-#
-# This site may have some hints:
-# https://gitlab.archlinux.org/seblu/infrastructure/-/blob/keycloak-open-registration/roles/keycloak/tasks/main.yml
-#
-# ==================================================================================================
-- name: "Create admin user"
-  ansible.builtin.command:
-    cmd: >
-      {{ keycloak_binary_dir }}/add-user-keycloak.sh
-      -r master
-      -u "{{ keycloak_admin_user }}"
-      -p "{{ keycloak_admin_password }}"
-  become: yes
   tags:
-    - never
-    - keycloak-admin-user
-
+    - keycloak
+ 
 - name: "Create list of certs to add into the combined pkcs12 file. (Part 1)"
   ansible.builtin.set_fact:
     keycloak_pkcs12_other_certificates: "{{ keycloak_pkcs12_other_certificates + [__additional_cert] }}"
@@ -180,7 +162,9 @@
   become: no
   when:
     - item[0].type != "public"
-
+  tags:
+    - keycloak
+ 
 - name: "Add to list of certs to add into the combined pkcs12 file. (Part 2)"
   ansible.builtin.set_fact:
     keycloak_pkcs12_other_certificates: "{{ keycloak_pkcs12_other_certificates + [__additional_cert] }}"
@@ -191,7 +175,9 @@
     __etc_certs: "/etc/ssl/certs"
     __additional_cert: "{{ __etc_certs }}/{{ item }}.pem"
   become: no
-
+  tags:
+    - keycloak
+ 
 # ==================================================================================================
 #
 # TODO: Add way to determine if this should be 'force' overwriten.
@@ -220,6 +206,28 @@
     - keycloak
     - keycloak_debug
     - keycloak-debug
+
+# ==================================================================================================
+#
+# I really need a way to test if the admin user is already created.  If so, don't run the command.
+#
+# As far as I can tell, no new file is created as a result.
+#
+# This site may have some hints:
+# https://gitlab.archlinux.org/seblu/infrastructure/-/blob/keycloak-open-registration/roles/keycloak/tasks/main.yml
+#
+# ==================================================================================================
+- name: "Create admin user"
+  ansible.builtin.command:
+    cmd: >
+      {{ keycloak_binary_dir }}/add-user-keycloak.sh
+      -r master
+      -u "{{ keycloak_admin_user }}"
+      -p "{{ keycloak_admin_password }}"
+  become: yes
+  tags:
+    - never
+    - keycloak-admin-user
 
 # ==================================================================================================
 #

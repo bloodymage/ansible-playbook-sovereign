@@ -27,7 +27,7 @@ keycloak_hostname_verification_policy: "ANY" #Default to "WILDCARD"
 # Directories
 keycloak_alt_home: "/opt/keycloak-{{ keycloak_version }}"
 keycloak_config_dir: "{{ keycloak_alt_home }}/{{ keycloak_mode }}/configuration"
-keycloak_binary_dir: "{{ keycloak_alt_home }}/bin"
+keycloak_binary_dir: "{{ keycloak_home }}/bin"
 keycloak_docs_dir: "{{ keycloak_alt_home }}/docs"
 keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
 keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
