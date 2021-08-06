@@ -39,6 +39,6 @@
     priority: "{{ item.priority }}"
   loop: "{{ __python_alternatives }}"
   become: yes
-  # when:
-  #   - 'python2' in ansible_facts.packages
-  #   - 'python3' in ansible_facts.packages
+  when:
+    - python2 in ansible_facts.packages
+    - python3 in ansible_facts.packages

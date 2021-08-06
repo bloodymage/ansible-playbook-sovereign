@@ -1,0 +1,125 @@
+---
+# ==================================================================================================
+#
+# Generate DDNS keys
+#
+# tasks/dnssec-keygen.yml
+# Generate DNSSEC key, inspired by Michele Salerno (@mikysal78)
+#
+# ==================================================================================================
+- name: "DDNS keygen | Ensure keys directory is present."
+  ansible.builtin.file:
+    path: "{{ bind_key_dir }}"
+    state: directory
+    owner: "{{ bind_owner }}"
+    group: "{{ bind_group }}"
+    mode: '0750'
+  become: yes
+
+# Check if a keyfile exists.
+- name: "Check if a keyfile exists."
+  ansible.builtin.stat:
+    path: "{{ bind_key_dir }}/{{ item.name }}.key"
+  loop: "{{ autonomy_zones }}"
+  become: yes
+  register: existing_ddns_keys
+
+# ==================================================================================================
+#
+# We're using shell here for use of pipes...
+#
+# ==================================================================================================
+- name: "Get existing key algorithm."
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      cat "{{ item['invocation']['module_args']['path'] }}" |
+      grep algorithm |
+      cut -d\  -f4 |
+      cut -d\; -f1
+    executable: /bin/bash
+  loop: "{{ existing_ddns_keys.results }}"
+  become: yes
+  register: algorithms
+  when:
+    - item['stat']['exists']
+
+- name: "Add existing algorithm and keyfile status to zone information."
+  ansible.builtin.set_fact:
+    __bind_ddns_zones: "{{ __bind_ddns_zones + [__zone] }}"
+  loop: "{{ existing_ddns_keys.results | product(algorithms.results) }}"
+  vars:
+    __existing_keys_name: "{{ item[0]['item']['name'] }}"
+    __algorithm_name: "{{ item[1]['item']['item']['name'] }}"
+    __key_type: "{{ item[0]['item']['type'] }}"
+    __key_domain: "{{ item[0]['item']['domain'] }}"
+    __samba_domain: "{{ item[0]['item']['samba_domain'] | default(__bind_dns_zone_samba_domain) }}"
+    __algorithm: "{{ item[1]['stdout'] | default(none) }}"
+    __nameserver_zone_type: "{{ autonomy_zone_type }}"
+    __zone:
+      name: "{{ __existing_keys_name }}"
+      type: "{{ __key_type }}"
+      domain: "{{ __key_domain }}"
+      existing_algorithm: "{{ __algorithm | default(none) }}"
+      keyfile_status: "{{ item[0]['stat']['exists'] }}"
+      nameserver_zone_type: "{{ __nameserver_zone_type }}"
+      samba_domain: "{{ __samba_domain }}"
+  delegate_to: localhost
+  become: no
+  when:
+    - __existing_keys_name == __algorithm_name
+    - item[1].skipped is not defined
+
+# ==================================================================================================
+#
+# We're using shell instead of command here because we are using '&&' and pipes.
+#
+# ==================================================================================================
+- name: "Generate missing keys and update existing keys."
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      {{ bind_ddns_confgen }} -a {{ autonomy_ddns_key_algorithm }} -k {{ item['name'] }} -z {{ item['domain'] }} |
+      grep secret |
+      cut -d\" -f2
+    executable: /bin/bash
+  loop: "{{ __bind_ddns_zones }}"
+  become: yes
+  register: bind_ddns_keys
+  when:
+    - (not item['keyfile_status'] or item['existing_algorithm'] != autonomy_ddns_key_algorithm)
+    - item['nameserver_zone_type'] == item['type']
+    - not item['samba_domain']
+
+# ==================================================================================================
+#
+# Install the ddns keys.
+#
+# Update key in password-store
+# when:
+#   - keyfile does not exist
+#   - force update key
+#
+# ==================================================================================================
+- name: "Install Dynamic DNS Keys."
+  ansible.builtin.template:
+    src: "etc/bind/ddns_key.j2"
+    dest: "{{ bind_key_dir }}/{{ item['item']['name'] }}.key"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ bind_ddns_keys['results'] }}"
+  notify: restart bind
+  vars:
+    __nameserver: "{{ inventory_hostname_short }}"
+    __force: "{% if item['item']['existing_algorithm'] != autonomy_ddns_key_algorithm %}yes{% else %}no{% endif %}"
+    __password_userpass: "userpass={{ item['stdout'] }}"
+    __password_create: "create=true"
+    __password_overwrite: "overwrite={{ __force }} backup={{ __force }}"
+    __password_store_id: "{{ item['item']['domain'] }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
+    __password_lookup: "{{ __password_store_id }} {{ __password_userpass }} {{ __password_create }} {{__password_overwrite }}"
+    bind_dnssec_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  when:
+    - bind_ddns_keys['results'] is defined
+    - item['stdout'] is defined

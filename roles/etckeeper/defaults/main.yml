@@ -1,3 +1,28 @@
 ---
 autonomy_packages:
   - etckeeper
+
+etckeeper_vcs: "git"
+
+etckeeper_git_commit_options: "{{ __etckeeper_git_commit_options }}"
+etckeeper_hg_commit_options: "{{ __etckeeper_hg_commit_options }}"
+etckeeper_bzr_commit_options: "{{ __etckeeper_bzr_commit_options }}"
+etckeeper_avoid_daily_autocommits: "{{ __etckeeper_git_commit_options }}"
+etckeeper_avoid_special_file_warning: "{{ __etckeeper_avoid_special_file_warning }}"
+etckeeper_avoid_commit_before_install: "{{ __etckeeper_avoid_commit_before_install }}"
+etckeeper_highlevel_package_manager: "apt"
+etckeeper_lowlevel_package_manager: "dpkg"
+etckeeper_push_remote: "{{ __etckeeper_push_remote }}"
+
+# ==================================================================================================
+#
+# Do NOT Use these variables.  They are used to track internal application defaults.
+#
+# ==================================================================================================
+__etckeeper_git_commit_options: ""
+__etckeeper_hg_commit_options: ""
+__etckeeper_bzr_commit_options: ""
+__etckeeper_avoid_daily_autocommits: "0"
+__etckeeper_avoid_special_file_warning: "0"
+__etckeeper_avoid_commit_before_install: "0"
+__etckeeper_push_remote: ""

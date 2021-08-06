@@ -9,7 +9,7 @@
 
 - hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
   roles:
-    - role: bloodymage.autonomy.aliases
+    - role: bloodymage.autonomy.etc_aliases
       tags:
         - aliases
 
@@ -19,7 +19,8 @@
       tags:
         - exim
 
-- hosts: mail_servers:!public_zone
+- name: "Configure mailservers."
+  hosts: mail_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.spamassassin
       tags:
@@ -28,13 +29,22 @@
     #  tags:
     #    - clamav
 
-- hosts: imap_servers:!public_zone
+- name: "Configure mailservers."
+  hosts: opendkim_servers
+  roles:
+    - role: bloodymage.autonomy.opendkim
+      tags:
+        - opendkim
+
+- name: "Configure mailservers."
+  hosts: imap_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.dovecot
       tags:
         - dovecot
 
-- hosts: postfix_servers:!public_zone
+- name: "Configure mailservers."
+  hosts: postfix_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.postfix
       tags:

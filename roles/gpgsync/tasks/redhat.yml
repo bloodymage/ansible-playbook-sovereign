@@ -1,0 +1,6 @@
+- name: "Build GPG Sync."
+  ansible.builtin.command:
+    cmd: >-
+      build_rpm.sh
+    chdir: "{{ gpgsync_build_dir }}/install"
+    creates: "{{ gpgsync_build_dir }}/dist/"

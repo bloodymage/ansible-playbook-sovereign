@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Configure Defaults
+  description: Creates Hosts DH Parameters
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
@@ -22,5 +22,10 @@ galaxy_info:
 
   galaxy_tags:
     - bloodymage
+    - ownca
+    - dhparams
+    - diffie-hillman
 
-dependencies: []
+dependencies:
+  - role: bloodymage.autonomy.config_defaults
+  - role: bloodymage.autonomy.collection_handlers

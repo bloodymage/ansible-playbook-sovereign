@@ -18,10 +18,14 @@ Looking for help.  Let me know if you are interested.
 ## Description
 This collection is a set of ansible playbooks that you can use to build and maintain your own personal self-hosted services.
 Initial services are:
-1. Email (Postfix and Dovecot)
-2. Address Book and Calendars (Nextcloud)
-3. Cloud Storage (Nextcloud)
-4. File server (Samba)
+1. [Certificate Authorities](docs/CERTIFICATE_AUTHORITIES.md) (Internal and ACME)
+2. An SSH Certificate Authority
+3. DNS (Bind9)
+4. Identity Management (Samba Active Directory)
+5. Email (Postfix and Dovecot)
+6. Address Book and Calendars (Nextcloud)
+7. Cloud Storage (Nextcloud)
+8. File server (Samba / NFS)
 
 For access to these services, a focus on centralized user management with a goal of single sign on across all services.  Eventually I will add smart card capabilities to minimize password requirements. 
 
@@ -32,7 +36,9 @@ There are three reasons I had with creating this with this project.
 2. I wanted to better control my data.
 3. I wanted a way to quickly and easily rebuild my network if absolutely necessary.
 
-Some smaller goals that I have for this project is minimizing the variables I have to define in my inventory.  For each role, having sensible defaults, and the fine tuning done in the inventory requires the least amount of definitions as possible.  In addition, I have set it up to simplify password management for various services by using ansible's passwordstore lookup to generate and save any passwords necessary.
+So far, each server is configured without using docker containers or any other group packages, for example: dovecot and postfix vs iRedMail.  I chose this route to learn as much as possible about each service and it's requirements.
+
+Some smaller goals that I have for this project is minimizing the variables I have to define in my inventory.  For each role, having sensible defaults which can be modified at runtime based on other configuration settings.  For example if you are using smart cards, enable smart card required settings.  These basic options can be set via inventories.  In addition, I have set it up to simplify password management for various services by using ansible's passwordstore lookup to generate and save any passwords necessary.
 
 Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
 
@@ -51,8 +57,19 @@ git clone https://github.com/bloodymage/ansible-collection-autonomy autonomy
 
 ## Usage
 
-Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
-For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) for more information.
+### Create GPG
+
+Create a GPG key for the user that will be using ansible and the collection playbooks.
+
+### Create your [inventory](docs/INVENTORY.md).
+
+Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables 
+are designed to be optional.  For the network zone it expects a naming scheme along the lines of: 
+"zone.example.com"
+
+For example, your internal network will be internal.example.com, and a dmz zone would be 
+dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) 
+for more information.
 
 ```
 ansible-playbook bloodymage/autonomy/playbooks/site.yml
@@ -60,13 +77,14 @@ ansible-playbook bloodymage/autonomy/playbooks/site.yml
 
 This will create your site.
 
-Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, otherwise it will use internal certificate authority certs.
+Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, 
+otherwise it will use internal certificate authority certs.
 
 ### Roles ([Full list](docs/ROLES.md))
 
 #### Identity Management
 ##### [Samba](roles/samba/README.md)
-##### [Samba Domain Users](roles/samba_domain_users/README.md)
+##### [Realm Users](roles/realm_users/README.md)
 
 #### Email
 ##### [Dovecot](roles/dovecot/README.md)
@@ -79,11 +97,66 @@ Any host that you wish to be accessible from the outside world, will use letsenc
 ##### [Nextcloud](roles/nextcloud/README.md)
 ##### [Samba](roles/samba/README.md)
 
-### Variables
+### [Variables](docs/VARIABLES.md)
 
-Note: This is still in early development.  Some of the variable descriptions and requirements listed below pertain more to how it is planned to eventually work, than how it works right now.
+This section provides the bare minimum listing of variables that need to be defined.  For the full listing see [docs/VARIABLES.md](docs/VARIABLES.md).
+Note: This is still in early development.  Some of the variable descriptions and requirements listed 
+below pertain more to how it is planned to eventually work, than how it works right now.
 
 #### Global Variables
+
+##### Decisions
+```
+autonomy_realm_identity_management_system: ""
+```
+
+Options:
+ - "" (Not set)
+ - samba
+ - openldap (planned for the future)
+ - freeipa (planned for the future)
+ 
+So far, this collection has really only been tested with this variable set to ```samba```.  You must set it yourself.  Things can, and most likely will go wrong if it's not set to ```samba```.
+
+##### Network structure
+```
+autonomy_root_domain: "example.com"
+```
+
+This next variable, I hope to eliminate one day.  To do so, I need to set the values based on the 
+zone group_vars.  For now, it may seem redundant, but it is required.
+
+within each dictionary, the 'samba_domain' variable is semi-optional, if undefined it defaults to 
+'no'.  It needs to be set to yes if you have a samba domain in that zone.
+
+The 'type' variable, and the 'autonomy_zone_type' variable below it have the following options:
+- internal
+- dmz
+- public
+
+```
+autonomy_zones:
+  - name: "internal"
+    type: "internal"
+    domain: "internal.{{ autonomy_root_domain }}"
+    samba_domain: yes                                         
+  - name: "dmz"
+    type: "dmz"
+    domain: "dmz.{{ autonomy_root_domain }}"
+  - name: "example"
+    type: "public"
+    domain: "{{ autonomy_root_domain }}"
+```
+
+For each zone, you'll need to set the following group variables:
+
+```
+autonomy_zone_type: "internal"
+autonomy_zone_name: "internal"
+```
+
+These are required to match the 'name' and 'type' set in the autonomy_zones listing.
+
 
 ##### Users
 ```
@@ -104,16 +177,12 @@ domain_users:
     password:              (optional)
 ```
 
-If the username is not defined, then it will be created based on other defined variables (given_name, surname if available, middle_name if available, and a random number.  If password is defined, the defined password will be used, otherwise a password will be generated (see [Passwords](#Passwords))
+For domain users, if the username is not defined, then it will be created based on other defined 
+variables (given_name, surname if available, middle_name if available, and a random number.  If 
+password is defined, the defined password will be used, otherwise a password will be generated 
+(see [Passwords](#Passwords))
 
-##### Choices
-
-The following are optional choices that are not required to be defined.
-
-- ```smart_card_usage: no```        Options: yes\no
-- ```realm_management_system: ""``` Options: "" (not tested), Samba, OpenLDAP (not implemented), FreeIPA (not implemented)
-
-#### Role variables
+#### [Role](docs/ROLES.md) variables
 Each role's variables are defined in their README.md file.
 
 #### Passwords
@@ -133,6 +202,14 @@ If you wish to manually generate your passwords, the following passwords can be 
 - samba_administrator_password
 
 For more information see: [Password Storage](#password-storage)
+
+#### Post run configuration.
+
+Not everything is configured via ansible.  There are a few things that can't be done (yet, hopefully?) that you will need to configure manually yourself.
+
+1. [Smartcards](docs/SMARTCARDS.md)
+2. [Keycloak](roles/keycloak/README.md)
+3. [Windows ACLs](roles/samba/README.md)
 
 ## Features and Advantages
 
@@ -169,8 +246,15 @@ Not yet implemented advantages:
 Each role is built with the idea of do one thing, and do it well.  So there will be many more roles than other projects might have.  The advantage is that you don't have to run every role every time.  Each role can be selected individually by using '--tag' with the role's name, for example '--tag dovecot' will run the dovecot role.  If you wish to run all roles related to email servers, you would run the playbook 'mailservers.yml'
 
 ### Similar Projects
+
+Each of these projects are excellent projects, they didn't quite meet my needs.
+
+1. Again, I wanted to actually learn how to use ansible.
+2. I am in a mixed linux/windows environment.  So, I wanted a Samba AD Domain, which none provide.
+3. I wanted smart card support, which none provided.
+
 #### Ansible Based
-##### [Debops](https://docs.debops.org/en/master/) [DebOps Github](https://github.com/debops/debops)
+##### [Debops](https://docs.debops.org/en/master/) ([DebOps Github Repo](https://github.com/debops/debops))
 
 Your Debian-based data center in a box.
 
@@ -202,20 +286,21 @@ Includes over 100 services you can easily self-host.
 
 YunoHost is an operating system aiming for the simplest administration of a server, and therefore democratize self-hosting, while making sure it stays reliable, secure, ethical and lightweight. It is a copylefted libre software project maintained exclusively by volunteers. Technically, it can be seen as a distribution based on Debian GNU/Linux and can be installed on many kinds of hardware.
 
-| Project                  | Autonomy                 | DebOps     | Sovereign | FreedomBox | HomelabOS | Yunohost |
-| :------                  | :---------               | :-----     | :-------- | :--------- | :-------- | :------- |
-| Uses Ansible             | Yes                      | Yes        | Yes       | No         | No        | No       |
-| Email                    | Dovecot<br>Postfix       |            |           |            |           |          |
-| Identity Management      | Active Directory (Samba) |            |           |            |           |          |
-| Groupware                | Nextcloud                | Nextcloud  | OwnCloud  |            |           |          |
-| Cloud Storage            | Nextcloud                | Nextcloud<br>Owncloud | OwnCloud  |            |           |          |
-| Certificate Authority    | Internal<br>Let's Encrypt|            |           |            |           |          |
-| DNS                      | Bind9                    |            |           |            |           |          |
-| Operating System Support | Linux                    |            |           |            |           |          |
-| Distribution Support     | Debian                   | Debian     |           |            |           |          |
-| Smart Card Support       | Yes                      |            |           |            |           |          |
+| Project                  | Autonomy                 | DebOps                 | Sovereign  | FreedomBox | HomelabOS | Yunohost |
+| :------                  | :---------               | :-----                 | :--------  | :--------- | :-------- | :------- |
+| Uses Ansible             | Yes                      | Yes                    | Yes        | No         | No        | No       |
+| Email                    | Dovecot<br>Postfix       | Dovecot<br>Postfix     |            |            |           |          |
+| Identity Management      | Active Directory (Samba) | LDAP (OpenLDAP)        |            |            |           |          |
+| Groupware                | Nextcloud                | Nextcloud?<br>Owncloud | OwnCloud   |            |           |          |
+| Cloud Storage            | Nextcloud                | Nextcloud?<br>Owncloud | OwnCloud   |            |           |          |
+| Certificate Authority    | Internal<br>Let's Encrypt|                        |            |            |           |          |
+| DNS                      | Bind9                    |                        |            |            |           |          |
+| Operating System Support | Linux                    | Linux                  | Linux      |            |           |          |
+| Distribution Support     | Debian                   | Debian                 | Debian     |            |           |          |
+| Smart Card Support       | Yes*                     |                        |            |            |           |          |
 | Website                  | https://github.com/bloodymage/ansible-collection-autonomy | https://debops.org | https://github.com/sovereign/sovereign | https://freedombox.org | https://homelabos.com | https://yunohost.org |
 
+* Smart Card Support is still buggy
 
 ### Related Projects
 #### [Hearthminion](https://github.com/hearthminion/ansible-collection-hearthminion)

@@ -5,13 +5,6 @@
 # Task: Install apps
 #
 # ==================================================================================================
-# - name: "Set default domain recreation variable to 'no'"
-#   ansible.builtin.set_fact:
-#     __samba_recreate_realm: yes
-#   become: no
-#   tags:
-#     - always
-
 - name: Include OS-specific variables.
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
@@ -26,7 +19,9 @@
     name: "{{ autonomy_packages }}"
     state: present
   become: yes
-  notify: restart sssd
+  notify:
+    - "enable sssd"
+    - "restart sssd"
 
 - name: "Ensure we have a password for the Samba Administrator account"
   ansible.builtin.set_fact:

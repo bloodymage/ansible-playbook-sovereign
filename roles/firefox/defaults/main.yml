@@ -14,6 +14,8 @@ firefox_etc: "/etc/{{ firefox }}"
 
 firefox_certificate_path: "{{ mozilla_lib_path }}/certificates"
 
+firefox_certificates:
+  - "{{ autonomy_org_name }}-root-ca.crt"
 
 # ==================================================================================================
 #
@@ -96,6 +98,15 @@ firefox_network_prefetch-next: no
 # very difficult to notice. Source
 firefox_network_IDN_show_punycode: yes
 
+# ==================================================================================================
+#
+# Do NOT use variables below
+#
+# ==================================================================================================
+__firefox_certificate_authorities_id:
+  - "ca"
+  - "component-ca"
+  - "identity-ca"
 
 # ==================================================================================================
 #
@@ -174,3 +185,4 @@ __firefox_network_prefetch-next: no
 # Not rendering IDNs as their Punycode equivalent leaves you open to phishing attacks that can be
 # very difficult to notice. Source
 __firefox_network_IDN_show_punycode: yes
+

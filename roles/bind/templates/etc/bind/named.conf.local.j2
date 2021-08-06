@@ -1,0 +1,76 @@
+# {{ ansible_managed }}
+
+{% for localzone in autonomy_zones -%}
+{% if localzone.samba_domain is not defined or localzone.samba_domain is false -%}
+{% if localzone.type == autonomy_zone_type -%}
+  include "{{ bind_key_dir }}/{{ localzone.name }}.key";
+{% elif localzone.type == "public" and autonomy_zone_type == "dmz" -%}
+  include "{{ bind_key_dir }}/{{ localzone.name }}.key";
+{% endif %}
+{% endif %}
+{% endfor %}
+include "/etc/bind/ansible.key";
+include "/etc/bind/rndc.key";
+
+{% for localzone in autonomy_zones -%}
+{% if localzone.samba_domain is not defined or localzone.samba_domain is false -%}
+{% if localzone.type == autonomy_zone_type -%}
+  zone "{{ localzone.domain }}" {
+  type primary;
+  notify no;
+  allow-query { any; };
+  allow-transfer { any; };
+{% if localzone.file is defined %}
+  file "{{ localzone.file }}";
+{% else %}
+  allow-update { key {{ localzone.name }}; };
+  file "{{ bind_zone_dir }}/db.{{ localzone.domain }}";
+{% endif %}
+};
+
+{% elif localzone.type == "public" and autonomy_zone_type == "dmz" -%}
+  zone "{{ localzone.domain }}" {
+  type primary;
+  notify no;
+  allow-query { any; };
+  allow-transfer { any; };
+{% if localzone.file is defined %}
+  file "{{ localzone.file }}";
+{% else %}
+  allow-update { key {{ localzone.name }}; };
+  file "{{ bind_zone_dir }}/db.{{ localzone.domain }}";
+{% endif %}
+};
+
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{% for localzone in bind_reverse_zones -%}
+zone "{{ localzone.name.split('.')[1] }}.{{ localzone.name.split('.')[0] }}.in-addr.arpa" {
+  type {{ bind_primary_zone }};
+  notify no;
+  allow-query { any; };
+  allow-transfer { any; };
+  allow-update { key {{ autonomy_zone_name }}; };
+  file "{{ bind_zone_dir }}/db.{{ localzone.name }}"; # zone file path
+};
+
+{% endfor %}
+
+{% for localzone in autonomy_zones -%}
+{% if localzone['type'] != "internal" and autonomy_zone_type == "internal" -%}
+zone "{{ localzone['domain'] }}" {
+  type secondary;
+  notify no;
+  allow-query { any; };
+  primaries {
+  {% for ns in groups[localzone.type + '_dns_servers'] -%}
+    {{ hostvars[ns]['ansible_host'] }};
+  {% endfor %}
+  };
+  file "{{ bind_cache_dir }}/db.{{ localzone.name }}"; # zone file path
+};
+{% endif %}
+{% endfor %}
+

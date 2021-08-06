@@ -30,7 +30,7 @@
 
 - name: "Create acmeca challenge host"
   ansible.builtin.template:
-    src: "apache-site.conf.j2"
+    src: "etc/apache/sites-available/apache-site.conf.j2"
     dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
     owner: "root"
     group: "root"

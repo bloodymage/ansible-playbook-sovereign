@@ -126,8 +126,13 @@ users_sudoers_options:
   - application: "screen"
     options:
       - entity: "Default"
-        value: "env_keep += WINDOW" 
+        value: "env_keep += WINDOW"
 
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
 __user_groups:
   - name: ansiblemanaged
     system: yes
@@ -141,3 +146,5 @@ __user_root:
   unix_home: /root
   ssh_access_cert:
     - root-everywhere
+
+__default_mikrotik_device_user: "admin"

@@ -4,3 +4,80 @@ autonomy_packages:
   - libmail-dkim-perl
   - opendkim
   - opendkim-tools
+
+opendkim_config_dir: "/etc/opendkim"
+opendkim_config_file: "opendkim.conf"
+opendkim_config_path: "/etc/{{ opendkim_config_file }}"
+opendkim_key_dir: "/etc/dkimkeys"
+opendkim_keytable: "KeyTable"
+opendkim_keytable_path: "{{ opendkim_config_dir }}/{{ opendkim_keytable }}"
+opendkim_trustedhosts: "TrustedHosts"
+opendkim_trustedhosts_path: "{{ opendkim_config_dir }}/{{ opendkim_trustedhosts }}"
+opendkim_signing_keytable: "SigningTable"
+opendkim_signing_keytable_path: "{{ opendkim_config_dir }}/{{ opendkim_signing_keytable }}"
+opendkim_mail_privatekey: "{{ opendkim_mail_service }}.private"
+opendkim_mail_privatekey_path: "{{ opendkim_key_dir }}/{{ opendkim_mail_privatekey }}"
+opendkim_pid_path: "/run/opendkim/opendkim.pid"
+
+
+opendkim_mail_service: "{{ ansible_date_time.year }}_mail"
+
+opendkim_user: "opendkim"
+opendkim_group: "{{ opendkim_user }}"
+
+
+opendkim_config_external_ignore_list: "refile:{{ opendkim_trustedhosts_path }}"
+opendkim_config_internal_hosts: "refile:{{ opendkim_trustedhosts_path }}"
+opendkim_config_logwhy: "Yes"
+opendkim_config_signing_keytable: "refile:{{ opendkim_signing_keytable_path }}"
+opendkim_config_keytable: "refile:{{ opendkim_keytable_path }}"
+
+opendkim_config_canonicalization: "{{ __opendkim_config_canonicalization }}"
+
+# ==================================================================================================
+#
+# Do not use the following variables.
+#
+# ==================================================================================================
+__opendkim_directories:
+  - path: "{{ opendkim_config_dir }}"
+    owner: "{{ opendkim_user }}"
+    group: "{{ opendkim_group }}"
+    mode: "0755"
+  - path: "{{ opendkim_key_dir }}"
+    owner: "{{ opendkim_user }}"
+    group: "{{ opendkim_group }}"
+    mode: "0700"
+  - path: "{{ mail_opendkim_sock_dir }}"
+    owner: "{{ opendkim_user }}"
+    group: "root"
+    mode: "0755"
+
+__opendkim_config_files:
+  - src: "etc/opendkim/{{ opendkim_trustedhosts | lower }}.j2"
+    dest: "{{ opendkim_trustedhosts_path }}"
+    owner: "{{ opendkim_user }}"
+    group: "{{ opendkim_group }}"
+    mode: "0644"
+  - src: "etc/opendkim/{{ opendkim_keytable | lower}}.j2"
+    dest: "{{ opendkim_keytable_path }}"
+    owner: "{{ opendkim_user }}"
+    group: "{{ opendkim_group }}"
+    mode: "0644"
+  - src: "etc/opendkim/{{ opendkim_signing_keytable | lower }}.j2"
+    dest: "{{ opendkim_signing_keytable_path }}"
+    owner: "{{ opendkim_user }}"
+    group: "{{ opendkim_group }}"
+    mode: "0644"
+  - src: "etc/{{ opendkim_config_file }}.j2"
+    dest: "{{ opendkim_config_path }}"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+
+__opendkim_config_canonicalization: "relaxed/simple"
+__opendkim_config_external_ignore_list: ""
+__opendkim_config_internal_hosts: "192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12"
+__opendkim_config_logwhy: "No"
+__opendkim_config_keytable: ""
+__opendkim_config_signing_keytable: ""

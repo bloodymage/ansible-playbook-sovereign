@@ -18,3 +18,6 @@ python3_alternative:
   priority: "20"
 
 __python_alternatives: []
+
+python2: "python2"
+python3: "python3"

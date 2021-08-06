@@ -1,0 +1,6 @@
+---
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: yes

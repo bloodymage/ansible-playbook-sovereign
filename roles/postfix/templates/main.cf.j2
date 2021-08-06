@@ -278,9 +278,11 @@ mailbox_transport = {{ postfix_mailbox_transport }}
 {# http://postfix.1071664.n5.nabble.com/GSSAPI-and-Success-as-a-error-code-td97224.html#a97241    #}
 {#                                                                                                #}
 {# ============================================================================================== #}
+{% if groups['internal_zone'] is defined %}
 {% if autonomy_smart_card_login and inventory_hostname in groups['internal_zone'] %}
 {% if postfix_line_length_limit != __postfix_line_length_limit -%}
   line_length_limit = {{ postfix_line_length_limit }}
+{% endif %}
 {% endif %}
 {% endif %}
 

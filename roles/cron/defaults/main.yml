@@ -1,0 +1,39 @@
+---
+# defaults file for cron
+autonomy_packages:
+  - cron
+
+cron_entries:
+  - name: "hourly"
+    minute: "17"
+    hour: "*"
+    day_of_month: "*"
+    month: "*"
+    day_of_week: "*"
+    user: "root"
+    command: "cd / && run-parts --report /etc/cron.hourly"
+  - name: "daily"
+    minute: "25"
+    hour: "6"
+    day_of_month: "*"
+    month: "*"
+    day_of_week: "*"
+    user: "root"
+    command: "test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.daily )"
+  - name: "weekly"
+    minute: "47"
+    hour: "6"
+    day_of_month: "*"
+    month: "*"
+    day_of_week: "7"
+    user: "root"
+    command: "test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.weekly )"
+  - name: "monthly"
+    minute: "52"
+    hour: "6"
+    day_of_month: "1"
+    month: "*"
+    day_of_week: "*"
+    user: "root"
+    command: "test -x /usr/sbin/anacron || ( cd / && run-parts --report /etc/cron.monthly )"
+

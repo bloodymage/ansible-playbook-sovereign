@@ -1,0 +1,8 @@
+---
+autonomy_enable_unzip: no
+autonomy_enable_emacs: no
+autonomy_enable_etckeeper: no
+autonomy_enable_screen: no
+autonomy_enable_keychain: no
+autonomy_enable_uptimed: no
+autonomy_enable_trash_cli: no

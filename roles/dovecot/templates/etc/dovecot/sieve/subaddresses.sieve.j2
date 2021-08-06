@@ -1,0 +1,21 @@
+# {{ ansible_managed }}
+
+require ["variables", "envelope", "fileinto", "subaddress", "mailbox"];
+
+if envelope :matches :detail "to" "*" {
+  # Save name in ${name} in all lowercase except for the first letter
+  set :lower :upperfirst "name" "${1}";
+}
+
+if string :is "${name}" "" {
+  /*  Default case if no detail is specified */
+  fileinto "{{ __main_folder }}";
+  stop;
+}
+else {
+  # For user{{ mail_recipient_delimiter }}work@example.com will be filtered into
+  # {{ __main_folder }}/work
+  fileinto :create "{{ __main_folder }}/${name}";
+  stop;
+}
+

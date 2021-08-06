@@ -59,7 +59,7 @@
     - name: "mail_servers"
       user: "{{ user_vmail }}"
   when:
-    - inventory_hostname in groups [item.name] | default([])
+    - inventory_hostname in groups[item.name] | default([])
   become: no
   tags:
     - users

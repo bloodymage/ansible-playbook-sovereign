@@ -38,10 +38,6 @@
   become: yes
   register: result
 
-- name: "Get IP geolocation data"
-  community.general.ipinfoio_facts:
-  become: no
-
 # ==================================================================================================
 #
 # Create SSL Private Key and CRS Directories
@@ -59,7 +55,7 @@
 # Need to modify to also create ~./pki and use ~/.ssh instead of ~/.pki/ssh
 #
 # ==================================================================================================
-- name: "Create user pki directories"
+- name: "Create user pki directories."
   ansible.builtin.file:
     path: "{{ __user_pki_dir }}/{{ item[1].name }}"
     state: directory
@@ -82,7 +78,7 @@
 # Create User Private Key
 #
 # ==================================================================================================
-- name: "Generate user private key"
+- name: "Generate user private key."
   community.crypto.openssl_privatekey:
     path: "{{ __user_private_dir }}/{{ __username }}.key"
     type: "{{ ownca_privatekey_type }}"
@@ -110,12 +106,14 @@
 #
 # Create Network CA Certificate
 #
+# mode is '0770' to key the samba file server happy with 'ADS' authentication.
+#
 # ==================================================================================================
-- name: Generate User CSRs
+- name: "Generate User CSRs."
   community.crypto.openssl_csr:
-    country_name: "{{ autonomy_country }}"
-    state_or_province_name: "{{ autonomy_region }}"
-    locality_name: "{{ autonomy_city }}"
+    country_name: "{{ autonomy_country | default(omit) }}"
+    state_or_province_name: "{{ autonomy_region | default (omit) }}"
+    locality_name: "{{ autonomy_city | default(omit) }}"
     organization_name: "{{ autonomy_org_name }}"
     organizational_unit_name: "{{ autonomy_org_unit_name }}"
     common_name: "{{ __given_name }}{{ __surname }}"
@@ -142,7 +140,7 @@
     group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     mode: "0770"
     backup: yes
-    force: no
+    force: "{{ __user_cert_force_regeneration }}"
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
@@ -158,7 +156,7 @@
     __id_number: "{{ item[0].id_number }}"
     __user_principal_name: "{{ item[0].username }}@{{ autonomy_domain }}"
     __email: "{{ __public_email }}"
-    __san_auth: "otherName:{{ msupn }};UTF8:{{ __user_principal_name }}"
+    __san_auth: "otherName:{{ ownca_msupn_oid }};UTF8:{{ __user_principal_name }}"
     __san_email: "email:{{ __email }}"
     __san: "{{ __san_email }}{% if item[1].name == 'authentication' %},{{ __san_auth }}{%endif %}"
     __crl_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
@@ -171,7 +169,7 @@
 # Create User Certificates
 #
 # ==================================================================================================
-- name: "Fetch CSRs"
+- name: "Fetch CSRs."
   ansible.builtin.fetch:
     src: "{{ ownca_home_dir }}/{{ __username }}/.pki/csr/{{ __username }}_{{ item[1].name }}.csr"
     dest: "{{ ownca_directory }}/users/csr/{{ __username }}_{{ item[1].name }}.csr"
@@ -184,14 +182,14 @@
     - item[0].id_number is defined
     - item[0].spns is not defined
 
-- name: "Get identity certificate information"
+- name: "Get identity certificate information."
   community.crypto.x509_certificate_info:
-    path: "{{ ownca_identity_ca_file }}"
+    path: "{{ ownca_identity_ca_cert_path }}"
   become: no
   register: identity_cert
   delegate_to: localhost
 
-- name: "Check if user cert exists"
+- name: "Check if user cert exists."
   ansible.builtin.stat:
     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
@@ -204,35 +202,21 @@
     - item[0].id_number is defined
     - item[0].spns is not defined
 
-- name: "Get old certificate information"
-  community.crypto.x509_certificate_info:
-    path: "{{ item.stat.path }}"
-  loop: "{{ cert_file.results }}"
-  become: no
-  delegate_to: localhost
-  register: user_certs
-  when:
-    - item.stat is defined
-    - item.stat.exists is true
-    - item.stat.path is defined
-
-# Note: This will force regeneration if ANY user certificate's authority_key_identified doesn't
-# match the Identity CA's subject_key_identifier.
-- name: "Check if the user's cert authority_key_identifier matches the Identity CA's subject_key_identifier."
+- name: "Check if we are regenerating host certs."
   ansible.builtin.set_fact:
     __user_cert_force_regeneration: yes
-  loop: "{{ user_certs.results }}"
   become: no
-  when:
-    - item.authority_key_identifier is defined
-    - item.authority_key_identifier != identity_cert.subject_key_identifier
+  changed_when: __user_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-host-certs
 
-- name: "Generate User Certificates"
+- name: "Generate User Certificates."
   community.crypto.x509_certificate:
     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
     csr_path: "{{ ownca_directory }}/users/csr/{{ __username }}_{{ item[1].name }}.csr"
-    ownca_path: "{{ ownca_identity_ca_file }}"
-    ownca_privatekey_path: "{{ ownca_identity_ca_key }}"
+    ownca_path: "{{ ownca_identity_ca_cert_path }}"
+    ownca_privatekey_path: "{{ ownca_identity_ca_key_path }}"
     ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     provider: ownca
     backup: yes

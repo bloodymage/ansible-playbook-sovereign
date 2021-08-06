@@ -1,0 +1,40 @@
+---
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: yes
+
+- name: "Ensure Build Directory Exists."
+  ansible.builtin.file:
+    path: "{{ gpgsync_build_dir }}"
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0755"
+  become: no
+
+# ==================================================================================================
+#
+# TODO: Find out why 'exclude' doesn't work.
+#
+# ==================================================================================================
+- name: "Extract Files."
+  ansible.builtin.unarchive:
+    src: "{{ item.source }}"
+    dest: "{{ gpgsync_build_dir }}"
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  loop: "{{ gpgsync_url }}"
+  become: no
+  when:
+    - item.type == "tarball"
+
+- name: "Include OS Family Tasks."
+  include: "{{ ansible_os_family | lower }}.yml"
+  when:
+    - ansible_network_os is not defined
+    - ansible_os_family is defined
+  become: no

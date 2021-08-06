@@ -1,20 +1,20 @@
 ---
 # tasks file for config_acmeca_environment
-- name: "Set account private key regeneration to 'no'"
+- name: "Set account private key regeneration to 'no'."
   ansible.builtin.set_fact:
     __acmeca_regenerate_acme_account_private_key: no
   become: no
   tags:
     - always
 
-- name: "Set server private key regeneration to 'no'"
+- name: "Set server private key regeneration to 'no'."
   ansible.builtin.set_fact:
     __acmeca_regenerate_server_private_key: no
   become: no
   tags:
     - always
 
-- name: Determine whether to force private key regeneration
+- name: "Determine whether to force server private key regeneration."
   ansible.builtin.set_fact:
     __acmeca_regenerate_server_private_key: yes
   become: no
@@ -23,7 +23,7 @@
     - regenerate-server-private-key
     - regenerate-private-key
 
-- name: Determine whether to force private key regeneration
+- name: "Determine whether to force account private key regeneration."
   ansible.builtin.set_fact:
     __acmeca_regenerate_acme_account_private_key: yes
   become: no

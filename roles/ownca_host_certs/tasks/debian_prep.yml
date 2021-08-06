@@ -1,11 +1,11 @@
 ---
-- name: "Install packages"
+- name: "Install packages."
   ansible.builtin.apt:
     name: "{{ autonomy_packages }}"
     state: present
   become: yes
   when:
-    - inventory_hostname not in groups['virtual_ip_address']
+    - inventory_hostname not in groups['virtual_hosts'] | default([])
 
 # ==================================================================================================
 #
@@ -13,15 +13,15 @@
 # server types.
 #
 # ==================================================================================================
-- name: "Check if host is in 'apache' or 'openldap' group"
+- name: "Check if host is in 'apache' or 'openldap' group."
   ansible.builtin.set_fact:
     ownca_private_key_group: "ssl-cert"
     ownca_private_key_mode: "0640"
     __ownca_private_key_dir_mode: "0750"
     __ownca_private_key_dir_group: "ssl-cert"
   when:
-    - inventory_hostname in groups['apache_servers']
-    - inventory_hostname in groups['openldap_servers']
+    - inventory_hostname in groups['apache_servers'] | default([])
+    - inventory_hostname in groups['openldap_servers'] | default([])
 
 # ==================================================================================================
 #
@@ -33,7 +33,7 @@
 #   - {{ ownca_etc }}/certs   mode: 0755
 #
 # ==================================================================================================
-- name: "Create SSL Directories"
+- name: "Create SSL Directories."
   ansible.builtin.file:
     path: "{{ ownca_etc }}/{{ item.name }}"
     state: directory
@@ -53,55 +53,6 @@
     mode: "{{ ownca_private_key_mode }}"
     force: no
   become: yes
-
-- name: "Set subject alt name based on role."
-  ansible.builtin.set_fact:
-    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
-  become: no
-  loop:
-    - name: "db_servers"
-      alt_name: "db"
-    - name: "dns_servers"
-      alt_name: "ns"
-    - name: "file_servers"
-      alt_name: "fs"
-    - name: "git_servers"
-      alt_name: "git"
-    - name: "homeassistant"
-      alt_name: "home"
-    - name: "auth_servers"
-      alt_name: "auth"
-    - name: "ldap_servers"
-      alt_name: "ldap"
-    - name: "mail_servers"
-      alt_name: "mail"
-    - name: "dovecot_servers"
-      alt_name: "imap"
-    - name: "postfix_servers"
-      alt_name: "smtp"
-    - name: "dlna_servers"
-      alt_name: "dlna"
-    - name: "mosquitto_servers"
-      alt_name: "mqtt"
-    - name: "radius_servers"
-      alt_name: "radius"
-    - name: "redis_servers"
-      alt_name: "redis"
-    - name: "samba_domain_controllers"
-      alt_name: "dc"
-    - name: "web_servers"
-      alt_name: "www"
-    - name: "zwavecontrollers"
-      alt_name: "zwave"
-  vars:
-    __group_id: "{{ autonomy_zone_name }}_{{ item.name }}"
-    __host_index: "{{ groups[__group_id].index(inventory_hostname) + 1 }}"
-    __padded_index: "{{ '%02d' % __host_index | int }}"
-    __alt_name:
-      - "DNS:{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
-      - "DNS:{{ item.alt_name }}.{{ autonomy_domain }}"
-  when:
-    - inventory_hostname in groups[item.name] | default([])
 
 - name: "Generate Host CSR."
   community.crypto.openssl_csr:

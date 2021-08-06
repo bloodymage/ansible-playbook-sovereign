@@ -9,7 +9,7 @@ keycloak_keystore_alias: "{{ keycloak_name | lower }}"
 keycloak_service_description: "{{ keycloak_name | title }}"
 
 # Keycloak ...
-keycloak_version: "12.0.4"
+keycloak_version: "15.0.0"
 keycloak_host: 127.0.0.1
 keycloak_mode: "standalone"
 keycloak_keystore_type: "pkcs12"
@@ -27,7 +27,7 @@ keycloak_hostname_verification_policy: "ANY" #Default to "WILDCARD"
 # Directories
 keycloak_alt_home: "/opt/keycloak-{{ keycloak_version }}"
 keycloak_config_dir: "{{ keycloak_alt_home }}/{{ keycloak_mode }}/configuration"
-keycloak_binary_dir: "{{ keycloak_alt_home }}/bin"
+keycloak_binary_dir: "{{ keycloak_home }}/bin"
 keycloak_docs_dir: "{{ keycloak_alt_home }}/docs"
 keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
 keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
@@ -45,9 +45,16 @@ keycloak_url: "https://github.com/keycloak/keycloak/releases/download"
 keycloak_source_url:
   - source: "{{ keycloak_url }}/{{ keycloak_version }}/keycloak-{{ keycloak_version }}.tar.gz"
     file: "keycloak-{{ keycloak_version }}.tar.gz"
-    checksum: "803e4f9f085b0560649c2486aa4378a66ddc08f0"
+    checksum: "8986ede748bd7cceef828669160e8b1de004be5f"
     checksum_type: "sha1"
   
 keycloak_samba_federation:
   - name: "{{ autonomy_org_unit_name }} Active Directory"
     edit_mode: "READONLY"
+
+keycloak_pkcs12_other_certificates:
+  - "/etc/ssl/certs/{{ autonomy_org_name }}-root-ca.pem"
+
+__keycloak_certificate_authorities_id:
+  - "ca"
+  - "component-ca"

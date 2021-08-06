@@ -4,11 +4,12 @@ autonomy_packages:
   - spamassassin
   - spamass-milter
 
+spamassassin_spamass_milter_user: "spamass-milter"
 spamassassin_spamd_user: "debian-spamd"
 
 spamassassin_directories:
-  - name: /var/spool/postfix/spamassassin
-    owner: "{{ spamassassin_spamd_user }}"
+  - name: "{{ mail_spamassassin_sock_dir }}"
+    owner: "{{ spamassassin_spamass_milter_user }}"
     group: root
     mode: "0755"
   - name: /var/lib/spamassassin/sa-update-keys

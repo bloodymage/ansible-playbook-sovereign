@@ -1,2 +1,57 @@
 ---
 # tasks file for opendkim
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+
+    - name: "Install packages"
+      ansible.builtin.package:
+        name: "{{ autonomy_packages }}"
+        state: present
+      become: yes
+
+- name: "Create required OpenDKIM directories."
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+    state: directory
+  loop: "{{ __opendkim_directories }}"
+  become: yes
+
+- name: "Generate OpenDKIM keys."
+  ansible.builtin.command:
+    cmd: "opendkim-genkey -r -h sha256 -d mail.{{ autonomy_root_domain }} -s {{ opendkim_mail_service }}"
+    chdir: "{{ opendkim_key_dir }}"
+    creates: "{{ opendkim_mail_privatekey_path }}"
+  become_user: "{{ opendkim_user }}"
+  become: yes
+
+- name: "Generate OpenDKIM host and keytable information."
+  ansible.builtin.template:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ __opendkim_config_files }}"
+  become: yes
+  notify:
+    - "restart opendkim"
+    - "restart postfix"
+
+- name: "Add postfix to opendkim group."
+  ansible.builtin.user:
+    name: "{{ mail_postfix_user }}"
+    groups: "{{ opendkim_group }}"
+    append: yes
+  when:
+    - inventory_hostname in groups['postfix_servers']

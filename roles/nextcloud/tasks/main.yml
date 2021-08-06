@@ -48,19 +48,35 @@
   register: install_status
   become: no
 
-- name: "Ensure we have a password for the nextcloud admin user"
+- name: "Ensure we have a password for the nextcloud database."
+  ansible.builtin.set_fact:
+    nextcloud_db_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ autonomy_domain }}/services/nextcloud/database_password"
+    __password_lookup: "{{ __password_store_id }}"
+  delegate_to: localhost
+  when:
+    - nextcloud_db_password == "password"
+
+- name: "Ensure we have a password for the nextcloud admin user."
   ansible.builtin.set_fact:
     nextcloud_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/nextcloud_admin_password"
-    __password_length: "length={{ nextcloud_password_legnth }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
     - nextcloud_admin_password == "password"
+
+- name: "Ensure we have a password for the nextcloud database."
+  ansible.builtin.set_fact:
+    nextcloud_passwordsalt: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  vars:
+    __password_store_id: "{{ autonomy_domain }}/services/nextcloud/passwordsalt"
+    __password_lookup: "{{ __password_store_id }}"
+  delegate_to: localhost
+  when:
+    - nextcloud_passwordsalt == "password"
 
 - name: "Install Nextcloud."
   include: nextcloud_install.yml

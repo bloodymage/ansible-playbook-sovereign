@@ -3,8 +3,8 @@
 SAHOME="/var/lib/spamassassin"
 SAGLOBALCFGPATH="/etc/spamassassin"
 
-SAUSER="{{ spamassassin_spamd_user }}"
-SAGROUP="{{ spamassassin_spamd_user }}"
+SAUSER="{{ mail_postfix_user }}"
+SAGROUP="{{ mail_postfix_user }}"
 
 # Change to one to enable spamd
 ENABLED=1
@@ -13,7 +13,7 @@ ENABLED=1
 # See man spamd for possible options. The -d option is automatically added.
 OPTIONS="-x --max-children 5 --helper-home-dir ${SAHOME}"
 OPTIONS="${OPTIONS} -u ${SAUSER} -g ${SAGROUP} --siteconfigpath ${SAGLOBALCFGPATH}"
-OPTIONS="${OPTIONS} --socketpath=/var/spool/postfix/spamassassin/spamd.sock"
+OPTIONS="${OPTIONS} --socketpath={{ mail_spamassassin_socket }}"
 OPTIONS="${OPTIONS} --socketowner=${SAUSER} --socketgroup=${SAGROUP} --socketmode=0660"
 
 # Pid file

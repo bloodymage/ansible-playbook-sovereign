@@ -1,8 +1,221 @@
+---
 # ==================================================================================================
 #
-# This play has been split into to stages.  While there may be a better way, the second stage is to
-# reset unreachable hosts so that certificates can be generated for them locally.
+# Gather some information.  This is always done, as it'll create groups used later in this playbook.
 #
 # ==================================================================================================
-- import_playbook: all_stage1.yml
-- import_playbook: all_stage2.yml
+- name: "Configure the environment for basic host configuration."
+  hosts: all:!localhost
+  ignore_unreachable: yes
+  roles:
+    - role: bloodymage.autonomy.config_environment
+      when:
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
+      tags:
+        - always
+
+# ==================================================================================================
+#
+# Configure setting applicable to ALL hosts.
+#
+# ==================================================================================================
+- name: "Basic host configuration for all hosts."
+  hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
+  strategy: linear
+  roles:
+    - role: bloodymage.autonomy.hostname
+      tags:
+        - hostname
+    - role: bloodymage.autonomy.hosts
+      tags:
+        - hosts
+    - role: bloodymage.autonomy.system_upgrade
+      tags:
+        - system_upgrade
+        - system-upgrade
+
+# ==================================================================================================
+#
+# Configure settings applicable based on OS:
+#   - Linux
+#   - Windows
+#
+# ==================================================================================================
+- name: "Linux Host SSH configuration."
+  hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+  strategy: linear
+  roles:
+    - role: bloodymage.autonomy.sshca_host_certs
+    - role: bloodymage.autonomy.openssh
+      tags:
+        - openssh
+
+# ==================================================================================================
+#
+# Additional basic configuration for all hosts.
+#
+# ==================================================================================================
+- name: "Basic host configuration for all hosts."
+  hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
+  strategy: linear
+  roles:
+    - role: bloodymage.autonomy.users
+      tags:
+        - users
+    - role: bloodymage.autonomy.emacs
+      when:
+        - autonomy_enable_emacs
+      tags:
+        - emacs
+    - role: bloodymage.autonomy.git
+      tags:
+        - git
+    - role: bloodymage.autonomy.unzip
+      when:
+        - (autonomy_dod_certs_install or autonomy_enable_unzip)
+      tags:
+        - unzip
+ 
+- name: "Install certificates on all host."
+  hosts: all:!localhost:!public_zone
+  roles:
+    - role: bloodymage.autonomy.ownca_host_certs
+      tags:
+        - regenerate-ownca
+        - ownca_host_certs
+        - ownca-host-certs
+        - ownca_host_certificates
+        - ownca-host-certificates
+    - role: bloodymage.autonomy.dod_certs
+      when:
+        - autonomy_dod_certs_install
+      tags:
+        - dod-certs
+        - dod_certs
+
+# ==================================================================================================
+#
+# Finish up settings based on OS:
+#
+# ==================================================================================================
+- name: "Basic settings for all Linux hosts."
+  hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+  strategy: linear
+  roles:
+    - role: bloodymage.autonomy.nftables
+      tags:
+        - nftables
+    - role: bloodymage.autonomy.fail2ban
+      tags:
+        - fail2ban
+    - role: bloodymage.autonomy.ntp
+      tags:
+        - ntp
+    - role: bloodymage.autonomy.unattended_upgrades
+      tags:
+        - unattended-upgrades
+    - role: bloodymage.autonomy.sudo
+      tags:
+        - sudo
+    - role: bloodymage.autonomy.skel
+      tags:
+        - skel
+    - role: bloodymage.autonomy.user_dotfiles
+      tags:
+        - dotfiles
+        - user-dotfiles
+        - user_dotfiles
+    - role: bloodymage.autonomy.etckeeper
+      when:
+        - autonomy_enable_etckeeper
+      tags:
+        - etckeeper
+    #- role: bloodymage.autonomy.polkit
+    #  tags:
+    #    - polkit
+    - role: bloodymage.autonomy.screen
+      when:
+        - autonomy_enable_screen
+      tags:
+        - screen
+    - role: bloodymage.autonomy.global
+      tags:
+        - global
+    - role: bloodymage.autonomy.rsync
+      tags:
+        - rsync
+    - role: bloodymage.autonomy.curl
+      tags:
+        - curl
+    - role: bloodymage.autonomy.keychain
+      when:
+        - autonomy_enable_keychain
+      tags:
+        - keychain
+    - role: bloodymage.autonomy.man
+      tags:
+        - man
+    - role: bloodymage.autonomy.rename
+      tags:
+        - rename
+    - role: bloodymage.autonomy.members
+      tags:
+        - members
+    - role: bloodymage.autonomy.bash_completion
+      tags:
+        - bash-completion
+    - role: bloodymage.autonomy.ispell
+      tags:
+        - ispell
+    - role: bloodymage.autonomy.make
+      tags:
+        - make
+    - role: bloodymage.autonomy.uptimed
+      when:
+        - autonomy_enable_uptimed
+      tags:
+        - uptimed
+    - role: bloodymage.autonomy.htop
+      tags:
+        - htop
+    - role: bloodymage.autonomy.python
+      tags:
+        - python
+    - role: bloodymage.autonomy.cron
+      tags:
+        - cron
+    - role: bloodymage.autonomy.trash_cli
+      when:
+        - autonomy_enable_trash_cli
+      tags:
+        - trash-cli
+
+- name: "Basic settings for all linux hosts (including virtual hosts and public zone hosts)."
+  hosts: linux:!localhost:!routeros:!tpeap:!printers
+  roles:
+    - role: bloodymage.autonomy.ownca_host_dhparams
+      tags:
+        - ownca-host-dhparams
+
+# ==================================================================================================
+#
+# Finally, we configure settings based on OS Distribution Family:
+#
+# - Debian
+#
+# Planned edition:
+#   - arch
+#   - gentoo
+#   - redhat
+#
+# Note:
+#  - "!routeros" is included because otherwise Mikrotik routers are included.
+#  - "!tpeap" is included because otherwise TP-Link EAP devices are included.
+#
+# ==================================================================================================
+- name: "Basic settings for Debian Family Hosts."
+  hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+  roles:
+    - role: bloodymage.autonomy.aptitude
+      tags:
+        - aptitude

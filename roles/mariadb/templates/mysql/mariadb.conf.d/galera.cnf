@@ -5,7 +5,7 @@
 # # Mandatory settings
 # wsrep_on=ON
 # wsrep_provider=/usr/lib/libgalera_smm.so
-# wsrep_cluster_address="gcomm://db1.olympus.home,db2.olympus.home"
+# wsrep_cluster_address="gcomm://db1.{{ autonomy_domain }}"
 # binlog_format=row
 # default_storage_engine=InnoDB
 # innodb_autoinc_lock_mode=2

@@ -132,7 +132,9 @@
     group: root
     mode: "0644"
   become: yes
-  notify: enable keycloak
+  notify:
+    - "enable keycloak"
+    - "daemon reload"
   tags:
     - keycloak
     - keycloak_debug
@@ -145,6 +147,59 @@
     owner: root
     group: root
     mode: "0644"
+  become: yes
+  notify: restart keycloak
+  tags:
+    - keycloak
+ 
+- name: "Create list of certs to add into the combined pkcs12 file. (Part 1)"
+  ansible.builtin.set_fact:
+    keycloak_pkcs12_other_certificates: "{{ keycloak_pkcs12_other_certificates + [__additional_cert] }}"
+  loop: "{{ autonomy_zones | product(__keycloak_certificate_authorities_id) }}"
+  vars:
+    __etc_certs: "/etc/ssl/certs"
+    __additional_cert: "{{ __etc_certs }}/{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}.pem"
+  become: no
+  when:
+    - item[0].type != "public"
+  tags:
+    - keycloak
+ 
+- name: "Add to list of certs to add into the combined pkcs12 file. (Part 2)"
+  ansible.builtin.set_fact:
+    keycloak_pkcs12_other_certificates: "{{ keycloak_pkcs12_other_certificates + [__additional_cert] }}"
+  loop: "{{ groups['samba_domain_controllers'] }}"
+  when:
+    - groups['samba_domain_controllers'] is defined
+  vars:
+    __etc_certs: "/etc/ssl/certs"
+    __additional_cert: "{{ __etc_certs }}/{{ item }}.pem"
+  become: no
+  tags:
+    - keycloak
+ 
+# ==================================================================================================
+#
+# TODO: Add way to determine if this should be 'force' overwriten.
+#
+# ==================================================================================================
+- name: Generate PKCS#12 file
+  community.crypto.openssl_pkcs12:
+    path:  "{{ keycloak_home }}/{{ keycloak_mode }}/configuration/{{ keycloak_keystore_file }}"
+    friendly_name: "{{ keycloak_keystore_alias }}"
+    privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
+    certificate_path: "{{ ownca_etc }}/certs/{{ autonomy_fqdn }}-chain.pem"
+    other_certificates: "{{ keycloak_pkcs12_other_certificates }}"
+    action: export
+    passphrase: "{{ keycloak_keystore_password }}"
+    state: present
+    iter_size: 0
+    maciter_size: 0
+    owner: root
+    group: root
+    mode: '0600'
+    backup: yes
+    force: yes
   become: yes
   notify: restart keycloak
   tags:
@@ -176,46 +231,14 @@
 
 # ==================================================================================================
 #
-# TODO: Add way to determine if this should be 'force' overwriten.
+# We need to ensure we have a running keycloak server, because if it's not running, all
+# subsequent tasks will fail.
 #
 # ==================================================================================================
-- name: Generate PKCS#12 file
-  community.crypto.openssl_pkcs12:
-    path:  "{{ keycloak_home }}/{{ keycloak_mode }}/configuration/{{ keycloak_keystore_file }}"
-    friendly_name: "{{ keycloak_keystore_alias }}"
-    privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
-    certificate_path: "{{ ownca_etc }}/certs/{{ autonomy_fqdn }}-chain.pem"
-    other_certificates:
-      - "/etc/ssl/certs/zeus.olympus.drbr.org.pem"
-      - "/etc/ssl/certs/hera.olympus.drbr.org.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[0] }}-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-component-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_zones[1] }}-ca.pem"
-      - "/etc/ssl/certs/{{ autonomy_org_name }}-root-ca.pem"
-    action: export
-    passphrase: "{{ keycloak_keystore_password }}"
-    state: present
-    iter_size: 0
-    maciter_size: 0
-    owner: root
-    group: root
-    mode: '0600'
-    backup: yes
-    force: yes
-  become: yes
-  notify: restart keycloak
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
+# - name: "Ensure we have a running keycloak server."
+#   ansible.builtin.meta: flush_handlers
 
-# ==================================================================================================
-#
-# This next command will fail if a server isn't actually running
-#
-# ==================================================================================================
-# - name: "Login to keycloak server"
+# - name: "Test Login to keycloak server."
 #   ansible.builtin.command:
 #     cmd: >-
 #       {{ keycloak_binary_dir }}/kcadm.sh config credentials
@@ -229,25 +252,18 @@
 #     - keycloak_debug
 #     - keycloak-debug
 
-# ==================================================================================================
-#
-# TODO: Loop this, we may have multiple realms
-#
-# Note: need to debug, it creates the realm, the realm is accessible, but has weird behavior.
-#
-# When you select the realm, an error message appears along the lines of "Realm not found"
-# There is a link to refresh, which when you click that link, the realm loads perfectly.
-#
-# Note 2: This does not set the frontend url.  How is that accomplished?
-#
-# ==================================================================================================
-# - name: "Create realm"
-#   ansible.builtin.command:
-#     cmd: >-
-#       {{ keycloak_binary_dir }}/kcadm.sh create realms
-#       -s realm="{{ autonomy_org_unit_name | lower }}"
-#       -s enabled=true
+# - name: "Create realms."
+#   community.general.keycloak_realm:
+#     id: "{{ item.name }}"
+#     auth_client_id: "admin-cli"
+#     auth_username: "{{ keycloak_admin_user }}"
+#     auth_password: "{{ keycloak_admin_password }}"
+#     auth_realm: "master"
+#     state: present
+#   loop: "{{ autonomy_zones }}"
 #   become: no
+#   when:
+#     - item.type == "internal"
 #   tags:
 #     - keycloak
 #     - keycloak_debug
