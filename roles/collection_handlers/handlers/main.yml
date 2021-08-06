@@ -101,7 +101,7 @@
 # ==================================================================================================
 - name: "Enable Keycloak."
   ansible.builtin.service:
-    name: "keycloak"
+    name: keycloak
     enabled: yes
     state: started
   become: yes
@@ -109,6 +109,19 @@
     - "enable keycloak"
   when:
     - inventory_hostname in groups['keycloak_servers'] | default([])
+
+- name: "Enable SSSD Services."
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  loop:
+    - sssd-pam
+    - sssd-nss
+    - sssd
+  become: yes
+  when:
+    - inventory_hostname in groups['sssd'] | default([])
 
 # ==================================================================================================
 #
