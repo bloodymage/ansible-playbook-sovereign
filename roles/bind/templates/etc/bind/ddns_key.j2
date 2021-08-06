@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+
+key "{{ item['item']['name'] }}" {
+  algorithm {{ autonomy_ddns_key_algorithm }};
+  secret "{{ bind_dnssec_secret }}";
+};

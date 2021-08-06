@@ -1,0 +1,13 @@
+---
+- name: "Build GPG Sync."
+  ansible.builtin.shell:
+    cmd: >-
+      ./build_deb.sh
+    chdir: "{{ gpgsync_build_dir }}/install"
+    creates: "{{ gpgsync_build_dir }}/deb_dist/gpgsync_{{ gpgsync_version }}-1_all.deb""
+  become: no
+
+- name: "Install a gpgsync package."
+  ansible.builtin.apt:
+    deb: "{{ gpgsync_build_dir }}/deb_dist/gpgsync_{{ gpgsync_version }}-1_all.deb"
+    state: present

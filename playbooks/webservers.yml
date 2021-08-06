@@ -1,5 +1,6 @@
 ---
-- hosts: all
+- name: "Configure webservers and websites."
+  hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
       when:
@@ -7,7 +8,8 @@
       tags:
         - always
 
-- hosts: redis_servers
+- name: "Configure webservers and websites."
+  hosts: redis_servers
   roles:
     - role: bloodymage.autonomy.redis
       tags:
@@ -18,11 +20,13 @@
 # We don't run this on the public zone servers, as that would be redundant.
 #
 # ==================================================================================================
-- hosts: apache_servers:!public_zone
+- name: "Configure webservers and websites."
+  hosts: apache_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.apache
 
-- hosts: nginx_servers:!public_zone
+- name: "Configure webservers and websites."
+  hosts: nginx_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.nginx
 
@@ -32,7 +36,8 @@
 # depends on an ACME CA working, the next group may depend on an ACME CA working.
 #
 # ==================================================================================================
-- hosts: web_servers:&public_zone
+- name: "Configure webservers and websites."
+  hosts: web_servers:&public_zone
   roles:
     - role: bloodymage.autonomy.config_acmeca_environment
     - role: bloodymage.autonomy.acmeca_challenge_site
@@ -50,7 +55,8 @@
         - ownca_crl_distribution_points
         - websites
 
-- hosts: nextcloud_servers:mediawiki_servers:drupal_servers
+- name: "Configure webservers and websites."
+  hosts: nextcloud_servers:mediawiki_servers:drupal_servers
   roles:
     - role: bloodymage.autonomy.php
       tags:
@@ -59,21 +65,24 @@
       tags:
         - composer
 
-- hosts: nextcloud_servers:&public_zone
+- name: "Configure webservers and websites."
+  hosts: nextcloud_servers:&public_zone
   roles:
     - role: bloodymage.autonomy.nextcloud
       tags:
         - nextcloud
         - websites
 
-- hosts: mediawiki_servers
+- name: "Configure webservers and websites."
+  hosts: mediawiki_servers
   roles:
     - role: bloodymage.autonomy.mediawiki
       tags:
         - mediawiki
         - websites
 
-- hosts: drupal_servers
+- name: "Configure webservers and websites."
+  hosts: drupal_servers
   roles:
     - role: bloodymage.autonomy.drush
       tags:

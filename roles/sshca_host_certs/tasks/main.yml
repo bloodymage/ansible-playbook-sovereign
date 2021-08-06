@@ -7,7 +7,7 @@
 # ==================================================================================================
 - name: "Pre-tasks"
   block:
-    - name: Include OS-specific variables.
+    - name: "Include OS-specific variables."
       include_vars: "{{ lookup('first_found', params) }}"
       vars:
         params:
@@ -22,7 +22,7 @@
         - sshca-host-certs-debug
         - install-packages
 
-    - name: "Install packages"
+    - name: "Install packages."
       ansible.builtin.package:
         name: "{{ autonomy_packages }}"
         state: present
@@ -44,7 +44,7 @@
   ansible.builtin.set_fact:
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_org_name }}_common/sshca/sshca_host_key_password"
+    __password_store_id: "{{ autonomy_root_domain }}/sshca/sshca_host_key_password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   changed_when:

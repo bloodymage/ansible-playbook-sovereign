@@ -13,7 +13,7 @@ sssd_pam_pwd_expiration_warning: 10
 sssd_debug_level: 0x4000
 
 # Really need a way to test for this
-sssd_systemd: no
+sssd_systemd: yes
 sssd_services: "nss, pam"
 
 # settings for /usr/share/pam-configs/sss"
@@ -21,4 +21,4 @@ sssd_pam_default: "yes"
 sssd_pam_priority: "128"
 sssd_pam_auth_initial: "pam_sss.so forward_pass"
 
-__sssd_certificate_verification: "crl_file={{ ownca_identity_crl_file_path }}"
+__sssd_certificate_verification: "crl_file={{ ownca_identity_crl_etc_path }}"

@@ -15,23 +15,13 @@
           paths:
             - "vars"
       become: no
-      tags:
-        - dovecot
-        - dovecot_debug
-        - dovecot-debug
-        - install-packages
-
+ 
     - name: "Install packages."
       ansible.builtin.package:
         name: "{{ autonomy_packages }}"
         state: present
       become: yes
-      tags:
-        - dovecot
-        - dovecot_debug
-        - dovecot-debug
-        - install-packages
-
+ 
 - name: "Update password and auth mechanims."
   ansible.builtin.set_fact:
     dovecot_password_databases: "{{ dovecot_password_databases + ['ldap'] }}"
@@ -40,12 +30,14 @@
   become: no
   when:
     - autonomy_realm_identity_management_system == "samba"
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
-    - install-packages
-
+ 
+- name: "Check if we are using an inboxzero namespace configuration."
+  ansible.builtin.set_fact:
+    dovecot_namespaces: "{{ dovecot_namespaces + [dovecot_inboxzero_namespace] }}"
+  become: no
+  when:
+    - dovecot_use_inboxzero_namespace
+ 
 - name: "Get Users' password from password-store."
   ansible.builtin.set_fact:
     __mail_user: "{{ mail_user }}"
@@ -57,10 +49,6 @@
   become: no
   delegate_to: localhost
   register: domain_user_list
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 # ==================================================================================================
 #
@@ -69,7 +57,7 @@
 # ==================================================================================================
 - name: "Install config files to /etc/dovecot."
   ansible.builtin.template:
-    src: "{{ item }}.j2"
+    src: "etc/dovecot/{{ item }}.j2"
     dest: "/etc/dovecot/{{ item }}"
     owner: "root"
     group: "root"
@@ -86,7 +74,7 @@
 
 - name: "Install auth config files to /etc/dovecot."
   ansible.builtin.template:
-    src: "dovecot-{{ item.name }}.conf.ext.j2"
+    src: "etc/dovecot/dovecot-{{ item.name }}.conf.ext.j2"
     dest: "/etc/dovecot/dovecot-{{ item.name }}.conf.ext"
     owner: "root"
     group: "root"
@@ -104,7 +92,7 @@
 
 - name: "Install configuration files to /etc/dovecot/conf.d."
   ansible.builtin.template:
-    src: "{{ item }}.j2"
+    src: "etc/dovecot/conf.d/{{ item }}.j2"
     dest: "/etc/dovecot/conf.d/{{ item }}"
     owner: "root"
     group: "root"
@@ -141,7 +129,7 @@
 
 - name: "Install authorization configuration files to /etc/dovecot/conf.d."
   ansible.builtin.template:
-    src: "auth.conf.j2"
+    src: "etc/dovecot/conf.d/auth.conf.j2"
     dest: "/etc/dovecot/conf.d/auth-{{ item.name }}.conf.ext"
     owner: "root"
     group: "root"
@@ -175,7 +163,7 @@
 
 - name: "Install configuration files to /etc/dovecot/virtual."
   ansible.builtin.template:
-    src: "dovecot-virtual.j2"
+    src: "etc/dovecot/virtual/dovecot-virtual.j2"
     dest: "/etc/dovecot/virtual/{{ item.name }}/dovecot-virtual"
     owner: "root"
     group: "root"
@@ -209,11 +197,11 @@
   become: yes
   loop: "{{ dovecot_inboxzero_mailboxes }}"
   when:
-    - dovecot_inboxzero_mailboxes is defined
+    - dovecot_use_inboxzero_namespace
 
 - name: "Install configuration files to /etc/dovecot/inboxzero."
   ansible.builtin.template:
-    src: "dovecot-virtual.j2"
+    src: "etc/dovecot/virtual/dovecot-virtual.j2"
     dest: "/etc/dovecot/inboxzero/{{ item.name }}/dovecot-virtual"
     owner: "root"
     group: "root"
@@ -221,13 +209,69 @@
   become: yes
   loop: "{{ dovecot_inboxzero_mailboxes }}"
   when:
-    - dovecot_inboxzero_mailboxes is defined
+    - dovecot_use_inboxzero_namespace
 
 # ==================================================================================================
 #
 # Setup Dovecot Sieve
 #
 # ==================================================================================================
+- name: "Ensure Dovecot Sieve Directories exists."
+  ansible.builtin.file:
+    path: "{{ dovecot_etc }}/sieve/{{ item }}"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0755"
+    state: directory
+  become: yes
+  loop:
+    - before
+    - after
+    - global
+
+- name: "Install IMAPSieve Spam Update Filters."
+  ansible.builtin.template:
+    src: "etc/dovecot/sieve/report-sieve.j2"
+    dest: "{{ dovecot_etc }}/sieve/global/report-{{ item.type }}.sieve"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_imapsieve_mailboxes }}"
+  tags:
+    - dovecot
+    - dovecot_debug
+    - dovecot-debug
+
+- name: "Install Sieve rules."
+  ansible.builtin.template:
+    src: "etc/dovecot/sieve/{{ item.name }}.sieve.j2"
+    dest: "{{ dovecot_etc }}/sieve/{{ item.type }}/{{ item.priority }}-{{ item.name }}.sieve"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_sieve_files }}"
+  vars:
+    __main_folder: "Inbox"
+  when:
+    - (item.archive is not defined or item.archive is false)
+
+- name: "Install Sieve rules. (Archive)"
+  ansible.builtin.template:
+    src: "etc/dovecot/sieve/{{ item.name }}.sieve.j2"
+    dest: "{{ dovecot_etc }}/sieve/{{ item.type }}/{{ item.priority }}-{{ item.name }}-archive.sieve"
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
+    mode: "0644"
+  become: yes
+  loop: "{{ dovecot_sieve_files }}"
+  vars:
+    __main_folder: "Archive"
+  when:
+    - item.archive is defined
+    - item.archive
+
 - name: "Ensure Sieve Pipe Bin Dir exists."
   ansible.builtin.file:
     path: "{{ dovecot_sieve_pipe_bin_dir }}"
@@ -243,22 +287,8 @@
 
 - name: "Install IMAPSieve Spam Update Filters."
   ansible.builtin.template:
-    src: "report-sieve.j2"
-    dest: "{{ dovecot_sieve_pipe_bin_dir }}/report-{{ item.type }}.sieve"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  loop: "{{ dovecot_imapsieve_mailboxes }}"
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
-
-- name: "Install IMAPSieve Spam Update Filters."
-  ansible.builtin.template:
-    src: "sa-learn.j2"
-    dest: "{{ dovecot_sieve_pipe_bin_dir }}/sal-learn-{{ item.type }}.sh"
+    src: "usr/lib/dovecot/sieve/sa-learn.j2"
+    dest: "{{ dovecot_sieve_pipe_bin_dir }}/sa-learn-{{ item.type }}.sh"
     owner: "root"
     group: "root"
     mode: "0755"
@@ -268,49 +298,6 @@
     - dovecot
     - dovecot_debug
     - dovecot-debug
-
-- name: "Ensure Dovecot Sieve Directories exists."
-  ansible.builtin.file:
-    path: "{{ dovecot_etc }}/sieve/{{ item }}"
-    owner: "{{ mail_user }}"
-    group: "{{ mail_user }}"
-    mode: "0755"
-    state: directory
-  become: yes
-  loop:
-    - before
-    - after
-    - global
-
-- name: "Install Sieve-before rules."
-  ansible.builtin.copy:
-    src: "etc/dovecot/sieve/before/{{ item }}"
-    dest: "{{ dovecot_etc }}/sieve/before/{{ item }}"
-    owner: "{{ mail_user }}"
-    group: "{{ mail_user }}"
-    mode: "0644"
-  become: yes
-  loop: "{{ dovecot_sieve_before_files }}"
-
-- name: "Install Sieve-after rules."
-  ansible.builtin.copy:
-    src: "etc/dovecot/sieve/after/{{ item }}"
-    dest: "{{ dovecot_etc }}/sieve/after/{{ item }}"
-    owner: "{{ mail_user }}"
-    group: "{{ mail_user }}"
-    mode: "0644"
-  become: yes
-  loop: "{{ dovecot_sieve_after_files }}"
-
-- name: "Install Sieve Global rules."
-  ansible.builtin.copy:
-    src: "etc/dovecot/sieve/global/{{ item }}"
-    dest: "{{ dovecot_etc }}/sieve/global/{{ item }}"
-    owner: "{{ mail_user }}"
-    group: "{{ mail_user }}"
-    mode: "0644"
-  become: yes
-  loop: "{{ dovecot_sieve_global_files }}"
 
 # ==================================================================================================
 #
@@ -325,7 +312,7 @@
 # - name: "Perform email migration"
 #   ansible.builtin.command:
 #     cmd: >-
-#       doveadm -o imapc_password='{{ item.password }}'
+#       doveadm -o imapc_password='{{ item.password | default(__password) }}'
 #       backup
 #       -1
 #       -a 'Virtual/All Mail'
@@ -334,5 +321,13 @@
 #       -u {{ item.account }} imapc:
 #   become: yes
 #   loop: "{{ dovecot_migration_users }}"
+#   vars:
+#     __password_store_id: "{{ autonomy_domain }}/external_services/{{ dovecot_migration_users }}/{{ item.account }}"
+#     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+#     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+#     __password_create: "create=true"
+#     __password_symbols: "nosymbols=true"
+#     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+#     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
 #   when:
 #     - item.account != 'bob@example.com'

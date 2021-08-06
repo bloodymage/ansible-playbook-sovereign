@@ -1,2 +1,23 @@
 ---
 # tasks file for ownca_host_dhparms
+# ==================================================================================================
+#
+# This takes forever on a RPi
+#
+# Are there security implications for generating elsewhere and transferring to the RPi server later?
+#
+# We only need to run this if the host's private key type is DSA or RSA.  It doesn't really apply
+# to elliptical curve cryptography.  Need to verify this.  I read it somewhere.
+#
+# ==================================================================================================
+- name: "Generate Diffie-Hellman Parameters."
+  community.crypto.openssl_dhparam:
+    path: "/etc/ssl/dhparams/{{ autonomy_fqdn }}.pem"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: yes
+    #force: "{{ __ownca_regenerate_csr }}"
+  become: yes
+  when:
+    - ownca_privatekey_type in ['DSA','RSA']

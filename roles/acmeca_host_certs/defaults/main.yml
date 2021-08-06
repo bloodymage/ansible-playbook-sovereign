@@ -23,6 +23,7 @@ acmeca_account_dir: "{{ letsencrypt_account_dir }}/{{ acmeca_directory }}"
 
 acmeca_domains: "{{ inventory_hostname }}"
 acmeca_challenge_type: "http-01"
+acmeca_method: "letsencrypt"
 
 acmeca_version: 2
 acmeca_key_usage:
@@ -32,8 +33,8 @@ acmeca_extended_key_usage:
   - serverAuth
   - clientAuth
 
-acmeca_account_email: "account@{{ inventory_hostname }}"
-acmeca_account_key: "account_at_{{ inventory_hostname }}.key"
+acmeca_account_email: "{{ autonomy_sysadmin_email_user_id }}{{ mail_delimiter }}{{ acmeca_method }}@{{ autonomy_root_domain }}"
+acmeca_account_key: "{{ autonomy_sysadmin_email_user_id }}_at_{{ inventory_hostname }}.key"
 acmeca_account_key_path: "{{ acmeca_account_dir }}/{{ acmeca_account_key }}"
 acmeca_account_key_type: RSA
 acmeca_account_key_size: 4096

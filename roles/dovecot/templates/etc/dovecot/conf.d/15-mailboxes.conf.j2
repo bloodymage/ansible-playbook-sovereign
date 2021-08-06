@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+
+{% for namespace in dovecot_namespaces -%}
+  namespace {{ namespace.name }} {
+  inbox = {{ namespace.inbox | default('no') }}
+  {% for mailbox in namespace.mailboxes -%}
+    mailbox {{ mailbox.name }} {
+    {% if mailbox.special_use is defined -%}
+      special_use = {{ mailbox.special_use }}
+    {% endif %}
+    {% if mailbox.comment is defined -%}
+      comment = {{ mailbox.comment }}
+    {% endif %}
+    {% if mailbox.autoexpunge is defined -%}
+      autoexpunge = {{ mailbox.autoexpunge }}
+    {% endif %}
+    {% if mailbox.auto is defined -%}
+      auto = {{ mailbox.auto }}
+    {% endif %}
+    }
+  {% endfor %}
+  }
+
+{% endfor %}

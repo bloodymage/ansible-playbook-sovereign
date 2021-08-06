@@ -25,4 +25,5 @@ galaxy_info:
     - upgrade
 
 dependencies:
+  - role: bloodymage.autonomy.config_defaults
   - role: bloodymage.autonomy.collection_handlers

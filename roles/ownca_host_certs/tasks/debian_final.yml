@@ -18,7 +18,7 @@
     - "{{ autonomy_fqdn }}-chain"
   notify: restart tls
 
-- name: Copy domain controllers' certificate to server.
+- name: "Copy domain controllers' certificate to server."
   ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}.crt"
     dest: "/usr/local/share/ca-certificates/{{ item }}.crt"
@@ -31,7 +31,7 @@
     - autonomy_realm_identity_management_system is truthy
   notify: restart tls
 
-- name: Copy domain controllers' certificate chain to server.
+- name: "Copy domain controllers' certificate chain to server."
   ansible.builtin.copy:
     src: "{{ ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
     dest: "/usr/local/share/ca-certificates/{{ item }}-chain.crt"
@@ -44,7 +44,7 @@
     - autonomy_realm_identity_management_system is truthy
   notify: restart tls
 
-- name: Copy CA Certificates to server.
+- name: "Copy CA Certificates to server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
@@ -55,7 +55,7 @@
   become: yes
   notify: restart tls
 
-- name: Copy CA Chains Certificates to server.
+- name: "Copy CA Chains Certificates to server."
   ansible.builtin.copy:
     src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
@@ -70,8 +70,8 @@
 
 - name: Copy CRLs to server.
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/crl/{{ autonomy_org_name }}-{{ item.name }}.crl"
-    dest: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ item.name }}.crl"
+    src: "{{ ownca_ca_directory }}/crl/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+    dest: "{{ ownca_etc }}/crls/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
     owner: root
     group: root
     mode: "0644"
@@ -113,33 +113,6 @@
     mode: '0600'
     force: "{{ __ownca_regenerate_csr }}"
   become: yes
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-
-# ==================================================================================================
-#
-# This takes forever on a RPi
-#
-# Are there security implications for generating elsewhere and transferring to the RPi server later?
-#
-# We only need to run this if the host's private key type is DSA or RSA.  It doesn't really apply
-# to elliptical curve cryptography.  Need to verify this.  I read it somewhere.
-#
-# ==================================================================================================
-- name: "Generate Diffie-Hellman Parameters."
-  community.crypto.openssl_dhparam:
-    path: "/etc/ssl/dhparams/{{ autonomy_fqdn }}.pem"
-    owner: "root"
-    group: "root"
-    mode: "0644"
-    backup: yes
-    force: "{{ __ownca_regenerate_csr }}"
-  become: yes
-  when:
-    - ownca_privatekey_type in ['DSA','RSA']
 
 # - name: Fetch PKCS#12 files
 #   ansible.builtin.fetch:

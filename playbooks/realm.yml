@@ -46,12 +46,12 @@
         - samba
         - recreate-realm
 
-- name: "Configure OpenLDAP."
-  hosts: openldap_servers
-  roles:
-    - role: bloodymage.autonomy.openldap
-      tags:
-        - openldap
+# - name: "Configure OpenLDAP."
+#   hosts: openldap_servers
+#   roles:
+#     - role: bloodymage.autonomy.openldap
+#       tags:
+#         - openldap
 
 - name: "Create realm users."
   hosts: samba_schema_master
@@ -69,14 +69,16 @@
 #
 # ==================================================================================================
 - name: "Create realm users dotfiles."
-  hosts: workstations:&linux:!mythfrontend
+  hosts: samba_ownca_user_hosts:workstations:&linux:!mythfrontend
   roles:
-    - role: bloodymage.autonomy.dotfiles
+    - role: bloodymage.autonomy.user_dotfiles
       vars:
         dotfiles_users: "{{ domain_users }}"
         dotfiles_home: "/home/{{ autonomy_org_unit_name | upper }}"
       tags:
         - dotfiles
+        - user-dotfiles
+        - user_dotfiles
 
 - name: "Configure realm users certificates."
   hosts: samba_ownca_user_hosts
@@ -120,14 +122,13 @@
         - samba-domain-keytabs
         - recreate-realm
 
-- hosts: keycloak_servers:!public_zone
+- name: "Configure Keycloak."
+  hosts: keycloak_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.keycloak
-      tags:
-        - keycloak
-        - recreate-realm
 
-- hosts: freeradius_servers
+- name: "Configure FreeRadius."
+  hosts: freeradius_servers
   roles:
     - role: bloodymage.autonomy.freeradius
       tags:

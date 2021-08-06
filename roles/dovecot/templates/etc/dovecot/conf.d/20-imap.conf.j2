@@ -1,0 +1,19 @@
+# {{ ansible_managed }}
+#imap_hibernate_timeout = 0
+#imap_max_line_length = 64k
+#imap_logout_format = in=%i out=%o deleted=%{deleted} expunged=%{expunged} \
+#imap_capability = 
+#imap_idle_notify_interval = 2 mins
+#imap_id_send = 
+#imap_id_log =
+#imap_client_workarounds = 
+#imap_urlauth_host =
+#imap_literal_minus = no
+#imap_fetch_failure = disconnect-immediately
+
+{% for protocol in dovecot_imap_protocols %}
+  protocol {{ protocol.name }} {
+  mail_plugins = $mail_plugins {{ dovecot_imap_mail_plugins }}
+  #mail_max_userip_connections = 10
+  }
+{% endfor %}

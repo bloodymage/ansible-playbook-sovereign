@@ -1,0 +1,9 @@
+---
+# tasks file for maintenance_service_restart
+- name: "Restart all services."
+  ansible.builtin.debug:
+    msg:
+      - "Restarting All Services..."
+  changed_when: true 
+  notify:
+    - "restart all"

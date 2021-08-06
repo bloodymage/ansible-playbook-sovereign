@@ -1,0 +1,31 @@
+---
+# ==================================================================================================
+#
+# We intentially do not set tags for config_ownca_environment because not all task are run every
+# time.  That role has tags set at the task level.
+#
+# ==================================================================================================
+- name: "Configure the environment for the Certificate Authorities."
+  hosts: all
+  ignore_unreachable: yes
+  roles:
+    - role: bloodymage.autonomy.config_environment
+      when:
+        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
+      tags:
+        - always
+    - role: bloodymage.autonomy.config_ownca_environment
+      tags: []
+
+- name: "Setup the TLS Certificate Authorities."
+  hosts: certificate_authorities
+  roles:
+    - role: bloodymage.autonomy.ownca
+      tags:
+        - ownca
+        - regenerate-ownca
+    - role: bloodymage.autonomy.ownca_crl
+      tags:
+        - regenerate-ownca
+        - ownca_crl
+        - ownca-crl

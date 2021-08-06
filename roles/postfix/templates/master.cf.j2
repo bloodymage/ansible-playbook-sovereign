@@ -1,134 +1,58 @@
 # {{ ansible_managed }}
 
 {#
+#
 # Postfix master process configuration file.  For details on the format
 # of the file, see the master(5) manual page (command: "man 5 master" or
 # on-line: http://www.postfix.org/master.5.html).
 #
 # Do not forget to execute "postfix reload" after editing this file.
 #
-# ==========================================================================
-# service type  private unpriv  chroot  wakeup  maxproc command + args
-#               (yes)   (yes)   (no)    (never) (100)
-# ==========================================================================#}
-#smtp      inet  n       -       y       -       -       smtpd
-smtp      inet  n       -       y       -       1       postscreen
-smtpd     pass  -       -       y       -       -       smtpd
-dnsblog   unix  -       -       y       -       0       dnsblog
-tlsproxy  unix  -       -       y       -       0       tlsproxy
-submission inet n       -       y       -       -       smtpd
-{% for option in postfix_master_submission_options %}
-  {{ option }}
-{% endfor %}
-smtps inet  n       -       y       -       -       smtpd
-{% for option in postfix_master_smtps_options %}
-  {{ option }}
-{% endfor %}
-#628       inet  n       -       y       -       -       qmqpd
-pickup    unix  n       -       y       60      1       pickup
-cleanup   unix  n       -       y       -       0       cleanup
-qmgr      unix  n       -       n       300     1       qmgr
-#qmgr     unix  n       -       n       300     1       oqmgr
-tlsmgr    unix  -       -       y       1000?   1       tlsmgr
-rewrite   unix  -       -       y       -       -       trivial-rewrite
-bounce    unix  -       -       y       -       0       bounce
-defer     unix  -       -       y       -       0       bounce
-trace     unix  -       -       y       -       0       bounce
-verify    unix  -       -       y       -       1       verify
-flush     unix  n       -       y       1000?   0       flush
-proxymap  unix  -       -       n       -       -       proxymap
-proxywrite unix -       -       n       -       1       proxymap
-smtp      unix  -       -       y       -       -       smtp
-relay     unix  -       -       y       -       -       smtp
-{% for option in postfix_master_relay_options %}
-  {{ option }}
-{% endfor %}
-showq     unix  n       -       y       -       -       showq
-error     unix  -       -       y       -       -       error
-retry     unix  -       -       y       -       -       error
-discard   unix  -       -       y       -       -       discard
-local     unix  -       n       n       -       -       local
-virtual   unix  -       n       n       -       -       virtual
-lmtp      unix  -       -       y       -       -       lmtp
-anvil     unix  -       -       y       -       1       anvil
-scache    unix  -       -       y       -       1       scache
-postlog   unix-dgram n  -       n       -       1       postlogd
-
-{#
-# ====================================================================
-# Interfaces to non-Postfix software. Be sure to examine the manual
-# pages of the non-Postfix software to find out what options it wants.
-#
-# Many of the following services use the Postfix pipe(8) delivery
-# agent.  See the pipe(8) man page for information about ${recipient}
-# and other message envelope options.
-# ====================================================================
-#
-# maildrop. See the Postfix MAILDROP_README file for details.
-# Also specify in main.cf: maildrop_destination_recipient_limit=1
-# ================================================================================================== #}
-maildrop  unix  -       n       n       -       -       pipe
-{% for option in postfix_master_maildrop_options %}
-  {{ option }}
-{% endfor %}
-
-{#
-# ====================================================================
-#
-# Recent Cyrus versions can use the existing "lmtp" master.cf entry.
-#
-# Specify in cyrus.conf:
-#   lmtp    cmd="lmtpd -a" listen="localhost:lmtp" proto=tcp4
-#
-# Specify in main.cf one or more of the following:
-#  mailbox_transport = lmtp:inet:localhost
-#  virtual_transport = lmtp:inet:localhost
-#
-# ====================================================================
-#
-# Cyrus 2.1.5 (Amos Gouaux)
-# Also specify in main.cf: cyrus_destination_recipient_limit=1
-#
-#cyrus     unix  -       n       n       -       -       pipe
-#  user=cyrus argv=/cyrus/bin/deliver -e -r ${sender} -m ${extension} ${user}
-#
-# ====================================================================
-# Old example of delivery via Cyrus.
-#
-#old-cyrus unix  -       n       n       -       -       pipe
-#  flags=R user=cyrus argv=/cyrus/bin/deliver -e -m ${extension} ${user}
-#
-# ==================================================================== #}
-#
-# See the Postfix UUCP_README file for configuration details.
-#
-uucp      unix  -       n       n       -       -       pipe
-{% for option in postfix_master_uucp_options %}
-  {{ option }}
-{% endfor %}
-
-#
-# Other external delivery methods.
-#
-ifmail    unix  -       n       n       -       -       pipe
-{% for option in postfix_master_ifmail_options %}
-  {{ option }}
-{% endfor %}
-bsmtp     unix  -       n       n       -       -       pipe
-{% for option in postfix_master_bsmtp_options %}
-  {{ option }}
-{% endfor %}
-scalemail-backend unix	-	n	n	-	2	pipe
-{% for option in postfix_master_scalemail_options %}
-  {{ option }}
-{% endfor %}
-mailman   unix  -       n       n       -       -       pipe
-{% for option in postfix_master_mailman_options %}
-  {{ option }}
-{% endfor %}
-{% if inventory_hostname in groups['dovecot_servers'] %}
-dovecot   unix  -       n       n       -       -       pipe
-{% for option in postfix_master_dovecot_options %}
-  {{ option }}
+#}
+# ==================================================================================================
+# service           type        private unpriv  chroot  wakeup  maxproc command + args
+#                               (yes)   (yes)   (no)    (never) (100)
+# ==================================================================================================
+{% for service in __postfix_master_service_configuration %}
+{%- if service.enabled is defined and service.enabled is false -%}#{%- endif -%}
+{{ service.name.ljust(20) }}{{ service.type.ljust(12) }}
+  {%- if service.type == "inet" -%}
+    {{ "n".ljust(8) }}
+  {%- elif service.private == __postfix_master_default_service_private -%}
+    {{ "-".ljust(8) }}
+  {%- elif service.private -%}
+    {{ "y".ljust(8) }}
+  {%- else -%}
+    {{ "n".ljust(8) }}
+  {%- endif -%}
+  {%- if service.run_unprivileged == __postfix_master_default_service_run_unprivileged -%}
+    {{ "-".ljust(8) }}
+  {%- elif service.run_unprivileged -%}
+    {{ "y".ljust(8) }}
+  {%- else -%}
+    {{ "n".ljust(8) }}
+  {%- endif -%}
+  {%- if service.run_chroot == __postfix_master_default_service_run_chroot -%}
+    {{ "-".ljust(8) }}
+  {%- elif service.run_chroot -%}
+    {{ "y".ljust(8) }}
+  {%- else -%}
+    {{ "n".ljust(8) }}
+  {%- endif -%}
+  {%- if service.wakeup_time == __postfix_master_default_service_wakeup_time -%}
+    {{ "-".ljust(8) }}
+  {%- else -%}
+    {{ service.wakeup_time.ljust(8) }}
+  {%- endif -%}
+  {%- if service.process_limit == __postfix_master_default_service_process_limit -%}
+    {{ "-".ljust(8) }}
+  {%- else -%}
+    {{ service.process_limit.ljust(8) }}
+  {%- endif -%}
+  {{ service.service_command }}
+{% if service.args is truthy %}
+{% for option in service.args %}
+  {% if service.enabled is defined and service.enabled is false %}#{% endif %}{{ option }}
 {% endfor %}
 {% endif %}
+{% endfor %}

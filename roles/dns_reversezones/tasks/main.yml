@@ -1,22 +1,22 @@
 ---
 - name: "Add or modify host PTR records (IPv4)"
   community.general.nsupdate:
-    key_name: "ansible"
-    key_secret: "{{ item.bind_dnssec_secret }}"
-    key_algorithm: "hmac-sha256"
-    server: "{{ item.address_ipv4 }}"
+    key_name: "{{ autonomy_zone_name }}"
+    key_secret: "{{ __key_secret }}"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    server: "{{ hostvars[item]['ansible_host'] }}"
     zone: "{{ bind_reverse_zone.split('.')[1] }}.{{ bind_reverse_zone.split('.')[0] }}.in-addr.arpa"
     record: "{{ bind_ipv4_ptr_record }}"
-    value: "{{ ansible_fqdn | default(inventory_hostname) }}."
+    value: "{{ autonomy_fqdn | default(inventory_hostname) }}."
     type: "PTR"
-  loop: "{{ bind_zone_dnsservers }}"
+  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
   become: yes
+  remote_user: root
+  vars:
+    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
+    __password_store_id: "{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  delegate_to: "{{ hostvars[item]['ansible_host'] }}"
   when:
     - bind_reverse_zone is defined
-  remote_user: root
-  delegate_to: "{{ item.address_ipv4 }}"
-  tags:
-    - dns_reversezone
-    - dns-reversezone
-    - dns_reversezone_debug
-    - dns-reversezone-debug

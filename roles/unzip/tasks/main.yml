@@ -1,0 +1,18 @@
+---
+# tasks file for unzip
+- name: "Pre-tasks"
+  block:
+    - name: Include OS-specific variables.
+      include_vars: "{{ lookup('first_found', params) }}"
+      vars:
+        params:
+          files: "{{ __os_variables_files }}"
+          paths:
+            - "vars"
+      become: no
+
+- name: "Include OS Specific Tasks."
+  include: "{{ ansible_system | lower }}.yml"
+  when:
+    - ansible_system
+

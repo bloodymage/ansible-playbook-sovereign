@@ -1,0 +1,82 @@
+---
+# defaults file for postfix-server
+autonomy_packages:
+  - postfix
+
+# ==================================================================================================
+#
+# Decisions
+#
+# ==================================================================================================
+postfix_use_mysql_backend: no
+postfix_sender_relay: ""
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+postfix_mailbox_users: []
+
+postfix_virtual_mailbox_domain_maps:
+  - name: "{{ autonomy_domain }}"
+    status: "OK"
+
+postfix_sasl_relay_files:
+  - filename: "sasl_passwd"
+    mode: "0600"
+  - filename: "sender_relay"
+    mode: "0644"
+
+postfix_virtual_mailbox_users:
+  - username: "webmaster@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: "postmaster@{{ autonomy_root_domain }}"
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: "abuse@{{ autonomy_root_domain }}"
+    email: "abuse@{{ autonomy_root_domain }}"
+
+postfix_virtual_mailbox_user_aliases:
+  - alias: "webmaster@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - alias: "postmaster@{{ autonomy_root_domain }}"
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - alias: "abuse@{{ autonomy_root_domain }}"
+    email: "abuse@{{ autonomy_root_domain }}"
+  - alias: "root@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - alias: "root@mail.{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - alias: "hostmaster@{{ autonomy_root_domain }}"
+    email: "webmaster@{{ autonomy_root_domain }}"
+
+postfix_catchall_user_alias:
+  alias: "@{{ autonomy_root_domain }}"
+  email: "webmaster@{{ autonomy_root_domain }}"
+
+postfix_canonical_mappings:
+  - origin: "www-data@{{ autonomy_fqdn }}"
+    destination: "webmaster@{{ autonomy_root_domain }}"
+
+postfix_ldap_maps: []
+postfix_ldap_map_debug_level: 0
+
+postfix_sasl_auth_user: ""
+postfix_sasl_auth_user_password: ""
+postfix_relay_host: []
+
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+__postfix_virtual_mailboxes:
+  - type: "canonical"
+    data: "{{ postfix_canonical_mappings }}"
+  - type: "virtual-mailbox-domains"
+    data: "{{ postfix_virtual_mailbox_domain_maps }}"
+  - type: "virtual-mailbox-users"
+    data: "{{ postfix_virtual_mailbox_users }}"
+  - type: "virtual-mailbox-user-aliases"
+    data: "{{ postfix_virtual_mailbox_user_aliases }}"
+
+__postfix_sasl_auth_users_list: []

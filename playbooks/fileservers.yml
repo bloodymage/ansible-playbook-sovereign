@@ -11,7 +11,8 @@
       tags:
         - always
 
-- hosts: samba_file_servers
+- name: "Configure Samba Fileservers."
+  hosts: samba_file_servers
   roles:
     - role: bloodymage.autonomy.samba
       when:
@@ -27,3 +28,11 @@
     - role: bloodymage.autonomy.cups
       tags:
         - cups
+
+- name: "Configure NFS Servers"
+  hosts: nfs_file_servers
+  roles:
+    - role: bloodymage.autonomy.nfs_server
+      tags:
+        - nfs-server
+        - nfs_server

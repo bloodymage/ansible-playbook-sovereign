@@ -1,3 +1,4 @@
+---
 - name: "Download Nextcloud Sources."
   ansible.builtin.get_url:
     url: "{{ item.source }}"

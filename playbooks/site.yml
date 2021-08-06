@@ -22,7 +22,8 @@
 #
 # ==================================================================================================
 - import_playbook: control.yml
-- import_playbook: certificate_authorities.yml
+- import_playbook: sshca.yml
+- import_playbook: ownca.yml
 - import_playbook: all.yml
 - import_playbook: dnsservers.yml
 - import_playbook: realm.yml

@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+
+require ["variables", "envelope", "fileinto", "subaddress", "mailbox","regex"];
+
+# ==================================================================================================
+#
+# Mailer Daemon (Auto responders)
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "mailer-daemon@",
+          address :contains "from" "postmaster@"
+          )
+{
+  fileinto :create "{{ __main_folder }}/Mailer Daemon";
+  stop;
+}
+

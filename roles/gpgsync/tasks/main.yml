@@ -1,20 +1,15 @@
 ---
 # tasks file for gpgsync
-# - name: Ensure destination directory exists
-#   ansible.builtin.file:
-#     path: "/srv/www/{{ autonomy_root_domain }}/pgp/"
-#     state: directory
-#     owner: www-data
-#     group: www-data
-#     mode: 755
-#   become: yes
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
 
-- name: "Create keylist"
-  ansible.builtin.template:
-    src: "keylist.json.j2"
-    dest: "/tmp/keylist.json"
-    owner: www-data
-    group: www-data
-    mode: 644
-  become: yes
-    
+- name: "Include OS Specific Tasks"
+  include: "{{ ansible_system | lower }}.yml"
+  when:
+    - ansible_system

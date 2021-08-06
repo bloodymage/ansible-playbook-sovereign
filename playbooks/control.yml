@@ -4,7 +4,8 @@
 # localhost to be able to run the remaining playbooks.
 #
 # ==================================================================================================
-- hosts: localhost
+- name: "Configure the control node."
+  hosts: localhost
   roles:
     - role: bloodymage.autonomy.config_environment
       when:

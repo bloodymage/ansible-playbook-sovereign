@@ -23,21 +23,6 @@
     - install-packages
     - ownca-all
 
-- name: Get IP geolocation data
-  community.general.ipinfoio_facts:
-  become: no
-  delegate_to: localhost
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certificates
-    - ownca-host-certificates
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca_host_certificates_debug
-    - ownca-host-certificates-debug
-    - ownca-all
-
 # ==================================================================================================
 #
 # Create SSL Private Key and CRS Directories
@@ -103,7 +88,7 @@
     privatekey_path: "{{ ownca_hosts_directory }}/private/{{ autonomy_fqdn }}.key"
     subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
     crl_distribution_points:
-      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
         reasons:
           - key_compromise
           - ca_compromise
@@ -115,10 +100,4 @@
           - aa_compromise
   become: no
   delegate_to: localhost
-  tags:
-    - ownca_host_certs
-    - ownca-host-certs
-    - ownca_host_certs_debug
-    - ownca-host-certs-debug
-    - ownca-all
 

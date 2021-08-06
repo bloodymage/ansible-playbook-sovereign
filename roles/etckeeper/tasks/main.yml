@@ -32,3 +32,15 @@
         - etckeeper_debug
         - etckeeper-debug
         - install-packages
+
+- name: "Install etckeeper configuration file."
+  ansible.builtin.template:
+    src: "etc/etckeeper/etckeeper.conf.j2"
+    dest: "/etc/etckeeper/etckeeper.conf"
+    owner: root
+    group: root
+    mode: "0644"
+    backup: yes
+  become: yes
+  notify:
+    - restart etckeeper

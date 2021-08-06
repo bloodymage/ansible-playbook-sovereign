@@ -32,7 +32,7 @@
 
 - name: "Ensure we have a password for the mail user."
   ansible.builtin.set_fact:
-    mediawiki_mail_user_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
+    mediawiki_ldap_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
   vars:
     __password_store_id: "{{ autonomy_domain }}/domain_users/mediawiki/password "
     __password_length: "{{ item.password_legnth | default(autonomy_password_length) }}"
@@ -40,6 +40,7 @@
   become: no
   when:
     - autonomy_realm_identity_management_system == "samba"
+    - mediawiki_ldap_password == "password"
   tags:
     - mediawiki
     - mediawiki_debug

@@ -1,0 +1,4 @@
+---
+# defaults file for unzip
+autonomy_packages:
+  - unzip

@@ -3,7 +3,7 @@
   community.network.routeros_command:
     commands:
       #- /user add name={{ item.username }} password= group=full
-      - /user remove admin
+      - /user remove {{ __default_mikrotik_device_user }}
       #- /user set 0 allowed-addres=""
   register: routeros_resources
   tags:
