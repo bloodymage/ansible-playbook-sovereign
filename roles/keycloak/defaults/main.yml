@@ -31,6 +31,7 @@ keycloak_binary_dir: "{{ keycloak_home }}/bin"
 keycloak_docs_dir: "{{ keycloak_alt_home }}/docs"
 keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
 keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
+keycloak_data_dir: "/opt/keycloak_data/"
 
 # Files
 keycloak_binary: "{{ keycloak_binary_dir }}/{{ keycloak_mode }}.sh"
