@@ -116,15 +116,6 @@ user_homeassistant_id_number: 503
 user_vmail_id_number:  504
 user_odoo_id_number: 505
 
-# MySQL / MariaDB
-mysql_administrator: "root"
-mysql_system_maintenance_user: "debian-sys-maint"
-mysql_datadir: "/var/lib/mysql"
-
-nextcloud_db_user: nextcloud
-nextcloud_db_hosts:
-  - "{{ autonomy_fqdn }}"
-  - "localhost"
 
 # ==================================================================================================
 #

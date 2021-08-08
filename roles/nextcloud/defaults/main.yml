@@ -72,8 +72,6 @@ nextcloud_source_url:
     checksum: "https://download.nextcloud.com/server/releases/nextcloud-{{ nextcloud_version }}.tar.bz2.sha256"
 
 nextcloud_database: "mysql"
-nextcloud_db_server: "db.{{ autonomy_domain }}"
-nextcloud_db_name: "{{ autonomy_org_name | lower }}_cloud"
 nextcloud_admin_user: "administrator"
 nextcloud_admin_password: "password"
 nextcloud_ldap_password: "password"

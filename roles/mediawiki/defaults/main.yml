@@ -53,10 +53,7 @@ mediawiki_skins_defaults:
   - MonoBook
   - Vector
 
-mediawiki_cookie_domain: "{{ autonomy_domain }}"
-mediawiki_db_server: "db.{{ autonomy_domain }}"
-mediawiki_db_name: "my_wiki"
-mediawiki_db_user: "wikiuser"
+mediawiki_cookie_domain: "wiki.{{ autonomy_domain }}"
 
 mediawiki_default_skin: Timeless
 mediawiki_skins: []

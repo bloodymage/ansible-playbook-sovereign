@@ -1,0 +1,42 @@
+---
+# MySQL / MariaDB
+mysql_administrator: "root"
+mysql_system_maintenance_user: "debian-sys-maint"
+mysql_datadir: "/var/lib/mysql"
+
+nextcloud_db_server: "db.{{ autonomy_domain }}"
+nextcloud_db_name: "{{ autonomy_zone_name | lower }}_cloud"
+nextcloud_db_user: "{{ autonomy_zone_name | lower }}_nextcloud"
+nextcloud_db_hosts:
+  - "{{ autonomy_fqdn }}"
+  - "localhost"
+
+mediawiki_db_server: "db.{{ autonomy_domain }}"
+mediawiki_db_name: "{{ autonomy_zone_name | lower }}_wiki"
+mediawiki_db_user: "{{ autonomy_zone_name | lower }}_wikiuser"
+mediawiki_shared_db: "{{ mediawiki_db_name }}"
+mediawiki_db_hosts:
+      - "%.{{ autonomy_fqdn }}"
+      - "localhost"
+
+phpmyadmin_db_name: phpmyadmin
+phpmyadmin_db_user: phpmyadmin
+phpmyadmin_db_hosts:
+      - "%.{{ ansible_fqdn }}"
+      - "localhost"
+
+mythtv_db_server: "db.{{ autonomy_domain }}"
+
+hass_db_server: "db.{{ autonomy_domain }}"
+hass_db_name: "{{ autonomy_zone_name | lower }}_hass"
+hass_db_user: "{{ autonomy_zone_name | lower }}_hassuser"
+hass_db_hosts:
+      - "%.{{ ansible_fqdn }}"
+      - "localhost"
+
+drupal_db_server: "db.{{ autonomy_domain }}"
+drupal_db_name: "{{ autonomy_zone_name | lower }}_drupal"
+drupal_db_user: "{{ autonomy_zone_name | lower }}_drupal"
+drupal_db_hosts:
+      - "%.{{ ansible_fqdn }}"
+      - "localhost"
