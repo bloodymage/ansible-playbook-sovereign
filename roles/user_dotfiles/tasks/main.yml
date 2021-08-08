@@ -1,7 +1,9 @@
 ---
+# task file for user_dotfiles
 # ==================================================================================================
 #
-#
+# This is used to create user dotfiles for both the host's local users and domain controlled users.
+# Any tasks that are set "item.id_number >= autonomy_min_domain_id_number" is for domain users only.
 #
 # ==================================================================================================
 - name: Ensure User Home directory exists
@@ -42,6 +44,11 @@
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
 
+# ==================================================================================================
+#
+# GnuPG Settings
+#
+# ==================================================================================================
 - name: Ensure user .gnupg folder exists
   ansible.builtin.file:
     path: "{{ __dotfiles_home }}/.gnupg"
@@ -115,8 +122,13 @@
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - item.id_number >= 100000
+    - item.id_number >= autonomy_min_domain_id_number
 
+# ==================================================================================================
+#
+# GPG Sync Configuration
+#
+# ==================================================================================================
 - name: Ensure User ~/.config/gpgsync directory exists
   ansible.builtin.file:
     dest: "{{ __dotfiles_home }}/.config/gpgsync"
@@ -136,10 +148,14 @@
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - item.id_number >= 100000
+    - item.id_number >= autonomy_min_domain_id_number
 
+# ==================================================================================================
+#
 # This file is modified each time gpgsync runs, therefore we only want to install it if it does not
 # currently exist.  Set Force = "no"
+#
+# ==================================================================================================
 - name: "Install gpgsync settings.json"
   ansible.builtin.template:
     src: "config/gpgsync/settings.json.j2"
@@ -158,7 +174,7 @@
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= 100000
+    - item.id_number >= autonomy_min_domain_id_number
 
 - name: "Install gpgsync.desktop"
   ansible.builtin.copy:
@@ -177,4 +193,26 @@
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= 100000
+    - item.id_number >= autonomy_min_domain_id_number
+
+# ==================================================================================================
+#
+# Set .k5login
+#
+# This is required by ssh to allow GSSAPI logins
+#
+# ==================================================================================================
+- name: "Install .k5login."
+  ansible.builtin.template:
+    src: k5login.j2
+    dest: "{{ __dotfiles_home }}/.k5login
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ dotfiles_users }}"
+  become: yes
+  when:
+    - dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+    - item.id_number >= autonomy_min_domain_id_number

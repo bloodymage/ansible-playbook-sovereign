@@ -59,6 +59,21 @@
     - keycloak_debug
     - keycloak-debug
 
+- name: "Create Keycloak Data Directory"
+  ansible.builtin.file:
+    path: "{{ keycloak_alt_home }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: yes
+  when:
+    - keycloak_mode == "standalone"
+  tags:
+    - keycloak
+    - keycloak_debug
+    - keycloak-debug
+
 - name: Extract Sources
   ansible.builtin.unarchive:
     src: "/tmp/{{ item.file }}"
@@ -206,6 +221,16 @@
     - keycloak
     - keycloak_debug
     - keycloak-debug
+
+- name: "Create symlink to data directory."
+  ansible.builtin.file:
+    src: "{{ keycloak_data_dir }}"
+    dest: "{{ keycloak_home }}/{{ keycloak_mode }}/data"
+    owner: root
+    group: root
+    state: link
+  when:
+    - keycloak_mode == "standalone"
 
 # ==================================================================================================
 #
