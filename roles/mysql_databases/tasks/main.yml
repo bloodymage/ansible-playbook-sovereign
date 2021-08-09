@@ -1,33 +1,78 @@
 ---
 # tasks file for mariadb-databases
-- name: Create Database
-  community.mysql.mysql_db:
-    name: "{{ item.db_name }}"
-    state: present
-  loop: "{{ mariadb_databases }}"
-  become: yes
+- name: "Identify databases."
+  ansible.builtin.set_fact:
+    __databases_to_create: "{{ __databases_to_create + [__database] }}"
+  become: no
+  loop:
+    - inventory_group: "{{ autonomy_zone_name }}_nextcloud_servers"
+      name: "{{ nextcloud_db_name }}"
+      user: "{{ nextcloud_db_user }}"
+      host: "{{ nextcloud_db_host }}"
+    - inventory_group: "{{ autonomy_zone_name }}_mediawiki_servers"
+      name: "{{ mediawiki_db_name }}"
+      user: "{{ mediawiki_db_user }}"
+      host: "{{ mediawiki_db_host }}"
+    - inventory_group: "{{ autonomy_zone_name }}_mythtv"
+      name: "{{ mythtv_db_name }}"
+      user: "{{ mythtv_db_user }}"
+      host: "{{ mythtv_db_host }}"
+    - inventory_group: "{{ autonomy_zone_name }}_homeassistant"
+      name: "{{ homeassistant_db_name }}"
+      user: "{{ homeassistant_db_user }}"
+      host: "{{ homeassistant_db_host }}"
+    - inventory_group: "{{ autonomy_zone_name }}_drupal_servers"
+      name: "{{ drupal_db_name }}"
+      user: "{{ drupal_db_user }}"
+      host: "{{ drupal_db_host }}"
+  vars:
+    __database:
+      name: "{{ item.name }}"
+      user: "{{ item.user }}"
+      host: "{{ item.host }}"
   when:
-    - mariadb_databases is defined
+    - groups[item.inventory_group] is defined
+
+- name: "Create Databases."
+  community.mysql.mysql_db:
+    name: "{{ item['name'] }}"
+    login_user: "{{ autonomy_zone_name }}"
+    login_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    state: present
+  loop: "{{ __databases_to_create }}"
+  become: yes
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ autonomy_zone_name }}"
+    __password_lookup: "{{ __password_store_id }}"
   tags:
     - mysql_databases
     - mysql-databases
     - mysql_databases_debug
     - mysql-databases-debug
 
-- name: Ensure MySQL users are present.
+- name: "Ensure MySQL users are present."
   community.mysql.mysql_user:
-    name: "{{ item.name }}"
-    host: "{{ item.host | default('localhost') }}"
-    password: "{{ item.password }}"
-    priv: "{{ item.priv | default('*.*:USAGE') }}"
-    state: "{{ item.state | default('present') }}"
-    append_privs: "{{ item.append_privs | default('no') }}"
-    encrypted: "{{ item.encrypted | default('no') }}"
-  loop: "{{ mysql_users }}"
-  #no_log: true
+    name: "{{ item['user'] }}"
+    host: "{{ item['host'] | default('localhost') }}"
+    password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    priv: "{{ item['priv'] | default('*.*:USAGE') }}"
+    state: "{{ item['state'] | default('present') }}"
+    append_privs: "{{ item['append_privs'] | default('no') }}"
+    encrypted: "{{ item['encrypted'] | default('no') }}"
+    login_user: "{{ autonomy_zone_name }}"
+    login_password: "{{ lookup('community.general.passwordstore', __login_lookup) }}"
+  loop: "{{ __databases_to_create }}"
   become: yes
-  when:
-    - mysql_users is defined
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ item['user'] }}"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __login_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ autonomy_zone_name }}"
+    __login_lookup: "{{ __login_store_id }}"
+  #no_log: true
   tags:
     - mysql_databases
     - mysql-databases
