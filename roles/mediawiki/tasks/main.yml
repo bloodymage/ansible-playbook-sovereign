@@ -18,7 +18,7 @@
   ansible.builtin.set_fact:
     mediawiki_db_password: "{{ lookup('community.general.passwordstore', __password_store_id + ' create=true length=' + __password_length + ' nosymbols=true ' + __password_overwrite) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/wikiuser"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ autonomy_zone_name }}_mediawiki"
     __password_length: "{{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
   become: no
