@@ -179,7 +179,7 @@ __ownca_root_ca:
   ownca_privatekey_passphrase: "{{ ownca_root_password }}"
   provider: "selfsigned"
   private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name | lower }}-root-ca.key"
-  password_store_id_base: "{{ autonomy_root_domain }}"
+  password_store_id_base: "{{ autonomy_passdb }}{{ autonomy_root_domain }}"
   ca_id: "root"
   zone_name: ""
   domain: "{{ autonomy_root_domain }}"

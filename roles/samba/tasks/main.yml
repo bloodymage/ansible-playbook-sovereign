@@ -36,7 +36,7 @@
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   become: no
   vars:
-    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"

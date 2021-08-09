@@ -52,7 +52,7 @@
   ansible.builtin.set_fact:
     nextcloud_db_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/services/nextcloud/database_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/{{ nextcloud_database }}/{{ autonomy_zone_name }}_nextcloud"
     __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
@@ -62,17 +62,17 @@
   ansible.builtin.set_fact:
     nextcloud_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/nextcloud_admin_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/nextcloud/nextcloud_admin_password"
     __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
     - nextcloud_admin_password == "password"
 
-- name: "Ensure we have a password for the nextcloud database."
+- name: "Ensure we have the password salt."
   ansible.builtin.set_fact:
     nextcloud_passwordsalt: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/services/nextcloud/passwordsalt"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/nextcloud/passwordsalt"
     __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
@@ -92,7 +92,7 @@
   ansible.builtin.set_fact:
     nextcloud_ldap_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ nextcloud_domain }}/domain_users/nextcloud/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ nextcloud_domain }}/domain_users/nextcloud/password"
     __password_length: "length={{ nextcloud_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"

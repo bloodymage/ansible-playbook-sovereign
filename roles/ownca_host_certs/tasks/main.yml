@@ -173,7 +173,7 @@
   ansible.builtin.set_fact:
     ownca_component_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/ownca/ownca_component_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/ownca/ownca_component_password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   delegate_to: localhost

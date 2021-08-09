@@ -3,7 +3,7 @@
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   when:
@@ -135,7 +135,7 @@
   vars:
     __username: "{{ item.username | default(item.given_name | lower) }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ __username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ __username }}/password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -169,7 +169,7 @@
   vars:
     __username: "{{ item.username }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ __username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ __username }}/password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -206,7 +206,7 @@
   become: yes
   vars:
     __username: "{{ item.username }}"
-    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ __username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ __username }}/password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"

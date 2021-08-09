@@ -18,6 +18,7 @@ autonomy_use_source_code_repos: no
 autonomy_password_length: "42"
 autonomy_virtual_host: no
 autonomy_dod_certs_install: no
+autonomy_passdb: "ansible/autonomy/"
 
 # Zone Information
 autonomy_root_domain: "example.com"
@@ -34,6 +35,9 @@ autonomy_zones:
   - name: "example"
     type: public
     domain: "{{ autonomy_root_domain }}"
+
+# This really needs to be set to the 1st list item that type == "internal"
+autonomy_internal_zone_name: "{{ autonomy_zones[0]['name'] }}"
 
 autonomy_domain: "{{ autonomy_zone_name }}.{{ autonomy_root_domain }}"
 autonomy_realm: "{{ autonomy_zone_name | upper }}"
@@ -116,15 +120,6 @@ user_homeassistant_id_number: 503
 user_vmail_id_number:  504
 user_odoo_id_number: 505
 
-# MySQL / MariaDB
-mysql_administrator: "root"
-mysql_system_maintenance_user: "debian-sys-maint"
-mysql_datadir: "/var/lib/mysql"
-
-nextcloud_db_user: nextcloud
-nextcloud_db_hosts:
-  - "{{ autonomy_fqdn }}"
-  - "localhost"
 
 # ==================================================================================================
 #

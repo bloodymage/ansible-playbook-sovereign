@@ -100,7 +100,7 @@
     __mail_user: "{{ mail_user }}"
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
     __password_lookup: "{{ __password_store_id }}"
   no_log: yes
   become: no
@@ -200,7 +200,7 @@
       - origin: "{{ item.origin }}"
         destination: "{{ item.destination }}"
         password: "{{ item.password | default(__password) }}"
-    __password_store_id: "{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -214,7 +214,7 @@
   ansible.builtin.set_fact:
     postfix_sasl_auth_user_password: "{{ __password }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ postfix_sasl_auth_user }}"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ postfix_sasl_auth_user }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"

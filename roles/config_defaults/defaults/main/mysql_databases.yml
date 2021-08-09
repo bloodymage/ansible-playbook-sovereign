@@ -1,0 +1,36 @@
+---
+# MySQL / MariaDB
+mysql_administrator: "root"
+mysql_zone_administrator: "{{ autonomy_zone_name | lower }}"
+mysql_system_maintenance_user: "debian-sys-maint"
+mysql_datadir: "/var/lib/mysql"
+
+nextcloud_db_server: "db.{{ autonomy_domain }}"
+nextcloud_db_name: "{{ autonomy_zone_name | lower }}_nextcloud"
+nextcloud_db_user: "{{ autonomy_zone_name | lower }}_nextcloud"
+nextcloud_db_host: "%.{{ autonomy_domain }}"
+
+mediawiki_db_server: "db.{{ autonomy_domain }}"
+mediawiki_db_name: "{{ autonomy_zone_name | lower }}_mediawiki"
+mediawiki_db_user: "{{ autonomy_zone_name | lower }}_mediawiki"
+mediawiki_shared_db: "{{ mediawiki_db_name }}"
+mediawiki_db_host: "%.{{ autonomy_domain }}"
+
+phpmyadmin_db_name: phpmyadmin
+phpmyadmin_db_user: phpmyadmin
+phpmyadmin_db_host: "%.{{ autonomy_domain }}"
+
+mythtv_db_server: "db.{{ autonomy_domain }}"
+mythtv_db_name: "{{ autonomy_zone_name | lower }}_mythtv"
+mythtv_db_user: "{{ autonomy_zone_name | lower }}_mythtv"
+mythtv_db_host: "%.{{ autonomy_domain }}"
+
+homeassistant_db_server: "db.{{ autonomy_domain }}"
+homeassistant_db_name: "{{ autonomy_zone_name | lower }}_homeassistant"
+homeassistant_db_user: "{{ autonomy_zone_name | lower }}_homeassistant"
+homeassistant_db_host: "%.{{ ansible_fqdn }}"
+
+drupal_db_server: "db.{{ autonomy_domain }}"
+drupal_db_name: "{{ autonomy_zone_name | lower }}_drupal"
+drupal_db_user: "{{ autonomy_zone_name | lower }}_drupal"
+drupal_db_host: "%.{{ autonomy_domain }}"

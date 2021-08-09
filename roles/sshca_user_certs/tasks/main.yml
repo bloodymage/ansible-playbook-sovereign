@@ -84,7 +84,7 @@
   #no_log: yes
   vars:
   vars:
-    __password_store_id: "{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
     __password_lookup: "{{ __password_store_id }}"
     __ssh_principals_list: "{% if item.ssh_principals is defined %}{{ item.ssh_principals + [item.username] }}{% else %}{{ [item.username] }}{% endif %}"
     __ssh_principals: "{% for principal in __ssh_principals_list %}{{ principal }}{{ ',' if not loop.last else '' }}{% endfor %}"

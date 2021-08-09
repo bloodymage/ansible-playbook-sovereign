@@ -107,19 +107,23 @@
   group_by:
     key: "{{ autonomy_zone_name }}_{{ item }}"
   loop:
+    - auth_servers
     - db_servers
+    - dlna_servers
     - dns_servers
+    - dovecot_servers
+    - drupal_servers
     - file_servers
     - git_servers
     - ha_proxy
     - homeassistant
-    - auth_servers
     - ldap_servers
     - mail_servers
-    - dovecot_servers
-    - postfix_servers
-    - dlna_servers
+    - mediawiki_servers
     - mosquitto_servers
+    - mythtv
+    - nextcloud_servers
+    - postfix_servers
     - radius_servers
     - redis_servers
     - samba_domain_controllers
@@ -132,19 +136,23 @@
   group_by:
     key: "{{ autonomy_zone_type }}_{{ item }}"
   loop:
+    - auth_servers
     - db_servers
+    - dlna_servers
     - dns_servers
+    - dovecot_servers
+    - drupal_servers
     - file_servers
     - git_servers
     - ha_proxy
     - homeassistant
-    - auth_servers
     - ldap_servers
     - mail_servers
-    - dovecot_servers
-    - postfix_servers
-    - dlna_servers
+    - mediawiki_servers
     - mosquitto_servers
+    - mythtv
+    - nextcloud_servers
+    - postfix_servers
     - radius_servers
     - redis_servers
     - samba_domain_controllers
