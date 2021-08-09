@@ -1,11 +1,12 @@
 ---
 # MySQL / MariaDB
 mysql_administrator: "root"
+mysql_zone_administrator: "{{ autonomy_zone_name | lower }}"
 mysql_system_maintenance_user: "debian-sys-maint"
 mysql_datadir: "/var/lib/mysql"
 
 nextcloud_db_server: "db.{{ autonomy_domain }}"
-nextcloud_db_name: "{{ autonomy_zone_name | lower }}_cloud"
+nextcloud_db_name: "{{ autonomy_zone_name | lower }}_nextcloud"
 nextcloud_db_user: "{{ autonomy_zone_name | lower }}_nextcloud"
 nextcloud_db_hosts:
   - "{{ autonomy_fqdn }}"
@@ -26,6 +27,11 @@ phpmyadmin_db_hosts:
       - "localhost"
 
 mythtv_db_server: "db.{{ autonomy_domain }}"
+mythtv_db_name: "{{ autonomy_zone_name | lower }}_mythconverg"
+mythtv_db_user: "{{ autonomy_zone_name | lower }}_mythtv"
+mythtv_db_hosts:
+      - "%.{{ ansible_fqdn }}"
+      - "localhost"
 
 hass_db_server: "db.{{ autonomy_domain }}"
 hass_db_name: "{{ autonomy_zone_name | lower }}_hass"
