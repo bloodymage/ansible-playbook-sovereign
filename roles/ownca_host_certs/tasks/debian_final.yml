@@ -82,7 +82,7 @@
   ansible.builtin.set_fact:
     ownca_host_certs_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/ownca_host_cert_pkcs12_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/ownca_host_cert_pkcs12_password"
     __password_length: "length={{ autonomy_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"

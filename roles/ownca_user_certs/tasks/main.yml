@@ -93,7 +93,7 @@
   become: yes
   loop: "{{ domain_users }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ item.username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ item.username }}/password"
     __username: "{{ item.username }}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ item.username }}"
     __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
@@ -144,7 +144,7 @@
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
     __password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     __username: "{{ item[0].username }}"
     __public_email: "{{ item[0].username }}@{{ autonomy_root_domain }}"
@@ -226,7 +226,7 @@
   delegate_to: localhost
   register: result
   vars:
-    __password_store_id: "{{ autonomy_domain }}/ownca/ownca_identity_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/ownca/ownca_identity_password"
     __password_lookup: "{{ __password_store_id }}"
     __username: "{{ item[0].username }}"
   when:
@@ -298,7 +298,7 @@
   become: yes
   loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
     __username: "{{ item[0].username }}"
     __id_number: "{{ item[0].id_number }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"

@@ -110,7 +110,7 @@
     move_home: yes
   loop: "{{ users }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -171,7 +171,7 @@
     index_var: index
   become: yes
   vars:
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"

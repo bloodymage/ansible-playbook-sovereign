@@ -7,7 +7,7 @@
   when:
     - ownca_host_certs_pkcs12_password == "password"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/ownca_host_cert_pkcs12_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ autonomy_hostname }}/ownca_host_cert_pkcs12_password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
