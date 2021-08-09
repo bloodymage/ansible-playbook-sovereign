@@ -55,7 +55,7 @@
     name: "{{ item['user'] }}"
     host: "{{ item['host'] | default('localhost') }}"
     password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    priv: "{{ item['priv'] | default('*.*:USAGE') }}"
+    priv: "{{ item['priv'] | default(item.name + '.*:ALL') }}"
     state: "{{ item['state'] | default('present') }}"
     append_privs: "{{ item['append_privs'] | default('no') }}"
     encrypted: "{{ item['encrypted'] | default('no') }}"
