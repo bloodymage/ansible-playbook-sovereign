@@ -68,7 +68,7 @@
   when:
     - nextcloud_admin_password == "password"
 
-- name: "Ensure we have a password for the nextcloud database."
+- name: "Ensure we have the password salt."
   ansible.builtin.set_fact:
     nextcloud_passwordsalt: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
