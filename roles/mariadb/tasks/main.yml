@@ -132,7 +132,7 @@
     - mariadb-debug
     - mariadb_debug
 
-- name: Add Debian Upgrade User
+- name: "Add Debian Upgrade User."
   community.mysql.mysql_user:
     name: "{{ mysql_system_maintenance_user }}"
     password: "{{ mysql_system_maintenance_user_password }}"
@@ -145,7 +145,7 @@
     - mariadb-debug
     - mariadb_debug
 
-- name: "Install System Maintenance config"
+- name: "Install System Maintenance config."
   ansible.builtin.template:
     src: "mysql/debian.cnf.j2"
     dest: "/etc/mysql/debian.cnf"
