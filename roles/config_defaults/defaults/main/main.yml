@@ -88,8 +88,9 @@ sshca_user_key_password: "password"
 
 # LDAP Definitions
 autonomy_base_dn: "DC={{ autonomy_org_unit_name | upper }},DC={{ autonomy_org_name | upper }},DC={{ autonomy_tld | upper }}"
-autonomy_user_dn: "CN=users,{{ autonomy_base_dn }}"
-autonomy_group_dn: "CN=users,{{ autonomy_base_dn }}"
+autonomy_base_dn_lower: "DC={{ autonomy_org_unit_name | lower }},DC={{ autonomy_org_name | lower }},DC={{ autonomy_tld | lower }}"
+autonomy_user_dn: "CN=Users,{{ autonomy_base_dn_lower }}"
+autonomy_group_dn: "CN=Users,{{ autonomy_base_dn_lower }}"
 autonomy_config_dn: "CN=Configuration,{{ autonomy_base_dn }}"
 autonomy_schema_dn: "CN=Schema,{{ autonomy_config_dn }}"
 
@@ -148,10 +149,10 @@ domain_user_vmail:
   username: "vmail"
   spns:
     - spn: "imap"
-      host: "{{ internal_mail_host }}"
+      host: "{{ autonomy_internal_mail_host }}"
       keytab_file: "/etc/dovecot/dovecot.keytab"
     - spn: "smtp"
-      host: "{{ internal_mail_host }}"
+      host: "{{ autonomy_internal_mail_host }}"
       keytab_file: "/etc/dovecot/dovecot.keytab"
   account_expire: "--noexpiry"
 
@@ -159,7 +160,7 @@ domain_user_mediawiki:
   username: "mediawiki"
   spns:
     - spn: "HTTP"
-      host: "{{ internal_www_host }}"
+      host: "{{ autonomy_internal_www_host }}"
       keytab_file: "/etc/apache2/wiki.{{ autonomy_domain }}.keytab"
   account_expire: "--noexpiry"
 
@@ -167,10 +168,10 @@ domain_user_keycloak:
   username: "keycloak"
   spns:
     - spn: "HTTP"
-      host: "{{ internal_keycloak_host }}"
+      host: "{{ autonomy_internal_keycloak_host }}"
       keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
     - spn: "HTTP"
-      host: "{{ dmz_keycloak_host }}"
+      host: "{{ autonomy_dmz_keycloak_host }}"
       keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
   account_expire: "--noexpiry"
 
@@ -215,6 +216,7 @@ __linear_strategy: "linear"
 __collection_overwrite_passwords: no
 
 # Samba
+__samba_recreate_realm: no
 __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
 
 __domain_system_users:
@@ -238,6 +240,8 @@ __letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directo
 __letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
 __buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
 __buypass_production_directory: "https://api.buypass.com/acme/directory"
+
+__autonomy_ddns_key_algorithm: "hmac-sha256"
 
 # ==================================================================================================
 #
@@ -263,4 +267,3 @@ __os_variables_files:
   - "{{ __system | lower }}.yml"
   - main.yml
 
-__autonomy_ddns_key_algorithm: "hmac-sha256"

@@ -146,6 +146,7 @@
     - git_servers
     - ha_proxy
     - homeassistant
+    - keycloak_servers
     - ldap_servers
     - mail_servers
     - mediawiki_servers

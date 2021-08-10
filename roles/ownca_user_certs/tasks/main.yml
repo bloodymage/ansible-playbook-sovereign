@@ -63,7 +63,7 @@
     group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     mode: "{{ item[1].mode }}"
   become: yes
-  loop: "{{ domain_users | product(ownca_user_pki_dirs) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_pki_dirs) | list }}"
   vars:
     __username: "{{ item[0].username }}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
@@ -91,7 +91,7 @@
     passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     backup: yes
   become: yes
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   vars:
     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ item.username }}/password"
     __username: "{{ item.username }}"
@@ -116,7 +116,7 @@
     locality_name: "{{ autonomy_city | default(omit) }}"
     organization_name: "{{ autonomy_org_name }}"
     organizational_unit_name: "{{ autonomy_org_unit_name }}"
-    common_name: "{{ __given_name }}{{ __surname }}"
+    common_name: "{{ __item[0]['display_name'] }}"
     email_address: "{{ __email }}"
     key_usage: "{{ item[1].key_usage }}"
     key_usage_critical: yes
@@ -142,7 +142,7 @@
     backup: yes
     force: "{{ __user_cert_force_regeneration }}"
   become: yes
-  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   vars:
     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
     __password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
@@ -175,7 +175,7 @@
     dest: "{{ ownca_directory }}/users/csr/{{ __username }}_{{ item[1].name }}.csr"
     flat: yes
   become: yes
-  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   vars:
     __username: "{{ item[0].username }}"
   when:
@@ -192,7 +192,7 @@
 - name: "Check if user cert exists."
   ansible.builtin.stat:
     path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
-  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   delegate_to: localhost
   become: no
   register: cert_file
@@ -222,7 +222,7 @@
     backup: yes
     force: "{{ __user_cert_force_regeneration }}"
   become: no
-  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   delegate_to: localhost
   register: result
   vars:
@@ -267,7 +267,7 @@
     group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     mode: "0770"
   become: yes
-  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   vars:
     __username: "{{ item[0].username }}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
@@ -296,7 +296,7 @@
     backup: yes
     force: no
   become: yes
-  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   vars:
     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
     __username: "{{ item[0].username }}"
@@ -325,7 +325,7 @@
       -outform DER
     chdir: "{{ __pki_cert_dir }}"
     #creates: "{{ item[0].username }}_{{ __cert_purpose }}.der"
-  loop: "{{ domain_users | product(ownca_user_cert_purposes) | list }}"
+  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   vars:
     __pki_cert_dir: "{{ ownca_directory }}/users/certs"
     __cert_purpose: "{{ item[1].name }}"

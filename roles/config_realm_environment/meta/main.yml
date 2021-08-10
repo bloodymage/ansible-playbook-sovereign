@@ -26,5 +26,3 @@ galaxy_info:
 
 dependencies:
   - role: bloodymage.autonomy.config_defaults
-  #- role: bloodymage.autonomy.system_upgrade
-  #- role: bloodymage.autonomy.krb5_client_config

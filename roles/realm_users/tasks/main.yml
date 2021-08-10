@@ -44,7 +44,7 @@
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  loop: "{{ domain_groups + __realm_users + __domain_system_users }}"
   vars:
     __username: "{{ item.username | default(item.groupname) }}_g"
     __groupname: "{{ item.groupname | default(__username) }}"
@@ -56,7 +56,7 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
-- name: Add Unix Samba Groups (With email address)
+- name: "Add Unix Samba Groups (With email address)."
   ansible.builtin.shell: >
     samba-tool group add "{{ __groupname }}"
     --gid-number {{ item.id_number }}
@@ -65,7 +65,7 @@
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  loop: "{{ domain_groups + __realm_users + __domain_system_users }}"
   vars:
     __username: "{{ item.username | default(item.groupname) }}_g"
     __groupname: "{{ item.groupname | default(__username) }}"
@@ -78,14 +78,14 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
-- name: Add Non-Unix Samba Groups (with Email Address)
+- name: "Add Non-Unix Samba Groups (with Email Address)."
   ansible.builtin.shell: >
     samba-tool group add "{{ item.groupname }}"
     --mail-address {{ item.mail_address }}
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users + __domain_system_users }}"
+  loop: "{{ domain_groups + __realm_users + __domain_system_users }}"
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
   when:
@@ -95,13 +95,13 @@
     - item.mail_address is defined
     - item.id_number is not defined
 
-- name: Add Non-Unix Samba Groups (without Email Address)
+- name: "Add Non-Unix Samba Groups (without Email Address)."
   ansible.builtin.shell: >
     samba-tool group add "{{ item.groupname }}"
     -U Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_groups + domain_users + __domain_system_users + __samba_domain_groups }}"
+  loop: "{{ domain_groups + __realm_users + __domain_system_users + __samba_domain_groups }}"
   when:
     - item.groupname is defined
     - inventory_hostname == __samba_schema_master
@@ -116,56 +116,19 @@
 #
 #
 # ==================================================================================================
-- name: Add Samba Users
-  ansible.builtin.command:
-    cmd: >
-      samba-tool user create "{{ __username }}" "{{ __password }}"
-      --unix-home "/home/{{ autonomy_org_unit_name | upper }}/{{ __username }}"
-      --uid-number "{{ item.id_number }}"
-      --gid-number "{{ item.id_number }}"
-      --given-name "{{ item.given_name }}"
-      --surname "{{ item.surname }}"
-      --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
-      --nis-domain "{{ autonomy_org_unit_name | upper }}"
-      --mail-address "{{ __username }}@{{ samba_email_domain }}"
-      --username Administrator
-      --password {{ samba_administrator_password }}
-  become: yes
-  loop: "{{ domain_users + __domain_system_users }}"
-  vars:
-    __username: "{{ item.username | default(item.given_name | lower) }}"
-    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ __username }}/password"
-    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-    __id_number: "{{ item.id_number }}"
-    __uid_number: "--uid-number '{{ item.id_number }}'"
-    __gid_number: "--gid-number '{{ item.id_number }}'"
-  when:
-    - item.given_name is defined
-    - item.surname is defined
-    - item.id_number is defined
-    - __username not in existing_user_list.stdout_lines
-  delegate_to: "{{ __samba_schema_master }}"
-  run_once: yes
-
-- name: Add Samba Users
+- name: "Add Samba Users. (Unix)"
   ansible.builtin.shell: >
     samba-tool user create "{{ __username }}" "{{ __password }}"
     --unix-home "/home/{{ autonomy_org_unit_name | upper }}/{{ __username }}"
     --uid-number "{{ item.id_number }}"
     --gid-number "{{ item.id_number }}"
-    --given-name "{{ item.given_name }}"
     --login-shell "{{ item.login_shell | default ('/bin/bash') }}"
     --nis-domain "{{ autonomy_org_unit_name | upper }}"
     --mail-address "{{ __username }}@{{ samba_email_domain }}"
     --username Administrator
     --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_users + __domain_system_users }}"
+  loop: "{{ __realm_users + __domain_system_users }}"
   vars:
     __username: "{{ item.username }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
@@ -175,12 +138,8 @@
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-    __id_number: "{{ item.id_number }}"
-    __uid_number: "--uid-number '{{ item.id_number }}'"
-    __gid_number: "--gid-number '{{ item.id_number }}'"
   when:
-    - item.given_name is defined
-    - item.surname is not defined
+    - item.username is defined
     - item.username not in existing_user_list.stdout_lines
     - item.id_number is defined
   delegate_to: "{{ __samba_schema_master }}"
@@ -194,12 +153,12 @@
 # Can this be done with 'ldap_entry' instead?
 #
 # ==================================================================================================
-- name: Add Samba Users
+- name: "Add Samba Users. (Non Unix)"
   ansible.builtin.shell: >
     samba-tool user create "{{ __username }}" "{{ __password }}"
     --username Administrator
     --password {{ samba_administrator_password }}
-  loop: "{{ domain_users + __domain_system_users }}"
+  loop: "{{ __realm_users + __domain_system_users }}"
   ignore_errors: yes
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
@@ -214,17 +173,18 @@
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   when:
+    - item.username is defined
     - item.username not in existing_user_list.stdout_lines
     - item.id_number is not defined
 
-- name: "Set expiry for Samba Users"
+- name: "Set expiry for Samba Users."
   ansible.builtin.command:
     cmd: >
       samba-tool user setexpiry "{{ item.account_expire }}" "{{ item.username }}"
       --username Administrator
       --password {{ samba_administrator_password }}
   become: yes
-  loop: "{{ domain_users + __domain_system_users }}"
+  loop: "{{ __realm_users + __domain_system_users }}"
   when:
     - inventory_hostname == __samba_schema_master
     - item.account_expire is defined
@@ -248,7 +208,7 @@
       samba-tool group addmembers ansiblemanaged "{{ __username }}"
       --username Administrator
       --password "{{ samba_administrator_password }}"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   delegate_to: "{{ __samba_schema_master }}"
   become: yes
   run_once: yes
@@ -260,30 +220,52 @@
     - item.id_number is defined
     - __username not in existing_user_list.stdout_lines
 
-- name: "Set Group Membership"
-  include: group_membership.yml
-  loop: "{{ domain_groups }}"
-  loop_control:
-    loop_var: group
-    index_var: group_index
-  when:
-    - __samba_schema_master is defined
-    - inventory_hostname == __samba_schema_master
-    - group.group_members is defined
-  delegate_to: "{{ __samba_schema_master }}"
-  run_once: yes
+# - name: "Set Group Membership."
+#   include: group_membership.yml
+#   loop: "{{ domain_groups }}"
+#   loop_control:
+#     loop_var: group
+#     index_var: group_index
+#   when:
+#     - __samba_schema_master is defined
+#     - inventory_hostname == __samba_schema_master
+#     - group.group_members is defined
+#   delegate_to: "{{ __samba_schema_master }}"
+#   run_once: yes
 
 # ==================================================================================================
 #
-# Conceptually this works to update the users ldap attributes.  The problem is, I wish to be able to
-# update the attribute if it is defined.  Otherwise, I don't want it to do anything.  One possible
-# option is to do a nested look "loop: {{ domain_users | product(attributes) }}" then check if that
-# attribute is defined for that user, and if yes, update it.  That's not very efficient though.
+# The final part updates the users ldap attributes.
+#
+# First we check what the user's CN is.  We do this, so we are not trying to update a CN that is not
+# defined.
 #
 # ==================================================================================================
+- name: "Get displayNames for all users."
+  community.general.ldap_search:
+    dn: "{{ autonomy_user_dn }}"
+    scope: "onelevel"
+    bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
+    bind_pw: "{{ samba_administrator_password }}"
+    start_tls: yes
+    server_uri: "ldap://{{ autonomy_fqdn }}"
+    attrs:
+      - "dn"
+  register: ldap_users
+
+- name: "Cleanup dn's of all ldap users."
+  ansible.builtin.set_fact:
+    __realm_user_dn_list: "{{ __realm_user_dn_list + [item.dn] }}"
+  loop: "{{ ldap_users.results }}"
+
+- name: "Print ldap_users."
+  ansible.builtin.debug:
+    msg:
+      - "{{ __realm_user_dn_list }}"
+
 - name: "Insert User LDAP Attributes"
   community.general.ldap_attrs:
-    dn: "CN={{ __dn }},{{ autonomy_user_dn }}"
+    dn: "{{ __dn }}"
     attributes:
       co: "{{ item.country | default(omit) }}"
       # carLicense:
@@ -303,12 +285,12 @@
       company: "{{ item.company | default(omit) }}"
       # department:
       # description:
-      # displayName: "{{ __dn }}"
+      displayName: "{{ item.display_name }}"
       gidNumber: "{{ item.id_number | default(omit) }}"
-      givenName: "{{ __given_name }}"
+      givenName: "{{ item.given_name }}"
       initials: "{{ __initials | default(omit) }}"
       l: "{{ item.city | default(omit) }}"
-      mail: "{{ __mail }}"
+      mail: "{{ item.mail }}"
       mobile: "{{ item.mobile | default(omit) }}"
       #o:
       otherMailbox: "{{ item.email_aliases | default(omit) }}"
@@ -321,13 +303,13 @@
       # postOfficeBox:
       postalCode: "{{ item.zip_code | default(omit) }}"
       # proxyAddresses:
-      sn: "{{ __surname | default(omit) }}"
+      sn: "{{ item.surname | default(omit) }}"
       st: "{{ item.state | default(omit) }}"
       # streetAddress:
       # telephoneNumber:
       title: "{{ item.job_title | default(omit) }}"
       uidNumber: "{{ item.id_number | default(omit) }}"
-      unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ __username }}"
+      unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}"
       url: "{{ item.urls | default(omit) }}"
       userCertificate: []
       wWWHomePage: "{{ item.internet_address | default(omit) }}"
@@ -336,16 +318,138 @@
     bind_pw: "{{ samba_administrator_password }}"
     start_tls: yes
     server_uri: "ldap://{{ autonomy_fqdn }}"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
+  ignore_errors: yes
   vars:
-    __generated_username: "{{ __given_name[0] }}{{ __surname[0] | default(null) }}"
-    __username: "{{ item.username | default(__generated_username) }}"
-    __default_mail: "{{ item.username }}@{{ autonomy_root_domain }}"
-    __mail: "{{ item.mail | default(__default_mail) }}"
-    __given_name: "{{ item.given_name  | default(item.username) }}"
-    __surname: "{{ item.surname | default(omit) }}"
-    #__initials: "{{ __given_name[0] | default(null) }}{{ item.middle_name[0] | default(null) }}{{ item.surname[0] | default(null) }}"
-    #__sn: "{% if item.surname is defined %}cn: {{ item.surname }}{% endif %}"
-    __dn: "{{ __given_name }}{% if item.surname is defined %} {{ __surname }}{% endif %}"
+    __dn: "CN={{ item.username }},{{ autonomy_user_dn }}"
   when:
     - item.id_number is defined
+    - __dn in __realm_user_dn_list
+
+- name: "Insert User LDAP Attributes"
+  community.general.ldap_attrs:
+    dn: "{{ __dn }}"
+    attributes:
+      co: "{{ item.country | default(omit) }}"
+      # carLicense:
+      # homePhone:
+      # otherHomePhone:
+      # facsimileTelephoneNumber:
+      # otherFacsimile:
+      # ipPhone:
+      # otherIpPhone:
+      # info:
+      # employeeID:
+      # employeeType:
+      # employeeNumber:
+      # division:
+      # roomNumber:
+      # cn:
+      company: "{{ item.company | default(omit) }}"
+      # department:
+      # description:
+      displayName: "{{ item.display_name }}"
+      gidNumber: "{{ item.id_number | default(omit) }}"
+      givenName: "{{ item.given_name }}"
+      initials: "{{ __initials | default(omit) }}"
+      l: "{{ item.city | default(omit) }}"
+      mail: "{{ item.mail }}"
+      mobile: "{{ item.mobile | default(omit) }}"
+      #o:
+      otherMailbox: "{{ item.email_aliases | default(omit) }}"
+      #otherMobile:
+      #otherPager:
+      #otherTelephone:
+      #ou:
+      #pager:
+      physicalDeliveryOfficeName: "{{ item.physical_delivery_office | default(omit) }}"
+      # postOfficeBox:
+      postalCode: "{{ item.zip_code | default(omit) }}"
+      # proxyAddresses:
+      sn: "{{ item.surname | default(omit) }}"
+      st: "{{ item.state | default(omit) }}"
+      # streetAddress:
+      # telephoneNumber:
+      title: "{{ item.job_title | default(omit) }}"
+      uidNumber: "{{ item.id_number | default(omit) }}"
+      unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}"
+      url: "{{ item.urls | default(omit) }}"
+      userCertificate: []
+      wWWHomePage: "{{ item.internet_address | default(omit) }}"
+    state: exact
+    bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
+    bind_pw: "{{ samba_administrator_password }}"
+    start_tls: yes
+    server_uri: "ldap://{{ autonomy_fqdn }}"
+  loop: "{{ __realm_users }}"
+  vars:
+    __common_name: "{{ item.given_name }}{% if item.surname is defined %} {{ item.surname }}{% endif %}"
+    __dn: "CN={{ __common_name }},{{ autonomy_user_dn }}"
+  ignore_errors: yes
+  when:
+    - item.id_number is defined
+    #- item.display_name != __common_name
+    - __dn in __realm_user_dn_list
+
+- name: "Insert User LDAP Attributes"
+  community.general.ldap_attrs:
+    dn: "{{ __dn }}"
+    attributes:
+      co: "{{ item.country | default(omit) }}"
+      # carLicense:
+      # homePhone:
+      # otherHomePhone:
+      # facsimileTelephoneNumber:
+      # otherFacsimile:
+      # ipPhone:
+      # otherIpPhone:
+      # info:
+      # employeeID:
+      # employeeType:
+      # employeeNumber:
+      # division:
+      # roomNumber:
+      # cn:
+      company: "{{ item.company | default(omit) }}"
+      # department:
+      # description:
+      displayName: "{{ item.display_name }}"
+      gidNumber: "{{ item.id_number | default(omit) }}"
+      givenName: "{{ item.given_name }}"
+      initials: "{{ __initials | default(omit) }}"
+      l: "{{ item.city | default(omit) }}"
+      mail: "{{ item.mail }}"
+      mobile: "{{ item.mobile | default(omit) }}"
+      #o:
+      otherMailbox: "{{ item.email_aliases | default(omit) }}"
+      #otherMobile:
+      #otherPager:
+      #otherTelephone:
+      #ou:
+      #pager:
+      physicalDeliveryOfficeName: "{{ item.physical_delivery_office | default(omit) }}"
+      # postOfficeBox:
+      postalCode: "{{ item.zip_code | default(omit) }}"
+      # proxyAddresses:
+      sn: "{{ item.surname | default(omit) }}"
+      st: "{{ item.state | default(omit) }}"
+      # streetAddress:
+      # telephoneNumber:
+      title: "{{ item.job_title | default(omit) }}"
+      uidNumber: "{{ item.id_number | default(omit) }}"
+      unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}"
+      url: "{{ item.urls | default(omit) }}"
+      userCertificate: []
+      wWWHomePage: "{{ item.internet_address | default(omit) }}"
+    state: exact
+    bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
+    bind_pw: "{{ samba_administrator_password }}"
+    start_tls: yes
+    server_uri: "ldap://{{ autonomy_fqdn }}"
+  loop: "{{ __realm_users }}"
+  #ignore_errors: yes
+  vars:
+    __dn: "CN={{ item.display_name }},{{ autonomy_user_dn }}"
+  when:
+    - item.id_number is defined
+    - __dn in __realm_user_dn_list

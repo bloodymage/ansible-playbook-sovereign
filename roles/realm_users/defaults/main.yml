@@ -22,3 +22,5 @@ autonomy_packages:
 # ==================================================================================================
 __samba_domain_groups:
   - groupname: ansiblemanaged
+
+__realm_user_dn_list: []
