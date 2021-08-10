@@ -1,5 +1,5 @@
 ---
-- name: "Install packages"
+- name: "Install packages."
   ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present
@@ -14,7 +14,7 @@
 # Create users and groups
 #
 # ==================================================================================================
-- name: "Ensure we have user groups required by host role"
+- name: "Ensure we have user groups required by host role."
   ansible.builtin.set_fact:
     user_groups: "{{ user_groups + [ item.group ] }}"
   loop:
@@ -40,7 +40,7 @@
     - users_debug
     - users-debug
 
-- name: "Ensure we have users required by host role"
+- name: "Ensure we have users required by host role."
   ansible.builtin.set_fact:
     users: "{{ users + [ item.user ] }}"
   loop:
@@ -66,7 +66,7 @@
     - users_debug
     - users-debug
 
-- name: "Create groups"
+- name: "Create groups."
   ansible.builtin.group:
     name: "{{ item.name }}"
     state: present
@@ -89,12 +89,7 @@
 # defined in the user definitions, then remove the user from the local system.
 #
 # ==================================================================================================
-- name: Print variable "users"
-  debug:
-    msg:
-      - "Users: {{ users }}"
-
-- name: Create login users (Password Enabled)
+- name: "Create login users (Password Enabled)."
   ansible.builtin.user:
     name: "{{ item['username'] }}"
     password: "{{ __password_hash }}"
@@ -130,13 +125,13 @@
     - users_debug
     - users-debug
 
-- name: Create login users (Password Disabled)
+- name: "Create login users (Password Disabled)."
   ansible.builtin.user:
     name: "{{ item.username }}"
     groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
-    system: "{{ item.system | default('no') }}"          # Defaults to no
+    system: "{{ item['system'] | default('no') }}"          # Defaults to no
     create_home: yes                                     # Defaults to yes
     comment: "{{ item['name'] | default(none) }}"
     home: "{{ item['unix_home'] | default('/nonexistent') }}"
@@ -160,19 +155,19 @@
 # Post configuration
 #
 # ==================================================================================================
-- name: Create User SSH Keys
+- name: "Create User SSH Keys."
   ansible.builtin.user:
     name: "{{ item['username'] }}"
     generate_ssh_key: yes
-    ssh_key_type: "{{ item.ssh_keytype | default('ed25519') }}"
+    ssh_key_type: "{{ item['ssh_keytype'] | default('ed25519') }}"
     ssh_key_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   loop: "{{ users }}"
   loop_control:
     index_var: index
   become: yes
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/ssh_key_password"
-    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item['username'] }}/ssh_key_password"
+    __password_length: "length={{ item['password_legnth'] | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
@@ -185,10 +180,10 @@
     - users_debug
     - users-debug
 
-- name: Create SSH Principals file for users
+- name: "Create SSH Principals file for users."
   ansible.builtin.template:
     src: "ssh_principals.j2"
-    dest: "/etc/ssh/auth_principals/{{ item.username }}"
+    dest: "/etc/ssh/auth_principals/{{ item['username'] }}"
     owner: root
     group: root
     mode: '0644'
@@ -211,7 +206,7 @@
 - name: "Setup Sudoers file for users"
   ansible.builtin.template:
     src: "user_sudoers.j2"
-    dest: "/etc/sudoers.d/user_{{ item.username }}"
+    dest: "/etc/sudoers.d/user_{{ item['username'] }}"
     owner: "root"
     group: "root"
     mode: "0440"
@@ -248,8 +243,14 @@
 # ...
 #
 # ==================================================================================================
-- name: Determine existing users
-  ansible.builtin.shell: 'grep {{ user_group_ansible_managed }} /etc/group | cut -d: -f4 | tr "," "\n"'
+- name: "Identify ansible managed users existing on the system."
+  ansible.builtin.shell:
+    cmd: >-
+      set -o pipefail &&
+      grep {{ user_group_ansible_managed }} /etc/group |
+      cut -d: -f4 |
+      tr "," "\n"
+    executable: "/bin/bash"
   changed_when: false
   register: existing_users
   tags:
@@ -257,37 +258,42 @@
     - users_debug
     - users-debug
 
+- name: "Get inventory defined users into a list."
+  ansible.builtin.set_fact:
+    __username_list: "{{ __username_list + [ item.username ] }}"
+  loop: "{{ users }}"
+
 # This currently fails because it needs a straight list of users.  Currently "users" list each item
 # is a dictionary.  Containing user configuration options
-# - name: Determine removed users
-#   ansible.builtin.set_fact:
-#     removed_users: "{{ existing_users.stdout_lines | difference(users) }}"
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: "Identify user accounts to be removed."
+  ansible.builtin.set_fact:
+    __removed_users: "{{ existing_users.stdout_lines | difference(__username_list) }}"
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
-# - name: Delete removed user accounts
-#   ansible.builtin.user:
-#     name: "{{ item }}"
-#     state: absent
-#   loop: "{{ removed_users }}"
-#   become: yes
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: "Delete user accounts to be removed."
+  ansible.builtin.user:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ __removed_users }}"
+  become: yes
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
-# - name: Remove sudoers for remove accounts
-#   ansible.builtin.file:
-#     name: "/etc/sudoers.d/{{ item }}"
-#     state: absent
-#   loop: "{{ removed_users }}"
-#   become: yes
-#   tags:
-#     - users
-#     - users_debug
-#     - users-debug
+- name: "Remove sudoers for accounts that no longer exist."
+  ansible.builtin.file:
+    name: "/etc/sudoers.d/{{ item }}"
+    state: absent
+  loop: "{{ __removed_users }}"
+  become: yes
+  tags:
+    - users
+    - users_debug
+    - users-debug
 
 # ==================================================================================================
 #

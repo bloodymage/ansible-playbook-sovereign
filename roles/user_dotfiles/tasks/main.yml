@@ -205,7 +205,7 @@
 - name: "Install .k5login."
   ansible.builtin.template:
     src: k5login.j2
-    dest: "{{ __dotfiles_home }}/.k5login
+    dest: "{{ __dotfiles_home }}/.k5login"
     owner: "{{ __dotfiles_owner }}"
     group: "{{ __dotfiles_group }}"
     mode: "0644"
