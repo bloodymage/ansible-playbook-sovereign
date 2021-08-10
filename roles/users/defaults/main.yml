@@ -46,15 +46,27 @@ user_groups:
 
 user_group_ansible_managed: "ansiblemanaged"
 
+user_mythtv_access_cert:
+  - mythtv
+
+user_mythtv_ssh_cert:
+  - none
+
+user_mythtv_groups: []
+user_mythtv_sudoers: []
+user_mythtv_gpg_name: ""
+user_mythtv_gpg_email: ""
+
 user_mythtv:
   username: mythtv
-  groups: []
+  groups: "{{ user_mythtv_groups }}"
   id_number: "{{ user_mythtv_id_number }}"
   unix_home: /home/mythtv
-  ssh_access_cert:
-    - mythtv
-  ssh_cert:
-    - None
+  ssh_access_cert: "{{ user_mythtv_access_cert }}"
+  ssh_cert: "{{ user_mythtv_ssh_cert }}"
+  sudoers: "{{ user_mythtv_sudoers }}"
+  gpg_name: "{{ user_mythtv_gpg_name }}"
+  gpg_email: "{{ user_mythtv_gpg_email }}"
 
 user_minidlna:
   username: minidlna
@@ -148,3 +160,5 @@ __user_root:
     - root-everywhere
 
 __default_mikrotik_device_user: "admin"
+
+__username_list: []

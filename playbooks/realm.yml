@@ -19,7 +19,7 @@
     - role: bloodymage.autonomy.config_realm_environment
 
 - name: "Configure baseline Kerberos Client."
-  hosts: internal_network:!routeros
+  hosts: internal_zone:!routeros
   roles:
     - role: bloodymage.autonomy.krb5_client_config
 
