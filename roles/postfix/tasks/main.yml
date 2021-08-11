@@ -210,7 +210,7 @@
   when:
     - postfix_sender_relay is truthy
 
-- name: "Get defaulut relay users password."
+- name: "Get default relay users password."
   ansible.builtin.set_fact:
     postfix_sasl_auth_user_password: "{{ __password }}"
   vars:
