@@ -122,7 +122,7 @@
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 # ==================================================================================================
 #
@@ -148,7 +148,7 @@
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 # ==================================================================================================
 #
@@ -174,7 +174,7 @@
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 - name: "Install gpgsync.desktop"
   ansible.builtin.copy:
@@ -193,7 +193,7 @@
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 # ==================================================================================================
 #
@@ -211,8 +211,12 @@
     mode: "0644"
   loop: "{{ dotfiles_users }}"
   become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ item.id_number }}"
+    __dotfiles_group: "{{ item.id_number }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
