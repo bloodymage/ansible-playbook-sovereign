@@ -116,7 +116,7 @@
     locality_name: "{{ autonomy_city | default(omit) }}"
     organization_name: "{{ autonomy_org_name }}"
     organizational_unit_name: "{{ autonomy_org_unit_name }}"
-    common_name: "{{ __item[0]['display_name'] }}"
+    common_name: "{{ item[0]['display_name'] }}"
     email_address: "{{ __email }}"
     key_usage: "{{ item[1].key_usage }}"
     key_usage_critical: yes
