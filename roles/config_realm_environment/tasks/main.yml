@@ -37,7 +37,7 @@
   tags:
     - always
 
-- name: "Create Samba Schema Master Group"
+- name: "Create Samba Schema Master Group."
   add_host:
     name: "{{ __samba_schema_master }}"
     groups:
@@ -55,6 +55,7 @@
       nickname: "{{ item.nickname | default(omit) }}"
       middle_name: "{{ item['middle_name'] | default(omit) }}"
       surname: "{{ item['surname'] | default(omit) }}"
+      full_name: "{{ __full_name }}"
       initials: "{{ __initials | default(omit) }}"
       country: "{{ item.country | default(omit) }}"
       state: "{{ item.state | default(omit) }}"
@@ -81,13 +82,14 @@
       # employeeID:
       # employeeType:
       # employeeNumber:
-      # division:
+      division: "{{ item.division | default(omit) }}"
       # roomNumber:
       # cn:
-      # department:
+      department: "{{ item['department'] | default(omit) }}"
       # description:
       display_name: "{{ __display_name }}"
-      #o:
+      organization: "{{ item.organization | default(omit) }}"
+      organizational_unit: "{{ item.organizational_unit | default(omit) }}"
       #otherMobile:
       #otherPager:
       #otherTelephone:
@@ -107,8 +109,8 @@
     __middle_initial: "{{ __middle_name[0] | default(None) }}"
     __full_middle_name: "{% if __middle_name is truthy %}{{ ' ' + __middle_name }}{% else %}{{ '' }}{% endif %}"
     __full_middle_initial: "{% if __middle_initial is truthy %}{{ ' ' + __middle_initial }}{% else %}{{ '' }}{% endif %}"
-    __full_surname: "{% if __surname is truthy %}{{ ' ' + __surname }}{% else %}{{ '' }}{% endif %}"
-    __full_callsign: "{% if __callsign is truthy %}{{ ' `' + __callsign + '`' }}{% else %}{{ '' }}{% endif %}"
+    __full_surname: "{% if __surname is truthy %} {{ __surname }}{% else %}{{ '' }}{% endif %}"
+    __full_callsign: '{% if __callsign is truthy %} "{{ __callsign }}"{% else %}{{ "" }}{% endif %}'
     __full_middle_part: "{% if __callsign is truthy %}{{ __full_callsign }}{% else %}{{ __full_middle_name }}{% endif %}"
     __display_middle_part: "{% if __callsign is truthy %}{{ __full_callsign }}{% else %}{{ __full_middle_initial }}{% endif %}"
     __full_name: "{{ __given_name }}{{ __full_middle_part }}{{ __full_surname }}"

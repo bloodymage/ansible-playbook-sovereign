@@ -220,18 +220,18 @@
     - item.id_number is defined
     - __username not in existing_user_list.stdout_lines
 
-# - name: "Set Group Membership."
-#   include: group_membership.yml
-#   loop: "{{ domain_groups }}"
-#   loop_control:
-#     loop_var: group
-#     index_var: group_index
-#   when:
-#     - __samba_schema_master is defined
-#     - inventory_hostname == __samba_schema_master
-#     - group.group_members is defined
-#   delegate_to: "{{ __samba_schema_master }}"
-#   run_once: yes
+- name: "Set Group Membership."
+  include: group_membership.yml
+  loop: "{{ domain_groups }}"
+  loop_control:
+    loop_var: group
+    index_var: group_index
+  when:
+    - __samba_schema_master is defined
+    - inventory_hostname == __samba_schema_master
+    - group.group_members is defined
+  delegate_to: "{{ __samba_schema_master }}"
+  run_once: yes
 
 # ==================================================================================================
 #
@@ -258,12 +258,7 @@
     __realm_user_dn_list: "{{ __realm_user_dn_list + [item.dn] }}"
   loop: "{{ ldap_users.results }}"
 
-- name: "Print ldap_users."
-  ansible.builtin.debug:
-    msg:
-      - "{{ __realm_user_dn_list }}"
-
-- name: "Insert User LDAP Attributes"
+- name: "Insert User LDAP Attributes."
   community.general.ldap_attrs:
     dn: "{{ __dn }}"
     attributes:
@@ -279,25 +274,25 @@
       # employeeID:
       # employeeType:
       # employeeNumber:
-      # division:
+      division: "{{ item['division'] | default(omit) }}"
       # roomNumber:
-      # cn:
+      #cn: "{{ item['display_name'] }}"
       company: "{{ item.company | default(omit) }}"
-      # department:
+      department: "{{ item['department'] | default(omit) }}"
       # description:
-      displayName: "{{ item.display_name }}"
-      gidNumber: "{{ item.id_number | default(omit) }}"
-      givenName: "{{ item.given_name }}"
-      initials: "{{ __initials | default(omit) }}"
+      displayName: "{{ item['display_name'] }}"
+      gidNumber: "{{ item['id_number'] | default(omit) }}"
+      givenName: "{{ item['given_name'] }}"
+      initials: "{{ item['initials'] | default(omit) }}"
       l: "{{ item.city | default(omit) }}"
       mail: "{{ item.mail }}"
       mobile: "{{ item.mobile | default(omit) }}"
-      #o:
+      o: "{{ item.organization | default(omit) }}"
+      ou: "{{ item.organizational_unit | default(omit) }}"
       otherMailbox: "{{ item.email_aliases | default(omit) }}"
       #otherMobile:
       #otherPager:
       #otherTelephone:
-      #ou:
       #pager:
       physicalDeliveryOfficeName: "{{ item.physical_delivery_office | default(omit) }}"
       # postOfficeBox:
@@ -319,18 +314,18 @@
     start_tls: yes
     server_uri: "ldap://{{ autonomy_fqdn }}"
   loop: "{{ __realm_users }}"
-  ignore_errors: yes
+  #ignore_errors: yes
   vars:
-    __dn: "CN={{ item.username }},{{ autonomy_user_dn }}"
+    __dn: "CN={{ item['username'] }},{{ autonomy_user_dn }}"
   when:
-    - item.id_number is defined
+    - item['id_number'] is defined
     - __dn in __realm_user_dn_list
 
-- name: "Insert User LDAP Attributes"
+- name: "Insert User LDAP Attributes."
   community.general.ldap_attrs:
     dn: "{{ __dn }}"
     attributes:
-      co: "{{ item.country | default(omit) }}"
+      co: "{{ item['country'] | default(omit) }}"
       # carLicense:
       # homePhone:
       # otherHomePhone:
@@ -342,11 +337,11 @@
       # employeeID:
       # employeeType:
       # employeeNumber:
-      # division:
+      division: "{{ item['division'] | default(omit) }}"
       # roomNumber:
-      # cn:
+      #cn: "{{ item['display_name'] }}"
       company: "{{ item.company | default(omit) }}"
-      # department:
+      department: "{{ item['department'] | default(omit) }}"
       # description:
       displayName: "{{ item.display_name }}"
       gidNumber: "{{ item.id_number | default(omit) }}"
@@ -355,12 +350,12 @@
       l: "{{ item.city | default(omit) }}"
       mail: "{{ item.mail }}"
       mobile: "{{ item.mobile | default(omit) }}"
-      #o:
+      o: "{{ item.organization | default(omit) }}"
+      ou: "{{ item.organizational_unit | default(omit) }}"
       otherMailbox: "{{ item.email_aliases | default(omit) }}"
       #otherMobile:
       #otherPager:
       #otherTelephone:
-      #ou:
       #pager:
       physicalDeliveryOfficeName: "{{ item.physical_delivery_office | default(omit) }}"
       # postOfficeBox:
@@ -370,8 +365,8 @@
       st: "{{ item.state | default(omit) }}"
       # streetAddress:
       # telephoneNumber:
-      title: "{{ item.job_title | default(omit) }}"
-      uidNumber: "{{ item.id_number | default(omit) }}"
+      title: "{{ item['job_title'] | default(omit) }}"
+      uidNumber: "{{ item['id_number'] | default(omit) }}"
       unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}"
       url: "{{ item.urls | default(omit) }}"
       userCertificate: []
@@ -383,15 +378,14 @@
     server_uri: "ldap://{{ autonomy_fqdn }}"
   loop: "{{ __realm_users }}"
   vars:
-    __common_name: "{{ item.given_name }}{% if item.surname is defined %} {{ item.surname }}{% endif %}"
+    __common_name: "{{ item['given_name'] }}{% if item['surname'] is defined %} {{ item['surname'] }}{% endif %}"
     __dn: "CN={{ __common_name }},{{ autonomy_user_dn }}"
-  ignore_errors: yes
+  #ignore_errors: yes
   when:
-    - item.id_number is defined
-    #- item.display_name != __common_name
+    - item['id_number'] is defined
     - __dn in __realm_user_dn_list
 
-- name: "Insert User LDAP Attributes"
+- name: "Insert User LDAP Attributes."
   community.general.ldap_attrs:
     dn: "{{ __dn }}"
     attributes:
@@ -407,11 +401,11 @@
       # employeeID:
       # employeeType:
       # employeeNumber:
-      # division:
+      division: "{{ item['division'] | default(omit) }}"
       # roomNumber:
-      # cn:
+      #cn: "{{ item['display_name'] }}"
       company: "{{ item.company | default(omit) }}"
-      # department:
+      department: "{{ item['department'] | default(omit) }}"
       # description:
       displayName: "{{ item.display_name }}"
       gidNumber: "{{ item.id_number | default(omit) }}"
@@ -420,7 +414,8 @@
       l: "{{ item.city | default(omit) }}"
       mail: "{{ item.mail }}"
       mobile: "{{ item.mobile | default(omit) }}"
-      #o:
+      o: "{{ item.organization | default(omit) }}"
+      ou: "{{ item.organizational_unit | default(omit) }}"
       otherMailbox: "{{ item.email_aliases | default(omit) }}"
       #otherMobile:
       #otherPager:
@@ -449,7 +444,9 @@
   loop: "{{ __realm_users }}"
   #ignore_errors: yes
   vars:
-    __dn: "CN={{ item.display_name }},{{ autonomy_user_dn }}"
+    __common_name: "{{ item['given_name'] }}{% if item['surname'] is defined %} {{ item['surname'] }}{% endif %}"
+    __dn: "CN={{ item['display_name'] }},{{ autonomy_user_dn }}"
   when:
-    - item.id_number is defined
+    - item['id_number'] is defined
+    - item['display_name'] != __common_name
     - __dn in __realm_user_dn_list
