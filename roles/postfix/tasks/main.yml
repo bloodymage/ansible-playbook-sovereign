@@ -194,6 +194,7 @@
 - name: "Get relay users password."
   ansible.builtin.set_fact:
     __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
+    postfix_smtp_sasl_security_options: "noanonymous"
   loop: "{{ postfix_sasl_auth_users_list }}"
   vars:
     __user:
