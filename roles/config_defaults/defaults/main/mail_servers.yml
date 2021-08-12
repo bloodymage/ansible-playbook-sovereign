@@ -21,8 +21,8 @@ mail_opendkim_socket: "{{ mail_opendkim_sock_dir }}/opendkim.sock"
 mail_opendkim_unix_socket: "unix:{{ mail_opendkim_sock_loc_name }}/opendkim.sock"
 
 # TODO: This is ugly, required for __domain_system_users (main.yml)
-autonomy_internal_mail_host: "{{ group['internal_mail_servers'][0] }}"
-autonomy_internal_www_host: "{{ group['interal_web_servers'][0] }}"
-autonomy_dmz_www_host: "{{ group['dmz_web_servers'][0] }}"
-auutonomy_internal_keycloak_host: "{{ group['internal_keycloak_servers'][0] }}"
-autonomy_dmz_keycloak_host: "{{ group['dmz_keycloak_servers'][0] }}"
+autonomy_internal_mail_host: "{{ groups['internal_mail_servers'][0] }}"
+autonomy_internal_www_host: "{{ groups['internal_web_servers'][0] }}"
+autonomy_dmz_www_host: "{{ groups['dmz_web_servers'][0] }}"
+autonomy_internal_keycloak_host: "{{ groups['internal_keycloak_servers'][0] }}"
+autonomy_dmz_keycloak_host: "{{ groups['dmz_keycloak_servers'][0] }}"

@@ -24,3 +24,4 @@ __samba_domain_groups:
   - groupname: ansiblemanaged
 
 __realm_user_dn_list: []
+

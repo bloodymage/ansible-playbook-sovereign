@@ -140,50 +140,6 @@ samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
 
 # ==================================================================================================
 #
-# Service user definitions
-#
-# These are users required by services available on our network.
-#
-# ==================================================================================================
-domain_user_vmail:
-  username: "vmail"
-  spns:
-    - spn: "imap"
-      host: "{{ autonomy_internal_mail_host }}"
-      keytab_file: "/etc/dovecot/dovecot.keytab"
-    - spn: "smtp"
-      host: "{{ autonomy_internal_mail_host }}"
-      keytab_file: "/etc/dovecot/dovecot.keytab"
-  account_expire: "--noexpiry"
-
-domain_user_mediawiki:
-  username: "mediawiki"
-  spns:
-    - spn: "HTTP"
-      host: "{{ autonomy_internal_www_host }}"
-      keytab_file: "/etc/apache2/wiki.{{ autonomy_domain }}.keytab"
-  account_expire: "--noexpiry"
-
-domain_user_keycloak:
-  username: "keycloak"
-  spns:
-    - spn: "HTTP"
-      host: "{{ autonomy_internal_keycloak_host }}"
-      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
-    - spn: "HTTP"
-      host: "{{ autonomy_dmz_keycloak_host }}"
-      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
-  account_expire: "--noexpiry"
-
-domain_user_nextcloud:
-  username: "nextcloud"
-  spns:
-    - spn: "HTTP"
-      host: "{{ dmz_www_host }}"
-  account_expire: "--noexpiry"
-
-# ==================================================================================================
-#
 # Github
 #
 # ==================================================================================================
@@ -219,12 +175,6 @@ __collection_overwrite_passwords: no
 __samba_recreate_realm: no
 __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
 
-__domain_system_users:
-  - "{{ domain_user_vmail }}"
-  - "{{ domain_user_mediawiki }}"
-  - "{{ domain_user_keycloak }}"
-  - "{{ domain_user_nextcloud }}"
-
 __autonomy_zones:
   - name: "{{ autonomy_internal_zone_name }}"
     zone: internal
@@ -242,6 +192,8 @@ __buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
 __buypass_production_directory: "https://api.buypass.com/acme/directory"
 
 __autonomy_ddns_key_algorithm: "hmac-sha256"
+
+__domain_system_users: []
 
 # ==================================================================================================
 #
