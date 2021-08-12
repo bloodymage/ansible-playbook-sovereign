@@ -131,7 +131,12 @@ ownca_format: 'pem'
 # Currently RSA is needed for testing windows smart card authorization.
 # ownca_privatekey_type: "{{ autonomy_default_encryption_type }}"
 ownca_privatekey_type: "RSA"
+ownca_privatekey_size: "4096"
 
+# Currently testing smart cards, most documentation recommends 2048.  Until smart cards are fully
+# functional, we will use 2048.
+#ownca_max_user_privatekey_size: "3072"
+ownca_max_user_privatekey_size: "2048"
 # Cert Authoritiy
 
 

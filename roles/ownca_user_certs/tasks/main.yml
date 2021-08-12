@@ -60,8 +60,10 @@
     path: "{{ __user_pki_dir }}/{{ item[1].name }}"
     state: directory
     owner: "root"
-    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "{{ item[1].mode }}"
+    group: "root"
+    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    #mode: "{{ item[1].mode }}"
+    mode: "0755"
   become: yes
   loop: "{{ __realm_users | product(ownca_user_pki_dirs) | list }}"
   vars:
@@ -82,17 +84,21 @@
   community.crypto.openssl_privatekey:
     path: "{{ __user_private_dir }}/{{ __username }}.key"
     type: "{{ ownca_privatekey_type }}"
-    owner: "root"
-    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    size: "{{ __size }}"
     cipher: auto
-    size: 2048
-    mode: "0770"
-    force: no
     passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
+    owner: "root"
+    group: "root"
+    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "0755"
+    state: present
+    force: no
+    
     backup: yes
   become: yes
   loop: "{{ __realm_users }}"
   vars:
+    __size: "{% if ownca_privatekey_type == 'RSA' and ownca_privatekey_size > ownca_max_user_privatekey_size %}{{ ownca_max_user_privatekey_size }}{% else %}{{ ownca_privatekey_size }}{% endif %}"
     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ item.username }}/password"
     __username: "{{ item.username }}"
     __user_home_dir: "{{ ownca_home_dir }}/{{ item.username }}"
@@ -137,8 +143,10 @@
           - aa_compromise
     path: "{{ __user_csr_dir }}/{{ __username }}_{{ item[1].name }}.csr"
     owner: "root"
-    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0770"
+    group: "root"
+    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "0755"
+    state: present
     backup: yes
     force: "{{ __user_cert_force_regeneration }}"
   become: yes
@@ -220,6 +228,10 @@
     ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     provider: ownca
     backup: yes
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
+    mode: "0644"
+    state: present
     force: "{{ __user_cert_force_regeneration }}"
   become: no
   loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
@@ -264,8 +276,9 @@
     src: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
     dest: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
     owner: "root"
-    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0770"
+    group: "root"
+    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "0755"
   become: yes
   loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   vars:
@@ -291,8 +304,9 @@
       - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-root-ca.crt"
     state: present
     owner: "root"
-    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0770"
+    group: "root"
+    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "0755"
     backup: yes
     force: no
   become: yes

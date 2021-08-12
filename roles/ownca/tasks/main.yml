@@ -121,7 +121,8 @@
   community.crypto.openssl_privatekey:
     path: "{{ item.private_key_path | default(__private_key_path) }}"
     passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    type: "{{ item.key_type | default(ownca_privatekey_type) }}"
+    type: "{{ ownca_privatekey_type }}"
+    size: "{{ ownca_privatekey_size }}"
     cipher: "auto"
     owner: "{{ __autonomy_user }}"
     group: "{{ __autonomy_user }}"
@@ -187,7 +188,9 @@
     provider: "{{ item.provider }}"
     owner: "{{ __autonomy_user }}"
     group: "{{ __autonomy_user }}"
+    mode: "0644"
     backup: yes
+    state: present
     force: "{{ __ownca_regenerate }}"
   loop: "{{ ownca_certificate_authorities }}"
   delegate_to: localhost
@@ -223,6 +226,7 @@
     backup: yes
     owner: "{{ __autonomy_user }}"
     group: "{{ __autonomy_user }}"
+    mode: "0644"
     force: "{{ __ownca_force_regenerate_intermediate_ca }}"
   loop: "{{ ownca_certificate_authorities }}"
   become: no
