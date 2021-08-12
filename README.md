@@ -286,20 +286,20 @@ Includes over 100 services you can easily self-host.
 
 YunoHost is an operating system aiming for the simplest administration of a server, and therefore democratize self-hosting, while making sure it stays reliable, secure, ethical and lightweight. It is a copylefted libre software project maintained exclusively by volunteers. Technically, it can be seen as a distribution based on Debian GNU/Linux and can be installed on many kinds of hardware.
 
-| Project                  | Autonomy                 | DebOps                 | Sovereign  | FreedomBox | HomelabOS | Yunohost |
-| :------                  | :---------               | :-----                 | :--------  | :--------- | :-------- | :------- |
-| Uses Ansible             | Yes                      | Yes                    | Yes        | No         | No        | No       |
-| Email                    | Dovecot<br>Postfix       | Dovecot<br>Postfix     |            |            |           |          |
-| Identity Management      | Active Directory (Samba) | LDAP (OpenLDAP)        |            |            |           |          |
-| Groupware                | Nextcloud                | Nextcloud?<br>Owncloud | OwnCloud   |            |           |          |
-| Cloud Storage            | Nextcloud                | Nextcloud?<br>Owncloud | OwnCloud   |            |           |          |
-| Certificate Authority    | Internal<br>Let's Encrypt|                        |            |            |           |          |
-| DNS                      | Bind9                    |                        |            |            |           |          |
-| Operating System Support | Linux                    | Linux                  | Linux      |            |           |          |
-| Distribution Support     | Debian                   | Debian                 | Debian     |            |           |          |
-| Smart Card Support       | Yes*                     |                        |            |            |           |          |
-| Website                  | https://github.com/bloodymage/ansible-collection-autonomy | https://debops.org | https://github.com/sovereign/sovereign | https://freedombox.org | https://homelabos.com | https://yunohost.org |
-
+| Project                  | Autonomy                                                  | DebOps                                              | Sovereign                                                              | FreedomBox             | HomelabOS             | Yunohost             |
+| :------                  | :---------                                                | :-----                                              | :--------                                                              | :---------             | :--------             | :-------             |
+| Uses Ansible             | Yes                                                       | Yes                                                 | Yes                                                                    | No                     | No                    | No                   |
+| Email                    | Dovecot<br>Postfix                                        | Dovecot<br>Postfix                                  |                                                                        |                        |                       |                      |
+| Identity Management      | Active Directory (Samba)                                  | LDAP (OpenLDAP)                                     |                                                                        |                        |                       |                      |
+| Groupware                | Nextcloud                                                 | Nextcloud?<br>Owncloud                              | OwnCloud                                                               |                        |                       |                      |
+| Cloud Storage            | Nextcloud                                                 | Nextcloud?<br>Owncloud                              | OwnCloud                                                               |                        |                       |                      |
+| Certificate Authority    | Internal<br>Let's Encrypt                                 |                                                     |                                                                        |                        |                       |                      |
+| DNS                      | Bind9                                                     |                                                     |                                                                        |                        |                       |                      |
+| Operating System Support | Linux                                                     | Linux                                               | Linux                                                                  |                        |                       |                      |
+| Distribution Support     | Debian                                                    | Debian                                              | Debian                                                                 |                        |                       |                      |
+| Smart Card Support       | Yes*                                                      |                                                     |                                                                        |                        |                       |                      |
+| License                  | [MIT](LICENSE.md)                                         | [GPLv3](https://github.com/debops/debops#licensing) | [GPLv3](https://github.com/sovereign/sovereign/blob/master/LICENSE.md) | [AGPLv3](https://salsa.debian.org/freedombox-team/freedombox/-/blob/master/COPYING.md#gnu-affero-general-public-license-version-3) | [MIT](https://gitlab.com/NickBusey/HomelabOS/-/blob/dev/LICENSE) | [AGPLv3](https://github.com/YunoHost/yunohost/blob/dev/LICENSE) |
+| Website                  | https://github.com/bloodymage/ansible-collection-autonomy | https://debops.org                                  | https://github.com/sovereign/sovereign                                 | https://freedombox.org | https://homelabos.com | https://yunohost.org |
 * Smart Card Support is still buggy
 
 ### Related Projects
