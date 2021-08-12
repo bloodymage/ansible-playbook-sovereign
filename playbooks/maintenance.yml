@@ -4,4 +4,14 @@
 # This playbook is for running maintenance tasks.
 #
 # ==================================================================================================
+- hosts: all
+  gather_facts: no
+  roles:
+    - role: bloodymage.autonomy.maintenance_wake_on_lan
+      tags:
+        - never
+        - wakeonlan
+        - wake-on-lan
+
 - import_playbook: maintenance_daily.yml
+
