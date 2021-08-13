@@ -44,6 +44,4 @@ domain_user_nextcloud:
       host: "{{ autonomy_dmz_www_host }}"
   account_expire: "--noexpiry"
 
-
 __realm_users: []
-

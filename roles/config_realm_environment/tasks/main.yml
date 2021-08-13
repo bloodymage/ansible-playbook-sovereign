@@ -50,7 +50,7 @@
     __realm_users: "{{ __realm_users + [ __user ] }}"
   vars:
     __user:
-      username: "{{ item.username | default(__generated_username) }}"
+      username: "{{ __username }}"
       groupname: "{{ item.groupname | default(omit) }}"
       given_name: "{{ __given_name }}"
       nickname: "{{ item.nickname | default(omit) }}"
@@ -88,7 +88,6 @@
       # cn:
       department: "{{ item['department'] | default(omit) }}"
       # description:
-      display_name: "{{ __display_name }}"
       organization: "{{ item.organization | default(omit) }}"
       organizational_unit: "{{ item.organizational_unit | default(omit) }}"
       #otherMobile:
