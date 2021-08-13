@@ -60,10 +60,7 @@
     server_uri: "ldap://{{ autonomy_fqdn }}"
   loop: "{{ __realm_users }}"
   vars:
-    __given_name: "{{ item.given_name  | default(item.username) }}"
-    __surname: "{{ item.surname | default(none) }}"
-    __sn: "{% if item.surname is defined %}cn: {{ item.surname }}{% endif %}"
-    __dn: "{{ __given_name }}{% if item.surname is defined %} {{ __surname }}{% endif %}"
+    __dn: "{{ item.username }}"
     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
@@ -103,9 +100,7 @@
 #     server_uri: "ldap://{{ autonomy_fqdn }}"
 #   loop: "{{ __realm_users }}"
 #   vars:
-#     __given_name: "{{ item.given_name  | default(item.username) }}"
-#     __surname: "{{ item.surname | default(omit) }}"
-#     __dn: "{{ __given_name }}{% if item.surname is defined %} {{ __surname }}{% endif %}"
+#     __dn: "{{ item.usernam }}"
 #     __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"  
 #     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
 #     __password_lookup: "{{ __password_store_id }}"
