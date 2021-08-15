@@ -63,7 +63,7 @@
     group: "root"
     #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     #mode: "{{ item[1].mode }}"
-    mode: "0755"
+    mode: "0770"
   become: yes
   loop: "{{ __realm_users | product(ownca_user_pki_dirs) | list }}"
   vars:
@@ -90,7 +90,7 @@
     owner: "root"
     group: "root"
     #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0755"
+    mode: "0660"
     state: present
     force: no
     
@@ -145,7 +145,7 @@
     owner: "root"
     group: "root"
     #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0755"
+    mode: "0660"
     state: present
     backup: yes
     force: "{{ __user_cert_force_regeneration }}"
@@ -278,7 +278,7 @@
     owner: "root"
     group: "root"
     #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0755"
+    mode: "0660"
   become: yes
   loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
   vars:
@@ -306,7 +306,7 @@
     owner: "root"
     group: "root"
     #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0755"
+    mode: "0660"
     backup: yes
     force: no
   become: yes

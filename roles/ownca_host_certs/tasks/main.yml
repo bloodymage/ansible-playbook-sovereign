@@ -300,4 +300,4 @@
   include: "copy_to_samba.yml"
   become: no
   when:
-    - inventory_hostname == groups['samba_file_servers'][0] | default([])
+    - inventory_hostname == groups['samba_ownca_user_hosts'][0] | default([])
