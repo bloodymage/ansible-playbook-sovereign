@@ -19,7 +19,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_dir_mode| defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_dir_mode| default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.username is defined
@@ -39,7 +39,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_file_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
@@ -63,7 +63,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_dir_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_dir_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
@@ -82,7 +82,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_file_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
@@ -100,7 +100,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_file_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   become: yes
   when:
     - dotfiles_users is defined
@@ -120,7 +120,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_dir_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_dir_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.username is defined
@@ -146,7 +146,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_dir_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_dir_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.username is defined
@@ -173,7 +173,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_file_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   become: yes
   when:
     - dotfiles_users is defined
@@ -193,7 +193,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_file_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   become: yes
   when:
     - dotfiles_users is defined
@@ -221,7 +221,7 @@
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
-    __mode: "{{ cifs_file_mode | defaulut(dotfiles_mode) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
