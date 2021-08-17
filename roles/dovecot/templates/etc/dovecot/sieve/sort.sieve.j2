@@ -1,0 +1,39 @@
+# {{ ansible_managed }}
+
+require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
+global ["autonomy_explicit_group", "autonomy_listname", "autonomy_explicit_subgroup", "autonomy_detected_domain", "autonomy_generic_subgroup", "autonomy_detail"];
+
+include :global "98-recipient-detail-sort";
+
+if not string :is "${autonomy_explicit_group}" "" {
+set "sort" "${autonomy_explicit_group}";
+} elsif not string :is "${autonomy_listname}" "" {
+  set "sort" "Mailing Lists";
+  set "subsort" "${autonomy_listname}";
+} elsif not string :is "${autonomy_detail}" "" {
+set "sort" "${autonomy_detail}";
+} else {
+set "sort" "${autonomy_detected_domain}";
+}
+
+if not string :is "${autonomy_explicit_subgroup}" "" {
+set "subsort" "${autonomy_explicit_subgroup}";
+} elsif not string :is "${autonomy_generic_subgroup}" "" {
+set "subsort" "${autonomy_generic_subgroup}";
+}
+
+if string :is "${sort}" "" {
+  /*  Default case if no detail is specified */
+  fileinto "{{ __main_folder }}";
+  stop;
+} else {
+  if string :is "${subsort}" "" {
+    fileinto :create "{{ __main_folder }}/${sort}";
+    stop;
+  } else {
+    # For user{{ mail_recipient_delimiter }}work@example.com will be filtered into
+    # {{ __main_folder }}/work
+    fileinto :create "{{ __main_folder }}/${sort}/${subsort}";
+    stop;
+  }
+}

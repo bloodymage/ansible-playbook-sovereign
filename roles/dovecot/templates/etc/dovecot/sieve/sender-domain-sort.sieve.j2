@@ -1,4 +1,18 @@
-require ["variables", "envelope", "fileinto", "subaddress", "mailbox","regex"];
+require ["include", "variables", "envelope", "mailbox","regex"];
+global ["autonomy_explicit_group", "autonomy_explicit_subgroup", "autonomy_detected_domain"];
+
+# ==================================================================================================
+#
+# Dropbox
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "dropbox.com",
+          address :contains "from" "dropboxmail.com"
+          )
+{
+ set "autonomy_explicit_group" "Dropbox";
+}
 
 # ==================================================================================================
 #
@@ -6,12 +20,48 @@ require ["variables", "envelope", "fileinto", "subaddress", "mailbox","regex"];
 #
 # ==================================================================================================
 if anyof (
-          address :is "from" "notification+ozll=hv1@facebookmail.com",
           address :contains "from" "facebookmail.com"
+)
+{
+  set "autonomy_explicit_group" "Facebook";
+}
+
+# ==================================================================================================
+#
+# Firefox
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "firefox.com"
           )
 {
- fileinto :create "{{ __main_folder }}/Facebook";
-  stop;
+ set "autonomy_explicit_group" "Firefox";
+}
+
+# ==================================================================================================
+#
+# Google
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "google.com",
+          address :contains "from" "googlemail.com"
+          )
+{
+ set "autonomy_explicit_group" "Google";
+}
+
+# ==================================================================================================
+#
+# ID.me
+#
+# ==================================================================================================
+if anyof (
+    address :contains "from" "id.me",
+    address :contains "from" "troopid.com"
+          )
+{
+ set "autonomy_explicit_group" "ID.me";
 }
 
 # ==================================================================================================
@@ -36,12 +86,10 @@ if anyof (
 #
 # ==================================================================================================
 if anyof (
-          address :is "from" "invitations@linkedin.com",
           address :contains "from" "linkedin.com"
           )
 {
- fileinto :create "{{ __main_folder }}/LinkedIn";
-  stop;
+  set "autonomy_explicit_group" "LinkedIn";
 }
 
 # ==================================================================================================
@@ -60,8 +108,7 @@ if anyof (
           address :contains "from" "pinterest.com"
           )
 {
- fileinto :create "{{ __main_folder }}/Pinterest";
-  stop;
+ set "autonomy_explicit_group" "Pinterest";
 }
 
 # ==================================================================================================
@@ -74,8 +121,7 @@ if anyof (
           address :is "from" "noreply@redditmail.com"
           )
 {
- fileinto :create "{{ __main_folder }}/Reddit";
-  stop;
+ set "autonomy_explicit_group" "Reddit";
 }
 
 # ==================================================================================================
@@ -90,8 +136,7 @@ if anyof (
           address :contains "from" "twitter.com"
           )
 {
- fileinto :create "{{ __main_folder }}/Twitter";
-  stop;
+ set "autonomy_explicit_group" "Twitter";
 }
 
 # ==================================================================================================
@@ -104,6 +149,15 @@ if anyof (
           address :is "from" "noreply@youtube.com"
           )
 {
- fileinto :create "{{ __main_folder }}/Google/Youtube";
-  stop;
+set "autonomy_explicit_group" "Google";
+set "autonomy_explicit_subgroup" "Youtube";
+}
+
+# ==================================================================================================
+#
+# Catchall Domain Sort
+#
+# ==================================================================================================
+if envelope :is :domain "from" "*" {
+  set :lower :upperfirst "autonomy_detected_domain" "${1}";
 }

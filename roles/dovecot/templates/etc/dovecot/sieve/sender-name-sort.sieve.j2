@@ -1,0 +1,60 @@
+# {{ ansible_managed }}
+
+require ["include", "variables", "envelope", "fileinto", "subaddress", "mailbox"];
+global ["autonomy_generic_subgroup"];
+
+if anyof (
+envelope :is :user "from" "notifications",
+envelope :is :user "from" "promo",
+envelope :is :user "from" "deals",
+envelope :is :user "from" "store-news",
+envelope :is :user "from" "store_news",
+envelope :is :user "from" "store-offers",
+envelope :is :user "from" "MyNavyFederal",
+envelope :is :user "from" "announcements",
+envelope :is :user "from" "newsletter",
+envelope :is :user "from" "newsletters",
+envelope :is :user "from" "videogames-store"
+)
+{
+set "autonomy_generic_subgroup" "Advertisements";
+}
+
+if anyof (
+envelope :is :user "from" "billing",
+envelope :is :user "from" "orders",
+envelope :is :user "from" "receipts"
+)
+{
+set "autonomy_generic_subgroup" "Bills and Receipts";
+}
+
+if anyof (
+envelope :is :user "from" "alerts",
+envelope :is :user "from" "account-updates",
+envelope :is :user "from" "account-update",
+envelope :is :user "from" "payment-update",
+envelope :is :user "from" "info",
+envelope :is :user "from" "accounts",
+envelope :is :user "from" "notice"
+)
+{
+set "autonomy_generic_subgroup" "Account Notifications";
+}
+
+if anyof (
+envelope :is :user "from" "shipping",
+envelope :is :user "from" "shipment-tracking",
+envelope :is :user "from" "ship-confirm",
+envelope :is :user "from" "auto-confirm"
+)
+{
+set "autonomy_generic_subgroup" "Shipping";
+}
+
+if anyof (
+envelope :is :user "from" "Video.Appointment"
+)
+{
+set "autonomy_generic_subgroup" "Appointments";
+}

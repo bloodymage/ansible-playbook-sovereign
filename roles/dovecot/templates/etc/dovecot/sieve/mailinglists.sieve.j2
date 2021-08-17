@@ -1,6 +1,7 @@
 # {{ ansible_managed }}
 
-require [ "regex", "variables", "fileinto", "envelope", "mailbox", "imap4flags" ];
+require [ "regex", "variables", "envelope", "mailbox", "imap4flags", "include"];
+global "listname";
 
 if exists "list-id" {
   if anyof (
@@ -8,8 +9,6 @@ if exists "list-id" {
             header :regex "list-id" "^\\s*<?([a-z_0-9-]+)[.@]"
   ) {
     set :lower :upperfirst "listname" "${1}";
-    fileinto :create "{{ __main_folder }}/Mailing Lists/${listname}";
-    stop;
   }
 }
 
@@ -17,8 +16,6 @@ if exists "list-id" {
 elsif exists "x-list-id" {
   if header :regex "x-list-id" "<([a-z_0-9-]+)\\\\." {
     set :lower "listname" "${1}";
-    fileinto :create "{{ __main_folder }}/Mailing Lists/${listname}";
-    stop;
   }
 }
 
@@ -26,8 +23,6 @@ elsif exists "x-list-id" {
 elsif exists "mailing-list" {
   if header :regex "mailing-list" "([a-z_0-9-]+)@" {
     set :lower "listname" "${1}";
-    fileinto :create "{{ __main_folder }}/Mailing Lists/${listname}";
-    stop;
   }
 }
 
@@ -35,8 +30,6 @@ elsif exists "mailing-list" {
 elsif exists "x-mailing-list" {
   if header :regex "x-mailing-list" "^\\s*([a-z_0-9-]+)@?" {
     set :lower "listname" "${1}";
-    fileinto :create "{{ __main_folder }}/Mailing Lists/${listname}";
-    stop;
   }
 }
 
@@ -44,8 +37,6 @@ elsif exists "x-mailing-list" {
 elsif exists "x-loop" {
   if header :regex "x-loop" "^\\s*(a-z_0-9-]+)@?" {
     set :lower "listname" "${1}";
-    fileinto :create "{{ __main_folder }}/Mailing Lists/${listname}";
-    stop;
   }
 }
 
@@ -57,8 +48,6 @@ elsif envelope :contains "from" "owner-" {
             header :regex "Sender" "owner-([a-z_0-9-]+)@"
   ) {
       set :lower "listname" "${1}";
-      fileinto :create "{{ __main_folder }}/Mailing Lists/${listname}";
-      stop;
   }
 }
 
@@ -66,7 +55,5 @@ elsif envelope :contains "from" "owner-" {
 elsif  envelope :contains "from" "-request" {
   if envelope :regex "from" "([a-z_0-9-]+)-request@" {
     set :lower "listname" "${1}";
-    fileinto :create "{{ __main_folder }}/Mailing Lists/${listname}";
-    stop;
   }
 }

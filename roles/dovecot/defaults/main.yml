@@ -81,20 +81,20 @@ dovecot_virtual_namespace:
       comment: "All my recent messages"
       auto: "create"
     - name: Unread
-      comment: All my unread messages
+      comment: "All my unread messages"
       auto: "create"
-    # - name: Later
-    #   comment: All my unread messages
-    #   auto: "create"
-    # - name: Personal
-    #   comment: All my unread messages
-    #   auto: "create"
-    # - name: Todo
-    #   comment: All my unread messages
-    #   auto: "create"
-    # - name: Work
-    #   comment: All my unread messages
-    #   auto: "create"
+    - name: Later
+      comment: "Reference for later"
+      auto: "create"
+    - name: Personal
+      comment: "Personal messages"
+      auto: "create"
+    - name: Todo
+      comment: "Things to do"
+      auto: "create"
+    - name: Work
+      comment: "Work related messages"
+      auto: "create"
 
 dovecot_inboxzero_namespace_name: "inboxzero"
 dovecot_inboxzero_inbox_name: "0-Inbox"
@@ -165,53 +165,36 @@ dovecot_sieve_files:
   - name: "duplicate"
     priority: "30"
     type: "before"
-  - name: "mailinglists"
-    priority: "90"
-    type: "after"
-  - name: "subaddresses"
-    priority: "90"
-    type: "after"
-  - name: "businesses"
-    priority: "60"
-    type: "global"
-  - name: "google"
-    priority: "61"
-    type: "global"
   - name: "openpgp"
     priority: "61"
     type: "global"
   - name: "system"
     priority: "70"
     type: "global"
-  - name: "social"
-    priority: "80"
-    type: "global"
-  - name: "businesses"
-    priority: "60"
-    type: "global"
-    archive: yes
-  - name: "google"
-    priority: "61"
-    type: "global"
-    archive: yes
-  - name: "openpgp"
-    priority: "61"
-    type: "global"
-    archive: yes
-  - name: "system"
-    priority: "70"
-    type: "global"
-    archive: yes
-  - name: "social"
-    priority: "80"
-    type: "global"
-    archive: yes
   - name: "mailinglists"
     priority: "90"
     type: "global"
-    archive: yes
-  - name: "subaddresses"
+  - name: "recipient-detail-sort"
     priority: "98"
+    type: "global"
+  - name: "sender-domain-sort"
+    priority: "97"
+    type: "global"
+  - name: "sender-name-sort"
+    priority: "97"
+    type: "global"
+  - name: "sort"
+    priority: "99"
+    type: "global"
+  - name: "openpgp"
+    priority: "61"
+    type: "global"
+  - name: "system"
+    priority: "70"
+    type: "global"
+    archive: yes
+  - name: "sort"
+    priority: "99"
     type: "global"
     archive: yes
 

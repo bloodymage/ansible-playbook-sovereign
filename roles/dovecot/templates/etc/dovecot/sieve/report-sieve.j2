@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-require ["vnd.dovecot.pipe", "copy" "imapsieve" "environment", "variables"];
+require ["vnd.dovecot.pipe", "copy", "imapsieve", "environment", "variables"];
 
 {% if item.type == "ham" %}
 if environment :matches "imap.mailbox" "*" {
