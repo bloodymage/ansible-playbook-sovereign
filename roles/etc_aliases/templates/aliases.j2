@@ -9,3 +9,9 @@
 {% for user in aliases_local_user_maps -%}
   {{ user.username }}: {{ user.email }}
 {% endfor %}
+
+#
+{% for user in users -%}
+  {{ user.username }}: hostmaster@{{ autonomy_root_domain }}
+{% endfor %}
+
