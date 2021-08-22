@@ -260,8 +260,7 @@
     __main_folder: "Archive"
   when:
     - item.archive is defined
-    - item
-    .archive
+    - item.archive
   tags:
     - sieve-filters
 
