@@ -98,7 +98,9 @@ postfix_smtp_header_checks:
     status: "IGNORE"
 
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
-
+postfix_smtpd_sasl_security_options:
+  - "noanonymous"
+  - "noplaintext"
 
 postfix_virtual_alias_maps:
   - "hash:/etc/postfix/virtual-mailbox-user-aliases"
@@ -130,6 +132,7 @@ postfix_smtp_helo_name: "{{ __postfix_smtp_helo_name }}"
 postfix_smtp_sasl_auth_enable: "{{ __postfix_smtp_sasl_auth_enable }}"
 postfix_smtp_sasl_password_maps: "{{ __postfix_smtp_sasl_password_maps }}"
 postfix_smtp_sasl_security_options: "{{ __postfix_smtp_sasl_security_options }}"
+postfix_smtp_sasl_tls_security_options: "{{ __postfix_smtp_sasl_tls_security_options }}"
 postfix_smtp_sender_dependent_authentication: "{{ __postfix_smtp_sender_dependent_authentication }}"
 postfix_smtp_tls_note_starttls_offer: "{{ __postfix_smtp_tls_note_starttls_offer }}"
 postfix_smtp_tls_security_level: "{{ __postfix_smtp_tls_security_level }}"
@@ -142,7 +145,6 @@ postfix_smtpd_sasl_auth_enable: "{{ __postfix_smtpd_sasl_auth_enable }}"
 postfix_smtpd_sasl_authenticated_header: "{{ __postfix_smtpd_sasl_authenticated_header }}"
 postfix_smtpd_sasl_local_domain: "{{ __postfix_smtpd_sasl_local_domain }}"
 postfix_smtpd_sasl_path: "{{ __postfix_smtpd_sasl_path }}"
-postfix_smtpd_sasl_security_options: "{{ __postfix_smtpd_sasl_security_options }}"
 postfix_smtpd_sasl_tls_security_options: "{{ __postfix_smtpd_sasl_tls_security_options }}"
 postfix_smtpd_sasl_type: "{{ __postfix_smtpd_sasl_type }}"
 postfix_smtpd_sender_login_maps:  "{{ __postfix_smtpd_sender_login_maps }}"
@@ -245,6 +247,7 @@ __postfix_smtp_sasl_password_maps: []
 __postfix_smtp_sasl_security_options:
   - "noplaintext"
   - "noanonymous"
+__postfix_smtp_sasl_tls_security_options: "$smtp_sasl_security_options"
 __postfix_smtp_sender_dependent_authentication: "no"
 __postfix_smtp_tls_note_starttls_offer: "no"
 __postfix_smtp_tls_security_level: ""

@@ -125,18 +125,10 @@
 - name: "Get relay users password."
   ansible.builtin.set_fact:
     __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
-    postfix_smtp_sasl_security_options: "noanonymous"
-    # ==================================================================================================
-#
-# This is separate from above because sometimes we need these only apply if we are configuring
-# authentication to an external relay server
-#
-# ==================================================================================================
-- name: "Get relay users password."
-  ansible.builtin.set_fact:
-    __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
-    postfix_smtp_sasl_security_options: "noanonymous"
-    postfix_smtpd_sasl_security_options: "noanonymous"
+    postfix_smtp_sasl_tls_security_options:
+      - "noanonymous"
+    postfix_smtpd_sasl_tls_security_options:
+      - "noanonymous"
   loop: "{{ postfix_sasl_auth_users_list }}"
   vars:
     __user:
