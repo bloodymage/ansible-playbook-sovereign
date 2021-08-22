@@ -113,6 +113,62 @@
     - postfix_debug
     - postfix-debug
 
+# ==================================================================================================
+#
+# This is separate from above because sometimes we need these only apply if we are configuring
+# authentication to an external relay server
+#
+# Update: this needs to be BEFORE the installation of the main.cf because smtp(d)_sasl_security_options
+# change if this is set.
+#
+# ==================================================================================================
+- name: "Get relay users password."
+  ansible.builtin.set_fact:
+    __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
+    postfix_smtp_sasl_security_options: "noanonymous"
+    # ==================================================================================================
+#
+# This is separate from above because sometimes we need these only apply if we are configuring
+# authentication to an external relay server
+#
+# ==================================================================================================
+- name: "Get relay users password."
+  ansible.builtin.set_fact:
+    __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
+    postfix_smtp_sasl_security_options: "noanonymous"
+    postfix_smtpd_sasl_security_options: "noanonymous"
+  loop: "{{ postfix_sasl_auth_users_list }}"
+  vars:
+    __user:
+      - origin: "{{ item.origin }}"
+        destination: "{{ item.destination }}"
+        password: "{{ item.password | default(__password) }}"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  when:
+    - postfix_sender_relay is truthy
+
+  loop: "{{ postfix_sasl_auth_users_list }}"
+  vars:
+    __user:
+      - origin: "{{ item.origin }}"
+        destination: "{{ item.destination }}"
+        password: "{{ item.password | default(__password) }}"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  when:
+    - postfix_sender_relay is truthy
+
 - name: "Install configuration files"
   ansible.builtin.template:
     src: "{{ item }}.j2"
@@ -184,32 +240,6 @@
     - postfix
     - postfix_debug
     - postfix-debug
-
-# ==================================================================================================
-#
-# This is separate from above because sometimes we need these only apply if we are configuring
-# authentication to an external relay server
-#
-# ==================================================================================================
-- name: "Get relay users password."
-  ansible.builtin.set_fact:
-    __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
-    postfix_smtp_sasl_security_options: "noanonymous"
-  loop: "{{ postfix_sasl_auth_users_list }}"
-  vars:
-    __user:
-      - origin: "{{ item.origin }}"
-        destination: "{{ item.destination }}"
-        password: "{{ item.password | default(__password) }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
-    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  when:
-    - postfix_sender_relay is truthy
 
 - name: "Get default relay users password."
   ansible.builtin.set_fact:
