@@ -1,39 +1,86 @@
 # {{ ansible_managed }}
 
 require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
-global ["autonomy_explicit_group", "autonomy_listname", "autonomy_explicit_subgroup", "autonomy_detected_domain", "autonomy_generic_subgroup", "autonomy_detail"];
+global ["autonomy_category", "autonomy_explicit_group", "autonomy_listname", "autonomy_detail", "autonomy_detected_domain", "autonomy_explicit_subgroup", "autonomy_generic_subgroup"];
 
 include :global "98-recipient-detail-sort";
 
+if not string :is "${autonomy_category}" "" {
+  set :upperfirst "category" "${autonomy_category}";
+}
+
 if not string :is "${autonomy_explicit_group}" "" {
-set "sort" "${autonomy_explicit_group}";
+  set :upperfirst "sort" "${autonomy_explicit_group}";
+  if not string :is "${autonomy_listname}" "" {
+    set :upperfirst "autonomy_explicit_subgroup" "${autonomy_listname}";
+  }
 } elsif not string :is "${autonomy_listname}" "" {
-  set "sort" "Mailing Lists";
-  set "subsort" "${autonomy_listname}";
+  set :upperfirst "category" "Mailing Lists";
+  set :upperfirst "sort" "${autonomy_listname}";
 } elsif not string :is "${autonomy_detail}" "" {
-set "sort" "${autonomy_detail}";
+  set :upperfirst "sort" "${autonomy_detail}";
 } else {
-set "sort" "${autonomy_detected_domain}";
+  set :upperfirst "sort" "${autonomy_detected_domain}";
 }
 
 if not string :is "${autonomy_explicit_subgroup}" "" {
-set "subsort" "${autonomy_explicit_subgroup}";
+  set :upperfirst "subsort" "${autonomy_explicit_subgroup}";
 } elsif not string :is "${autonomy_generic_subgroup}" "" {
-set "subsort" "${autonomy_generic_subgroup}";
+  set :upperfirst "subsort" "${autonomy_generic_subgroup}";
 }
 
-if string :is "${sort}" "" {
-  /*  Default case if no detail is specified */
-  fileinto "{{ __main_folder }}";
+# ==================================================================================================
+#
+# Sort based on category, sort, and subsort variables
+#
+# TODO: There has got to be a better way.
+#
+# ==================================================================================================
+{% if dovecot_bounce_folder_name is truthy %}
+if allof (
+  address :localpart :is "from" ["postmaster", "mailer-daemon", "MAILER-DAEMON"],
+  not string :is "autonomy_category" "Systems"
+)
+{
+  fileinto "{{ dovecot_bounce_folder_name }}";
   stop;
-} else {
-  if string :is "${subsort}" "" {
-    fileinto :create "{{ __main_folder }}/${sort}";
-    stop;
+}
+{% endif %}
+
+
+if allof (
+  string :is "${category}" "",
+  string :is "${sort}" ""
+) {
+    if string :is "${subsort}" "" {
+      fileinto "{{ __main_folder }}";
+      stop;
   } else {
-    # For user{{ mail_recipient_delimiter }}work@example.com will be filtered into
-    # {{ __main_folder }}/work
-    fileinto :create "{{ __main_folder }}/${sort}/${subsort}";
-    stop;
+      fileinto "{{ __main_folder }}/${subsort}";
+      stop;
   }
+} elsif string :is "${category}" "" {
+    if string :is "${subsort}" "" {
+      fileinto :create "{{ __main_folder }}/${sort}";
+      stop;
+    } else {
+      fileinto :create "{{ __main_folder }}/${sort}/${subsort}";
+      stop;
+    }
+} elsif string :is "${sort}" "" {
+    if string :is "${subsort}" "" {
+      fileinto :create "{{ __main_folder }}/${category}";
+      stop;
+    } else {
+      fileinto :create "{{ __main_folder }}/${category}/${subsort}";
+      stop;
+    }
+} else {
+    if string :is "${subsort}" "" {
+      fileinto :create "{{ __main_folder }}/${category}/${sort}";
+      stop;
+    } else {
+      fileinto :create "{{ __main_folder }}/${category}/${sort}/${subsort}";
+      stop;
+    }
 }

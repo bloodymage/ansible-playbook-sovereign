@@ -1,10 +1,9 @@
 # {{ ansible_managed }}
 
-require ["include", "variables", "envelope", "fileinto", "subaddress", "mailbox"];
-global "autonomy_detail";
+require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
+global ["autonomy_category", "autonomy_explicit_group", "autonomy_listname", "autonomy_detail", "autonomy_detected_domain", "autonomy_explicit_subgroup", "autonomy_generic_subgroup"];
 
 if envelope :matches :detail "to" "*" {
   # Save name in ${sort} in all lowercase except for the first letter
   set :lower :upperfirst "autonomy_detail" "${1}";
 }
-

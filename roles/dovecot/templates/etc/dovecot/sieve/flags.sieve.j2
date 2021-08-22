@@ -1,0 +1,29 @@
+# {{ ansible_managed }}
+
+# Copied from "https://blog.gs-9.com/en/posts/sieve-filtering/"
+
+require ["foreverypart", "mime", "imap4flags"];
+
+foreverypart
+{
+  if header :mime :contenttype "Content-Type" "application/ics"
+  {
+    addflag "invites";
+  }
+  if header :mime :contenttype "Content-Type" "text/x-vcard"
+  {
+    addflag "contact";
+  }
+  if header :mime :param "filename" :contains "Content-Disposition" "attachment"
+  {
+    addflag "attachment";
+  }
+  if header :mime :param "filename" :matches ["Content-Type", "Content-Disposition"] ["*.com", "*.exe", "*.vbs", "*.scr", "*.pif", "*.hta", "*.bat", "*.zip" ]
+  {
+    addflag "dangerous";
+  }
+  if header :mime :param "filename" :matches ["Content-Type", "Content-Disposition"] ["*.pdf", "*.ods", "*.sdc", "*.sxc", "*.doc", "*.docx", "*.docm", "*.xsl", "*.xlsx", "*.xlsm", "*.ppt", "*.pptx", "*.pptm"]
+  {
+    addflag "documents";
+  }
+}

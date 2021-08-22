@@ -30,14 +30,28 @@
   become: no
   when:
     - autonomy_realm_identity_management_system == "samba"
- 
+
+- name: "Check if we are using a bounce folder."
+  ansible.builtin.set_fact:
+    dovecot_private_namespace_mailboxes: "{{ dovecot_private_namespace_mailboxes + [dovecot_bounce_folder] }}"
+  become: no
+  when:
+    - dovecot_bounce_folder_name is truthy
+
+- name: "Check if we are using an Advertisements folder."
+  ansible.builtin.set_fact:
+    dovecot_private_namespace_mailboxes: "{{ dovecot_private_namespace_mailboxes + [dovecot_advertisements_folder] }}"
+  become: no
+  when:
+    - dovecot_advertisements_folder_name is truthy
+
 - name: "Check if we are using an inboxzero namespace configuration."
   ansible.builtin.set_fact:
     dovecot_namespaces: "{{ dovecot_namespaces + [dovecot_inboxzero_namespace] }}"
   become: no
   when:
     - dovecot_use_inboxzero_namespace
- 
+
 - name: "Get Users' password from password-store."
   ansible.builtin.set_fact:
     __mail_user: "{{ mail_user }}"
@@ -67,10 +81,6 @@
     #- "{{ dovecot_password_file }}"
   become: yes
   notify: restart dovecot
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 - name: "Install auth config files to /etc/dovecot."
   ansible.builtin.template:
@@ -85,10 +95,6 @@
   when:
     - item.name != "system"
     - item.name != "deny"
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 - name: "Install configuration files to /etc/dovecot/conf.d."
   ansible.builtin.template:
@@ -122,10 +128,6 @@
     - auth-static.conf.ext
     - auth-vpopmail.conf.ext
   notify: restart dovecot
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 - name: "Install authorization configuration files to /etc/dovecot/conf.d."
   ansible.builtin.template:
@@ -137,10 +139,6 @@
   become: yes
   loop: "{{ dovecot_auth_conf }}"
   notify: restart dovecot
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 # ==================================================================================================
 #
@@ -156,10 +154,6 @@
     state: directory
   become: yes
   loop: "{{ dovecot_virtual_mailboxes }}"
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 - name: "Install configuration files to /etc/dovecot/virtual."
   ansible.builtin.template:
@@ -170,10 +164,6 @@
     mode: "0644"
   become: yes
   loop: "{{ dovecot_virtual_mailboxes }}"
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 # ==================================================================================================
 #
@@ -239,9 +229,7 @@
   become: yes
   loop: "{{ dovecot_imapsieve_mailboxes }}"
   tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
+    - sieve-filters
 
 - name: "Install Sieve rules."
   ansible.builtin.template:
@@ -256,6 +244,8 @@
     __main_folder: "Inbox"
   when:
     - (item.archive is not defined or item.archive is false)
+  tags:
+    - sieve-filters
 
 - name: "Install Sieve rules. (Archive)"
   ansible.builtin.template:
@@ -270,7 +260,10 @@
     __main_folder: "Archive"
   when:
     - item.archive is defined
-    - item.archive
+    - item
+    .archive
+  tags:
+    - sieve-filters
 
 - name: "Ensure Sieve Pipe Bin Dir exists."
   ansible.builtin.file:
@@ -280,10 +273,6 @@
     mode: "0755"
     state: directory
   become: yes
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 - name: "Install IMAPSieve Spam Update Filters."
   ansible.builtin.template:
@@ -294,10 +283,6 @@
     mode: "0755"
   become: yes
   loop: "{{ dovecot_imapsieve_mailboxes }}"
-  tags:
-    - dovecot
-    - dovecot_debug
-    - dovecot-debug
 
 # ==================================================================================================
 #

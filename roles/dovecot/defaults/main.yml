@@ -28,6 +28,36 @@ dovecot_use_inboxzero_namespace: no
 # ==================================================================================================
 dovecot_junk_mail_folder: "Junk"
 dovecot_infected_mail_folder: "Infected"
+dovecot_bounce_folder_name: ""
+dovecot_advertisements_folder_name: ""
+
+dovecot_private_namespace_mailboxes:
+  - name: "Sent"
+    auto: "subscribe"
+    special_use: "\\Sent"
+  - name: Drafts
+    special_use: "\\Drafts"
+    auto: subscribe
+  - name: "{{ dovecot_junk_mail_folder }}"
+    special_use: "\\Junk"
+    auto: "subscribe"
+  - name: "Trash"
+    special_use: "\\Trash"
+    autoexpunge: "30 days"
+    auto: "subscribe"
+  - name: "Archive"
+    special_use: "\\Archive"
+    auto: "subscribe"
+
+dovecot_bounce_folder:
+  name: "{{ dovecot_bounce_folder_name }}"
+  auto: "subscribe"
+  #autoexpunge: "30 days"
+
+dovecot_advertisements_folder:
+  name: "{{ dovecot_advertisements_folder_name }}"
+  auto: "subscribe"
+  #autoexpunge: "30 days"
 
 dovecot_private_namespace:
   name: "private"
@@ -39,23 +69,7 @@ dovecot_private_namespace:
   #hidden: "no"
   list: "yes"
   subscriptions: "yes"
-  mailboxes:
-    - name: "Sent"
-      auto: "subscribe"
-      special_use: "\\Sent"
-    - name: Drafts
-      special_use: "\\Drafts"
-      auto: subscribe
-    - name: "{{ dovecot_junk_mail_folder }}"
-      special_use: "\\Junk"
-      auto: "subscribe"
-    - name: "Trash"
-      special_use: "\\Trash"
-      autoexpunge: "30 days"
-      auto: "subscribe"
-    - name: "Archive"
-      special_use: "\\Archive"
-      auto: "subscribe"
+  mailboxes: "{{ dovecot_private_namespace_mailboxes }}"
 
 dovecot_virtual_namespace:
   name: "virtual"
@@ -165,11 +179,11 @@ dovecot_sieve_files:
   - name: "duplicate"
     priority: "30"
     type: "before"
-  - name: "openpgp"
-    priority: "61"
-    type: "global"
-  - name: "system"
-    priority: "70"
+  - name: "flags"
+    priority: "40"
+    type: "before"
+  - name: "flags"
+    priority: "40"
     type: "global"
   - name: "mailinglists"
     priority: "90"
@@ -186,13 +200,6 @@ dovecot_sieve_files:
   - name: "sort"
     priority: "99"
     type: "global"
-  - name: "openpgp"
-    priority: "61"
-    type: "global"
-  - name: "system"
-    priority: "70"
-    type: "global"
-    archive: yes
   - name: "sort"
     priority: "99"
     type: "global"
@@ -448,6 +455,12 @@ dovecot_auth_conf_passwdfile:
   userdb:
     - driver: passwd-file
       args: username_format=%u /etc/dovecot/users
+
+dovecot_sieve_mime_flags:
+  - mime_type: "application/ics"
+    flags: "invites"
+  - mime_type: "text/x-vcard"
+    flags: "contact"
 
 # The following variables are not modified from the application defaults.
 
