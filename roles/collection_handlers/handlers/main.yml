@@ -163,7 +163,8 @@
   listen:
     - "restart cron"
   when:
-    - ntp_cron_handler_enabled | bool
+    - ntp_cron_handler_enabled is defined
+    - ntp_cron_handler_enabled
     - inventory_hostname in groups['linux'] | default([])
 
 - name: "Restart DDclient."
