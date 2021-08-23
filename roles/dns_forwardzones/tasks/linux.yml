@@ -25,7 +25,7 @@
   become: yes
   vars:
     __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
     __password_lookup: "{{ __password_store_id }}"
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
@@ -47,7 +47,7 @@
   become: yes
   vars:
     __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
     __password_lookup: "{{ __password_store_id }}"
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   delegate_to: "{{ hostvars[item]['ansible_host'] }}"
@@ -93,7 +93,7 @@
 # - name: "Add or modify host CNAME records based on defined virtual hosts"
 #   community.general.nsupdate:
 #     key_name: "{{ autonomy_zone_name }}"
-#     key_secret: "{{ item[0].bind_dnssec_secret }}"
+#     key_secret: "{{ item[0].bind_dyndns_secret }}"
 #     key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
 #     server: "{{ item[0].address_ipv4 }}"
 #     zone: "{{ bind_zone }}"
@@ -111,7 +111,7 @@
 # - name: "Add or modify MX records"
 #   community.general.nsupdate:
 #     key_name: "{{ autonomy_zone_name }}"
-#     key_secret: "{{ item.bind_dnssec_secret }}"
+#     key_secret: "{{ item.bind_dyndns_secret }}"
 #     key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
 #     server: "{{ item.address_ipv4 }}"
 #     zone: "{{ zone }}"
