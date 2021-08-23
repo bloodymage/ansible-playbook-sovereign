@@ -1,38 +1,61 @@
-Role Name
+Ansible Role: bloodymage.autonomy.acmeca_challenge_site
 =========
 
-A brief description of the role goes here.
+- [Description](#description)
+- [Installation](#installation)
+- [Requirements](#requirements)
+- [Usage](#usage)
+- [Role Variables](#role-variables)
+- [Contributing](#contributing)
+- [License](#license)
+- [Author Information](#author-information)
+
+Description
+-----------
+
+Creates a virtual host for acmeca challenges.
+
+Installation
+------------
+This is part of the **bloodymage.autonomy** collection and will not work without the full collection.  You will need to install the entire collection following the procedures listed for the [collection](https://github.com/bloodymage/ansible-collection-autonomy#installation)
 
 Requirements
 ------------
+This role depends on:
+- python3-cryptography
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+Usage
+-----
+
+This is part of the collection "webservers" playbook.
+
+```
+- name: "Configure webservers and websites."
+  hosts: web_servers:&public_zone
+  roles:
+    - role: bloodymage.autonomy.config_acmeca_environment
+    - role: bloodymage.autonomy.acmeca_challenge_site
+      tags:
+        - acmeca-challenge-site
+        - acmeca
+```
+
+If you haven't already installed python3-cryptography then this role will install it for you.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+No role specific variables apply.  All variables used are global variables from the collection.
 
-Dependencies
+Contributing
 ------------
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
-
-Example Playbook
-----------------
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+[How to contribute](../../CONTRIBUTING.md)
 
 License
 -------
-
-BSD
+[MIT](../../LICENSE.md)
 
 Author Information
 ------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
+G Derber
+gd.github@bloodymage.org
