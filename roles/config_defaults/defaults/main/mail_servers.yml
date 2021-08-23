@@ -1,6 +1,6 @@
 ---
 # Mail Servers
-mail_location: "mbox:~/mail:INBOX=/var/mail/%u"
+mail_location: "maildir:/var/mail/vmail/%d/%n/mail:LAYOUT=fs"
 mail_uid: "{{ user_vmail_id_number }}"
 mail_gid: "{{ user_vmail_id_number }}"
 mail_privileged_group:  mail
