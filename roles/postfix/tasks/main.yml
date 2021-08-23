@@ -173,7 +173,7 @@
   loop: "{{ autonomy_zones }}"
   when:
     - autonomy_zone_type == "dmz"
-    - item.type != "internal"
+    - item.type == "public"
 
 - name: "Install configuration files"
   ansible.builtin.template:
