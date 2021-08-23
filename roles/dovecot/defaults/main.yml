@@ -378,6 +378,7 @@ dovecot_mail_protocols:
 
 dovecot_imap_protocols:
   - name: imap
+    mail_plugins: "$mail_plugins imap_sieve"
 
 dovecot_imapsieve_mailboxes:
   - name: "Junk"
