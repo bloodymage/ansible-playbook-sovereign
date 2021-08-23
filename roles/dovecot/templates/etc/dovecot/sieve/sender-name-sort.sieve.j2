@@ -24,7 +24,14 @@ if anyof (
 if anyof (
   address :contains "from" "billing",
   address :contains "from" "orders",
-  address :contains "from" "receipts"
+  address :contains "from" "receipts",
+  allof (
+    address :contains "from" "info",
+    anyof (
+      header :contains "Subject" "bill",
+      header :contains "Subject" "payment"
+    )
+  )
 )
 {
   set "autonomy_generic_subgroup" "Bills and Receipts";
