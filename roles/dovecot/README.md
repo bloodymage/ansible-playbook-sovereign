@@ -71,11 +71,11 @@ References
 
 Contributing
 ------------
-[Contributing](CONTRIBUTING.md)
+[Contributing](../../CONTRIBUTING.md)
 
 License
 -------
-[MIT](LICENSE.md)
+[MIT](../../LICENSE.md)
 
 Author Information
 ------------------
