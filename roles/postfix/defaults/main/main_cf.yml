@@ -105,9 +105,7 @@ postfix_smtpd_relay_restrictions:
   - "reject_unauth_destination"
   - "reject"
 
-postfix_smtpd_sasl_security_options:
-  - "noanonymous"
-  - "noplaintext"
+
 
 postfix_virtual_alias_maps:
   - "hash:/etc/postfix/virtual-mailbox-user-aliases"
@@ -152,6 +150,7 @@ postfix_smtpd_sasl_auth_enable: "{{ __postfix_smtpd_sasl_auth_enable }}"
 postfix_smtpd_sasl_authenticated_header: "{{ __postfix_smtpd_sasl_authenticated_header }}"
 postfix_smtpd_sasl_local_domain: "{{ __postfix_smtpd_sasl_local_domain }}"
 postfix_smtpd_sasl_path: "{{ __postfix_smtpd_sasl_path }}"
+postfix_smtpd_sasl_security_options: "{{ __postfix_smtpd_sasl_security_options }}"
 postfix_smtpd_sasl_tls_security_options: "{{ __postfix_smtpd_sasl_tls_security_options }}"
 postfix_smtpd_sasl_type: "{{ __postfix_smtpd_sasl_type }}"
 postfix_smtpd_sender_login_maps:  "{{ __postfix_smtpd_sender_login_maps }}"

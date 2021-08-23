@@ -131,6 +131,9 @@
       - "noanonymous"
     postfix_smtpd_sasl_tls_security_options:
       - "noanonymous"
+    postfix_smtpd_sasl_security_options:
+      - "noanonymous"
+      - "noplaintext"
   loop: "{{ postfix_sasl_auth_users_list }}"
   vars:
     __user:
