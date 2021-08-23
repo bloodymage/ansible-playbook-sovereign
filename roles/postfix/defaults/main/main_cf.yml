@@ -98,6 +98,13 @@ postfix_smtp_header_checks:
     status: "IGNORE"
 
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
+postfix_smtpd_relay_restrictions:
+  - "permit_sasl_authenticated"
+  - "permit_mynetworks"
+  - "permit_auth_destination"
+  - "reject_unauth_destination"
+  - "reject"
+
 postfix_smtpd_sasl_security_options:
   - "noanonymous"
   - "noplaintext"
@@ -126,6 +133,7 @@ postfix_myorigin: "{{ __postfix_myorigin }}"
 postfix_postscreen_access_list: "{{ __postfix_postscreen_access_list }}"
 postfix_readme_directory: "{{ __postfix_readme_directory }}"
 postfix_relay_destination_concurrency_limit: "{{ __postfix_relay_destination_concurrency_limit }}"
+postfix_relay_domains: "{{ __postfix_relay_domains }}"
 postfix_relay_host: "{{ __postfix_relay_host }}"
 postfix_sender_dependent_relayhost_maps: "{{ __postfix_sender_dependent_relayhost_maps }}"
 postfix_smtp_helo_name: "{{ __postfix_smtp_helo_name }}"
@@ -140,7 +148,6 @@ postfix_smtp_tls_wrappermode: "{{ __postfix_smtp_tls_wrappermode }}"
 postfix_smtpd_client_restrictions: "{{ __postfix_smtpd_client_restrictions }}"
 postfix_smtpd_helo_restrictions: "{{ __postfix_smtpd_helo_restrictions }}"
 postfix_smtpd_recipient_restrictions: "{{ __postfix_smtpd_recipient_restrictions }}"
-postfix_smtpd_relay_restrictions: "{{ __postfix_smtpd_relay_restrictions }}"
 postfix_smtpd_sasl_auth_enable: "{{ __postfix_smtpd_sasl_auth_enable }}"
 postfix_smtpd_sasl_authenticated_header: "{{ __postfix_smtpd_sasl_authenticated_header }}"
 postfix_smtpd_sasl_local_domain: "{{ __postfix_smtpd_sasl_local_domain }}"
@@ -238,6 +245,7 @@ __postfix_postscreen_greet_action: "ignore"
 __postfix_readme_directory: "/usr/share/doc/postfix"
 __postfix_recipient_delimiter: ""
 __postfix_relay_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_relay_domains: []
 __postfix_relay_host: ""
 __postfix_sender_dependent_relayhost_maps: []
 __postfix_smtp_header_checks: ""

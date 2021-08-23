@@ -40,6 +40,8 @@
 
 - name: "Check if we are using Active Directory."
   ansible.builtin.set_fact:
+    postfix_local_recipient_maps:
+      - "$virtual_mailbox_maps"
     postfix_virtual_alias_maps:
       - "proxy:ldap:/etc/postfix/ad_virtual_user_maps.cf"
       - "proxy:ldap:/etc/postfix/ad_virtual_user_aliases_maps.cf"
@@ -161,6 +163,15 @@
   when:
     - postfix_sender_relay is truthy
 
+- name: "Identify relay domains."
+  ansible.builtin.set_fact:
+    __postfix_relay_domains: "{{ __postfix_relay_domains + [item.domain] }}"
+  become: no
+  loop: "{{ autonomy_zones }}"
+  when:
+    - autonomy_zone_type == "dmz"
+    - item.type != "internal"
+
 - name: "Install configuration files"
   ansible.builtin.template:
     src: "{{ item }}.j2"
@@ -217,6 +228,29 @@
     - postfix
     - postfix_debug
     - postfix-debug
+
+- name: "Identify virtual domains."
+  ansible.builtin.set_fact:
+    __postfix_virtual_mailbox_domain_maps:
+      - name: "{{ autonomy_domain }}"
+        status: "OK"
+  become: no
+  when:
+    - autonomy_zone_type == "dmz"
+    - inventory_hostname not in groups['dovecot_servers']
+
+- name: "Identify virtual domains."
+  ansible.builtin.set_fact:
+    __postfix_virtual_mailbox_domain_maps: "{{ __postfix_virtual_mailbox_domain_maps + [__domain] }}"
+  become: no
+  vars:
+    __domain:
+      name: "{{ item.domain }}"
+      status: "OK"
+  loop: "{{ autonomy_zones }}"
+  when:
+    - (item.type == "internal" or item.type == "public")
+    - inventory_hostname in groups['dovecot_servers']
 
 - name: "Install virtual mailboxes' configuration files (postmap update required)"
   ansible.builtin.template:

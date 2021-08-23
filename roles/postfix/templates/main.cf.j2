@@ -154,7 +154,7 @@ smtpd_sender_restrictions =
 {% endif %}
 
 # Relay Definitions
-{% if postfix_relay_domains is defined -%}
+{% if postfix_relay_domains is truthy -%}
 relay_domains =
 {% for domain in postfix_relay_domains %}
   {{ domain }}{{ "," if not loop.last else "" }}
