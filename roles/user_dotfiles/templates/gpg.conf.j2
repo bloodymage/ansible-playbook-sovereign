@@ -4,7 +4,7 @@
   default-key {{ item.gpg_keys[0].key_id }}
 {% endif %}
 {% if dotfiles_gpg_pinentry_mode is defined -%}
-  pinentry-mode {{ dotfiles_gpg_pinentry_mode }}
+  #pinentry-mode {{ dotfiles_gpg_pinentry_mode }}
 {% endif %}
 no-emit-version 
 no-comments
