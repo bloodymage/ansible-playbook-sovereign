@@ -7,7 +7,6 @@ users:
     name: 'Pi'
     groups:
       - users
-      - ansiblemanaged
     id_number: 1000
     unix_home: /home/pi
     password: "password"
