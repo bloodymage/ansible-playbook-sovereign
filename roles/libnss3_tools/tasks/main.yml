@@ -37,6 +37,14 @@
     chdir: "/etc/pki"
   become: yes
 
+# ==================================================================================================
+#
+# TODO: Remove "ignore_errors"
+#
+# certutil exits with an error if the cert is already in the database.  So this is an idempodency
+# issue.  How to test if the cert is already in the database?
+#
+# ==================================================================================================
 - name: Install CA Certificates
   ansible.builtin.command:
     cmd: >
@@ -46,6 +54,7 @@
       -i /usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca.crt
   become: yes
   loop: "{{ ownca_certificate_authorities }}"
+  ignore_errors: yes
 
 # ==================================================================================================
 #
