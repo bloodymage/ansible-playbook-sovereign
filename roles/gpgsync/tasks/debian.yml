@@ -4,7 +4,7 @@
     cmd: >-
       ./build_deb.sh
     chdir: "{{ gpgsync_build_dir }}/install"
-    creates: "{{ gpgsync_build_dir }}/deb_dist/gpgsync_{{ gpgsync_version }}-1_all.deb""
+    creates: "{{ gpgsync_build_dir }}/deb_dist/gpgsync_{{ gpgsync_version }}-1_all.deb"
   become: no
 
 - name: "Install a gpgsync package."
