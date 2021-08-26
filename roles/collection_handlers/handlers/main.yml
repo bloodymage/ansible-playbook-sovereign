@@ -269,7 +269,8 @@
     - "restart all"
     - "restart ntp"
   when:
-    - ntp_enabled | bool
+    - ntp_enabled is defined
+    - ntp_enabled
     - inventory_hostname in groups['ntp'] | default([])
 
 - name: "Restart OpenDKIM."
