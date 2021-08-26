@@ -30,3 +30,4 @@
   include: "{{ ansible_system | lower }}.yml"
   when:
     - ansible_system
+    - inventory_hostname not in groups['mythfrontend']
