@@ -12,7 +12,7 @@
   become: yes
   loop: "{{ samba_shares }}"
   when:
-    item.share != "Users"
+    item.name != "Users"
 
 - name: "Set filesystem permissions on samba User share"
   ansible.builtin.file:
@@ -26,7 +26,7 @@
   become: yes
   loop: "{{ samba_shares }}"
   when:
-    item.share == "Users"
+    - item.name == "Users"
 
 - name: "Set filesystem permissions on samba User's home folder"
   ansible.builtin.file:
@@ -39,6 +39,8 @@
     mode: "{{ item.mode | default('0770') }}"
   become: yes
   loop: "{{ __realm_users }}"
+  when:
+    - item.id_number is defined
 
 # ==================================================================================================
 #
