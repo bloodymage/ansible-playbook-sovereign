@@ -165,8 +165,10 @@
     __user_principal_name: "{{ item[0].username }}@{{ autonomy_domain }}"
     __email: "{{ __public_email }}"
     __san_auth: "otherName:{{ ownca_msupn_oid }};UTF8:{{ __user_principal_name }}"
-    __san_email: "email:{{ __email }}"
-    __san: "{{ __san_email }}{% if item[1].name == 'authentication' %},{{ __san_auth }}{%endif %}"
+    __san_other_mail: "{% if item[0].email_aliases is defined %}{{ item[0].email_aliases | map('regex_replace', '^', 'email:') | list }}{% else %}[]{% endif %}"
+    __san_mail: "email:{{ __email }}"
+    __san_email: "{{ [__san_mail] + __san_other_mail }}"
+    __san: "{% if item[1].name == 'authentication' %}{{ __san_mail }},{{ __san_auth }}{% else %}{{ __san_email }}{%endif %}"
     __crl_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
   when:
     - item[0].id_number is defined
