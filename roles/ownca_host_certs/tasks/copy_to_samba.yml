@@ -4,7 +4,7 @@
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     owner: root
     group: root
-    mode: "0644"
+    mode: "0660"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   when:
@@ -16,7 +16,7 @@
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     owner: root
     group: root
-    mode: "0644"
+    mode: "0660"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   when:
@@ -29,7 +29,7 @@
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.cer"
     owner: root
     group: root
-    mode: "0644"
+    mode: "0660"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   when:
@@ -41,7 +41,7 @@
     dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.cer"
     owner: root
     group: root
-    mode: "0644"
+    mode: "0660"
   loop: "{{ ownca_certificate_authorities }}"
   become: yes
   when:

@@ -11,4 +11,5 @@
   roles:
     - role: bloodymage.autonomy.maintenance_service_restart
       tags:
+        - never
         - restart-services

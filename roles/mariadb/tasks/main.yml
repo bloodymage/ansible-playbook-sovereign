@@ -72,7 +72,7 @@
   ansible.builtin.set_fact:
     mysql_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/services/mysql/{{ mysql_administrator }}"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ mysql_administrator }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -92,7 +92,7 @@
   ansible.builtin.set_fact:
     mysql_system_maintenance_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -132,7 +132,7 @@
     - mariadb-debug
     - mariadb_debug
 
-- name: Add Debian Upgrade User
+- name: "Add Debian Upgrade User."
   community.mysql.mysql_user:
     name: "{{ mysql_system_maintenance_user }}"
     password: "{{ mysql_system_maintenance_user_password }}"
@@ -145,7 +145,7 @@
     - mariadb-debug
     - mariadb_debug
 
-- name: "Install System Maintenance config"
+- name: "Install System Maintenance config."
   ansible.builtin.template:
     src: "mysql/debian.cnf.j2"
     dest: "/etc/mysql/debian.cnf"
@@ -155,6 +155,56 @@
   become: yes
   when:
     - ansible_os_family == "Debian"
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
+- name: "Create internal zone and dmz zone administrators."
+  community.mysql.mysql_user:
+    name: "{{ item.name | lower }}"
+    password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    priv: "*.*:ALL,GRANT"
+    #host: "%.{{ item.domain }}"
+    state: present
+    login_user: "{{ mysql_administrator }}"
+    login_password: "{{ mysql_administrator_password }}"
+  become: no
+  loop: "{{ autonomy_zones }}"
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}{{ item.domain }}/services/mysql/{{ item.name | lower }}"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  when:
+    - autonomy_zone_type == item.type
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
+- name: "Create public zone administrators."
+  community.mysql.mysql_user:
+    name: "{{ item['name'] | lower }}"
+    password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    priv: "*.*:ALL,GRANT"
+    #host: "%.{{ item.domain }}"
+    state: present
+    login_user: "{{ mysql_administrator }}"
+    login_password: "{{ mysql_administrator_password }}"
+  become: no
+  loop: "{{ autonomy_zones }}"
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}{{ item.domain }}/services/mysql/{{ item.name | lower }}"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+  when:
+    - (autonomy_zone_type == "dmz" and item.type == "public")
   tags:
     - mariadb
     - mariadb-debug

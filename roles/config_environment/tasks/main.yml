@@ -38,13 +38,18 @@
   group_by:
     key: "{{ autonomy_zone_type }}_zone"
 
-- name: "Create group by zone."
+- name: "Create group by zone name."
   group_by:
     key: "{{ autonomy_zone_name }}_zone"
   when:
     - autonomy_zone_name is defined
 
-- name: "Create group by zone."
+# ==================================================================================================
+#
+# In some places we need the same group as above, without the "_zone" on the end.
+#
+# ==================================================================================================
+- name: "Create group by zone name."
   group_by:
     key: "{{ autonomy_zone_name }}"
   when:
@@ -58,100 +63,44 @@
 - name: "Create parent groups based on host's role."
   group_by:
     key: "{{ item.parent }}"
-  loop:
-    - name: "mariadb_servers"
-      parent: "mysql_compatible_servers"
-    - name: "postgresql_servers"
-      parent: "db_servers"
-    - name: "bind9_servers"
-      parent: "dns_servers"
-    - name: "keycloak_servers"
-      parent: "auth_servers"
-    - name: "openldap_servers"
-      parent: "ldap_servers"
-    - name: "dovecot_servers"
-      parent: "imap_servers"
-    - name: "postfix_servers"
-      parent: "smtp_servers"
-    - name: "minidlna_servers"
-      parent: "dlna_servers"
-    - name: "apache_servers"
-      parent: "web_servers"
-    - name: "nginx_servers"
-      parent: "web_servers"
-    - name: "mythfrontend"
-      parent: "mythtv"
-    - name: "mythbackend"
-      parent: "mythtv"
-    - name: "nfs_file_servers"
-      parent: "file_servers"
-    - name: "samba_file_servers"
-      parent: "file_servers"
+  loop: "{{ autonomy_parent_groups }}"
   when:
+    - item.parent is defined
     - inventory_hostname in groups[item.name] | default([])
 
+# ==================================================================================================
+#
+# We run this a second time because groups that were created by the previous task won't create
+# parent groups based on the newly added groups.
+#
+# For example:
+# postfix_servers will create smtp_servers group in the previous task.  We need smtp_servers to be
+# part of the 'mail_servers' group.  The previous task won't add smtp_servers to the mail_servers
+# group, so we run it a second time.
+#
+# ==================================================================================================
 - name: "Create parent groups based on host's role."
   group_by:
     key: "{{ item.parent }}"
-  loop:
-    - name: "mysql_compatible_servers"
-      parent: "db_servers"
-    - name: "smtp_servers"
-      parent: "mail_servers"
-    - name: "imap_servers"
-      parent: "mail_servers"
+  loop: "{{ autonomy_parent_groups }}"
   when:
+    - item.parent is defined
+    - inventory_hostname not in groups[item.parent] | default([])
     - inventory_hostname in groups[item.name] | default([])
 
 - name: "Create host groups based on zone name and role."
   group_by:
-    key: "{{ autonomy_zone_name }}_{{ item }}"
-  loop:
-    - db_servers
-    - dns_servers
-    - file_servers
-    - git_servers
-    - ha_proxy
-    - homeassistant
-    - auth_servers
-    - ldap_servers
-    - mail_servers
-    - dovecot_servers
-    - postfix_servers
-    - dlna_servers
-    - mosquitto_servers
-    - radius_servers
-    - redis_servers
-    - samba_domain_controllers
-    - web_servers
-    - zwavecontrollers
+    key: "{{ autonomy_zone_name }}_{{ item.name }}"
+  loop: "{{ autonomy_parent_groups }}"
   when:
-    - inventory_hostname in groups[item] | default([])
+    - inventory_hostname in groups[item.name] | default([])
 
 - name: "Create host groups based on zone type and role."
   group_by:
-    key: "{{ autonomy_zone_type }}_{{ item }}"
-  loop:
-    - db_servers
-    - dns_servers
-    - file_servers
-    - git_servers
-    - ha_proxy
-    - homeassistant
-    - auth_servers
-    - ldap_servers
-    - mail_servers
-    - dovecot_servers
-    - postfix_servers
-    - dlna_servers
-    - mosquitto_servers
-    - radius_servers
-    - redis_servers
-    - samba_domain_controllers
-    - web_servers
-    - zwavecontrollers
+    key: "{{ autonomy_zone_type }}_{{ item.name }}"
+  loop: "{{ autonomy_parent_groups }}"
   when:
-    - inventory_hostname in groups[item] | default([])
+    - inventory_hostname in groups[item.name] | default([])
 
 # ==================================================================================================
 #

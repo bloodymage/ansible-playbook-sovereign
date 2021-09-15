@@ -44,7 +44,7 @@
   ansible.builtin.set_fact:
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_root_domain }}/sshca/sshca_host_key_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_root_domain }}/sshca/sshca_host_key_password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   changed_when:

@@ -154,7 +154,7 @@ smtpd_sender_restrictions =
 {% endif %}
 
 # Relay Definitions
-{% if postfix_relay_domains is defined -%}
+{% if postfix_relay_domains is truthy -%}
 relay_domains =
 {% for domain in postfix_relay_domains %}
   {{ domain }}{{ "," if not loop.last else "" }}
@@ -181,10 +181,16 @@ smtpd_sasl_type = {{ postfix_smtpd_sasl_type }}
 smtpd_sasl_auth_enable = {{ postfix_smtpd_sasl_auth_enable }}
 {% endif %}
 {% if postfix_smtpd_sasl_security_options != __postfix_smtpd_sasl_security_options -%}
-smtpd_sasl_security_options = {{ postfix_smtpd_sasl_security_options }}
+smtpd_sasl_security_options =
+{% for option in postfix_smtpd_sasl_security_options %}
+  {{ option }}{{ "," if not loop.last else "" }}
+{% endfor %}
 {% endif %}
 {% if postfix_smtpd_sasl_tls_security_options != __postfix_smtpd_sasl_tls_security_options -%}
-smtpd_sasl_tls_security_options = {{ postfix_smtpd_sasl_tls_security_options }}
+smtpd_sasl_tls_security_options =
+{% for option in postfix_smtpd_sasl_tls_security_options %}
+  {{ option }}{{ "," if not loop.last else "" }}
+{% endfor %}
 {% endif %}
 {% if postfix_smtpd_sasl_authenticated_header != __postfix_smtpd_sasl_authenticated_header -%}
 smtpd_sasl_authenticated_header = {{ postfix_smtpd_sasl_authenticated_header }}
@@ -196,7 +202,16 @@ smtpd_sasl_local_domain = {{ postfix_smtpd_sasl_local_domain }}
 smtp_sasl_auth_enable = {{ postfix_smtp_sasl_auth_enable }}
 {% endif %}
 {% if postfix_smtp_sasl_security_options != __postfix_smtp_sasl_security_options -%}
-smtp_sasl_security_options = {{ postfix_smtp_sasl_security_options }}
+smtp_sasl_security_options =
+{% for option in postfix_smtp_sasl_security_options %}
+  {{ option }}{{ "," if not loop.last else "" }}
+{% endfor %}
+{% endif %}
+{% if postfix_smtp_sasl_tls_security_options != __postfix_smtp_sasl_tls_security_options -%}
+smtp_sasl_tls_security_options =
+{% for option in postfix_smtp_sasl_tls_security_options %}
+  {{ option }}{{ "," if not loop.last else "" }}
+{% endfor %}
 {% endif %}
 {% if postfix_smtp_sasl_password_maps != __postfix_smtp_sasl_password_maps %}
 smtp_sasl_password_maps = {{ postfix_smtp_sasl_password_maps }}

@@ -17,9 +17,9 @@
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
-    __mode: "{{ dotfiles_mode }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode| default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.username is defined
@@ -37,8 +37,9 @@
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
@@ -60,8 +61,9 @@
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
@@ -78,8 +80,9 @@
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
@@ -95,8 +98,9 @@
   loop: "{{ dotfiles_users }}"
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   become: yes
   when:
     - dotfiles_users is defined
@@ -114,15 +118,15 @@
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
-    __mode: "{{ dotfiles_mode }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 # ==================================================================================================
 #
@@ -140,15 +144,15 @@
   become: yes
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
-    __mode: "{{ dotfiles_mode }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 # ==================================================================================================
 #
@@ -167,14 +171,15 @@
   loop: "{{ dotfiles_users }}"
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   become: yes
   when:
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 - name: "Install gpgsync.desktop"
   ansible.builtin.copy:
@@ -186,14 +191,15 @@
   loop: "{{ dotfiles_users }}"
   vars:
     __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
-    __dotfiles_owner: "{{ item.id_number }}"
-    __dotfiles_group: "{{ item.id_number }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   become: yes
   when:
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number
 
 # ==================================================================================================
 #
@@ -205,14 +211,19 @@
 - name: "Install .k5login."
   ansible.builtin.template:
     src: k5login.j2
-    dest: "{{ __dotfiles_home }}/.k5login
+    dest: "{{ __dotfiles_home }}/.k5login"
     owner: "{{ __dotfiles_owner }}"
     group: "{{ __dotfiles_group }}"
     mode: "0644"
   loop: "{{ dotfiles_users }}"
   become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(dotfiles_mode) }}"
   when:
     - dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - item.id_number >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_min_domain_id_number

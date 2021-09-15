@@ -131,9 +131,20 @@ ownca_format: 'pem'
 # Currently RSA is needed for testing windows smart card authorization.
 # ownca_privatekey_type: "{{ autonomy_default_encryption_type }}"
 ownca_privatekey_type: "RSA"
+ownca_privatekey_size: "4096"
 
+# Currently testing smart cards, most documentation recommends 2048.  Until smart cards are fully
+# functional, we will use 2048.
+#ownca_max_user_privatekey_size: "3072"
+ownca_max_user_privatekey_size: "2048"
 # Cert Authoritiy
 
+ownca_root_not_after: "+3650d"
+ownca_intermediate_not_after: "+3600d"
+ownca_issuer_not_after: "+3600d"
+ownca_component_not_after: "+825d"
+ownca_identity_not_after: "+3600d"
+ownca_codesign_not_after: "+3600d"
 
 # ==================================================================================================
 #
@@ -179,7 +190,7 @@ __ownca_root_ca:
   ownca_privatekey_passphrase: "{{ ownca_root_password }}"
   provider: "selfsigned"
   private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name | lower }}-root-ca.key"
-  password_store_id_base: "{{ autonomy_root_domain }}"
+  password_store_id_base: "{{ autonomy_passdb }}{{ autonomy_root_domain }}"
   ca_id: "root"
   zone_name: ""
   domain: "{{ autonomy_root_domain }}"

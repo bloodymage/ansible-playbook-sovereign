@@ -117,9 +117,9 @@
     __password_userpass: "userpass={{ item['stdout'] }}"
     __password_create: "create=true"
     __password_overwrite: "overwrite={{ __force }} backup={{ __force }}"
-    __password_store_id: "{{ item['item']['domain'] }}/hosts/{{ __nameserver }}/bind_dnssec_secret"
+    __password_store_id: "{{ autonomy_passdb }}{{ item['item']['domain'] }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
     __password_lookup: "{{ __password_store_id }} {{ __password_userpass }} {{ __password_create }} {{__password_overwrite }}"
-    bind_dnssec_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    bind_dyndns_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   when:
     - bind_ddns_keys['results'] is defined
     - item['stdout'] is defined

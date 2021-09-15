@@ -4,7 +4,7 @@
     "comment": "The GPG Sync example keylist"
   },
   "keys": [
-{% for user in domain_users %}
+{% for user in __realm_users %}
   {% if user.gpg_keys is defined %}
     {% for key in user.gpg_keys %}
       {

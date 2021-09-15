@@ -1,3 +1,63 @@
 ---
 # defaults file for config_realm_environment
-__samba_recreate_realm: no
+# ==================================================================================================
+#
+# Service user definitions
+#
+# These are users required by services available on our network.
+#
+# ==================================================================================================
+domain_user_vmail:
+  username: "vmail"
+  spns:
+    - spn: "imap"
+      host: "{{ autonomy_internal_mail_host }}"
+      keytab_file: "/etc/dovecot/dovecot.keytab"
+    - spn: "smtp"
+      host: "{{ autonomy_internal_mail_host }}"
+      keytab_file: "/etc/dovecot/dovecot.keytab"
+  account_expire: "--noexpiry"
+
+domain_user_mediawiki:
+  username: "mediawiki"
+  spns:
+    - spn: "HTTP"
+      host: "{{ autonomy_internal_www_host }}"
+      keytab_file: "/etc/apache2/wiki.{{ autonomy_domain }}.keytab"
+  account_expire: "--noexpiry"
+
+domain_user_keycloak:
+  username: "keycloak"
+  spns:
+    - spn: "HTTP"
+      host: "{{ autonomy_internal_keycloak_host }}"
+      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
+    - spn: "HTTP"
+      host: "{{ autonomy_dmz_keycloak_host }}"
+      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
+  account_expire: "--noexpiry"
+
+domain_user_nextcloud:
+  username: "nextcloud"
+  spns:
+    - spn: "HTTP"
+      host: "{{ autonomy_dmz_www_host }}"
+  account_expire: "--noexpiry"
+
+__realm_users: []
+
+__default_domain_system_users:
+  - name: "internal_mail_servers"
+    user: "{{ domain_user_vmail }}"
+  - name: "internal_web_servers"
+    user: "{{ domain_user_mediawiki }}"
+  - name: "keycloak_servers"
+    user: "{{ domain_user_keycloak }}"
+  - name: "dmz_www_servers"
+    user: "{{ domain_user_nextcloud }}"
+
+domain_mail_user_spns:
+  - spn: "imap"
+    keytab_file: "/etc/dovecot/dovecot.keytab"
+  - spn: "smtp"
+    keytab_file: "/etc/dovecot/dovecot.keytab"

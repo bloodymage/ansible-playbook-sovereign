@@ -173,7 +173,7 @@
   ansible.builtin.set_fact:
     ownca_component_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_domain }}/ownca/ownca_component_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/ownca/ownca_component_password"
     __password_lookup: "{{ __password_store_id }}"
   become: no
   delegate_to: localhost
@@ -300,4 +300,4 @@
   include: "copy_to_samba.yml"
   become: no
   when:
-    - inventory_hostname == groups['samba_file_servers'][0] | default([])
+    - inventory_hostname == groups['samba_ownca_user_hosts'][0] | default([])

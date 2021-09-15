@@ -17,9 +17,7 @@ postfix_sender_relay: ""
 # ==================================================================================================
 postfix_mailbox_users: []
 
-postfix_virtual_mailbox_domain_maps:
-  - name: "{{ autonomy_domain }}"
-    status: "OK"
+postfix_virtual_mailbox_domain_maps: "{{ __postfix_virtual_mailbox_domain_maps }}"
 
 postfix_sasl_relay_files:
   - filename: "sasl_passwd"
@@ -69,6 +67,8 @@ postfix_relay_host: []
 #
 #
 # ==================================================================================================
+__postfix_virtual_mailbox_domain_maps: []
+
 __postfix_virtual_mailboxes:
   - type: "canonical"
     data: "{{ postfix_canonical_mappings }}"

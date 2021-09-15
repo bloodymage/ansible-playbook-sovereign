@@ -43,6 +43,8 @@
   vars:
     __additional_cert: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}.crt"
   become: no
+  when:
+    - item[0]['type'] != "public"
 
 # ==================================================================================================
 #

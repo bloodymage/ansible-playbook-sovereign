@@ -42,7 +42,7 @@
     pkinit_require_eku = true
   {% elif inventory_hostname in groups['workstations'] -%}
     enable-pkinit = yes
-    pkinit_identity = FILE:/etc/ssl/certs/{{ autonomy_fqdn }}.pem,/etc/ssl/private/{{ autonomy_fqdn }}.key
+    pkinit_identity = FILE:/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem,/etc/ssl/private/{{ autonomy_fqdn }}.key
     pkinit_identities = PKCS11:opensc-pkcs11.so:slotid=0:certid=01
     pkinit_require_eku = true
     pkinit_anchors = DIR:/etc/ssl/certs
@@ -83,9 +83,8 @@
 {% if autonomy_smart_card_login %}
 {% if inventory_hostname in groups['samba_domain_controllers'] %}
 [kdc]
-  pkinit_anchors = DIR:/etc/ssl/certs
   enable-pkinit = yes
-  pkinit_identity = FILE:/etc/ssl/certs/{{ autonomy_fqdn }}.pem,/etc/ssl/private/{{ autonomy_fqdn }}.key
+  pkinit_identity = FILE:/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem,/etc/ssl/private/{{ autonomy_fqdn }}.key
   pkinit_anchors = DIR:/etc/ssl/certs
   pkinit_principal_in_certificate = yes
   pkinit_win2k = no

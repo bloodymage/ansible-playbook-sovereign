@@ -80,7 +80,9 @@ bind_root_zones:
 bind_rpz_zones: []
 
 bind_dnssec_validation: "no"
-bind_dnssec_secret: "secret"
+
+
+bind_dyndns_secret: "secret"
 
 
 bind_ddns_algorithm: "hmac-sha512"

@@ -6,11 +6,41 @@
     state: directory
     recurse: yes
     follow: no
-    owner: "root"
+    owner: "{{ autonomy_org_unit_name | upper }}\\unixadmin"
     group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
     mode: "{{ item.mode | default('0770') }}"
   become: yes
   loop: "{{ samba_shares }}"
+  when:
+    item.name != "Users"
+
+- name: "Set filesystem permissions on samba User share"
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    recurse: no
+    follow: no
+    owner: "{{ autonomy_org_unit_name | upper }}\\unixadmin"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "{{ item.mode | default('0770') }}"
+  become: yes
+  loop: "{{ samba_shares }}"
+  when:
+    - item.name == "Users"
+
+- name: "Set filesystem permissions on samba User's home folder"
+  ansible.builtin.file:
+    path: "/srv/samba/home/{{ item.username }}"
+    state: directory
+    recurse: yes
+    follow: no
+    owner: "{{ autonomy_org_unit_name | upper }}\\{{ item.username }}"
+    group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    mode: "{{ item.mode | default('0770') }}"
+  become: yes
+  loop: "{{ __realm_users }}"
+  when:
+    - item.id_number is defined
 
 # ==================================================================================================
 #

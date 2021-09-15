@@ -18,6 +18,7 @@ autonomy_use_source_code_repos: no
 autonomy_password_length: "42"
 autonomy_virtual_host: no
 autonomy_dod_certs_install: no
+autonomy_passdb: "ansible/autonomy/"
 
 # Zone Information
 autonomy_root_domain: "example.com"
@@ -34,6 +35,9 @@ autonomy_zones:
   - name: "example"
     type: public
     domain: "{{ autonomy_root_domain }}"
+
+# This really needs to be set to the 1st list item that type == "internal"
+autonomy_internal_zone_name: "{{ autonomy_zones[0]['name'] }}"
 
 autonomy_domain: "{{ autonomy_zone_name }}.{{ autonomy_root_domain }}"
 autonomy_realm: "{{ autonomy_zone_name | upper }}"
@@ -84,8 +88,9 @@ sshca_user_key_password: "password"
 
 # LDAP Definitions
 autonomy_base_dn: "DC={{ autonomy_org_unit_name | upper }},DC={{ autonomy_org_name | upper }},DC={{ autonomy_tld | upper }}"
-autonomy_user_dn: "CN=users,{{ autonomy_base_dn }}"
-autonomy_group_dn: "CN=users,{{ autonomy_base_dn }}"
+autonomy_base_dn_lower: "DC={{ autonomy_org_unit_name | lower }},DC={{ autonomy_org_name | lower }},DC={{ autonomy_tld | lower }}"
+autonomy_user_dn: "CN=Users,{{ autonomy_base_dn_lower }}"
+autonomy_group_dn: "CN=Users,{{ autonomy_base_dn_lower }}"
 autonomy_config_dn: "CN=Configuration,{{ autonomy_base_dn }}"
 autonomy_schema_dn: "CN=Schema,{{ autonomy_config_dn }}"
 
@@ -116,15 +121,6 @@ user_homeassistant_id_number: 503
 user_vmail_id_number:  504
 user_odoo_id_number: 505
 
-# MySQL / MariaDB
-mysql_administrator: "root"
-mysql_system_maintenance_user: "debian-sys-maint"
-mysql_datadir: "/var/lib/mysql"
-
-nextcloud_db_user: nextcloud
-nextcloud_db_hosts:
-  - "{{ autonomy_fqdn }}"
-  - "localhost"
 
 # ==================================================================================================
 #
@@ -141,50 +137,6 @@ samba_group_class: "(objectClass=group)"
 samba_search: "(|(userPrincipalName=%uid)(sAMAccountName=%uid)(mail=%uid))"
 samba_enabled_users: "(! (userAccountControl:1.2.840.113556.1.4.803:=2))"
 samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
-
-# ==================================================================================================
-#
-# Service user definitions
-#
-# These are users required by services available on our network.
-#
-# ==================================================================================================
-domain_user_vmail:
-  username: "vmail"
-  spns:
-    - spn: "imap"
-      host: "{{ internal_mail_host }}"
-      keytab_file: "/etc/dovecot/dovecot.keytab"
-    - spn: "smtp"
-      host: "{{ internal_mail_host }}"
-      keytab_file: "/etc/dovecot/dovecot.keytab"
-  account_expire: "--noexpiry"
-
-domain_user_mediawiki:
-  username: "mediawiki"
-  spns:
-    - spn: "HTTP"
-      host: "{{ internal_www_host }}"
-      keytab_file: "/etc/apache2/wiki.{{ autonomy_domain }}.keytab"
-  account_expire: "--noexpiry"
-
-domain_user_keycloak:
-  username: "keycloak"
-  spns:
-    - spn: "HTTP"
-      host: "{{ internal_keycloak_host }}"
-      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
-    - spn: "HTTP"
-      host: "{{ dmz_keycloak_host }}"
-      keytab_file: "{{ keycloak_home }}/standalone/configuration/keycloak.keytab"
-  account_expire: "--noexpiry"
-
-domain_user_nextcloud:
-  username: "nextcloud"
-  spns:
-    - spn: "HTTP"
-      host: "{{ dmz_www_host }}"
-  account_expire: "--noexpiry"
 
 # ==================================================================================================
 #
@@ -220,13 +172,8 @@ __linear_strategy: "linear"
 __collection_overwrite_passwords: no
 
 # Samba
+__samba_recreate_realm: no
 __samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
-
-__domain_system_users:
-  - "{{ domain_user_vmail }}"
-  - "{{ domain_user_mediawiki }}"
-  - "{{ domain_user_keycloak }}"
-  - "{{ domain_user_nextcloud }}"
 
 __autonomy_zones:
   - name: "{{ autonomy_internal_zone_name }}"
@@ -243,6 +190,10 @@ __letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directo
 __letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
 __buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
 __buypass_production_directory: "https://api.buypass.com/acme/directory"
+
+__autonomy_ddns_key_algorithm: "hmac-sha256"
+
+__domain_system_users: []
 
 # ==================================================================================================
 #
@@ -268,4 +219,3 @@ __os_variables_files:
   - "{{ __system | lower }}.yml"
   - main.yml
 
-__autonomy_ddns_key_algorithm: "hmac-sha256"

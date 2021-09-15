@@ -1,0 +1,198 @@
+# {{ ansible_managed }}
+
+require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
+global ["autonomy_category", "autonomy_explicit_group", "autonomy_listname", "autonomy_detail", "autonomy_detected_domain", "autonomy_explicit_subgroup", "autonomy_generic_subgroup"];
+
+# ==================================================================================================
+#
+# OpenPGP
+#
+# ==================================================================================================
+if anyof (
+  address :contains "from" "openpgp.org"
+)
+{
+  set "autonomy_category" "Accounts";
+}
+
+# ==================================================================================================
+#
+# Facebook
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "facebookmail.com"
+)
+{
+  set "autonomy_category" "Social";
+  set "autonomy_explicit_group" "Facebook";
+}
+
+# ==================================================================================================
+#
+# Firefox
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "firefox.com"
+          )
+{
+  set "autonomy_category" "Accounts";
+  set "autonomy_explicit_group" "Firefox";
+}
+
+if address :contains "from" "github.com"
+{
+  set "autonomy_category" "Accounts";
+  set "autonomy_explicit_group" "Github";
+}
+
+# ==================================================================================================
+#
+# Google
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "google.com",
+          address :contains "from" "googlemail.com"
+          )
+{
+  set "autonomy_category" "Accounts";
+  set "autonomy_explicit_group" "Google";
+}
+
+# ==================================================================================================
+#
+# LinkedIn
+#
+# connections@linkedin.com
+# emailconfirm@linkedin.com
+# groups-noreply@linkedin.com
+# invitations@linkedin.com
+# invitations-noreply@linkedin.com
+# jobs-listings@linkedin.com
+# jobs-noreply@linkedin.com
+# member@linkedin.com
+# messages-noreply@bounce.linkedin.command
+# messages-noreply@linkedin.com
+# news@linkedin.com
+# notifications-noreply@linkedin.com
+# password@linkedin.com
+# security-noreply@linkedin.com
+# welcome@linkedin.com
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "linkedin.com"
+          )
+{
+  set "autonomy_category" "Social";
+  set "autonomy_explicit_group" "LinkedIn";
+}
+
+# ==================================================================================================
+#
+# Pinterest
+#
+# editorial@pinterest.com
+# community@pinterest.com
+# confirm@pintrest.com
+# pinbot@pintrest.com
+# weekly@pintrest.com
+# news@pintrest.com
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "pinterest.com"
+          )
+{
+  set "autonomy_category" "Social";
+  set "autonomy_explicit_group" "Pinterest";
+}
+
+# ==================================================================================================
+#
+# Reddit
+#
+# ==================================================================================================
+if anyof (
+          address :is "from" "noreply@reddit.com",
+          address :is "from" "noreply@redditmail.com"
+          )
+{
+  set "autonomy_category" "Social";
+  set "autonomy_explicit_group" "Reddit";
+}
+
+# ==================================================================================================
+#
+# Twitter
+#
+# confirm@twitter.com
+# verify@twitter.com
+#
+# ==================================================================================================
+if anyof (
+          address :contains "from" "twitter.com"
+          )
+{
+  set "autonomy_category" "Social";
+  set "autonomy_explicit_group" "Twitter";
+}
+
+# ==================================================================================================
+#
+# Youtube
+#
+# ==================================================================================================
+if anyof (
+          address :is "from" "no-reply@youtube.com",
+          address :is "from" "noreply@youtube.com"
+          )
+{
+  set "autonomy_category" "Accounts";
+  set "autonomy_explicit_group" "Google";
+  set "autonomy_explicit_subgroup" "Youtube";
+}
+
+# ==================================================================================================
+#
+# Catchall Domain Sort
+#
+# ==================================================================================================
+if address :domain :regex "from" "([^.]*)\\.?([^.]*)\\.?([^.]*)\\.?([^.]*)\\.?([^.]*)\\.?([^.]*)" {
+  if string :is "${1}" "" {} else { set :lower "part1" "${1}."; }
+  if string :is "${2}" "" {} else { set :lower "part2" "${2}."; }
+  if string :is "${3}" "" {} else { set :lower "part3" "${3}."; }
+  if string :is "${4}" "" {} else { set :lower "part4" "${4}."; }
+  if string :is "${5}" "" {} else { set :lower "part5" "${5}."; }
+  if string :is "${6}" "" {} else { set :lower "part6" "${6}"; }
+
+  set :lower "autonomy_detected_domain" "${part1}${part2}${part3}${part4}${part5}${part6}";
+}
+
+# ==================================================================================================
+#
+# Managed Systems
+#
+#
+# ==================================================================================================
+if anyof (
+{% for item in groups['all'] %}
+  string :is "${autonomy_detected_domain}" "{{ item }}."{{ "," if not loop.last else "" }}
+{% endfor %}
+)
+{
+  if anyof (
+{% for user in mail_aliases_local_user_maps %}
+    envelope :user :matches ["from","to"] "{{ user.username }}",
+{% endfor %}
+{% for user in mail_aliases_local_user_maps %}
+    envelope :user :matches ["from","to"] "{{ user.username | upper }}"{{ "," if not loop.last else "" }}
+{% endfor %}
+  )
+  {
+    set "autonomy_category" "Systems";
+    set "autonomy_explicit_group" "${autonomy_detected_domain}";
+  }
+}

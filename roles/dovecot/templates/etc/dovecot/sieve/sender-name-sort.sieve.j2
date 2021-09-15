@@ -1,0 +1,68 @@
+# {{ ansible_managed }}
+
+require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
+global ["autonomy_category", "autonomy_explicit_group", "autonomy_listname", "autonomy_detail", "autonomy_detected_domain", "autonomy_explicit_subgroup", "autonomy_generic_subgroup"];
+
+if anyof (
+  address :contains "from" "notifications",
+  address :contains "from" "promo",
+  address :contains "from" "deals",
+  address :contains "from" "store-news",
+  address :contains "from" "store_news",
+  address :contains "from" "store-offers",
+  address :contains "from" "announcements",
+  address :contains "from" "newsletter",
+  address :contains "from" "newsletters",
+  address :contains "from" "videogames-store",
+  header "Precedence" "list",
+  header "Precedence" "bulk"
+)
+{
+  set "autonomy_generic_subgroup" "Advertisements";
+}
+
+if anyof (
+  address :contains "from" "billing",
+  address :contains "from" "orders",
+  address :contains "from" "receipts",
+  allof (
+    address :contains "from" "info",
+    anyof (
+      header :contains "Subject" "bill",
+      header :contains "Subject" "payment"
+    )
+  )
+)
+{
+  set "autonomy_generic_subgroup" "Bills and Receipts";
+}
+
+if anyof (
+  address :contains "from" "alerts",
+  address :contains "from" "account-updates",
+  address :contains "from" "account-update",
+  address :contains "from" "payment-update",
+  address :contains "from" "info",
+  address :contains "from" "accounts",
+  address :contains "from" "notice"
+)
+{
+set "autonomy_generic_subgroup" "Account Notifications";
+}
+
+if anyof (
+  address :contains "from" "shipping",
+  address :contains "from" "shipment-tracking",
+  address :contains "from" "ship-confirm",
+  address :contains "from" "auto-confirm"
+)
+{
+  set "autonomy_generic_subgroup" "Shipping";
+}
+
+if anyof (
+  address :contains "from" "Video.Appointment"
+)
+{
+  set "autonomy_generic_subgroup" "Appointments";
+}

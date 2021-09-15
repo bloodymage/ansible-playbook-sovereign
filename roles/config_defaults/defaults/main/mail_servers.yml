@@ -1,6 +1,6 @@
 ---
 # Mail Servers
-mail_location: "mbox:~/mail:INBOX=/var/mail/%u"
+mail_location: "maildir:/var/mail/vmail/%d/%n/mail:LAYOUT=fs"
 mail_uid: "{{ user_vmail_id_number }}"
 mail_gid: "{{ user_vmail_id_number }}"
 mail_privileged_group:  mail
@@ -19,3 +19,49 @@ mail_opendkim_sock_loc_name: "opendkim"
 mail_opendkim_sock_dir: "/var/spool/postfix/{{ mail_opendkim_sock_loc_name }}"
 mail_opendkim_socket: "{{ mail_opendkim_sock_dir }}/opendkim.sock"
 mail_opendkim_unix_socket: "unix:{{ mail_opendkim_sock_loc_name }}/opendkim.sock"
+
+# TODO: This is ugly, required for __domain_system_users (main.yml)
+autonomy_internal_mail_host: "{{ groups['internal_mail_servers'][0] }}"
+autonomy_internal_www_host: "{{ groups['internal_web_servers'][0] }}"
+autonomy_dmz_www_host: "{{ groups['dmz_web_servers'][0] }}"
+autonomy_internal_keycloak_host: "{{ groups['internal_keycloak_servers'][0] }}"
+autonomy_dmz_keycloak_host: "{{ groups['dmz_keycloak_servers'][0] }}"
+
+
+mail_aliases_local_user_maps:
+  - username: abuse
+    email: "abuse@{{ autonomy_root_domain }}"
+  - username: clamav
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: daemon
+    email: "hostmaster@{{ autonomy_root_domain }}"
+  - username: ftp
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: hostmaster
+    email: "hostmaster@{{ autonomy_root_domain }}"
+  - username: mailer-daemon
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: news
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: nobody
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: noc
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: postmaster
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: root
+    email: "hostmaster@{{ autonomy_root_domain }}"
+  - username: security
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: spamass-milter
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: spamassassin
+    email: "postmaster@{{ autonomy_root_domain }}"
+  - username: usenet
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: webmaster
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: www
+    email: "webmaster@{{ autonomy_root_domain }}"
+  - username: www-data
+    email: "webmaster@{{ autonomy_root_domain }}"

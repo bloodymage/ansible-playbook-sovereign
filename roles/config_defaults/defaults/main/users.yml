@@ -1,0 +1,88 @@
+---
+user_mythtv_access_cert:
+  - mythtv
+
+user_mythtv_ssh_cert:
+  - none
+
+user_mythtv_groups: []
+user_mythtv_sudoers: []
+user_mythtv_gpg_name: ""
+user_mythtv_gpg_email: ""
+
+user_mythtv:
+  username: mythtv
+  groups: "{{ user_mythtv_groups }}"
+  id_number: "{{ user_mythtv_id_number }}"
+  unix_home: /home/mythtv
+  ssh_access_cert: "{{ user_mythtv_access_cert }}"
+  ssh_cert: "{{ user_mythtv_ssh_cert }}"
+  sudoers: "{{ user_mythtv_sudoers }}"
+  gpg_name: "{{ user_mythtv_gpg_name }}"
+  gpg_email: "{{ user_mythtv_gpg_email }}"
+
+user_minidlna:
+  username: minidlna
+  name: MiniDLNA Server
+  groups: []
+  id_number: "{{ user_minidlna_id_number }}"
+  #unix_home: /srv/minidlna
+  unix_home: /var/lib/minidlna
+  shell: /usr/sbin/nologin
+
+user_git:
+  username: git
+  groups: []
+  uid_number: "{{ user_git_id_number }}"
+  unix_home: /srv/git
+
+user_homeassistant:
+  username: homeassistant
+  name: "Home Assistant"
+  groups: []
+  id_number: "{{ user_homeassistant_id_number }}"
+  unix_home: /home/homeassistant
+  ssh_access_cert:
+    - root-everywhere
+    - homeassistant
+  ssh_cert:
+    - None
+
+user_vmail:
+  username: vmail
+  groups: []
+  id_number: "{{ user_vmail_id_number }}"
+  unix_home: "/var/mail/vmail"
+  ssh_access_cert: []
+  ssh_cert:
+    - None
+
+user_odoo:
+  username: odoo
+  groups: []
+  id_number: "{{ user_odoo_id_number }}"
+  unix_home: /home/odoo
+  ssh_access_cert:
+    - root-everywhere
+
+user_root: "{{ __user_root }}"
+
+user_mythtv_group:
+  name: mythtv
+  gid: "{{ user_mythtv_id_number }}"
+
+user_minidlna_group:
+  name: minidlna
+  gid: "{{ user_minidlna_id_number }}"
+
+user_git_group:
+  name: git
+  gid: "{{ user_git_id_number }}"
+
+user_homeassistant_group:
+  name: homeassistant
+  gid: "{{ user_homeassistant_id_number }}"
+
+user_vmail_group:
+  name: vmail
+  gid: "{{ user_vmail_id_number }}"

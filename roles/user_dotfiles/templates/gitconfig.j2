@@ -1,13 +1,20 @@
 {{ ansible_managed | comment }}
 
+[user]
 {% if item.gpg_keys is defined %}
-  [user]
-  name = "{{ item.gpg_keys[0].name }}"
-  email = "{{ item.gpg_keys[0].email }}"
-  {% if item.gpg_keys[0].sign_keyid is defined %}
-    signingkey = "{{ item.gpg_keys[0].sign_keyid }}"
-  {% endif %}
+name = "{{ item.gpg_keys[0].name }}"
+email = "{{ item.gpg_keys[0].email }}"
+{% if item.gpg_keys[0].sign_keyid is defined %}
+signingkey = "{{ item.gpg_keys[0].sign_keyid }}"
 {% endif %}
+{% elif item.display_name is defined %}
+  name = "{{ item.display_name }}"
+  email = "{{ item.mail }}"
+{% else %}
+  name = "{{ item.username }}"
+  email = "{{ item.username }}@{{ autonomy_fqdn }}"
+{% endif %}
+
 
 [init]
 defaultBranch = {{ dotfiles_default_git_branch }}
@@ -22,9 +29,9 @@ excludesfile = ~/.gitignore # Creates a global git ignore
 {% if item.github_user is defined -%}
   user = {{ item.github_user }}
   oauth-token = {{ item.oauth_token }}
-{% elif autonomy_github_user is truthy and autonomy_github_oauth_token is truthy %}
-  user = autonomy_github_user }}
-  oauth-token = autonomy_github_oauth_token }}
+{% elif autonomy_github_user is truthy and autonomy_github_oauth_token is truthy -%}
+  user = {{ autonomy_github_user }}
+  oauth-token = {{ autonomy_github_oauth_token }}
 {% endif %}
 
 [branch "{{ dotfiles_default_git_branch }}"]

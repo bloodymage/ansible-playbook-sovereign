@@ -75,7 +75,7 @@
         - (autonomy_dod_certs_install or autonomy_enable_unzip)
       tags:
         - unzip
- 
+
 - name: "Install certificates on all host."
   hosts: all:!localhost:!public_zone
   roles:

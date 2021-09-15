@@ -15,7 +15,7 @@
 - name: "Get information from user authentication x509 certificate"
   community.crypto.x509_certificate_info:
     path: "{{ ownca_directory }}/users/certs/{{ item.username }}_authentication.crt"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   register: __result
   delegate_to: localhost
   run_once: yes
@@ -52,7 +52,7 @@
     executable: "/bin/bash"
     chdir: "{{ ownca_directory }}/users"
     creates: "{{ __ssh_pubkey }}"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   become: no
   delegate_to: localhost
   run_once: yes
@@ -76,15 +76,14 @@
              "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
     responses:
       (?i)passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   changed_when: false
   become: no
   delegate_to: localhost
   run_once: yes
   #no_log: yes
   vars:
-  vars:
-    __password_store_id: "{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
     __password_lookup: "{{ __password_store_id }}"
     __ssh_principals_list: "{% if item.ssh_principals is defined %}{{ item.ssh_principals + [item.username] }}{% else %}{{ [item.username] }}{% endif %}"
     __ssh_principals: "{% for principal in __ssh_principals_list %}{{ principal }}{{ ',' if not loop.last else '' }}{% endfor %}"
@@ -98,7 +97,7 @@
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
     mode: "0700"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   become: yes
   when:
     - item.id_number is defined
@@ -120,7 +119,7 @@
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
     mode: "0600"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   become: yes
   when:
     - item.id_number is defined
@@ -132,7 +131,7 @@
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
     mode: "0600"
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   become: yes
   when:
     - item.id_number is defined
@@ -144,7 +143,7 @@
     owner: root
     group: root
     mode: '0644'
-  loop: "{{ domain_users }}"
+  loop: "{{ __realm_users }}"
   become: yes
   vars:
     __realm: "{% if inventory_hostname not in groups['sssd'] %}{{ autonomy_org_unit_name | upper }}\\{% else %}{% endif %}"
@@ -166,7 +165,7 @@
 #     token: '{{ autonomy_github_oauth_token }}'
 #     pubkey: "{{ lookup('file', __ssh_pubkey) }}"
 #     state: present
-#   loop: "{{ domain_users }}"
+#   loop: "{{ __realm_users }}"
 #   delegate_to: localhost
 #   vars:
 #     __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"

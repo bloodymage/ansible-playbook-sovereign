@@ -1,2 +1,3 @@
 ---
 # defaults file for mariadb-databases
+__databases_to_create: []

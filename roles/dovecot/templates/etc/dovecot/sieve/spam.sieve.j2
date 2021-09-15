@@ -1,14 +1,14 @@
 # {{ ansible_managed }}
 
-require ["envelope", "subaddress", "fileinto", "imap4flags", "regex", "mailbox"];
+require ["envelope", "subaddress", "fileinto", "imap4flags", "regex", "mailbox", "date"];
 
-# I don't even want to see spam higher than level 10
+# Delete email where spam level is higher than 10
 if header :contains "X-Spam-Level" "**********" {
   discard;
   stop;
 }
 
-# Trash messages with improperly formed message IDs
+# Junk improperly formed message IDs
 if not header :regex "message-id" ".*@.*\\." {
   fileinto "{{ dovecot_junk_mail_folder }}";
   setflag "\\Seen";
@@ -29,14 +29,16 @@ if anyof (header :contains "X-Spam-Level" "*****",
   }
 }
 
-if envelope :matches :detail "to" "spam"{
-  fileinto "{{ dovecot_junk_mail_folder }}";
-}
-
-if header :contains "X-Spam-Flag" "YES" {
+if anyof (
+  envelope :matches :detail "to" "spam",
+  header :contains "X-Spam-Flag" "YES",
+  header :contains "Authentication-Results" "dkim=fail",
+  header :contains "Authentication-Results" "spf=fail",
+  header :contains "Authentication-Results" "spf=none"
+)
+{
   fileinto "{{ dovecot_junk_mail_folder }}";
   setflag "\\Seen";
   # Stop here - if there are other rules, ignore them for spam messages
   stop;
-
 }
