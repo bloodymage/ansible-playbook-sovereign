@@ -45,3 +45,19 @@ domain_user_nextcloud:
   account_expire: "--noexpiry"
 
 __realm_users: []
+
+__default_domain_system_users:
+  - name: "internal_mail_servers"
+    user: "{{ domain_user_vmail }}"
+  - name: "internal_web_servers"
+    user: "{{ domain_user_mediawiki }}"
+  - name: "keycloak_servers"
+    user: "{{ domain_user_keycloak }}"
+  - name: "dmz_www_servers"
+    user: "{{ domain_user_nextcloud }}"
+
+domain_mail_user_spns:
+  - spn: "imap"
+    keytab_file: "/etc/dovecot/dovecot.keytab"
+  - spn: "smtp"
+    keytab_file: "/etc/dovecot/dovecot.keytab"

@@ -101,6 +101,7 @@
       # telephoneNumber:
       ssh_access_cert: "{{ item.ssh_access_cert | default(omit) }}"
       ssh_principals: "{{ item.ssh_principals | default(omit) }}"
+      gpg_keys: "{{ item.gpg_keys | default(omit) }}"
     __given_name: "{{ item.given_name }}"
     __middle_name: "{{ item.middle_name | default(None) }}"
     __surname: "{{ item.surname | default(None) }}"
@@ -132,19 +133,28 @@
   tags:
     - always
 
-- name: "Add system users"
-  ansible.builtin.set_fact:
-    __domain_system_users: "{{ __domain_system_users + [item.user] }}"
-  loop:
-    - name: "internal_mail_servers"
-      user: "{{ domain_user_vmail }}"
-    - name: "internal_web_servers"
-      user: "{{ domain_user_mediawiki }}"
-    - name: "keycloak_servers"
-      user: "{{ domain_user_keycloak }}"
-    - name: "dmz_www_servers"
-      user: "{{ domain_user_nextcloud }}"
-  when:
-    - groups[item.name] is defined
-  delegate_to: localhost
-  run_once: yes
+# - name: "Get domain mail user spns."
+#   ansible.builtin.set_fact:
+#     __domain_mail_user_spns:
+#   loop: "{{ domain_mail_user_spns }}"
+#   vars:
+#     __spns:
+#       spn: "{{ item.spn }}"
+
+# - name: "Add system users"
+#   ansible.builtin.set_fact:
+#     __domain_system_users: "{{ __domain_system_users + [__user] }}"
+#   loop: "{{ __default_domain_system_users | product(__domain_system_user_spns) }}"
+#   vars:
+#     __user:
+#       username: "{{ item[0]['username'] }}"
+#       spns:
+#         - spn: "{{ item[1].spn }}"
+#           hostname: "{{ item[1]
+#       keytab_file: "{{ item[0]['keytab_file'] }}"
+#       account_expiry: "{{ item[0]['account_expiry'] }}"
+#   when:
+#     - groups["samba_domain_controllers"] is defined
+#     - groups[item.name] is defined
+#   delegate_to: localhost
+#   run_once: yes

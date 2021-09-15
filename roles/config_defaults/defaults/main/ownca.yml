@@ -139,6 +139,12 @@ ownca_privatekey_size: "4096"
 ownca_max_user_privatekey_size: "2048"
 # Cert Authoritiy
 
+ownca_root_not_after: "+3650d"
+ownca_intermediate_not_after: "+3600d"
+ownca_issuer_not_after: "+3600d"
+ownca_component_not_after: "+825d"
+ownca_identity_not_after: "+3600d"
+ownca_codesign_not_after: "+3600d"
 
 # ==================================================================================================
 #
