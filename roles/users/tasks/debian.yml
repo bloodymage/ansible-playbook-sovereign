@@ -180,6 +180,15 @@
     - users_debug
     - users-debug
 
+- name: "Ensure auth_principals directory exists."
+  ansible.builtin.file:
+    path: "/etc/ssh/auth_principals"
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+  become: yes
+
 - name: "Create SSH Principals file for users."
   ansible.builtin.template:
     src: "ssh_principals.j2"
@@ -300,7 +309,7 @@
 #
 #
 # ==================================================================================================
-# - name: Add User SSH keys to gitolite
+# - name: Add Users' SSH keys to gitolite.
 #   fetch:
 #     src: "/home/{{ item.username }}/.ssh/id_ed25519.pub"
 #     dest: "~/gitolite-admin/keydir/{{ inventory_hostname }}/{{ item.usename }}.pub"
@@ -310,7 +319,7 @@
 #     - users_debug
 #     - users-debug
 
-# - name: Add public ssh keys of users
+# - name: Add users' SSH keys to Github.
 #   authorized_key:
 #     user: "{{ item }}"
 #     exclusive: yes
