@@ -154,7 +154,7 @@
   ansible.builtin.package_facts:
     manager: auto
   when:
-    - inventory_hostname in groups['linux']
+    - inventory_hostname in groups['linux'] | default([])
 
 # ==================================================================================================
 #
