@@ -47,7 +47,7 @@
     - item.enabled 
 
 - name: "Install Drupal"
-  include: install_drupal.yml
+  include_tasks: install_drupal.yml
   loop: "{{ installed.results }}"
   loop_control:
     loop_var: __installed
@@ -55,7 +55,7 @@
     - (__installed.stat.exists is not defined) or (not __installed.stat.exists)
 
 - name: "Upgrade Drupal"
-  include: upgrade_drupal.yml
+  include_tasks: upgrade_drupal.yml
   loop: "{{ installed.results }}"
   loop_control:
     loop_var: __installed

@@ -79,12 +79,12 @@
     - nextcloud_passwordsalt == "password"
 
 - name: "Install Nextcloud."
-  include: nextcloud_install.yml
+  include_tasks: nextcloud_install.yml
   when:
     - not install_status.stat.exists
 
 - name: "Upgrade Nextcloud."
-  include: "nextcloud_upgrade.yml"
+  include_tasks: "nextcloud_upgrade.yml"
   when:
     - install_status.stat.exists
 
@@ -113,7 +113,7 @@
   become: yes
 
 - name: "Install Nextcloud apps."
-  include: nextcloud_apps.yml
+  include_tasks: nextcloud_apps.yml
 
 - name: "Ensure we have a clean nextcloud state before we do anything else."
   ansible.builtin.command:
@@ -131,7 +131,7 @@
 #
 # ==================================================================================================
 # - name: "Configure LDAP"
-#   include: nextcloud_ldap.yml
+#   include_tasks: nextcloud_ldap.yml
 #   when:
 #     - 'user_ldap' in nextcloud_apps
 

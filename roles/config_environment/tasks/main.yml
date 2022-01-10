@@ -183,6 +183,22 @@
 #         - debug
 #         - debug-mode
 
+- name: "Check if we are using passwords for logon."
+  ansible.builtin.set_fact:
+    ansible_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  when:
+    - autonomy_use_password_logon is defined
+    - autonomy_use_password_logon
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ ansible_user }}/password"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+
+
 - name: "Set environment configuration complete flag."
   ansible.builtin.set_fact:
     __autonomy_configuration_complete: yes

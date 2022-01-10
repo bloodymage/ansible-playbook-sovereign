@@ -111,6 +111,7 @@
   ansible.builtin.set_fact:
     ownca_certificate_authorities: "{{ ownca_certificate_authorities + [__certificate_authority] }}"
   loop: "{{ autonomy_zones }}"
+  become: no
   vars:
     ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.key"
     __certificate_authority:
@@ -156,18 +157,16 @@
     - item[0].type != "public"
 
 - name: "Include OS Family Preparation Tasks."
-  include: "{{ ansible_os_family | lower }}_prep.yml"
+  include_tasks: "{{ ansible_os_family | lower }}_prep.yml"
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
     - not ownca_generate_locally
-  become: no
 
 - name: "Include Localhost Preparation Tasks."
-  include: "localhost_prep.yml"
+  include_tasks: "localhost_prep.yml"
   when:
     - ansible_network_os is defined or ownca_generate_locally
-  become: no
 
 - name: "Ensure we have a password for the Component Issuing CA."
   ansible.builtin.set_fact:
@@ -276,28 +275,24 @@
     - parent_cert_authorities.complete_chain is defined
 
 - name: "Include OS Family Tasks."
-  include: "{{ ansible_os_family | lower }}_final.yml"
+  include_tasks: "{{ ansible_os_family | lower }}_final.yml"
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
     - not ownca_generate_locally
-  become: no
 
 - name: "Include NetworkOS Tasks."
-  include: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
-  become: no
+  include_tasks: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
   when:
     - ansible_network_os is defined
     - not ownca_generate_locally
 
 - name: "Include Local tasks."
-  include: "localhost_final.yml"
-  become: no
+  include_tasks: "localhost_final.yml"
   when:
     - ownca_generate_locally
 
 - name: "Copy to Samba File Server."
-  include: "copy_to_samba.yml"
-  become: no
+  include_tasks: "copy_to_samba.yml"
   when:
     - inventory_hostname == groups['samba_ownca_user_hosts'][0] | default([])

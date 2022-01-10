@@ -221,7 +221,7 @@
     - __username not in existing_user_list.stdout_lines
 
 - name: "Set Group Membership."
-  include: group_membership.yml
+  include_tasks: group_membership.yml
   loop: "{{ domain_groups }}"
   loop_control:
     loop_var: group
@@ -230,7 +230,6 @@
     - __samba_schema_master is defined
     - inventory_hostname == __samba_schema_master
     - group.group_members is defined
-  delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
 # ==================================================================================================

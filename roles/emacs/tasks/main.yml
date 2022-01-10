@@ -12,6 +12,6 @@
       become: no
 
 - name: "Include OS Specific Tasks"
-  include: "{{ ansible_system | lower }}.yml"
+  include_tasks: "{{ ansible_system | lower }}.yml"
   when:
     - ansible_system

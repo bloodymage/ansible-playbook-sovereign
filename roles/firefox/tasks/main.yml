@@ -27,7 +27,7 @@
     - install-packages
 
 - name: "Include OS Specific Tasks"
-  include: "{{ ansible_system | lower }}.yml"
+  include_tasks: "{{ ansible_system | lower }}.yml"
   when:
     - ansible_system
     - inventory_hostname not in groups['mythfrontend']

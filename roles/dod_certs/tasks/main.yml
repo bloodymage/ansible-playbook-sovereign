@@ -1,9 +1,8 @@
 ---
 # tasks file for dod_certs
 - name: "Include OS Family Tasks."
-  include: "{{ ansible_os_family | lower }}.yml"
+  include_tasks: "{{ ansible_os_family | lower }}.yml"
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
     - not ownca_generate_locally
-  become: no

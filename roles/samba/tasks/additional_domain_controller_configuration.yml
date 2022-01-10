@@ -23,7 +23,7 @@
   ignore_errors: yes
 
 - name: "Harden domain."
-  include: "hardening.yml"
+  include_tasks: "hardening.yml"
   become: no
   when:
     - autonomy_fqdn == __samba_schema_master
@@ -114,7 +114,7 @@
     - autonomy_fqdn == __samba_schema_master
 
 - name: "Update Schema"
-  include: "schema_updates.yml"
+  include_tasks: "schema_updates.yml"
   become: no
   when:
     - autonomy_fqdn == __samba_schema_master

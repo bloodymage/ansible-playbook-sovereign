@@ -92,7 +92,7 @@
     - __zone_current_serial_number is defined
 
 - name: "Configure Dynamic DNS Keys."
-  include: dynamic_dns.yml
+  include_tasks: dynamic_dns.yml
 
 # ==================================================================================================
 #

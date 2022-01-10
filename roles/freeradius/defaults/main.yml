@@ -52,9 +52,9 @@ freeradius_mods:
             value: "/etc/ssl/certs/{{ autonomy_fqdn }}.pem"
           - name: "ca_file"
             value: "/etc/ssl/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.pem"
-          # - name:	"auto_chain"
+          # - name: "auto_chain"
           #   value:  "yes"
-          # - name:	"psk_identity"
+          # - name: "psk_identity"
           #   value: "test"
           # - name: "psk_hexphrase"
           #   value: "036363823"
@@ -72,18 +72,18 @@ freeradius_mods:
           #   value: "yes"
           - name: ca_path
             value: "${cadir}"
-            #		allow_expired_crl = no
-            #	check_cert_issuer = "/C=GB/ST=Berkshire/L=Newbury/O=My Company Ltd"
-            #	check_cert_cn = %{User-Name}
+            #  allow_expired_crl = no
+            # check_cert_issuer = "/C=GB/ST=Berkshire/L=Newbury/O=My Company Ltd"
+            # check_cert_cn = %{User-Name}
           - name: cipher_list
             value: "DEFAULT"
           - name: cipher_server_preference
             value: "no"
-            #		disable_tlsv1_2 = no
-            #		disable_tlsv1_1 = no
-            #		disable_tlsv1 = no
-            #		tls_min_version = "1.0"
-            #		tls_max_version = "1.3"
+            #  disable_tlsv1_2 = no
+            #  disable_tlsv1_1 = no
+            #  disable_tlsv1 = no
+            #  tls_min_version = "1.0"
+            #  tls_max_version = "1.3"
           - name: ecdh_curve
             value: "prime256v1"
           - name: "cache"
@@ -95,18 +95,18 @@ freeradius_mods:
           - name: verify
             value_group: []
             #  - name: "skip_if_ocsp_okno"
-            #		 value: "no"
-            #	 - name: tmpdir
+            #   value: "no"
+            #  - name: tmpdir
             #    value: "/tmp/radiusd"
-            #	 - name: client
+            #  - name: client
             #    value: "/path/to/openssl verify -CApath ${..ca_path} %{TLS-Client-Cert-Filename}"
-          - name:	ocsp
+          - name: ocsp
             value_group:
               - name: enable
                 value: "no"
               - name: override_cert_url
                 value: "yes"
-              # - name:	"url"
+              # - name: "url"
               #   value: "http://127.0.0.1/ocsp/"
               # - name: use_nonce
               #   value: "yes"
@@ -118,7 +118,7 @@ freeradius_mods:
         options:
           - name: tls
             value: "tls-common"
-          # - name:	virtual_server
+          # - name: virtual_server
           #   value: "check-eap-tls"
       - name: "ttls"
         options:
@@ -132,35 +132,35 @@ freeradius_mods:
             value: "no"
           - name: virtual_server
             value: "inner-tunnel"
-          # - name:	include_length
+          # - name: include_length
           #   value: "yes"
-          # - name:	require_client_cert
+          # - name: require_client_cert
           #   value: yes
       - name: "peap"
         options:
           - name: "tls"
             value: "tls-common"
-          - name:	default_eap_type
+          - name: default_eap_type
             value: "mschapv2"
-          - name:	copy_request_to_tunnel
+          - name: copy_request_to_tunnel
             value: "no"
-          # - name:	"proxy_tunneled_request_as_eap"
+          # - name: "proxy_tunneled_request_as_eap"
           #   value: yes
-          - name:	virtual_server
+          - name: virtual_server
             value: "inner-tunnel"
-          # - name:	soh
+          # - name: soh
           #   value: "yes"
           # - name: "soh_virtual_server"
           #   value: "soh-server"
           # - name: "require_client_cert"
           #   value: "yes"
-      - name:	mschapv2
+      - name: mschapv2
         options: []
           # - name: send_error
           #   value: "no"
-          # - name:	"identity"
+          # - name: "identity"
           #   value: "FreeRADIUS"
-      # - name:	fast
+      # - name: fast
       #   options: []
 
   - name: mschap

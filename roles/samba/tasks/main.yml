@@ -62,7 +62,7 @@
   become: yes
 
 - name: "Clean samba domain"
-  include: clean_environment.yml
+  include_tasks: clean_environment.yml
   when:
     - __samba_recreate_realm
 
@@ -73,22 +73,20 @@
 #
 # ==================================================================================================
 - name: "Create initial controller"
-  include: provision_initial_controller.yml
+  include_tasks: provision_initial_controller.yml
   when:
     - __samba_recreate_realm
     - autonomy_fqdn == __samba_schema_master
     - inventory_hostname in groups['samba_domain_controllers']
 
 - name: "Check domain prior to provisioning new domain controllers"
-  include: "check_domain.yml"
-  become: no
+  include_tasks: "check_domain.yml"
   when:
     - not __samba_joined_as_domain_controller
     - inventory_hostname in groups['samba_domain_controllers']
 
 - name: "Provision additional domain controllers"
-  include: "provision_additional_controllers.yml"
-  become: no
+  include_tasks: "provision_additional_controllers.yml"
   when:
     - autonomy_fqdn != __samba_schema_master
     - not __samba_joined_as_domain_controller
@@ -104,8 +102,7 @@
 #
 # ==================================================================================================
 - name: "Test domain controllers"
-  include: "test_controllers.yml"
-  become: no
+  include_tasks: "test_controllers.yml"
   when:
     - not __samba_joined_as_domain_controller
     - inventory_hostname in groups['samba_domain_controllers']
@@ -117,17 +114,14 @@
 #
 # ==================================================================================================
 - name: "Configure Samba"
-  include: "configure_samba.yml"
-  become: no
+  include_tasks: "configure_samba.yml"
 
 - name: "Configure file servers"
-  include: "file_servers.yml"
-  become: no
+  include_tasks: "file_servers.yml"
   when:
     - inventory_hostname in groups['samba_file_servers']
 
 - name: "Additional Domain Controller Configuration."
-  include: additional_domain_controller_configuration.yml
-  become: no
+  include_tasks: additional_domain_controller_configuration.yml
   when:
     - inventory_hostname in groups['samba_domain_controllers']

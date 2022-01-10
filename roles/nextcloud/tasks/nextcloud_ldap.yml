@@ -21,7 +21,7 @@
 #     - websites
 
 - name: "Configure LDAP"
-  include: nextcloud_{{ id.type }}_config.yml
+  include_tasks: nextcloud_{{ id.type }}_config.yml
   loop: "{{ nextcloud_ldap_config_ids }}"
   loop_control:
     loop_var: id

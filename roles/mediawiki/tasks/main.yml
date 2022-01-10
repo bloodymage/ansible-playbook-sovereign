@@ -120,11 +120,10 @@
     - websites
 
 - name: "Include mediawiki extension task"
-  include: mediawiki_extensions.yml
+  include_tasks: mediawiki_extensions.yml
   loop: "{{ virtual_hosts }}"
   loop_control:
     loop_var: host
-  become: no
   when:
     - virtual_hosts is defined
   tags:
@@ -164,11 +163,10 @@
     - websites
 
 - name: "Install Additional mediawiki skins"
-  include: mediawiki_skins.yml
+  include_tasks: mediawiki_skins.yml
   loop: "{{ virtual_hosts }}"
   loop_control:
     loop_var: host
-  become: no
   when:
     - virtual_hosts is defined
   tags:

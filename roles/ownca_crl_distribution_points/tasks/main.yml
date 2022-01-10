@@ -45,7 +45,7 @@
     - ownca_crl_distribution_points
 
 - name: Copy CRLs to server.
-  include: "install_crls.yml"
+  include_tasks: "install_crls.yml"
   loop: "{{ virtual_hosts }}"
   loop_control:
     loop_var: vhost
@@ -55,7 +55,6 @@
     - vhost.content == "crls"
     - vhost.enabled is defined
     - vhost.enabled
-  become: yes
   tags:
     - ownca-crl-distribution-points
     - ownca_crl_distribution_points
