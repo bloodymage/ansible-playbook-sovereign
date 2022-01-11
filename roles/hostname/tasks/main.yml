@@ -45,7 +45,7 @@
     - hostname
 
 - name: "RouterOS: Set Hostname"
-  community.network.routeros_command:
+  community.routeros.command:
     commands:
       - /system identity print
   become: no

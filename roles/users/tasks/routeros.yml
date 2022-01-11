@@ -1,6 +1,6 @@
 ---
 - name: Configure RouterOS Users
-  community.network.routeros_command:
+  community.routeros.command:
     commands:
       #- /user add name={{ item.username }} password= group=full
       - /user remove {{ __default_mikrotik_device_user }}
