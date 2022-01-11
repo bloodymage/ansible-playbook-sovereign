@@ -108,7 +108,7 @@
     - __samba_recreate_realm
 
 - name: "Remove database files."
-  include: "remove_files.yml"
+  include_tasks: "remove_files.yml"
   become: no
   loop: "{{ __database.results }}"
   loop_control:
