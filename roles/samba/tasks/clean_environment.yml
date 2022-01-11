@@ -109,6 +109,10 @@
 
 - name: "Remove database files."
   include_tasks: "remove_files.yml"
+<<<<<<< HEAD
+=======
+  become: no
+>>>>>>> release/0.10.6
   loop: "{{ __database.results }}"
   loop_control:
     loop_var: __directory
