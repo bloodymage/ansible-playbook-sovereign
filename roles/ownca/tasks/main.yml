@@ -140,7 +140,7 @@
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
 
-- name: "Generate Certificate Authority Certificate Signing Requests (CSR)."
+- name: "Generate Root Certificate Authority Certificate Signing Requests (CSR)."
   community.crypto.openssl_csr:
     path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
     privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
@@ -182,7 +182,7 @@
   when:
     - item.name == "root"
 
-- name: "Generate Selfsigned Certificate."
+- name: "Generate Root Certificate Authority Selfsigned Certificate."
   community.crypto.x509_certificate:
     path: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
@@ -305,39 +305,51 @@
     - item.provider == "ownca"
     - item.ownca == "root"
 
-- name: "Print intermediate cert info"
-  ansible.builtin.debug:
-    msg:
-      - "{{ item }}"
-      #- "{{ item.item.org_unit_name }}"
-      #- "{{ item.serial_number }}"
-      #- "{{ item.subject_alt_name }}"
-      #- "{{ item.subject_key_identifier }}"
-  loop: "{{ intermediate_cert_info.results }}"
-  when:
-    - item.serial_number is defined
+# - name: "Print intermediate cert info"
+#   ansible.builtin.debug:
+#     msg:
+#       - "{{ item[1].item.org_unit_name }}"
+#       - "{{ item[1].serial_number }}"
+#       - "{{ item[1].subject_alt_name }}"
+#       - "{{ item[1].subject_key_identifier }}"
+#       - "{{ item[0].name }}"
+#       - "{{ item[0].common_name }}"
+#       - "{{ item[0].org_unit_name }}"
+#   loop: "{{ ownca_certificate_authorities | product(intermediate_cert_info.results) }}"
+#   when:
+#     - item[1].serial_number is defined
+#     - item[0].org_unit_name is defined
 
-- meta: end_play
-
+# ==================================================================================================
+#
+# Generate's the Issing CA's CSR.
+#
+# Note:
+# - item[0].org_unit_name check in when clause is added because this loops through all Certificate
+#   Authorities.  The 'Root' CA does not have an organizational unit.  It is the organization.
+#
+# ==================================================================================================
 - name: "Generate Issuing Certificate Authority Certificate Signing Requests (CSR)."
   community.crypto.openssl_csr:
-    path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
-    privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
+    path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item[0].name }}-ca.csr"
+    privatekey_path: "{{ item[0].private_key_path | default(__private_key_path) }}"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    common_name: "{{ item.common_name }}"
-    country_name: "{{ item.country_name | default(omit) }}"
-    email_address: "{{ item.email_address | default(omit) }}"
-    organization_name: "{{ item.organization_name | default(autonomy_org_name | title ) }}"
-    organizational_unit_name: "{{ item.org_unit_name | default(omit) | title }}"
-    state_or_province_name: "{{ item.region_name | default(omit) }}"
-    key_usage: "{{ item.keyusage }}"
-    key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
-    basic_constraints: "{{ item.basic_constraints }}"
-    basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
+    common_name: "{{ item[0].common_name }}"
+    country_name: "{{ item[0].country_name | default(omit) }}"
+    email_address: "{{ item[0].email_address | default(omit) }}"
+    organization_name: "{{ item[0].organization_name | default(autonomy_org_name | title ) }}"
+    organizational_unit_name: "{{ item[0].org_unit_name | default(omit) | title }}"
+    state_or_province_name: "{{ item[0].region_name | default(omit) }}"
+    key_usage: "{{ item[0].keyusage }}"
+    key_usage_critical: "{{ item[0].keyusage_critical | default('no') }}"
+    basic_constraints: "{{ item[0].basic_constraints }}"
+    basic_constraints_critical: "{{ item[0].basic_constraints_critical | default('no') }}"
     create_subject_key_identifier: yes
-    authority_cert_serial_number: "{{ root_cert_info.serial_number }}"
+    authority_cert_issuer: "{{ item[1].subject_alt_name }}"
+    authority_cert_serial_number: "{{ item[1].serial_number }}"
+    authority_key_identifier: "{{ item[1].subject_key_identifier }}"
     crl_distribution_points:
-      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item[0].name }}-ca.crl"
         reasons:
           - key_compromise
           - ca_compromise
@@ -351,17 +363,23 @@
     group: "{{ __autonomy_user }}"
     backup: yes
     state: present
-  loop: "{{ ownca_certificate_authorities }}"
+  loop: "{{ ownca_certificate_authorities | product(intermediate_cert_info.results) }}"
   delegate_to: localhost
   run_once: yes
   become: no
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_store_id: "{{ autonomy_passdb }}{{ item[0].domain }}/ownca/ownca_{{ item[0].ca_id }}_password"
     __password_lookup: "{{ __password_store_id }}"
-    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item[0].name }}-ca.key"
   when:
-    - item.provider == "ownca"
-    - item.ownca == "intermediate"
+    - item[0].provider == "ownca"
+    - item[0].ownca == "intermediate"
+    - item[0].org_unit_name is defined
+    - item[1].item.org_unit_name is defined
+    - item[1].subject_key_identifier is defined
+    - item[1].subject_alt_name is defined
+    - item[1].serial_number is defined
+    - item[0].org_unit_name == item[1].item.org_unit_name
 
 - name: "Generate Issuing CA Signed Certificate."
   community.crypto.x509_certificate:
@@ -460,7 +478,8 @@
 #
 # This is done because Windows frequently needs DER format.
 #
-# Currently split into to tasks.  The 'root' ca does not have a chain file.
+# Currently split into two tasks.  The 'root' ca does not have a chain file.  Need a way to make
+# this idempotent.
 #
 # ==================================================================================================
 - name: "Convert CA Certificates to DER format."

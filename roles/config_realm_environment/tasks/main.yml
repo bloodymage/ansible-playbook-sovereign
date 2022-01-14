@@ -52,7 +52,7 @@
     __user:
       username: "{{ __username }}"
       groupname: "{{ item.groupname | default(omit) }}"
-      given_name: "{{ __given_name }}"
+      given_name: "{{ __given_name | default(item.username) }}"
       nickname: "{{ item.nickname | default(omit) }}"
       middle_name: "{{ item['middle_name'] | default(omit) }}"
       surname: "{{ item['surname'] | default(omit) }}"
@@ -102,7 +102,7 @@
       ssh_access_cert: "{{ item.ssh_access_cert | default(omit) }}"
       ssh_principals: "{{ item.ssh_principals | default(omit) }}"
       gpg_keys: "{{ item.gpg_keys | default(omit) }}"
-    __given_name: "{{ item.given_name }}"
+    __given_name: "{{ item.given_name | default(item.username) }}"
     __middle_name: "{{ item.middle_name | default(None) }}"
     __surname: "{{ item.surname | default(None) }}"
     __nickname: "{{ item.nickname | default(__given_name) }}"

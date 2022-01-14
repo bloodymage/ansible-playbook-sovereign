@@ -10,6 +10,19 @@
             - "vars"
       become: no
 
+- name: "Create SSL Directories."
+  ansible.builtin.file:
+    path: "{{ ownca_hosts_directory }}/{{ item.name }}"
+    state: directory
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
+    mode: "{{ item.mode }}"
+  become: yes
+  loop: "{{ ownca_host_certs_directories }}"
+  become: no
+  delegate_to: localhost
+  run_once: yes
+
 - name: "Add subject alt names based on ipv6."
   ansible.builtin.set_fact:
     ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + [__alt_name] }}"
