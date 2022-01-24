@@ -24,4 +24,10 @@ ownca_user_pki_dirs:
   - name: "ssh"
     mode: "0755"
 
+ownca_user_directories:
+  - name: "csr"
+    mode: "0755"
+  - name: "certs"
+    mode: "0755"
+
 __user_cert_force_regeneration: no

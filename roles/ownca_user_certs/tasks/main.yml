@@ -38,6 +38,18 @@
   become: yes
   register: result
 
+- name: "Create SSL Directories."
+  ansible.builtin.file:
+    path: "{{ ownca_directory }}/users/{{ item.name }}"
+    state: directory
+    owner: "{{ __autonomy_user }}"
+    group: "{{ __autonomy_user }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ ownca_user_directories }}"
+  become: no
+  delegate_to: localhost
+  run_once: yes
+
 # ==================================================================================================
 #
 # Create SSL Private Key and CRS Directories
@@ -93,7 +105,6 @@
     mode: "0660"
     state: present
     force: no
-    
     backup: yes
   become: yes
   loop: "{{ __realm_users }}"
