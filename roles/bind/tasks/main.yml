@@ -16,7 +16,7 @@
             - "vars"
       become: no
       when:
-        - inventory_hostname not in groups['public_zone']
+        - inventory_hostname not in groups['public_zone'] | default([])
 
     - name: "Install packages."
       ansible.builtin.package:
@@ -24,7 +24,7 @@
         state: present
       become: yes
       when:
-        - inventory_hostname not in groups['public_zone']
+        - inventory_hostname not in groups['public_zone'] | default([])
 
 # ==================================================================================================
 #
