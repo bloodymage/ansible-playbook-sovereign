@@ -73,13 +73,13 @@
         - nextcloud
         - websites
 
-- name: "Configure webservers and websites."
-  hosts: mediawiki_servers
-  roles:
-    - role: bloodymage.autonomy.mediawiki
-      tags:
-        - mediawiki
-        - websites
+# - name: "Configure webservers and websites."
+#   hosts: mediawiki_servers
+#   roles:
+#     - role: bloodymage.autonomy.mediawiki
+#       tags:
+#         - mediawiki
+#         - websites
 
 - name: "Configure webservers and websites."
   hosts: drupal_servers
