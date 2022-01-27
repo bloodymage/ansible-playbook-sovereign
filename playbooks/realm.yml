@@ -10,7 +10,7 @@
         - always
 
 - name: "Prepare playbook environment. (Realm Specific)"
-  hosts: all:!public_zone
+  hosts: all:!public_zone:!wifi_access_points:!routers:!switches
   ignore_unreachable: yes
   roles:
     # NOTE: Tags are set at task level for 'config_realm_environment'.
