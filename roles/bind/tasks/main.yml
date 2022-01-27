@@ -115,7 +115,8 @@
     - named.conf.local
   when:
     - bind_dyndns_secret is defined
-    - inventory_hostname not in groups['public_zone']
+    - inventory_hostname not in groups['public_zone'] | default([])
+    - groups['dmz_dns_servers'] is defined # Temporary fix for #534
   notify: restart bind
 
 # ==================================================================================================
@@ -133,7 +134,7 @@
   become: yes
   when:
     - bind_dyndns_secret is defined
-    - inventory_hostname not in groups['public_zone']
+    - inventory_hostname not in groups['public_zone'] | default([])
 
 # ==================================================================================================
 #
@@ -150,7 +151,7 @@
   become: yes
   when:
     - bind_dyndns_secret is defined
-    - inventory_hostname not in groups['public_zone']
+    - inventory_hostname not in groups['public_zone'] | default([])
 
 # ==================================================================================================
 #
@@ -211,4 +212,4 @@
     - "{{ bind_zone_dir }}"
     - "{{ bind_cache_dir }}"
   when:
-    - inventory_hostname not in groups['public_zone']
+    - inventory_hostname not in groups['public_zone'] | default([])
