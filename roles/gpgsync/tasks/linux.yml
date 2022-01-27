@@ -37,4 +37,3 @@
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
-  become: no
