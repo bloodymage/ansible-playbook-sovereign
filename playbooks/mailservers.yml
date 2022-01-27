@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: all:!wifi_access_points:!routers:!switches
   roles:
     - role: bloodymage.autonomy.config_environment
       when:
@@ -7,13 +7,13 @@
       tags:
         - always
 
-- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+- hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts
   roles:
     - role: bloodymage.autonomy.etc_aliases
       tags:
         - aliases
 
-- hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts:!mail_servers
+- hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts:!mail_servers
   roles:
     - role: bloodymage.autonomy.exim
       tags:

@@ -20,7 +20,7 @@
 #
 # ==================================================================================================
 - name: "Basic host configuration for all hosts."
-  hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
+  hosts: all:!localhost:!wifi_access_points:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.hostname
@@ -42,7 +42,7 @@
 #
 # ==================================================================================================
 - name: "Linux Host SSH configuration."
-  hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+  hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.sshca_host_certs
@@ -56,7 +56,7 @@
 #
 # ==================================================================================================
 - name: "Basic host configuration for all hosts."
-  hosts: all:!localhost:!tpeap:!printers:!public_zone:!virtual_hosts
+  hosts: all:!localhost:!wifi_access_points:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.users
@@ -99,7 +99,7 @@
 #
 # ==================================================================================================
 - name: "Basic settings for all Linux hosts."
-  hosts: linux:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+  hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts
   strategy: linear
   roles:
     - role: bloodymage.autonomy.nftables
@@ -191,7 +191,7 @@
         - trash-cli
 
 - name: "Basic settings for all linux hosts (including virtual hosts and public zone hosts)."
-  hosts: linux:!localhost:!routeros:!tpeap:!printers
+  hosts: linux:!localhost:!routeros:!wifi_access_points:!printers
   roles:
     - role: bloodymage.autonomy.ownca_host_dhparams
       tags:
@@ -210,11 +210,11 @@
 #
 # Note:
 #  - "!routeros" is included because otherwise Mikrotik routers are included.
-#  - "!tpeap" is included because otherwise TP-Link EAP devices are included.
+#  - "!wifi_access_points" is included because otherwise TP-Link EAP devices are included.
 #
 # ==================================================================================================
 - name: "Basic settings for Debian Family Hosts."
-  hosts: debian:!localhost:!routeros:!tpeap:!printers:!public_zone:!virtual_hosts
+  hosts: debian:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts
   roles:
     - role: bloodymage.autonomy.aptitude
       tags:

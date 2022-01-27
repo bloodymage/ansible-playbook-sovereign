@@ -1,5 +1,5 @@
 - name: "Prepare playbook environment."
-  hosts: all
+  hosts: all:!wifi_access_points:!routers:!switches
   roles:
     - role: bloodymage.autonomy.config_environment
       when:
