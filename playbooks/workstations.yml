@@ -8,7 +8,7 @@
         - always
 
 - name: "Configure workstations."
-  hosts: workstations
+  hosts: workstations:!mythfrontend
   roles:
     - role: bloodymage.autonomy.cups
       tags:
