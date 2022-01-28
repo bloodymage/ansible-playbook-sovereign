@@ -243,6 +243,10 @@
 # This site may have some hints:
 # https://gitlab.archlinux.org/seblu/infrastructure/-/blob/keycloak-open-registration/roles/keycloak/tasks/main.yml
 #
+# It looks like it creates a file at:
+#   "{{ keycloak_home }}/{{ keycloak_mode }}/configuration/keycloak-add-user.json"
+# However, during upgrades, I have not needed to recreate the admin user.
+#
 # ==================================================================================================
 - name: "Create admin user"
   ansible.builtin.command:
@@ -251,10 +255,10 @@
       -r master
       -u "{{ keycloak_admin_user }}"
       -p "{{ keycloak_admin_password }}"
+    creates: "{{ keycloak_home }}/{{ keycloak_mode }}/configuration/keycloak-add-user.json"
   become: yes
   tags:
-    - never
-    - keycloak-admin-user
+    - keycloak
 
 # ==================================================================================================
 #
@@ -262,8 +266,8 @@
 # subsequent tasks will fail.
 #
 # ==================================================================================================
-# - name: "Ensure we have a running keycloak server."
-#   ansible.builtin.meta: flush_handlers
+- name: "Ensure we have a running keycloak server."
+  ansible.builtin.meta: flush_handlers
 
 # - name: "Test Login to keycloak server."
 #   ansible.builtin.command:
