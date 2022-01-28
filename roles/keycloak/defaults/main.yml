@@ -9,7 +9,7 @@ keycloak_keystore_alias: "{{ keycloak_name | lower }}"
 keycloak_service_description: "{{ keycloak_name | title }}"
 
 # Keycloak ...
-keycloak_version: "15.0.0"
+keycloak_version: "16.1.1"
 keycloak_host: 127.0.0.1
 keycloak_mode: "standalone"
 keycloak_keystore_type: "pkcs12"
@@ -31,7 +31,7 @@ keycloak_binary_dir: "{{ keycloak_home }}/bin"
 keycloak_docs_dir: "{{ keycloak_alt_home }}/docs"
 keycloak_license_dir: "{{ keycloak_docs_dir }}/licenses-keycloak"
 keycloak_license_file: "org.apache.maven,maven-model,3.3.9,Apache Software License 2.0.txt"
-keycloak_data_dir: "/opt/keycloak_data/"
+keycloak_data_dir: "/opt/keycloak_data"
 
 # Files
 keycloak_binary: "{{ keycloak_binary_dir }}/{{ keycloak_mode }}.sh"
@@ -46,7 +46,7 @@ keycloak_url: "https://github.com/keycloak/keycloak/releases/download"
 keycloak_source_url:
   - source: "{{ keycloak_url }}/{{ keycloak_version }}/keycloak-{{ keycloak_version }}.tar.gz"
     file: "keycloak-{{ keycloak_version }}.tar.gz"
-    checksum: "8986ede748bd7cceef828669160e8b1de004be5f"
+    checksum: "4acc5d20bc3d26e25aa3bcffbc50ac9b76135c93"
     checksum_type: "sha1"
   
 keycloak_samba_federation:
