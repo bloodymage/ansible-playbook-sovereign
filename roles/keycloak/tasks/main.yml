@@ -61,7 +61,7 @@
 
 - name: "Create Keycloak Data Directory"
   ansible.builtin.file:
-    path: "{{ keycloak_alt_home }}"
+    path: "{{ keycloak_data_dir }}"
     state: directory
     owner: root
     group: root
