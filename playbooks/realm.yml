@@ -126,6 +126,8 @@
   hosts: keycloak_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.keycloak
+      tags:
+        - keycloak
 
 - name: "Configure FreeRadius."
   hosts: freeradius_servers
