@@ -24,7 +24,6 @@
 
 - name: "Harden domain."
   include_tasks: "hardening.yml"
-  become: no
   when:
     - autonomy_fqdn == __samba_schema_master
 
@@ -115,6 +114,5 @@
 
 - name: "Update Schema"
   include_tasks: "schema_updates.yml"
-  become: no
   when:
     - autonomy_fqdn == __samba_schema_master

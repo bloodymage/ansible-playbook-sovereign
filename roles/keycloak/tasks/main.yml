@@ -9,9 +9,6 @@
         - "vars"
   become: no
   tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
     - install-packages
 
 - name: "Install packages"
@@ -20,9 +17,6 @@
     state: present
   become: yes
   tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
     - install-packages
 
 # ==================================================================================================
@@ -40,11 +34,6 @@
     mode: '0644'
   loop: "{{ keycloak_source_url }}"
   become: no
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
-    - download-sources
 
 - name: "Create Keycloak Directory"
   ansible.builtin.file:
@@ -54,14 +43,10 @@
     group: root
     mode: "0755"
   become: yes
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: "Create Keycloak Data Directory"
   ansible.builtin.file:
-    path: "{{ keycloak_alt_home }}"
+    path: "{{ keycloak_data_dir }}"
     state: directory
     owner: root
     group: root
@@ -69,10 +54,6 @@
   become: yes
   when:
     - keycloak_mode == "standalone"
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: Extract Sources
   ansible.builtin.unarchive:
@@ -85,10 +66,6 @@
     creates: "{{ keycloak_license_path }}"
   become: yes
   loop: "{{ keycloak_source_url }}"
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: "Create a symbolic link keycloak -> keycloak-{{ keycloak_version }}"
   ansible.builtin.file:
@@ -98,10 +75,6 @@
     group: root
     state: link
   become: yes
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: "Ensure we have a password for the keycloak administrator user."
   ansible.builtin.set_fact:
@@ -116,10 +89,6 @@
   become: no
   when:
     - keycloak_admin_password == "password"
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: "Ensure we have a password for the keycloak keystore."
   ansible.builtin.set_fact:
@@ -134,10 +103,6 @@
   become: no
   when:
     - keycloak_keystore_password == "password"
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: "Install Service File."
   ansible.builtin.template:
@@ -150,10 +115,6 @@
   notify:
     - "enable keycloak"
     - "daemon reload"
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: "Install Keycloak configuration file"
   ansible.builtin.template:
@@ -164,8 +125,6 @@
     mode: "0644"
   become: yes
   notify: restart keycloak
-  tags:
-    - keycloak
  
 - name: "Create list of certs to add into the combined pkcs12 file. (Part 1)"
   ansible.builtin.set_fact:
@@ -177,8 +136,6 @@
   become: no
   when:
     - item[0].type != "public"
-  tags:
-    - keycloak
  
 - name: "Add to list of certs to add into the combined pkcs12 file. (Part 2)"
   ansible.builtin.set_fact:
@@ -190,8 +147,6 @@
     __etc_certs: "/etc/ssl/certs"
     __additional_cert: "{{ __etc_certs }}/{{ item }}.pem"
   become: no
-  tags:
-    - keycloak
  
 # ==================================================================================================
 #
@@ -217,10 +172,6 @@
     force: yes
   become: yes
   notify: restart keycloak
-  tags:
-    - keycloak
-    - keycloak_debug
-    - keycloak-debug
 
 - name: "Create symlink to data directory."
   ansible.builtin.file:
@@ -241,6 +192,10 @@
 # This site may have some hints:
 # https://gitlab.archlinux.org/seblu/infrastructure/-/blob/keycloak-open-registration/roles/keycloak/tasks/main.yml
 #
+# It looks like it creates a file at:
+#   "{{ keycloak_home }}/{{ keycloak_mode }}/configuration/keycloak-add-user.json"
+# However, during upgrades, I have not needed to recreate the admin user.
+#
 # ==================================================================================================
 - name: "Create admin user"
   ansible.builtin.command:
@@ -249,10 +204,8 @@
       -r master
       -u "{{ keycloak_admin_user }}"
       -p "{{ keycloak_admin_password }}"
+    creates: "{{ keycloak_home }}/{{ keycloak_mode }}/configuration/keycloak-add-user.json"
   become: yes
-  tags:
-    - never
-    - keycloak-admin-user
 
 # ==================================================================================================
 #
@@ -260,8 +213,8 @@
 # subsequent tasks will fail.
 #
 # ==================================================================================================
-# - name: "Ensure we have a running keycloak server."
-#   ansible.builtin.meta: flush_handlers
+- name: "Ensure we have a running keycloak server."
+  ansible.builtin.meta: flush_handlers
 
 # - name: "Test Login to keycloak server."
 #   ansible.builtin.command:

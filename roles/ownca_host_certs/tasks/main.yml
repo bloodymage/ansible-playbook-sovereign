@@ -17,7 +17,6 @@
     owner: "{{ __autonomy_user }}"
     group: "{{ __autonomy_user }}"
     mode: "{{ item.mode }}"
-  become: yes
   loop: "{{ ownca_host_certs_directories }}"
   become: no
   delegate_to: localhost

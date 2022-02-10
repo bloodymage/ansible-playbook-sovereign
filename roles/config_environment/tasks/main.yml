@@ -6,26 +6,29 @@
 #
 # ==================================================================================================
 - name: "Create groups based on the Network OS"
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ ansible_network_os.split('.')[2] | lower }}"
   when:
     - ansible_network_os is defined
+  changed_when: False
   tags:
     - always
 
 - name: "Create groups based on the OS Family"
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ ansible_os_family | lower }}"
   when:
     - ansible_os_family is defined
+  changed_when: False
   tags:
     - always
 
 - name: "Create groups based on the System"
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ ansible_system | lower }}"
   when:
     - ansible_system is defined
+  changed_when: False
   tags:
     - always
 
@@ -35,14 +38,16 @@
 #
 # =================================================================================================
 - name: "Create group by zone type."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ autonomy_zone_type }}_zone"
+  changed_when: False
 
 - name: "Create group by zone name."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ autonomy_zone_name }}_zone"
   when:
     - autonomy_zone_name is defined
+  changed_when: False
 
 # ==================================================================================================
 #
@@ -50,10 +55,11 @@
 #
 # ==================================================================================================
 - name: "Create group by zone name."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ autonomy_zone_name }}"
   when:
     - autonomy_zone_name is defined
+  changed_when: False
 
 # ==================================================================================================
 #
@@ -61,12 +67,13 @@
 #
 # ==================================================================================================
 - name: "Create parent groups based on host's role."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ item.parent }}"
   loop: "{{ autonomy_parent_groups }}"
   when:
     - item.parent is defined
     - inventory_hostname in groups[item.name] | default([])
+  changed_when: False
 
 # ==================================================================================================
 #
@@ -80,27 +87,30 @@
 #
 # ==================================================================================================
 - name: "Create parent groups based on host's role."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ item.parent }}"
   loop: "{{ autonomy_parent_groups }}"
   when:
     - item.parent is defined
     - inventory_hostname not in groups[item.parent] | default([])
     - inventory_hostname in groups[item.name] | default([])
+  changed_when: False
 
 - name: "Create host groups based on zone name and role."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ autonomy_zone_name }}_{{ item.name }}"
   loop: "{{ autonomy_parent_groups }}"
   when:
     - inventory_hostname in groups[item.name] | default([])
+  changed_when: False
 
 - name: "Create host groups based on zone type and role."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ autonomy_zone_type }}_{{ item.name }}"
   loop: "{{ autonomy_parent_groups }}"
   when:
     - inventory_hostname in groups[item.name] | default([])
+  changed_when: False
 
 # ==================================================================================================
 #
@@ -118,7 +128,7 @@
 #
 # ==================================================================================================
 - name: "Check if we have a samba domain, add hosts if it exists."
-  group_by:
+  ansible.builtin.group_by:
     key: "{{ item.parent }}"
   loop:
     - name: "samba_domain_controllers"
@@ -132,12 +142,14 @@
     - groups['samba_domain_controllers'] is defined
     #- inventory_hostname in groups[autonomy_zone_name] | default([])
     #- groups['samba_domain_controllers'][0] in groups[autonomy_zone_name] | default([])
+  changed_when: False
 
 - name: "Create virtual_hosts group."
-  group_by:
+  ansible.builtin.group_by:
     key: "virtual_hosts"
   when:
     - autonomy_virtual_host
+  changed_when: False
 
 # ==================================================================================================
 #

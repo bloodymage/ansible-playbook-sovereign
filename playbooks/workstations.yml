@@ -1,5 +1,5 @@
 - name: "Prepare playbook environment."
-  hosts: all
+  hosts: all:!wifi_access_points:!routers:!switches
   roles:
     - role: bloodymage.autonomy.config_environment
       when:
@@ -8,7 +8,7 @@
         - always
 
 - name: "Configure workstations."
-  hosts: workstations
+  hosts: workstations:!mythfrontend
   roles:
     - role: bloodymage.autonomy.cups
       tags:

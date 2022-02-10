@@ -1,6 +1,6 @@
 ---
 - name: "Prepare playbook environment."
-  hosts: all
+  hosts: all:!wifi_access_points:!routers:!switches
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
@@ -10,7 +10,7 @@
         - always
 
 - name: "Prepare playbook environment. (Realm Specific)"
-  hosts: all:!public_zone
+  hosts: all:!public_zone:!wifi_access_points:!routers:!switches
   ignore_unreachable: yes
   roles:
     # NOTE: Tags are set at task level for 'config_realm_environment'.
@@ -126,6 +126,8 @@
   hosts: keycloak_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.keycloak
+      tags:
+        - keycloak
 
 - name: "Configure FreeRadius."
   hosts: freeradius_servers

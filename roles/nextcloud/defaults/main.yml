@@ -1,6 +1,6 @@
 ---
 # defaults file for nextcloud
-nextcloud_version: "21.0.4"
+nextcloud_version: "23.0.1"
 
 __packages_base:
   - apache2
