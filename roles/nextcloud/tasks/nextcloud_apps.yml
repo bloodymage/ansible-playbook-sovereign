@@ -31,7 +31,7 @@
 # ==================================================================================================
 - name: Enable Nextcloud Apps
   ansible.builtin.command:
-    cmd: "php occ app:enable {{ item }}"
+    cmd: "php occ app:enable --force {{ item }}"
     chdir: "/srv/www/{{ inventory_hostname }}"
   loop: "{{ nextcloud_apps }}"
   become: yes
