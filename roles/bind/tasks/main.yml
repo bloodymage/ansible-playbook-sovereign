@@ -121,17 +121,25 @@
 
 # ==================================================================================================
 #
+# This creates the following directories:
+#   - /var/lib/bind/
+#   - /var/cache/bind/
 #
+# I choose 0775 permissions, why?  Why not 0755?  I am sure I had a reason, can't remember what it
+# was.
+#
+# TODO: Document why I am using 0775
 #
 # ==================================================================================================
-- name: "Ensure Zone Directory Exists."
+- name: "Ensure Zone Directories Exists and are writable by bind user."
   ansible.builtin.file:
-    dest: "{{ bind_zone_dir }}"
+    dest: "{{ item.name }}"
     state: directory
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
-    mode: "0755"
+    mode: "{{ item.mode }}"
   become: yes
+  loop: "{{ __autonomy_bind_zone_directories }}"
   when:
     - bind_dyndns_secret is defined
     - inventory_hostname not in groups['public_zone'] | default([])
@@ -191,25 +199,3 @@
   when:
     - bind_reverse_zone is defined
   notify: restart bind
-
-# ==================================================================================================
-#
-# I choose 0775 permissions, why?  Why not 0755?  I am sure I had a reason, can't remember what it
-# was.
-#
-# TODO: Document why I am using 0775
-#
-# ==================================================================================================
-- name: "Ensure Bind can write to bind directories."
-  ansible.builtin.file:
-    path: "{{ item }}"
-    owner: "{{ bind_owner }}"
-    group: "{{ bind_group }}"
-    mode: "0775"
-    state: directory
-  become: yes
-  loop:
-    - "{{ bind_zone_dir }}"
-    - "{{ bind_cache_dir }}"
-  when:
-    - inventory_hostname not in groups['public_zone'] | default([])

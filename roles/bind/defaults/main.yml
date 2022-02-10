@@ -16,6 +16,7 @@ bind_auth_file: "{{ bind_conf_dir }}/{{ auth_file }}"
 # Custom location for zone files
 bind_zone_dir: "{{ bind_dir }}"
 bind_cache_dir: "/var/cache/bind"
+bind_zone_dir_mode: "0775"
 
 # Main config file
 bind_config: "{{ bind_conf_dir }}/named.conf"
@@ -190,3 +191,9 @@ __bind_ddns_zones: []
 __complete_bind_dns_zones: []
 __bind_dns_zone_samba_domain: no
 __tmp_keyfiles: []
+
+__autonomy_bind_zone_directories:
+  - name: "{{ bind_zone_dir }}"
+    mode: "{{ bind_zone_dir_mode }}"
+  - name: "{{ bind_cache_dir }}"
+    mode: "{{ bind_zone_dir_mode }}"
