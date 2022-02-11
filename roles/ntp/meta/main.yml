@@ -1,6 +1,6 @@
 galaxy_info:
   author: G Derber
-  description: Configures timezone information
+  description: Configures NTP server
   company: Bloodymage
 
   issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
@@ -22,7 +22,7 @@ galaxy_info:
 
   galaxy_tags:
     - bloodymage
-    - timezone
+    - ntp
 
 dependencies:
-  - role: bloodymage.autonomy.collection_handlers
+  - role: bloodymage.autonomy.collection_globals

@@ -1,0 +1,97 @@
+# {{ ansible_managed }}
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# The krb5.conf configuration file                                                               #}
+{#                                                                                                #}
+{# Refs:                                                                                          #}
+{# - https://web.mit.edu/kerberos/krb5-1.18/doc/admin/conf_files/krb5_conf.html                   #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if autonomy_kerberos_logging %}
+[logging] 
+  default = FILE:/var/log/krb5.log 
+  default = SYSLOG:INFO:DAEMON 
+{% endif %}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# While this works, it needs to be cleaned up a bit                                              #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+[libdefaults]
+  default_realm = {{ autonomy_domain | upper }}
+  dns_lookup_realm = false
+  dns_lookup_kdc = true
+{% if autonomy_smart_card_login %}
+{% if inventory_hostname in groups['samba_domain_controllers'] %}
+  pkinit_anchors = DIR:/etc/ssl/certs
+{% endif %}
+{% endif %}
+  rdns = false
+
+{% if autonomy_smart_card_login %}
+{% if inventory_hostname in groups['samba_domain_controllers'] %}
+[appdefaults]
+  pkinit_anchors = DIR:/etc/ssl/certs
+{% endif %}
+{% endif %}
+
+[realms]
+  {{ autonomy_domain | upper }} = {
+{% for server in groups['samba_domain_controllers'] %}
+    kdc = {{ server }}
+{% endfor %}
+{% if autonomy_smart_card_login %}
+  {% if inventory_hostname in groups['samba_domain_controllers'] %}
+    pkinit_require_eku = true
+  {% elif inventory_hostname in groups['workstations'] %}
+  enable-pkinit = yes
+    pkinit_identity = FILE:/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem,/etc/ssl/private/{{ autonomy_fqdn }}.key
+    pkinit_identities = PKCS11:opensc-pkcs11.so:slotid=0:certid=01
+    pkinit_require_eku = true
+    pkinit_anchors = DIR:/etc/ssl/certs
+    #pkinit_principal_in_certificate = yes
+    #pkinit_win2k = no
+    #pkinit_win2k_require_binding = yes
+    pkinit_kdc_hostname = dc.{{ autonomy_domain }}
+    canonicalize = True
+    #default_ccache_name = KEYRING:persistent:%{uid}
+  {% endif %}
+{% endif %}
+{% if groups['samba_file_servers'] is defined %}
+  {% if inventory_hostname in groups['samba_file_servers'] %}
+    auth_to_local = RULE:[2:{{ autonomy_org_unit_name | upper }}\$1]
+  {% else -%}
+      #auth_to_local = DEFAULT
+  {% endif %}
+{% else -%}
+      #auth_to_local = DEFAULT
+{% endif %}
+  }
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# This may come out completely.  This should only be defined if DNS lookups aren't working       #}
+{#                                                                                                #}
+{# Ref:                                                                                           #}
+{# - https://sssd.io/docs/users/ad_provider.html                                                  #}
+{# -                                                                                              #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if autonomy_kerberos_domain_realm %}
+[domain_realm]
+  {{ autonomy_domain }} = {{ autonomy_domain | upper }}
+  .{{ autonomy_domain }} = {{ autonomy_domain | upper }}
+{% endif %}
+
+{% if autonomy_smart_card_login %}
+{% if inventory_hostname in groups['samba_domain_controllers'] %}
+[kdc]
+  enable-pkinit = yes
+  pkinit_identity = FILE:/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem,/etc/ssl/private/{{ autonomy_fqdn }}.key
+  pkinit_anchors = DIR:/etc/ssl/certs
+  pkinit_principal_in_certificate = yes
+  pkinit_win2k = no
+  pkinit_win2k_require_binding = yes
+{% endif %}
+{% endif %}

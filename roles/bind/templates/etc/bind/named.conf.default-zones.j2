@@ -1,5 +1,11 @@
 # {{ ansible_managed }}
 
+{% if inventory_hostname in groups['samba_domain_controllers'] %}
+  zone "." {
+  type hint;
+  file "/usr/share/dns/root.hints";
+  };
+{% else %}
 // prime the server with knowledge of the root servers
 zone "." in {
   type secondary;
@@ -16,6 +22,7 @@ zone "." in {
 {% endfor %}
   };
 };
+{% endif %}
 
 // be authoritative for the localhost forward and reverse zones, and for
 // broadcast zones as per RFC 1912

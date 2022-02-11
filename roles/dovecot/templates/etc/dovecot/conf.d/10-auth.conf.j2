@@ -2,7 +2,7 @@
 
 {% if autonomy_realm_identity_management_system == "samba" %}
 auth_gssapi_hostname = "$ALL"
-  auth_krb5_keytab = "/etc/dovecot/dovecot.keytab"
+auth_krb5_keytab = "/etc/dovecot/dovecot.keytab"
 {% endif %}
 
 {% if dovecot_auth_use_winbind is defined -%}

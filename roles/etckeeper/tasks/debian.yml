@@ -1,0 +1,14 @@
+---
+# ==================================================================================================
+#
+# We want to ensure the apt repo is up to date.  We don't care about upgrading the system in this
+# role.
+#
+# The basic idea is we want to have etckeeper installed on the system before we make any other
+# changes to it, but sometimes to ensure packages are available, we need to update the cache first.
+#
+# ==================================================================================================
+- name: "Update Apt Repo information."
+  ansible.builtin.apt:
+    update_cache: yes
+    upgrade: no

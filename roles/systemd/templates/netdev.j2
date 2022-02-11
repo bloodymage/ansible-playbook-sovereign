@@ -1,0 +1,130 @@
+# {{ ansible_managed }}
+
+{% if item.match is defined %}
+[Match]
+Host=
+Virtualization=
+KernelCommandLine=
+KernelVersion=
+Credential=
+Architecture=
+Firmware=
+
+{% endif %}
+[NetDev]
+{% if item.description is defined %}
+Description={{ item.description }}
+{% endif %}
+Name={{ item.name }}
+Kind={{ item.kind }}
+{% if item.mac_address is defined %}
+MACAddress={{ item.mac_address }}
+{% endif %}
+{% if item.kind == "bond" %}
+
+[Bond]
+Mode={{ item.mode }}
+{% if item.transmit_hash_policy is defined %}
+TransmitHashPolicy={{ item.transmit_hash_policy }}
+{% endif %}
+{% if item.lacp_transmit_rate is defined %}
+LACPTransmitRate={{ item.lacp_transmit_rate }}
+{% endif %}
+{% if item.mii_monitor_sec is defined %}
+MIIMonitorSec={{ item.mii_monitor_sec }}
+{% endif %}
+{% if item.up_delay_sec is defined %}
+UpDelaySec={{ item.up_delay_sec }}
+{% endif %}
+{% if item.down_delay_sec is defined %}
+DownDelaySec={{ item.down_delay_sec }}
+{% endif %}
+{% if item.learn_packet_interval_sec is defined %}
+LearnPacketIntervalSec={{ item.learn_packet_interval_sec }}
+{% endif %}
+{% if item.mode == "802.3ad" %}
+{% if item.ad_select is defined %}
+AdSelect={{ item.ad_select }}
+{% endif %}
+{% if item.ad_actor_system_priority %}
+AdActorSystemPriority={{ item.ad_actor_system_priority }}
+{% endif %}
+{% if item.ad_user_port_key is defined %}
+AdUserPortKey={{ item.ad_user_port_key }}
+{% endif %}
+{% if item.ad_actor_system is defined %}
+AdActorSystem={{ item.ad_actor_system }}
+{% endif %}
+{% endif %}
+{% if item.mode == "active-backup" %}
+{% if item.fail_over_mac_policy is defined %}
+FailOverMACPolicy={{ item.fail_over_mac_policy }}
+{% endif %}
+{% if item.primary_reselect_policy is defined %}
+PrimaryReselectPolicy={{ item.primary_reselect_policy }}
+{% endif %}
+{% if item.gratuitous_arp is defined %}
+GratuitousARP={{ item.gratuitous_arp }}
+{% endif %}
+{% endif %}
+{% if item.arp_validate is defined %}
+ARPValidate={{ item.arp_validate }}
+{% endif %}
+{% if item.arp_interval_sec is defined %}
+ARPIntervalSec={{ item.arp_interval_sec }}
+{% endif %}
+{% if item.arp_ip_targets is defined %}
+ARPIPTargets={{ item.arp_ip_targets }}
+{% endif %}
+{% if item.arp_all_targets is defined %}
+ARPAllTargets={{ item.arp_all_targets }}
+{% endif %}
+{% if item.resend_igmp is defined %}
+ResendIGMP={{ item.resend_igmp }}
+{% endif %}
+{% if item.packets_per_slave is defined %}
+PacketsPerSlave={{ item.packets_per_slave }}
+{% endif %}
+{% if item.all_slaves_active is defined %}
+AllSlavesActive={{ item.all_slaves_active }}
+{% endif %}
+{% if item.mode == "balance-tlb" %}
+{% if item.dynamic_transmit_load_balancing is defined %}
+DynamicTransmitLoadBalancing={{ item.dynamic_transmit_load_balancing }}
+{% endif %}
+{% endif %}
+{% if item.min_links is defined %}
+MinLinks={{ item.min_links }}
+{% endif %}
+{% endif %}
+{% if item.kind == "vlan" %}
+
+[VLAN]
+Id={{ item.vlan_id }}
+{% if item.protocol is defined %}
+Protocol={{ item.protocol }}
+{% endif %}
+{% if item.gvrp is defined %}
+GVRP={{ item.gvrp }}
+{% endif %}
+{% if item.mvrp is defined %}
+MVRP={{ item.mvrp }}
+{% endif %}
+{% if item.loose_binding is defined %}
+LooseBinding={{ item.loose_binding }}
+{% endif %}
+{% if item.reorder_header is defined %}
+ReorderHeader={{ item.reorder_header }}
+{% endif %}
+{% if item.egress_qos_maps is defined %}
+EgressQOSMaps={{ item.eqgress_qos_maps }}
+{% endif %}
+{% if item.ingress_qos_maps is defined %}
+IngressQOSMaps={{ item.ingress_qos_maps }}
+{% endif %}
+{% endif %}
+{% if item.kind == "macvlan" %}
+
+[MACVLAN]
+Mode={{ item.mode }}
+{% endif %}

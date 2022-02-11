@@ -1,0 +1,78 @@
+---
+# defaults file for acmeca
+autonomy_acmeca_packages:
+  - python3-cryptography
+
+# Default ACME CA key settings
+autonomy_acmeca_method: "letsencrypt"
+autonomy_acmeca_challenge_type: "dns-01"
+autonomy_acmeca_key_type: "rsa"
+autonomy_acmeca_key_size: "{{ autonomy_default_key_size }}"
+
+# Account Key Settings
+autonomy_acmeca_account_email: "{{ autonomy_default_sysadmin_user }}{{ autonomy_mail_recipient_delimiter }}{{ autonomy_acmeca_method }}@{{ autonomy_root_domain }}"
+autonomy_acmeca_account_key_type: "{{ autonomy_acmeca_key_type }}"
+autonomy_acmeca_account_key_size: "{{ autonomy_acmeca_key_size }}"
+
+# Certificate Settings
+autonomy_acmeca_certificate_key_type: "{{ autonomy_acmeca_key_type }}"
+autonomy_acmeca_certificate_key_size: "{{ autonomy_acmeca_key_size }}"
+autonomy_acmeca_certificate_key_owner: "root"
+autonomy_acmeca_certificate_key_group: "root"
+autonomy_acmeca_certificate_key_mode: "0600"
+autonomy_acmeca_ocsp_must_staple: false
+autonomy_acmeca_key_usage:
+  - digitalSignature
+  - keyAgreement
+autonomy_acmeca_extended_key_usage:
+  - serverAuth
+  - clientAuth
+autonomy_acmeca_version: 2
+acmeca_backup_old_certs: true
+
+# Directories
+autonomy_acmeca_directory: "{{ __letsencrypt_production_directory }}"
+autonomy_acmeca_dir: "{{ autonomy_sysconf_dir }}/{{ autonomy_acmeca_method }}"
+autonomy_acmeca_keys_dir: "{{ autonomy_acmeca_dir }}/keys"
+autonomy_acmeca_csr_dir: "{{ autonomy_acmeca_dir }}/csr"
+autonomy_acmeca_archive_dir: "{{ autonomy_acmeca_dir }}/archive"
+autonomy_acmeca_live_dir: "{{ autonomy_acmeca_dir }}/live"
+
+# PKI Directories
+autonomy_acmeca_pki_account_dir: "{{ autonomy_user_pki_dir }}/acmeca/accounts"
+autonomy_acmeca_pki_csr_dir: "{{ autonomy_user_pki_dir }}/acmeca/csrs"
+autonomy_acmeca_pki_cert_dir: "{{ autonomy_user_pki_dir }}/acmeca/certs"
+
+# Files
+autonomy_acmeca_account_key: "{{ autonomy_default_sysadmin_user }}_at_{{ autonomy_root_zone_name }}_{{ autonomy_tld }}_{{ autonomy_acmeca_account_key_type | lower }}.key"
+autonomy_acmeca_account_key_path: "{{ autonomy_acmeca_pki_account_dir }}/{{ autonomy_acmeca_account_key }}"
+
+# URLs
+autonomy_acmeca_directory_url: "{{ __letsencrypt_production_url }}"
+
+# Host Configuration
+autonomy_acmeca_host_subject_alt_name:
+  - "DNS:{{ inventory_hostname }}"
+
+# ==================================================================================================
+#
+# Do not modify
+#
+# The following variables are defaults that can be modified via tags (eg, the
+# 'regenerate-private-key' will change '__acmeca_regenerate_private_key' to 'yes') or they are
+# constants that if changed will  cause this playbook to fail.
+#
+# ==================================================================================================
+__acmeca_regenerate_host_key: false
+__acmeca_regenerate_account_key: false
+
+__letsencrypt_staging_directory: "acme-staging.api.letsencrypt.org/directory"
+__letsencrypt_production_directory: "acme-v02.api.letsencrypt.org/directory"
+__letsencrypt_staging_url: "https://acme-staging-v02.api.letsencrypt.org/directory"
+__letsencrypt_production_url: "https://acme-v02.api.letsencrypt.org/directory"
+__buypass_staging_directory: "https://api.test4.buypass.no/acme/directory"
+__buypass_production_directory: "https://api.buypass.com/acme/directory"
+
+__acmeca_timestamp_date: "{{ ansible_date_time.year }}-{{ ansible_date_time.month }}-{{ ansible_date_time.day }}"
+__acmeca_timestamp_time: "{{ ansible_date_time.hour }}:{{ ansible_date_time.minute }}:{{ ansible_date_time.second }}"
+__acmeca_timestamp: "{{ __acmeca_timestamp_date }}@{{ __acmeca_timestamp_time }}"

@@ -1,0 +1,15 @@
+- name: "Generate keylist.json"
+  ansible.builtin.template:
+    src: keylist.json.j2
+    dest: ~/keylist.json
+  delegate_to: localhost
+  become: no
+
+- name: "Sign keylist.json"
+  ansible.builtin.command:
+    cmd: >-
+      gpg --armor
+        --local-user {{ __autonomy_user_gpg_key }}
+        --detach-sign ~/keylist.json
+  delegate_to: localhost
+  become: no

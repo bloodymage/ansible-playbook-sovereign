@@ -1,7 +1,6 @@
 ---
 # defaults file for evolution
-autonomy_packages:
+autonomy_evolution_packages:
   - evolution
   - evolution-plugins
   - evolution-plugins-experimental
-  - evolution-rss

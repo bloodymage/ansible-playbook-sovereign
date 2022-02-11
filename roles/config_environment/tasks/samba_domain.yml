@@ -1,0 +1,46 @@
+# ==================================================================================================
+#
+# We try to identify all hosts within the domain.
+#
+# Samba Domain Controllers, by definition are.
+# Samba File Servers, and SSSD connected hosts are if they are in the same zone as the domain
+# controllers.
+#
+# Note: if we check to see if the domain controller is in the same zone as the sssd host, and we
+# are using '--limit' to only run the playbook on the sssd host, then this fails.  So if later we
+# are checking that the host is in the samba domain, then that task will fail.
+#
+# Disabling zone check for until I can find a better way.
+#
+# ==================================================================================================
+- name: "Check if we have a samba domain, add hosts if it exists."
+  ansible.builtin.group_by:
+    key: "{{ item.parent }}"
+  loop:
+    - name: "samba_domain_controllers"
+      parent: "samba_domain"
+    - name: "samba_file_servers"
+      parent: "samba_domain"
+    - name: "sssd"
+      parent: "samba_domain"
+  when:
+    - inventory_hostname in groups[item.name] | default([])
+    #- inventory_hostname in groups[autonomy_zone_name] | default([])
+    #- groups['samba_domain_controllers'][0] in groups[autonomy_zone_name] | default([])
+  changed_when: False
+
+# ==================================================================================================
+#
+# This variable is crucial.  Things can go wrong if it's improperly set.  This may be a problem if
+# we are using the 'limit' flag to only run on certain hosts, and a domain controller is not part
+# of that list.
+#
+# Disabling for now.
+#
+# ==================================================================================================
+# - name: "Update password and auth mechanims."
+#   ansible.builtin.set_fact:
+#     autonomy_realm_identity_management_system: "samba"
+#   become: no
+#   when:
+#     - groups['samba_domain_controllers'] is defined

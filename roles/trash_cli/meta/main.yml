@@ -25,4 +25,5 @@ galaxy_info:
     - packages
 
 dependencies:
-  - role: bloodymage.autonomy.collection_handlers
+  - role: bloodymage.autonomy.collection_globals
+

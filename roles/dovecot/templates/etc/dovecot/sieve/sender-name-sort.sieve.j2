@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
-global ["autonomy_category", "autonomy_explicit_group", "autonomy_listname", "autonomy_detail", "autonomy_detected_domain", "autonomy_explicit_subgroup", "autonomy_generic_subgroup"];
+global ["level1", "level2", "level3", "level4", "level5", "level6", "level7"];
 
 if anyof (
   address :contains "from" "notifications",
@@ -18,7 +18,7 @@ if anyof (
   header "Precedence" "bulk"
 )
 {
-  set "autonomy_generic_subgroup" "Advertisements";
+  set "level3" "Advertisements";
 }
 
 if anyof (
@@ -34,7 +34,7 @@ if anyof (
   )
 )
 {
-  set "autonomy_generic_subgroup" "Bills and Receipts";
+  set "level3" "Bills and Receipts";
 }
 
 if anyof (
@@ -47,7 +47,7 @@ if anyof (
   address :contains "from" "notice"
 )
 {
-set "autonomy_generic_subgroup" "Account Notifications";
+  set "level3" "Account";
 }
 
 if anyof (
@@ -57,12 +57,23 @@ if anyof (
   address :contains "from" "auto-confirm"
 )
 {
-  set "autonomy_generic_subgroup" "Shipping";
+  set "level3" "Shipping";
 }
 
 if anyof (
   address :contains "from" "Video.Appointment"
 )
 {
-  set "autonomy_generic_subgroup" "Appointments";
+  set "level3" "Appointments";
 }
+
+{% if dovecot_bounce_folder_name is truthy %}
+if allof (
+  address :localpart :is "from" ["postmaster", "mailer-daemon", "MAILER-DAEMON"],
+  not string :is "level1" "Systems"
+)
+{
+  fileinto "{{ dovecot_bounce_folder_name }}";
+  stop;
+}
+{% endif %}

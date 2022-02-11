@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+
+{% if autonomy_postfix_domains is defined %}
+{% for item in autonomy_postfix_domains %}
+{% if item.transport_type is defined %}
+{{ item.domain.ljust(20) }}  {{ item.transport_type }}
+  {%- if item.transport_dest is defined %}:{{ item.transport_dest }}{% endif %}
+{% endif %}
+{% endfor %}
+{% endif %}

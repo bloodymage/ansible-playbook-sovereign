@@ -25,8 +25,11 @@ plugin {
 {% if dovecot_sieve_extensions is defined %}
   sieve_extensions = {{ dovecot_sieve_extensions }}
 {% endif %}
-{% if dovecot_sieve_global_extensions is defined %}
-  sieve_global_extensions = {{ dovecot_sieve_global_extensions }}
+{% if autonomy_dovecot_sieve_global_extensions is defined %}
+  sieve_global_extensions = {{ autonomy_dovecot_sieve_global_extensions }}
+{% endif %}
+{% if autonomy_dovecot_sieve_pipe_bin_dir is defined %}
+  sieve_pipe_bin_dir = {{ autonomy_dovecot_sieve_pipe_bin_dir }}
 {% endif %}
 {% if dovecot_sieve_plugins is defined %}
   sieve_plugins = {{ dovecot_sieve_plugins }}

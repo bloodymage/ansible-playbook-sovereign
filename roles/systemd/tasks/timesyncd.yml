@@ -1,0 +1,6 @@
+---
+- name: "Install Timesyncd packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_systemd_timesyncd_packages }}"
+    state: present
+  become: yes

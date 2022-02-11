@@ -1,0 +1,320 @@
+# {{ ansible_managed }}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# The sections are ordered so that the '[user]' section is first, followed by all sections       #}
+{# alphabetically except for the '[alias]' section, which is last.                                #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+[user]
+{% if item.gpg_keys is defined %}
+  name = "{{ item.gpg_keys[0].name }}"
+  email = "{{ item.gpg_keys[0].email }}"
+{% if item.gpg_keys[0].sign_keyid is defined %}
+  signingkey = "{{ item.gpg_keys[0].sign_keyid }}"
+{% endif %}
+{% elif item.display_name is defined %}
+  name = "{{ item.display_name }}"
+  email = "{{ item.mail }}"
+{% else %}
+  name = "{{ item.username }}"
+  email = "{{ item.username }}@{{ autonomy_fqdn }}"
+{% endif %}
+  useConfigOnly = {{ item.use_config_only | default(autonomy_user_gitconfig_use_config_only) }}
+
+{# Not sure this is still necessary #}
+{#  [add "interactive"] #}
+{# useBuiltin = false # required for git 2.37.0 #}
+
+[branch "{{ autonomy_user_gitconfig_default_branch }}"]
+  remote = origin
+  merge = refs/heads/{{ autonomy_user_gitconfig_default_branch }}
+
+[color]
+  branch = always
+  diff = always
+  grep = always
+  interactive = always
+  pager = true
+  showbranch = auto
+  status = auto
+  ui = always
+
+[color "interactive"]
+  error = red bold
+
+[color "branch"]
+  current = yellow reverse
+  local = yellow
+  remote = green
+
+[color "diff"]
+  meta = yellow
+  frag = magenta
+  old = red
+  new = green
+  whitespace = white reverse
+
+[color "status"]
+  added = yellow
+  changed = green
+  untracked = cyan
+  branch = magenta
+
+{% if item.gpg_keys[0].sign_keyid is defined -%}
+  [commit]
+  gpgSign = true
+{%- endif %}
+
+[core]
+  editor = {{ autonomy_user_gitconfig_editor }}
+  pager = delta
+  whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
+  excludesfile = ~/.gitignore # Creates a global git ignore
+
+[delta]
+  navigate = true
+  light = false
+  line-numbers=true
+
+[diff]
+  tool = vimdiff
+  colorMoved = default
+
+[difftool]
+  prompt = false
+
+[github]
+{% if item.github_user is defined %}
+  user = {{ item.github_user }}
+  oauth-token = {{ item.oauth_token }}
+{% elif autonomy_github_user is truthy and autonomy_github_oauth_token is truthy %}
+  user = {{ autonomy_github_user }}
+  oauth-token = {{ autonomy_github_oauth_token }}
+{% endif %}
+
+[init]
+  defaultBranch = {{ autonomy_user_gitconfig_default_branch }}
+
+[interactive]
+  diffFilter = delta --color-only
+
+[merge]
+  tool = emerge
+  conflictStyle = diff3
+
+[push]
+  default = matching
+  gpgSign = if-asked
+
+[tag]
+  gpgSign = true
+
+[url "git@github.com:"]
+  insteadof = github:
+
+
+# ==================================================================================================
+#
+# All aliases are pushed to the bottom of the file, these are the most likely to be changed.
+#
+# ==================================================================================================
+[alias]
+# List Aliases
+la = "!git config -l | grep alias | cut -c 7-"
+
+# Branch Aliases
+b   = branch
+bc  = checkout -b
+bl  = branch -v
+bL  = branch -av
+bx  = branch -d
+bX  = branch -D
+bmv = branch -m
+bM  = branch -M
+bs  = show-branch
+bS  = show-branch -a
+bclean = "!f() { git branch --merged ${1-master} | grep -v " ${1-master}$" | xargs -r git branch -d; }; f"
+bdone = "!f() { git checkout ${1-master} && git up && git bclean ${1-master}; }; f"
+
+
+# Checkout Aliases
+co  = checkout
+co0 = checkout HEAD --
+cob = checkout -b
+cod = checkout develop
+coh = checkout hotfix
+com = checkout {{ autonomy_user_gitconfig_default_branch }}
+cor = checkout release
+
+# Clone Aliases
+cl = clone
+
+# Commit Aliases
+c         = commit -
+ca        = !git add --all && git commit --all -v
+cm        = !git add --all && git commit --all -v --message
+camend    = commit --amend --reuse-message HEAD
+cdate     = !git add --all && git commit --message \"Commit for $(date -I)\"
+cdatetime = !git add --all && git commit --message \"Commit for $(date -Iseconds)\"
+cyolo     = !git add --all && git commit --message \"$(fortune -n 72 -s)\" && git push --force
+cyolo2    = !git add --all && git commit --message \"$(fortune -n 72 -s)\"
+cyolo3    = !git add --all && git commit --message \"$(curl -s https://whatthecommit.com/index.txt)\" && git push --force
+cyolo4    = !git add --all && git commit --message \"$(curl -s https://whatthecommit.com/index.txt)\"
+cidk      = !git add --all && git commit --message '¯\\_(ツ)_/¯' && git push --force
+cidk2     = !git add --all && git commit --message '¯\\(°_o)/¯'
+save      = !git add --all && git commit --message "SAVEPOINT"
+wip       = !git add --update && git commit --message "WIP"
+wipe      = !git add --all && git commit -qm 'WIPE SAVEPOINT' && git reset --hard HEAD~1
+
+cundo = reset HEAD~
+untrack = rm --cache --
+
+
+# Config files
+ec = config --global --edit
+
+# Diff Aliases
+d    = diff          # Diff working dir to index
+ds   = diff --staged # Diff index to HEAD
+dc   = diff --staged # Diff index to HEAD
+dh   = diff HEAD     # Diff working dir and index to HEAD
+hub  = browse
+hubd = compare
+
+# Fetch Aliases
+f   = fetch
+fm  = pull
+fo  = fetch origin
+
+# Flow Aliases
+fli   = flow init
+flb   = flow bugfix
+flbf  = flow bugfix finish --squash
+flbr  = flow bugfix rebase
+flbs  = flow bugfix start
+flf   = flow feature
+flff  = flow feature finish --squash
+flfr  = flow feature rebase
+flfs  = flow feature start
+flh   = flow hotfix
+flhf  = flow hotfix finish --squash
+flhr  = flow hotfix rebase
+flhs  = flow hotfix start
+flr   = flow release
+flrf  = flow release finish --squash
+flrr  = flow release rebase
+flrs  = flow release start
+fls   = flow support
+flsf  = flow support finish --squash
+flsr  = flow support rebase
+flss  = flow support start
+
+# Logging Aliases
+# Basic Format
+l    = log --pretty=format:"%C(yellow)%h\\ %C(blue)[%cn\\ <%ce>]\\ %C(green)%cr%C(reset)\\ %s"
+ld   = log --pretty=format:"%C(yellow)%h\\ %C(green)%<(32)%cd%C(red)%d\\ %C(reset)%s\\ %C(blue)[%cn\\ <%ce>]\\ %GK"
+ldh  = log --pretty=format:"%C(yellow)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s\\ %C(blue)[%cn\\ <%ce>]\\ %GK" --date=human
+ldi  = log --pretty=format:"%C(yellow)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s\\ %C(blue)[%cn\\ <%ce>]\\ %GK" --date=iso
+ldi1 = log --pretty=format:"%C(yellow)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s\\ %C(blue)[%cn\\ <%ce>]\\ %GK" --date=iso-strict
+ldr  = log --pretty=format:"%C(yellow)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s\\ %C(blue)[%cn\\ <%ce>]\\ %GK" --date=relative
+ldr1 = log --pretty=format:"%C(yellow)%h\\ %C(green)%<(32)%cd%C(red)%d\\ %C(reset)%s\\ %C(blue)[%cn\\ <%ce>]\\ %GK" --date=rfc
+lds  = log --pretty=format:"%C(yellow)%h\\ %C(green)%<(12)%cd%C(red)%d\\ %C(reset)%s\\ %C(blue)[%cn\\ <%ce>]\\ %GK" --date=short
+ls   = ldr
+
+ldt   = log --pretty=format:"%C(yellow)%<(9)%h\\ %C(green)%<(32)%cd%C(red)%d\\ %C(reset)%s%C(blue)\\ [%cn\\ <%ce>]\\ %GK" --topo-order
+ldht  = log --pretty=format:"%C(yellow)%<(9)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s%C(blue)\\ [%cn\\ <%ce>]\\ %GK" --topo-order --date=human
+ldit  = log --pretty=format:"%C(yellow)%<(9)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s%C(blue)\\ [%cn\\ <%ce>]\\ %GK" --topo-order --date=iso
+ldi1t = log --pretty=format:"%C(yellow)%<(9)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s%C(blue)\\ [%cn\\ <%ce>]\\ %GK" --topo-order --date=iso-strict
+ldrt  = log --pretty=format:"%C(yellow)%<(9)%h\\ %C(green)%<(20)%cd%C(red)%d\\ %C(reset)%s%C(blue)\\ [%cn\\ <%ce>]\\ %GK" --topo-order --date=relative
+ldr1t = log --pretty=format:"%C(yellow)%<(9)%h\\ %C(green)%<(32)%cd%C(red)%d\\ %C(reset)%s%C(blue)\\ [%cn\\ <%ce>]\\ %GK" --topo-order --date=rfc
+ldst  = log --pretty=format:"%C(yellow)%<(9)%h\\ %C(green)%<(12)%cd%C(red)%d\\ %C(reset)%s%C(blue)\\ [%cn\\ <%ce>]\\ %GK" --topo-order --date=short
+
+# Log Graph Aliases
+lg    = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)"
+lgdh  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --date=human
+lgdi  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --date=iso
+lgdi1 = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --date=iso-strict
+lgdr  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --date=relative
+lgdr1 = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --date=rfc
+lgds  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --date=short
+
+lgt    = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --topo-order
+lgdht  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --topo-order --date=human
+lgdit  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --topo-order --date=iso
+lgdi1t = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --topo-order --date=iso-strict
+lgdrt  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --topo-order --date=relative
+lgdr1t = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --topo-order --date=rfc
+lgdst  = log --graph --pretty=format:"%C(yellow)%h%C(reset)\\ -\\ %C(red)%d%C(reset)\\ %s\\ %C(green)(%cd)%C(reset)\\ %C(blue)<%cn>%C(reset)" --topo-order --date=short
+
+# Long Formats
+ll  = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n"
+lls = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat
+llsf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat --full-diff
+llsp = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat --patch
+llspf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat --full-diff --patch
+llb  = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B"
+llbs = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat
+llbsf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat --full-diff
+llbsp = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat --patch
+llbspf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat --full-diff --patch
+
+llt  = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --topo-order
+llst = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat --full-diff --topo-order
+llstf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat --full-diff --topo-order
+llspt = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat --patch --topo-order
+llsptf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+s%n" --stat --full-diff --patch --topo-order
+llbt  = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --topo-order
+llbst = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat --topo-order
+llbstf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat --full-diff --topo-order
+llbspt = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat --patch --topo-order
+llbsptf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%n%C(bold\\ yellow)Author:\\ %C(cyan)%an\\ <%ae>%n%C(bold\\ yellow)Commiter:\\ %C(blue)%cn\\ <%ce>\\ %GK%n%C(bold\\ yellow)Date:\\ \\ \\ %C(green)%ai\\ (%ar)%C(reset)%n%+B" --stat --full-diff --patch --topo-order
+
+# Log Patch Formats
+lp   = log --patch
+
+#llf  = fsck --lost-found
+#ll   = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+#lh   = shortlog --summary --numbered
+
+# merge
+m   = merge
+mom = merge origin/{{ autonomy_user_gitconfig_default_branch }}
+
+# push
+o = !git push origin --all && git push --prune
+p   = push
+pa  = push --all
+pt  = push --tags
+
+# rebase
+r   = rebase
+ra  = rebase --abort
+rc  = rebase --continue
+ri  = rebase --interactive
+rs  = rebase --skip
+rom = rebase origin/{{ autonomy_user_gitconfig_default_branch }}
+
+# Remote Aliases
+re  = remote
+rea = remote add
+rel = remote --verbose
+rem = remote rename
+res = remote set-url
+rex = remote rm
+
+
+# Misc Aliases
+# Recent Commit information
+#dl = "!git ll -1"
+#dlc = diff --cached HEAD^
+#dr  = '!f() { git diff "$1"^.."$1"; }; f'
+#lc  = '!f() { git ll "$1"^.."$1"; }; f'
+#diffr  = '!f() { git diff "$1"^.."$1"; }; f'
+
+#
+#up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+
+# Find files ...
+grep = "!git ls-files | grep --binary-files=without-match --ignore-case"
+#grep = "!git ls-files | grep --ignore-case"

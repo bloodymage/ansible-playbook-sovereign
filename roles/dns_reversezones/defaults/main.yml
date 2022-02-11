@@ -1,4 +1,0 @@
----
-# defaults file for dns-update
-bind_ipv4_address: "{{ ansible_default_ipv4.address | default(ansible_host) }}"
-bind_ipv4_ptr_record: "{{ bind_ipv4_address.split('.')[3] }}.{{ bind_ipv4_address.split('.')[2] }}.{{ bind_ipv4_address.split('.')[1] }}.{{ bind_ipv4_address.split('.')[0] }}.in-addr.arpa."

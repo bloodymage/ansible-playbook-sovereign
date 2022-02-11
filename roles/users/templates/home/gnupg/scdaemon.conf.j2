@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+
+{% if autonomy_user_dotfiles_gpg_disable_ccid -%}
+  disable-ccid
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_pcsc_driver != "libpcsclite.so" -%}
+  pcsc-driver {{ autonomy_user_dotfiles_gpg_pcsc_driver }}
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_pcsc_shared -%}
+  pcsc-shared
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_reader_port is truthy -%}
+  reader-port
+  {%- for item in autonomy_user_dotfiles_gpg_reader_port -%}
+    {{ " " }}{{ item }}
+  {%- endfor +%}
+{% endif %}

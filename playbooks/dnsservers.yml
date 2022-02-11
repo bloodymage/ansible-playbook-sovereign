@@ -3,8 +3,6 @@
   hosts: all
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
 
@@ -16,25 +14,12 @@
         - bind
         - bind9
 
-- name: "Set Forward Zone information."
+- name: "Update DNS Records."
   hosts: all:!localhost
   ignore_unreachable: yes
   roles:
-    - role: bloodymage.autonomy.dns_forwardzones
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "dns"
       tags:
-        - dns_forwardzones
-        - dns-forwardzones
-        - dns-forwardzone
-        - dns-update
-
-# TODO: Configure RouterOS reversezones
-- name: "Set Reverse Zone information."
-  hosts: all:!localhost:!routeros:!virtual_hosts
-  ignore_unreachable: yes
-  roles:
-    - role: bloodymage.autonomy.dns_reversezones
-      tags:
-        - dns_reversezones
-        - dns-reversezones
-        - dns-reversezone
-        - dns-update
+        - dns

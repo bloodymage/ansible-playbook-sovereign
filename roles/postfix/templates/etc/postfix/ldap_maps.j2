@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+
+{{ 'server_host'.ljust(28) }}=
+{%- for server in groups['samba_domain_controllers'] -%}
+  {{ " " }}ldap://{{ server }}{{ "," if not loop.last else "" }}
+{%- endfor %}
+
+{{ 'server_port'.ljust(28) }}= 389
+{{ 'version'.ljust(28) }}= 3
+{{ 'bind'.ljust(28) }}= yes
+{{ 'bind_dn'.ljust(28) }}= cn={{ __mail_user }},{{ autonomy_user_dn }}
+{{ 'bind_pw'.ljust(28) }}= {{ __mail_user_password }}
+{{ 'search_base'.ljust(28) }}= {{ autonomy_user_dn }}
+{{ 'scope'.ljust(28) }}= {{ item.scope }}
+{{ 'query_filter'.ljust(28) }}= {{ item.query_filter }}
+{% if item.leaf_result_attribute is defined -%}
+  {{ 'leaf_result_attribute'.ljust(28) }}= {{ item.leaf_result_attribute }}
+{% endif %}
+{% if item.special_result_attribute is defined -%}
+  {{ 'special_result_attribute'.ljust(28) }}= {{ item.special_result_attribute }}
+{% endif %}
+{{ 'result_attribute'.ljust(28) }}= {{ item.result_attribute }}
+{% if item.result_format is defined -%}
+  {{ 'result_format'.ljust(28) }}= {{ item.result_format }}
+{% endif %}
+{{ 'debuglevel'.ljust(28) }}= {{ item.postfix_ldap_map_debug_level | default(postfix_ldap_map_debug_level) }}
+{{ 'start_tls'.ljust(28) }}= yes
+{{ 'tls_require_cert'.ljust(28) }}= no

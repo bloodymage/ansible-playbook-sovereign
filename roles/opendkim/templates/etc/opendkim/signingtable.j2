@@ -1,4 +1,7 @@
 # {{ ansible_managed }}
 
-
-*@{{ autonomy_root_domain }} {{ autonomy_root_domain }}
+{% for item in autonomy_zones %}
+{% if item.type == "public" %}
+*@{{ item.domain }} {{ item.domain }}
+{% endif %}
+{% endfor %}

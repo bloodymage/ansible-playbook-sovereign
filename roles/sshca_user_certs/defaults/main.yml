@@ -1,9 +1,0 @@
----
-# defaults file for sshca-user-certs
-sshca_user_pki_dirs:
-  - name: "ssh"
-    mode: "0755"
-
-sshca_user_keyfile: "{{ sshca_domain }}_user_key"
-sshca_user_signer_key: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
-sshca_user_signer_id: "{{ sshca_domain }}"

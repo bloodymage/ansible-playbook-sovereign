@@ -1,0 +1,27 @@
+---
+- name: "Complete Let's Encrypt challenges."
+  community.crypto.acme_certificate:
+    acme_directory: "{{ autonomy_acmeca_url }}"
+    acme_version: "{{ autonomy_acmeca_version }}"
+    account_key_src: "{{ autonomy_acmeca_account_key_path }}"
+    modify_account: no
+    challenge: "{{ autonomy_acmeca_challenge_type }}"
+    csr: "{{ autonomy_acmeca_csr_dir }}/{{ item.name }}.csr"
+    dest: "{{ autonomy_acmeca_archive_dir }}/{{ item.name }}/cert.pem"
+    chain_dest: "{{ autonomy_acmeca_archive_dir }}/{{ item.name }}/chain.pem"
+    fullchain_dest: "{{ autonomy_acmeca_archive_dir }}/{{ item.name }}/fullchain.pem"
+    data: "{{ acme_challenge['results'][my_index] }}"
+    force: "{{ __acmeca_regenerate_server_private_key }}"
+    validate_certs: yes
+  loop: "{{ virtual_hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  notify: restart apache
+  when:
+    - virtual_hosts is defined
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'] is defined
+  tags:
+    - acmeca
+    - acmeca-host-certs

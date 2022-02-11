@@ -1,0 +1,7 @@
+---
+- name: "Get package facts."
+  ansible.builtin.package_facts:
+    manager: auto
+  when:
+    - autonomy_virtual_host is falsy
+    - ansible_connection != "local"

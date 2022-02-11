@@ -1,4 +1,0 @@
----
-# defaults file for user_password_store
-user_password_store_users: "{{ users }}"
-user_password_store_user_home: "/home"

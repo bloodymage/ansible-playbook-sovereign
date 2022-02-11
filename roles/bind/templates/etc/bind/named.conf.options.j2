@@ -1,5 +1,6 @@
 {{ ansible_managed | comment }}
 
+{% if inventory_hostname not in groups['samba_domain_controllers'] %}
 {% if bind_acls is defined -%}
   {% for acl in bind_acls -%}
     acl {{ acl['name'] }} {
@@ -16,46 +17,38 @@
     };
   {% endfor %}
 {% endif %}
+{% endif %}
 
 options {
   directory "/var/cache/bind";
-  recursion yes; #enable recursive queries
+
+  // version statement for security to avoid hacking known weaknesses
+  // if the real version number is revealed
+  version "not currently available";
+
+  dnssec-validation {{ bind_dnssec_validation }};
 
   listen-on { any; };
   listen-on-v6 { any; };
 
-  allow-query { trusted; };
-  allow-transfer { trusteddns; };
-
-  dnssec-validation {{ bind_dnssec_validation }};
+{% if inventory_hostname in groups['samba_domain_controllers'] %}
+  tkey-gssapi-keytab "/var/lib/samba/bind-dns/dns.keytab";
+{% else %}
+  allow-query { {{ autonomy_bind_allow_query }}; };
+  allow-transfer { {{ autonomy_bind_allow_transfer }}; };
+  recursion yes; #enable recursive queries
 
   auth-nxdomain no;    # conform to RFC1035
 
+  {# TODO: Ensure eligibility is at least 6 seconds longer than the trigger #}
+  prefetch {{ autonomy_bind_prefetch_trigger }} {{ autonomy_bind_prefetch_eligibility }};
 {# if bind_rpz_zones length > 0 #}
 {# response-policy { #}
-{% for zone in bind_rpz_zones %}
-  zone {{ zone }}
-{% endfor %}
 {# }; #}
 {# endif #}
 
-{% if groups['samba_domain_controllers'] is defined %}
-{% if inventory_hostname in groups['samba_domain_controllers'] %}
-  tkey-gssapi-keytab "/var/lib/samba/bind-dns/dns.keytab";
 {% endif %}
-{% endif %}
+
+
 
 };
-
-{# logging {  #}
-{# channel simple_log {  #}
-{# file "/var/log/bind/bind.log" versions 3 size 5m;  #}
-{# severity debug;  #}
-{# print-time yes;  #}
-{# print-severity yes;  #}
-{# print-category yes;  #}
-{# };  #}
-{# category default{  #}
-{# simple_log;  #}
-{# };  #}
-{# };  #}

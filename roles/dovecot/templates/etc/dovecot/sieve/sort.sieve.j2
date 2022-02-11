@@ -1,33 +1,7 @@
 # {{ ansible_managed }}
 
 require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
-global ["autonomy_category", "autonomy_explicit_group", "autonomy_listname", "autonomy_detail", "autonomy_detected_domain", "autonomy_explicit_subgroup", "autonomy_generic_subgroup"];
-
-include :global "98-recipient-detail-sort";
-
-if not string :is "${autonomy_category}" "" {
-  set :upperfirst "category" "${autonomy_category}";
-}
-
-if not string :is "${autonomy_explicit_group}" "" {
-  set :upperfirst "sort" "${autonomy_explicit_group}";
-  if not string :is "${autonomy_listname}" "" {
-    set :upperfirst "autonomy_explicit_subgroup" "${autonomy_listname}";
-  }
-} elsif not string :is "${autonomy_listname}" "" {
-  set :upperfirst "category" "Mailing Lists";
-  set :upperfirst "sort" "${autonomy_listname}";
-} elsif not string :is "${autonomy_detail}" "" {
-  set :upperfirst "sort" "${autonomy_detail}";
-} else {
-  set :upperfirst "sort" "${autonomy_detected_domain}";
-}
-
-if not string :is "${autonomy_explicit_subgroup}" "" {
-  set :upperfirst "subsort" "${autonomy_explicit_subgroup}";
-} elsif not string :is "${autonomy_generic_subgroup}" "" {
-  set :upperfirst "subsort" "${autonomy_generic_subgroup}";
-}
+global ["level1", "level2", "level3", "level4", "level5", "level6", "level7"];
 
 # ==================================================================================================
 #
@@ -36,51 +10,50 @@ if not string :is "${autonomy_explicit_subgroup}" "" {
 # TODO: There has got to be a better way.
 #
 # ==================================================================================================
-{% if dovecot_bounce_folder_name is truthy %}
-if allof (
-  address :localpart :is "from" ["postmaster", "mailer-daemon", "MAILER-DAEMON"],
-  not string :is "autonomy_category" "Systems"
-)
-{
-  fileinto "{{ dovecot_bounce_folder_name }}";
-  stop;
+if not string :is "${level1}" "" {
+set :upperfirst "level1" "${level1}";
+set "sorted_mailbox" "/${level1}";
+} else {
+set "sorted_mailbox" "";
 }
-{% endif %}
+
+if not string :is "${level2}" "" {
+set :upperfirst "level2" "${level2}";
+set "sorted_mailbox" "${sorted_mailbox}/${level2}";
+}
+
+if not string :is "${level3}" "" {
+set :upperfirst "level3" "${level3}";
+set "sorted_mailbox" "${sorted_mailbox}/${level3}";
+}
+
+if not string :is "${level4}" "" {
+set :upperfirst "level4" "${level4}";
+set "sorted_mailbox" "${sorted_mailbox}/${level4}";
+}
+
+if not string :is "${level5}" "" {
+set :upperfirst "level5" "${level5}";
+set "sorted_mailbox" "${sorted_mailbox}/${level5}";
+}
+
+if not string :is "${level6}" "" {
+set :upperfirst "level2" "${level6}";
+set "sorted_mailbox" "${sorted_mailbox}/${level6}";
+}
+
+if not string :is "${level7}" "" {
+set :upperfirst "level7" "${level7}";
+set "sorted_mailbox" "${sorted_mailbox}/${level7}";
+}
 
 
-if allof (
-  string :is "${category}" "",
-  string :is "${sort}" ""
+if anyof (
+  not string :is "${sorted_mailbox}" ""
 ) {
-    if string :is "${subsort}" "" {
-      fileinto "{{ __main_folder }}";
+      fileinto :create "{{ __main_folder }}${sorted_mailbox}";
       stop;
   } else {
-      fileinto "{{ __main_folder }}/${subsort}";
+      fileinto "{{ __main_folder }}";
       stop;
   }
-} elsif string :is "${category}" "" {
-    if string :is "${subsort}" "" {
-      fileinto :create "{{ __main_folder }}/${sort}";
-      stop;
-    } else {
-      fileinto :create "{{ __main_folder }}/${sort}/${subsort}";
-      stop;
-    }
-} elsif string :is "${sort}" "" {
-    if string :is "${subsort}" "" {
-      fileinto :create "{{ __main_folder }}/${category}";
-      stop;
-    } else {
-      fileinto :create "{{ __main_folder }}/${category}/${subsort}";
-      stop;
-    }
-} else {
-    if string :is "${subsort}" "" {
-      fileinto :create "{{ __main_folder }}/${category}/${sort}";
-      stop;
-    } else {
-      fileinto :create "{{ __main_folder }}/${category}/${sort}/${subsort}";
-      stop;
-    }
-}

@@ -1,6 +1,10 @@
 # {{ ansible_managed }}
 
-hosts = dc.{{ autonomy_domain }}:389
+hosts =
+{%- for server in groups['samba_domain_controllers'] -%}
+  {{ server }}{{ " " if not loop.last else "" }}
+{%- endfor %}
+
 ldap_version = 3
 auth_bind = yes
 dn = cn={{ mail_user }},{{ autonomy_user_dn }}

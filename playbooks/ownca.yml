@@ -10,8 +10,6 @@
   ignore_unreachable: yes
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
     - role: bloodymage.autonomy.config_ownca_environment
@@ -21,11 +19,16 @@
   hosts: certificate_authorities
   roles:
     - role: bloodymage.autonomy.ownca
+      vars:
+        __ownca_tasks: "ownca"
       tags:
         - ownca
         - regenerate-ownca
-    - role: bloodymage.autonomy.ownca_crl
+    - role: bloodymage.autonomy.ownca
+      vars:
+        __ownca_tasks: "crls"
       tags:
+        - ownca
         - regenerate-ownca
         - ownca_crl
         - ownca-crl

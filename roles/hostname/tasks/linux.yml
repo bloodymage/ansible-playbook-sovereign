@@ -1,0 +1,27 @@
+---
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: yes
+  tags:
+    - hostname
+    - hostname_debug
+    - hostname-debug
+    - install-packages
+
+# ==================================================================================================
+#
+# Task: "Set Hostname"
+#
+# Allows changing a hostname simply by updating the hosts IP address
+#
+# ==================================================================================================
+- name: "Set Hostname"
+  ansible.builtin.hostname:
+    name: "{{ autonomy_hostname }}"
+  become: yes
+  when:
+    - inventory_hostname != "localhost"
+  tags:
+    - hostname

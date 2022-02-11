@@ -2,122 +2,40 @@
 # ==================================================================================================
 #
 # Tasks:
-#  
+#
 #
 # ==================================================================================================
-- name: "Pre-tasks."
-  block:
-    - name: "Include OS-specific variables."
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
-      tags:
-        - sshca
-        - sshca_debug
-        - sshca-debug
-        - install-packages
-
-    - name: "Install packages."
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-      delegate_to: localhost
-      run_once: yes
-      tags:
-        - sshca
-        - sshca_debug
-        - sshca-debug
-        - install-packages
-
-# ==================================================================================================
-#
-# Create a CA key directory
-#  
-#
-# ==================================================================================================
-- name: "Create CA key directory."
-  ansible.builtin.file:
-    path: "{{ sshca_key_directory }}"
-    state: directory
-    mode: '0700'
-  delegate_to: localhost
-  run_once: yes
-  tags:
-    - sshca
-    - sshca_debug
-    - sshca-debug
-
-# ==================================================================================================
-#
-# Generate Passwords if they don't exist
-#
-# ==================================================================================================
-- name: "Ensure we have a password for the Host CA Key."
-  ansible.builtin.set_fact:
-    sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_root_domain }}/sshca/sshca_host_key_password"
-    __password_length: "length={{ autonomy_password_length }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  delegate_to: localhost
-  run_once: yes
-  changed_when:
-    - sshca_host_key_password != "password"
-  when:
-    - sshca_host_key_password == "password"
-  tags:
-    - sshca
-    - sshca_debug
-    - sshca-debug
-
-- name: "Ensure we have a password for the User CA Key."
-  ansible.builtin.set_fact:
-    sshca_user_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
-    __password_length: "length={{ autonomy_password_length }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-  delegate_to: localhost
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
   become: no
-  changed_when:
-    - sshca_user_key_password != "password"
-  when:
-    - sshca_user_key_password == "password"
   tags:
     - sshca
-    - sshca_debug
-    - sshca-debug
+    - sshca-host-certs
+    - sshca-user-certs
+    - install-packages
 
-# ==================================================================================================
-#
-# Generate CA keys
-#
-# ==================================================================================================
-- name: "Generate Host CA keys."
-  community.crypto.openssh_keypair:
-    path: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
-    type: "{{ sshca_host_key_type }}"
-    comment: "{{ sshca_host_key_comment }}"
-    passphrase: "{{ sshca_host_key_password }}"
-    owner: "{{ __autonomy_user }}"
-    group: "{{ __autonomy_user }}"
+- name: "Create SshCA."
+  include_tasks: "sshca.yml"
+  when:
+    - __sshca_tasks == "sshca"
+  tags:
+    - sshca
 
-- name: "Generate User CA keys."
-  community.crypto.openssh_keypair:
-    path: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
-    type: "{{ sshca_user_key_type }}"
-    comment: "{{ sshca_user_key_comment }}"
-    passphrase: "{{ sshca_user_key_password }}"
-    owner: "{{ __autonomy_user }}"
-    group: "{{ __autonomy_user }}"
+- name: "Configure SshCA Host Certs."
+  include_tasks: "sshca_host_certs.yml"
+  when:
+    - __sshca_tasks == "hostcerts"
+  tags:
+    - sshca-host-certs
+
+- name: "Configure SshCA User Certs."
+  include_tasks: "sshca_user_certs.yml"
+  when:
+    - __sshca_tasks == "usercerts"
+  tags:
+    - sshca-user-certs

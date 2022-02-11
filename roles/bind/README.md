@@ -60,8 +60,9 @@ Similar Projects
 
 References
 ----------
-- [BIND 9 Administrator Reference Manual](https://bind9.readthedocs.io/en/v9_16_15/)
+- [BIND 9 Administrator Reference Manual](https://bind9.readthedocs.io/en/latest/)
 - [DNS for Rocket Scientists](http://www.zytrax.com/books/dns/)
+- [Debian Wiki: Bind9](https://wiki.debian.org/Bind9)
 - [Samba Wiki: Setting up an BIND DNS Server](https://wiki.samba.org/index.php/Setting_up_a_BIND_DNS_Server)
 
 Contributing

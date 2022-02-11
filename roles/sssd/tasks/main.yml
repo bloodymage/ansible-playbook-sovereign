@@ -23,12 +23,12 @@
     - "enable sssd"
     - "restart sssd"
 
-- name: "Ensure we have a password for the Samba Administrator account"
+- name: "Ensure we have a password for the Samba Administrator account."
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   become: no
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   when:
     - samba_administrator_password == "password"
@@ -46,7 +46,7 @@
     sssd_systemd: yes
     #sssd_pam_verbosity: 3
 
-- name: "Set SSSD Smart Card Configuration"
+- name: "Set SSSD Smart Card Configuration."
   ansible.builtin.set_fact:
     sssd_ldap_user_certificate: "userCertificate;binary"
     sssd_pam_cert_auth: yes
@@ -61,7 +61,7 @@
     - inventory_hostname in groups['workstations']
     - autonomy_smart_card_login
 
-- name: "stop sssd"
+- name: "Stop SSSD."
   ansible.builtin.service:
     name: sssd
     state: stopped
@@ -71,7 +71,7 @@
     - realm_list_results.stdout is defined
     - realm_list_results.stdout is truthy
 
-- name: "Leave Realm"
+- name: "Leave Realm."
   ansible.builtin.command:
     cmd: "realm leave"
   become: yes
@@ -80,13 +80,13 @@
     - realm_list_results.stdout is defined
     - realm_list_results.stdout is truthy
 
-- name: Checking to see if system still joined to AD
+- name: "Checking to see if system still joined to AD."
   command: /bin/bash -c "/usr/sbin/realm list"
   register: realm_list_results
   when:
     - __samba_recreate_realm
 
-- name: Debug realm_list_results
+- name: "Debug realm_list_results."
   ansible.builtin.debug:
     msg: "{{ realm_list_results.stdout }}"
     verbosity: 1
@@ -96,7 +96,7 @@
     - never
     - debug
 
-- name: Clear old data
+- name: "Clear old data."
   ansible.builtin.file:
     path: "/var/lib/sss/{{ item }}"
     state: absent
@@ -107,21 +107,17 @@
   when:
     - __samba_recreate_realm
 
-- name: Ensure DB directory exists
+- name: "Ensure DB directory exists and has the proper permissions."
   ansible.builtin.file:
-    path: "/var/lib/sss/{{ item }}"
+    path: "/var/lib/sss/{{ item.name }}"
     state: directory
-    owner: sssd
-    group: sssd
-    mode: "0755"
-  loop:
-    - db
-    - mc
+    owner: "{{ item.owner }}"
+    group: "{{ item.group }}"
+    mode: "{{ item.mode }}"
+  loop: "{{ autonomy_sssd_db_directories }}"
   become: yes
-  when:
-    - __samba_recreate_realm
 
-- name: "Test Kerberos Logon to Active Directory Domain Controller"
+- name: "Test Kerberos Logon to Active Directory Domain Controller."
   expect:
     command: kinit administrator
     responses:
@@ -141,9 +137,9 @@
     - realm_list_results.stdout is defined
     - realm_list_results.stdout is falsy
 
-- name: "Install sssd.conf"
+- name: "Install sssd.conf."
   ansible.builtin.template:
-    src: "{{ role_path }}/templates/sssd.conf.j2"
+    src: "sssd.conf.j2"
     dest: "/etc/sssd/sssd.conf"
     owner: root
     group: root
@@ -151,7 +147,7 @@
   become: yes
   notify: restart sssd
 
-- name: "Ensure pam_preauth_available file exists"
+- name: "Ensure pam_preauth_available file exists."
   ansible.builtin.file:
     path: "/var/lib/sss/pubconf/pam_preauth_available"
     owner: "root"
@@ -163,7 +159,7 @@
   when:
     - autonomy_smart_card_login
 
-- name: "Set variables for pam sss config"
+- name: "Set variables for pam sss config."
   ansible.builtin.set_fact:
     sssd_pam_priority: "900"
     sssd_pam_auth_initial: "pam_sss.so allow_missing_name try_cert_auth forward_pass"
@@ -172,7 +168,7 @@
     - autonomy_smart_card_login
     - inventory_hostname in groups['workstations']
 
-- name: "Install /usr/share/pam-configs/sss"
+- name: "Install /usr/share/pam-configs/sss."
   ansible.builtin.template:
     src: "pam-sss.j2"
     dest: "/usr/share/pam-configs/sss"

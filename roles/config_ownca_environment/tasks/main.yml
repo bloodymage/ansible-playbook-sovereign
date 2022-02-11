@@ -27,4 +27,4 @@
   changed_when: __ownca_force_regenerate_issuing_ca
   tags:
     - never
-    - regenerate-intermediate-ca
+    - regenerate-issuing-ca

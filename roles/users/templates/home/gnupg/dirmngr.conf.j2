@@ -1,0 +1,14 @@
+# {{ ansible_managed }}
+
+{% if ((autonomy_user_dotfiles_gpg_keyservers is truthy) and
+       (autonomy_user_dotfiles_gpg_keyservers != autonomy_gnupg_keyservers)) %}
+{% for server in autonomy_user_dotfiles_gpg_keyservers %}
+keyserver {{ server.name }} {% if server.options is defined %}{% for option in server.options %}{{ option }}{{ " " if not loop.last else "" }}{% endfor +%}
+{% endfor %}
+{% endif %}
+
+# Tor
+{% if ((autonomy_user_dotfiles_gpg_use_tor) and
+       (autonomy_user_dotfiles_gpg_use_tor != autonomy_gnupg_use_tor)) -%}
+  use-tor
+{% endif %}

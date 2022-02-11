@@ -130,27 +130,31 @@
   loop: "{{ domain_users }}"
   delegate_to: localhost
   run_once: yes
+  when:
+    - domain_users is truthy
   tags:
     - always
 
 # - name: "Get domain mail user spns."
 #   ansible.builtin.set_fact:
-#     __domain_mail_user_spns:
+#     __domain_mail_user_spns: "{{ __domain_mail_user_spns + [__spns] }}"
 #   loop: "{{ domain_mail_user_spns }}"
 #   vars:
 #     __spns:
 #       spn: "{{ item.spn }}"
+#   tags:
+#     - always
 
-# - name: "Add system users"
+# - name: "Add system users."
 #   ansible.builtin.set_fact:
 #     __domain_system_users: "{{ __domain_system_users + [__user] }}"
-#   loop: "{{ __default_domain_system_users | product(__domain_system_user_spns) }}"
+#   loop: "{{ __default_domain_system_users | product(__domain_mail_user_spns) }}"
 #   vars:
 #     __user:
 #       username: "{{ item[0]['username'] }}"
 #       spns:
 #         - spn: "{{ item[1].spn }}"
-#           hostname: "{{ item[1]
+#           hostname: "{{ item[1].host }}"
 #       keytab_file: "{{ item[0]['keytab_file'] }}"
 #       account_expiry: "{{ item[0]['account_expiry'] }}"
 #   when:
@@ -158,3 +162,5 @@
 #     - groups[item.name] is defined
 #   delegate_to: localhost
 #   run_once: yes
+#   tags:
+#     - always

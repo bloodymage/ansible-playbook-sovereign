@@ -1,18 +1,25 @@
 ---
 # tasks file for chromium
-- name: "Pre-tasks"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: false
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
+- name: "Add APT Repository for 'deb' package."
+  community.general.apt_repo:
+    repo: "ppa:savoury1/chromium"
+    state: present
+    update: true
+  when:
+    - ansible_distribution == "Ubuntu"
+    - autonomy_chromium_snap is false
+
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: true

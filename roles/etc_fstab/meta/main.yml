@@ -1,0 +1,28 @@
+galaxy_info:
+  author: G Derber
+  description: Configures /etc/fstab
+  company: Bloodymage
+
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
+
+  license: MIT
+
+  min_ansible_version: 2.10
+
+  platforms:
+    - name: Rasbian
+      versions:
+        - 12
+    - name: Debian
+      versions:
+        - 12
+    - name: Ubuntu
+      versions:
+        - 22.04
+
+  galaxy_tags:
+    - bloodymage
+    - aliases
+
+dependencies:
+  - role: bloodymage.autonomy.collection_globals

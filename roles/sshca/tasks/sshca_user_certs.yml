@@ -1,0 +1,112 @@
+---
+# tasks file for sshca-user-certs
+- name: "Ensure user has their .ssh directory"
+  ansible.builtin.file:
+    path: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh"
+    state: directory
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
+    mode: "0700"
+  loop: "{{ __realm_users }}"
+  become: yes
+  when:
+    - item.id_number is defined
+
+- name: "Create user pki directories."
+  ansible.builtin.file:
+    path: "{{ ownca_directory }}/users/{{ item.name }}"
+    state: directory
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "{{ item.mode }}"
+  become: no
+  loop: "{{ sshca_user_pki_dirs }}"
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Create user SSH public keys."
+  community.crypto.openssl_publickey:
+    path: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
+    privatekey_path: "{{ __user_private_dir }}/{{ item.username }}.key"
+    privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    format: "OpenSSH"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
+    mode: "0600"
+    state: "present"
+    backup: true
+    force: false
+    return_content: true
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/{{ item.username }}/password"
+    __password_lookup: "{{ __password_store_id }}"
+    __user_home_dir: "{{ sshca_home_dir }}/{{ item.username }}"
+    __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
+  loop: "{{ __realm_users }}"
+  become: yes
+  when:
+    - item.id_number is defined
+
+- name: "Fetch user SSH public keys."
+  ansible.builtin.fetch:
+    src: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
+    dest: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
+    flat: true
+  loop: "{{ __realm_users }}"
+  changed_when: false
+  when:
+    - item.id_number is defined
+
+- name: "Sign SSH Public Keys."
+  community.crypto.openssh_cert:
+    signing_key: "{{ sshca_user_signer_key }}"
+    public_key: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
+    path: "{{ ownca_directory }}/users/ssh/{{ item.username }}-cert.pub"
+    identifier: "{{ sshca_user_signer_id }}"
+    type: "user"
+    principals: "{{ __ssh_principals }}"
+    #serial_number:
+    valid_at: "+2w"
+    valid_from: "+0s"
+    valid_to: "+52w"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0600"
+    ignore_timestamps: true
+    regenerate: "full_idempotence"
+    state: "present"
+    use_agent: "true"
+  loop: "{{ __realm_users }}"
+  delegate_to: localhost
+  become: false
+  vars:
+    __ssh_principals_list: "{% if item.ssh_principals is defined %}{{ item.ssh_principals + [item.username] }}{% else %}{{ [item.username] }}{% endif %}"
+    __ssh_principals: "{% for principal in __ssh_principals_list %}{{ principal }}{{ ',' if not loop.last else '' }}{% endfor %}"
+  when:
+    - item.id_number is defined
+
+- name: "Install SSH Certificate."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/users/ssh/{{ item.username }}-cert.pub"
+    dest: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}-cert.pub"
+    owner: "{{ item.id_number }}"
+    group: "{{ item.id_number }}"
+    mode: "0600"
+  loop: "{{ __realm_users }}"
+  become: true
+  when:
+    - item.id_number is defined
+
+- name: "Create SSH Principals file for users."
+  ansible.builtin.template:
+    src: "ssh_principals.j2"
+    dest: "/etc/ssh/auth_principals/{{ __realm }}{{ item.username }}"
+    owner: root
+    group: root
+    mode: '0644'
+  loop: "{{ __realm_users }}"
+  become: true
+  vars:
+    __realm: "{% if inventory_hostname not in groups['sssd'] %}{{ autonomy_org_unit_name | upper }}\\{% else %}{% endif %}"
+  when:
+    - item.id_number is defined

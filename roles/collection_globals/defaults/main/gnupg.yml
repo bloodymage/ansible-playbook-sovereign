@@ -1,0 +1,40 @@
+---
+# ==================================================================================================
+#
+# Global Variables for GnuPG
+#
+# ==================================================================================================
+# gpg.conf
+autonomy_gnupg_pinentry_mode: "default"
+autonomy_gnupg_personal_cipher_preferences: []
+autonomy_gnupg_personal_digest_preferences: []
+autonomy_gnupg_personal_compress_preferences: []
+autonomy_gnupg_default_preference_list: "{{ autonomy_gnupg_personal_digest_preferences + autonomy_gnupg_personal_cipher_preferences + autonomy_gnupg_personal_compress_preferences }}"
+autonomy_gnupg_cert_digest_algo: ""
+autonomy_gnupg_s2k_digest_algo: ""
+autonomy_gnupg_s2k_cipher_algo: ""
+autonomy_gnupg_comment: ""
+autonomy_gnupg_emit_version: false
+autonomy_gnupg_greeting: false
+autonomy_gnupg_keyid_format: "0xlong"
+autonomy_gnupg_list_options: []
+autonomy_gnupg_verify_options: []
+autonomy_gnupg_with_fingerprint: false
+autonomy_gnupg_require_cross_certification: true
+autonomy_gnupg_symkey_cache: true
+autonomy_gnupg_throw_keyids: false
+autonomy_gnupg_with_keygrip: false
+autonomy_gnupg_keyserver_options: []
+
+# ==================================================================================================
+#
+# dirmngr.conf
+#
+# ==================================================================================================
+autonomy_gnupg_keyservers:
+  - name: "hkps://keys.openpgp.org"
+  - name: "hkps://keys.mailvelope.com"
+
+# False is essentially auto detect system capabilities
+# In other words, if the system has tor available, it will use tor, if not it won't.
+autonomy_gnupg_use_tor: false

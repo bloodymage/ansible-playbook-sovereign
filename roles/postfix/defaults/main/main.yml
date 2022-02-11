@@ -1,6 +1,6 @@
 ---
 # defaults file for postfix-server
-autonomy_packages:
+autonomy_postfix_packages:
   - postfix
 
 # ==================================================================================================
@@ -19,11 +19,33 @@ postfix_mailbox_users: []
 
 postfix_virtual_mailbox_domain_maps: "{{ __postfix_virtual_mailbox_domain_maps }}"
 
-postfix_sasl_relay_files:
-  - filename: "sasl_passwd"
-    mode: "0600"
-  - filename: "sender_relay"
+autonomy_postfix_client_access_file: "client_access"
+autonomy_postfix_helo_access_file: "helo_access"
+autonomy_postfix_transport_file: "transport"
+autonomy_postfix_sasl_passwd_file: "sasl_passwd"
+autonomy_postfix_sender_relay_file: "sender_relay"
+autonomy_postfix_tls_server_sni_maps_file: "tls_server_sni_maps"
+
+
+autonomy_postfix_config_map_files:
+  - filename: "{{ autonomy_postfix_client_access_file }}"
     mode: "0644"
+    install: true
+  - filename: "{{ autonomy_postfix_helo_access_file }}"
+    mode: "0644"
+    install: true
+  - filename: "{{ autonomy_postfix_transport_file }}"
+    mode: "0644"
+    install: true
+  - filename: "{{ autonomy_postfix_tls_server_sni_maps_file }}"
+    mode: "0644"
+    install: "{% if autonomy_postfix_tls_server_sni_maps is truthy %}true{% else %}false{% endif %}"
+  - filename: "{{ autonomy_postfix_sasl_passwd_file }}"
+    mode: "0600"
+    install: "{% if __postfix_sasl_auth_users_list is defined and postfix_sender_relay is truthy %}true{% else %}false{% endif %}"
+  - filename: "{{ autonomy_postfix_sender_relay_file }}"
+    mode: "0644"
+    install: "{% if __postfix_sasl_auth_users_list is defined and postfix_sender_relay is truthy and postfix_sasl_auth_user is truthy %}true{% else %}false{% endif %}"
 
 postfix_virtual_mailbox_users:
   - username: "webmaster@{{ autonomy_root_domain }}"
@@ -60,7 +82,6 @@ postfix_ldap_map_debug_level: 0
 
 postfix_sasl_auth_user: ""
 postfix_sasl_auth_user_password: ""
-postfix_relay_host: []
 
 # ==================================================================================================
 #

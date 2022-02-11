@@ -10,18 +10,14 @@
   become: no
   tags:
     - evolution
-    - evolution_debug
-    - evolution-debug
     - install-packages
 
 - name: "Install packages"
-  package:
-    pkg: "{{ autonomy_packages }}"
+  ansible.builtin.package:
+    pkg: "{{ autonomy_evolution_packages }}"
     state: present
   become: yes
   register: result
   tags:
     - evolution
-    - evolution_debug
-    - evolution-debug
     - install-packages

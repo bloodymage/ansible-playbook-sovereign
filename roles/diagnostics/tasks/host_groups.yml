@@ -1,0 +1,48 @@
+---
+- name: "Import Environment Role."
+  ansible.builtin.import_role:
+    name: "bloodymage.autonomy.config_environment"
+  tags:
+    - host-groups
+
+- name: "Print Host Group Information."
+  ansible.builtin.debug:
+    msg:
+      - "System {{ inventory_hostname }}"
+      - "Groups:  {{ group_names }}"
+  tags:
+    - host-groups
+
+# - name: "Display Host ip by group."
+#   ansible.builtin.debug:
+#     msg:
+#       - "Group name: {{ __group_name }}"
+#       - "  Hosts:    {{ item }}"
+#   loop: "{{ groups[__group_name] }}"
+#   vars:
+#     __group_name: "wifi_access_points"
+#   delegate_to: localhost
+#   run_once: yes
+#   tags:
+#     - host-groups
+
+# - name: "Display groups."
+#   ansible.builtin.debug:
+#     msg:
+#       - "Group name: {{ item.key }}"
+#       - "  Hosts:    {{ item.value }}"
+#   loop: "{{ groups | dict2items }}"
+#   delegate_to: localhost
+#   run_once: yes
+#   tags:
+#     - host-groups
+
+# - name: "Display groups."
+#   ansible.builtin.debug:
+#     msg:
+#       - "Group: {{ item }}"
+#   loop: "{{ groups | dict2items }}"
+#   delegate_to: localhost
+#   run_once: yes
+#   tags:
+#     - host-groups

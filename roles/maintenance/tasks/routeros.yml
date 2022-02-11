@@ -1,0 +1,19 @@
+---
+- name: "Check for RouterOS updates."
+  community.routeros.command:
+    commands:
+      - /system package update check-for-updates
+  register: routeros_resources
+  become: no
+  changed_when: false
+  tags:
+    - system_upgrade
+    - system-upgrade
+
+- name: "Print RouterOS updates."
+  ansible.builtin.debug:
+    msg:
+      - "{{ routeros_resources }}"
+  become: no
+  tags:
+    - system_upgrade

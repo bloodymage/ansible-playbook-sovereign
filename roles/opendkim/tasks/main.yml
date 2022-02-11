@@ -1,21 +1,19 @@
 ---
 # tasks file for opendkim
-- name: "Pre-tasks"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_opendkim_packages }}"
+    state: present
+  become: yes
 
 - name: "Create required OpenDKIM directories."
   ansible.builtin.file:
@@ -27,31 +25,130 @@
   loop: "{{ __opendkim_directories }}"
   become: yes
 
+# ==================================================================================================
+#
+# It might be possible to generate these using: 'community.crypto.openssl_privatekey' and
+# 'community.crypto.openssl_publickey' as of right now, I am not sure how to do that.
+#
+# TODO: Generate these using ansible modules for increased idempotency.
+#
+# ==================================================================================================
 - name: "Generate OpenDKIM keys."
   ansible.builtin.command:
-    cmd: "opendkim-genkey -r -h sha256 -d mail.{{ autonomy_root_domain }} -s {{ opendkim_mail_service }}"
+    cmd: "opendkim-genkey -r -h sha256 -d mail.{{ item.domain }} -s {{ opendkim_mail_service }}_{{ item.name }}"
     chdir: "{{ opendkim_key_dir }}"
     creates: "{{ opendkim_mail_privatekey_path }}"
-  become_user: "{{ opendkim_user }}"
+  loop: "{{ autonomy_zones }}"
   become: yes
-
-- name: "Generate OpenDKIM host and keytable information."
-  ansible.builtin.template:
-    src: "{{ item.src }}"
-    dest: "{{ item.dest }}"
-    owner: "{{ item.owner }}"
-    group: "{{ item.group }}"
-    mode: "{{ item.mode }}"
-  loop: "{{ __opendkim_config_files }}"
-  become: yes
-  notify:
-    - "restart opendkim"
-    - "restart postfix"
-
-- name: "Add postfix to opendkim group."
-  ansible.builtin.user:
-    name: "{{ mail_postfix_user }}"
-    groups: "{{ opendkim_group }}"
-    append: yes
+  vars:
+    opendkim_mail_privatekey: "{{ opendkim_mail_service }}_{{ item.name }}.private"
+    opendkim_mail_privatekey_path: "{{ opendkim_key_dir }}/{{ opendkim_mail_privatekey }}"
   when:
-    - inventory_hostname in groups['postfix_servers']
+    - item.type == "public"
+
+- name: "Ensure OpenDKIM Private Keys have the proper permissions."
+  ansible.builtin.file:
+    path: "{{ opendkim_mail_privatekey_path }}"
+    owner: "{{ opendkim_user }}"
+    group: "{{ opendkim_group }}"
+    mode: "0600"
+    state: "file"
+  loop: "{{ autonomy_zones }}"
+  become: yes
+  vars:
+    opendkim_mail_privatekey: "{{ opendkim_mail_service }}_{{ item.name }}.private"
+    opendkim_mail_privatekey_path: "{{ opendkim_key_dir }}/{{ opendkim_mail_privatekey }}"
+  when:
+    - item.type == "public"
+
+- name: "Ensure OpenDKIM Public Keys have the proper permissions."
+  ansible.builtin.file:
+    path: "{{ opendkim_mail_publickey_path }}"
+    owner: "{{ opendkim_user }}"
+    group: "{{ opendkim_group }}"
+    mode: "0600"
+    state: "file"
+  loop: "{{ autonomy_zones }}"
+  become: yes
+  vars:
+    opendkim_mail_privatekey: "{{ opendkim_mail_service }}_{{ item.name }}.txt"
+    opendkim_mail_publickey_path: "{{ opendkim_key_dir }}/{{ opendkim_mail_privatekey }}"
+  when:
+    - item.type == "public"
+
+- name: "Create Public Key Directory."
+  ansible.builtin.file:
+    path: "~/.pki/dkim"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: 0700
+    state: "directory"
+  become: true
+  become_user: "{{ autonomy_user }}"
+  delegate_to: localhost
+  run_once: true
+
+# - name: "Get DKIM public key."
+#   ansible.builtin.slurp:
+#     src: "{{ opendkim_mail_publickey_path }}"
+#   loop: "{{ autonomy_zones }}"
+#   become: yes
+#   vars:
+#     opendkim_mail_privatekey: "{{ opendkim_mail_service }}_{{ item.name }}.txt"
+#     opendkim_mail_publickey_path: "{{ opendkim_key_dir }}/{{ opendkim_mail_privatekey }}"
+#   register: dkim_dns_record
+#   when:
+#     - item.type == "public"
+
+# ==================================================================================================
+#
+# NOTE: This is a public key.  This is a convient place for persistant storage so that the DNS
+# records can be easily updated from the public zone hosts.
+#
+# ==================================================================================================
+# - name: "Save DKIM public key."
+#   ansible.builtin.debug:
+#     msg:
+#       - "##########################################################################################"
+#       - "DNS record to add for zone:"
+#       - "{{ dkim_public_key }}"
+#       - "##########################################################################################"
+#     #verbosity: 2
+#   loop: "{{ dkim_dns_record.results }}"
+#   vars:
+#     __content: "{{ item.content | string | b64decode }}"
+#     __split1: "{{ __content.split('(') }}"
+#     __split: "{{ __split1[1].split(')') }}"
+#     __raw_record: "{{ __split[0] | trim | replace(';', '\\;') | replace('\t','') | replace('\n','') | replace(' ','\\ ') }}"
+#     __record: "userpass='{{ __raw_record }}'"
+#     __force: "no"
+#     __password_create: "create=true"
+#     __password_overwrite: "overwrite={{ __force }} backup={{ __force }}"
+#     __password_store_id: "{{ autonomy_passdb }}/{{ item.item.domain }}/dns/dkim"
+#     __password_lookup: "{{ __password_store_id }} {{ __record }} {{ __password_create }} {{__password_overwrite }}"
+#     dkim_public_key: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+#   when:
+#     - item.item.type == "public"
+
+
+# - name: "Generate OpenDKIM host and keytable information."
+#   ansible.builtin.template:
+#     src: "{{ item.src }}"
+#     dest: "{{ item.dest }}"
+#     owner: "{{ item.owner }}"
+#     group: "{{ item.group }}"
+#     mode: "{{ item.mode }}"
+#   loop: "{{ __opendkim_config_files }}"
+#   become: yes
+#   notify:
+#     - "restart opendkim"
+#     - "restart postfix"
+
+# - name: "Add postfix to opendkim group."
+#   ansible.builtin.user:
+#     name: "{{ mail_postfix_user }}"
+#     groups: "{{ opendkim_group }}"
+#     append: yes
+#   become: yes
+#   when:
+#     - inventory_hostname in groups['postfix_servers']

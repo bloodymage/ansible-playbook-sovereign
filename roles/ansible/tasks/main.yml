@@ -1,0 +1,19 @@
+---
+# tasks file for ansible-init
+- name: "Install Required Apps."
+  ansible.builtin.package:
+    name: "{{ autonomy_ansible_packages }}"
+    state: present
+  become: yes
+
+- name: "Install ansible.cfg"
+  ansible.builtin.template:
+    src: "ansible.cfg.j2"
+    dest: ~/.ansible.cfg
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: '0644'
+  become: no
+
+- name: "End playbook."
+  ansible.builtin.meta: end_play

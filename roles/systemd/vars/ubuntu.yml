@@ -1,0 +1,3 @@
+---
+autonomy_packages:
+  - libnss-resolve

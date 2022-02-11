@@ -1,0 +1,30 @@
+galaxy_info:
+  author: G Derber
+  description: Configures timezone information
+  company: Bloodymage
+
+  issue_tracker_url: http://github.com/bloodymage/ansible-collection-autonomy
+
+  license: MIT
+
+  min_ansible_version: 2.10
+
+  platforms:
+    - name: Rasbian
+      versions:
+        - 11
+        - 12
+    - name: Debian
+      versions:
+        - 11
+        - 12
+    - name: Ubuntu
+      versions:
+        - 20.04
+
+  galaxy_tags:
+    - bloodymage
+    - timezone
+
+dependencies:
+  - role: bloodymage.autonomy.collection_globals

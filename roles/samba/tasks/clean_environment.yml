@@ -70,14 +70,14 @@
       cut -d: -f2 |
       tr -s "[:blank:]"
     executable: "/bin/bash"
-  register: config_file
+  register: __config_file
   become: no
   when:
     - __samba_recreate_realm
 
 - name: "Remove config file."
   ansible.builtin.file:
-    path: "{{ config_file }}"
+    path: "{{ __config_file }}"
     state: absent
   when:
     - __samba_recreate_realm
@@ -109,10 +109,6 @@
 
 - name: "Remove database files."
   include_tasks: "remove_files.yml"
-<<<<<<< HEAD
-=======
-  become: no
->>>>>>> release/0.10.6
   loop: "{{ __database.results }}"
   loop_control:
     loop_var: __directory

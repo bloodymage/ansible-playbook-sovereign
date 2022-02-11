@@ -1,4 +1,4 @@
 # {{ ansible_managed }}
 
-ssl_certificate /etc/ssl/certs/{{ inventory_hostname }}.pem;
-ssl_certificate_key /etc/ssl/private/{{ inventory_hostname }}.key;
+ssl_certificate {{ autonomy_ssl_certificate_file }};
+ssl_certificate_key {{ autonomy_ssl_certificate_key_file }};

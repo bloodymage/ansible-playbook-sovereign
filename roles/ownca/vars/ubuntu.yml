@@ -1,0 +1,6 @@
+---
+autonomy_ownca_packages:
+  - python3-cryptography
+  - python3-openssl
+  - rng-tools-debian
+  - ca-certificates

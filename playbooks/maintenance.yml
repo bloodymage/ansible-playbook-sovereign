@@ -6,12 +6,80 @@
 # ==================================================================================================
 - hosts: all
   gather_facts: no
+  serial: 1
   roles:
-    - role: bloodymage.autonomy.maintenance_wake_on_lan
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "wakeonlan"
       tags:
         - never
         - wakeonlan
         - wake-on-lan
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "reboot"
+      tags:
+        - never
+        - reboot
 
-- import_playbook: maintenance_daily.yml
+- hosts: all
+  ignore_unreachable: true
+  roles:
+    - role: bloodymage.autonomy.config_environment
+      tags:
+        - always
 
+- name: "DNS Maintenance."
+  hosts: all:!localhost
+  ignore_unreachable: true
+  roles:
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "dns"
+      tags:
+        - dns
+
+- name: "System Maintenance."
+  hosts: all:!localhost:!public_zone:!virtual_hosts:!printers
+  roles:
+    - role: bloodymage.autonomy.aptitude
+      when:
+        - ansible_os_family == "Debian"
+      tags:
+        - maintenance-upgrade
+        - aptitude
+        - upgrade
+
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "upgrade"
+      tags:
+        - maintenance-upgrade
+        - upgrade
+
+- name: "User Maintenance."
+  hosts: all:!localhost:!public_zone:!routeros:!virtual_hosts:!printers
+  roles:
+    - role: bloodymage.autonomy.users
+      vars:
+        __user_tasks: "dotfiles"
+      tags:
+        - dotfiles
+        - user-dotfiles
+        - user_dotfiles
+
+- name: "Import Weekly Playbook."
+  import_playbook: "maintenance_weekly.yml"
+
+- name: "Import Monthly Playbook."
+  import_playbook: "maintenance_monthly.yml"
+
+- name: "Service Maintenance."
+  hosts: all:!localhost
+  roles:
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "service restart"
+      tags:
+        - never
+        - restart-services

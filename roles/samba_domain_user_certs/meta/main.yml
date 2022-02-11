@@ -26,7 +26,5 @@ galaxy_info:
     - domain
 
 dependencies:
-  - role: bloodymage.autonomy.collection_handlers
-  #- role: bloodymage.autonomy.samba_domain_users
-  #- role: bloodymage.autonomy.ownca_user_certs
+  - role: bloodymage.autonomy.collection_globals
 

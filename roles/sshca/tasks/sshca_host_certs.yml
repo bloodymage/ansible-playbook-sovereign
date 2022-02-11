@@ -1,0 +1,91 @@
+---
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_sshca_host_certs_packages }}"
+    state: present
+  become: yes
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
+    - install-packages
+
+- name: "Create persistant host certificate directory."
+  ansible.builtin.file:
+    path: "{{ ownca_directory }}/hosts/ssh/{{ inventory_hostname }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0755"
+    state: directory
+  become: false
+  delegate_to: localhost
+  tags:
+    - sshca-host-certs
+    - sshca-host-certs-debug
+
+- name: "Fetch public keys."
+  ansible.builtin.fetch:
+    src: "{{ ssh_config_dir }}/ssh_host_{{ item }}_key.pub"
+    dest: "{{ ownca_directory }}/hosts/ssh/{{ inventory_hostname }}/ssh_host_{{ item }}_key.pub"
+    flat: true
+  loop: "{{ autonomy_sshca_host_key_types }}"
+  changed_when: false
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
+
+# ==================================================================================================
+#
+# Sign SSH Keys
+#
+# TODO: Add serial number
+#
+# Set 'use_agent' to true, to enable use of passwords for signing keys.
+#
+# ==================================================================================================
+- name: "Sign SSH Public Keys."
+  community.crypto.openssh_cert:
+    signing_key: "{{ sshca_host_signer_key }}"
+    public_key: "{{ ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item }}_key.pub"
+    path: "{{ ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item }}_key-cert.pub"
+    identifier: "{{ sshca_host_signer_id }}"
+    type: "host"
+    principals: "{{ sshca_host_signer_hostnames }}"
+    #serial_number:
+    valid_at: "+2w"
+    valid_from: "+0s"
+    valid_to: "+52w"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0644"
+    ignore_timestamps: true
+    regenerate: "full_idempotence"
+    state: "present"
+    use_agent: "true"
+  become: no
+  loop: "{{ autonomy_sshca_host_key_types }}"
+  delegate_to: localhost
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug
+
+- name: "Copy certificates to server."
+  ansible.builtin.copy:
+    src: "{{ ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item }}_key-cert.pub"
+    dest: "{{ ssh_config_dir }}/ssh_host_{{ item }}_key-cert.pub"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ autonomy_sshca_host_key_types }}"
+  notify: restart ssh
+  become: yes
+  tags:
+    - sshca_host_certs
+    - sshca-host-certs
+    - sshca_host_certs_debug
+    - sshca-host-certs-debug

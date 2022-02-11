@@ -2,5 +2,3 @@
 # defaults file for nginx
 autonomy_packages:
   - nginx
-
-nginx_proxy_pass: "http://localhost:8080"

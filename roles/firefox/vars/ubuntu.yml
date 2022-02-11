@@ -1,1 +1,3 @@
 firefox_path: "{{ firefox_lib_path }}"
+
+autonomy_firefox_snap: true

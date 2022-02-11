@@ -1,14 +1,12 @@
 ---
 - name: "Configure webservers and websites."
-  hosts: all:!wifi_access_points:!routers:!switches
+  hosts: all:!wifi_access_points:!routers:!switches:!printers
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
 
-- name: "Configure webservers and websites."
+- name: "Create redis servers."
   hosts: redis_servers
   roles:
     - role: bloodymage.autonomy.redis
@@ -20,15 +18,19 @@
 # We don't run this on the public zone servers, as that would be redundant.
 #
 # ==================================================================================================
-- name: "Configure webservers and websites."
+- name: "Create Apache webservers."
   hosts: apache_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.apache
+      tags:
+        - apache
 
-- name: "Configure webservers and websites."
+- name: "Create nginx webservers."
   hosts: nginx_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.nginx
+      tags:
+        - nginx
 
 # ==================================================================================================
 #
@@ -36,27 +38,23 @@
 # depends on an ACME CA working, the next group may depend on an ACME CA working.
 #
 # ==================================================================================================
-- name: "Configure webservers and websites."
+- name: "Configure ACME CA."
   hosts: web_servers:&public_zone
   roles:
-    - role: bloodymage.autonomy.config_acmeca_environment
-    - role: bloodymage.autonomy.acmeca_challenge_site
-      tags:
-        - acmeca-challenge-site
-        - acmeca
-    - role: bloodymage.autonomy.acmeca_host_certs
-      tags:
-        - acmeca_host_certs
-        - acmeca-host-certs
-        - acmeca
+    - role: bloodymage.autonomy.acmeca
+      vars:
+        __acmeca_tasks: "account"
+    - role: bloodymage.autonomy.acmeca
+      vars:
+        __acmeca_tasks: "certs"
     - role: bloodymage.autonomy.ownca_crl_distribution_points
       tags:
         - ownca-crl-distribution-points
         - ownca_crl_distribution_points
         - websites
 
-- name: "Configure webservers and websites."
-  hosts: nextcloud_servers:mediawiki_servers:drupal_servers
+- name: "Configure PHP"
+  hosts: nextcloud_sites:mediawiki_sites:drupal_sites
   roles:
     - role: bloodymage.autonomy.php
       tags:
@@ -65,24 +63,24 @@
       tags:
         - composer
 
-- name: "Configure webservers and websites."
-  hosts: nextcloud_servers:&public_zone
+- name: "Configure Nextcloud Sites."
+  hosts: nextcloud_sites:&public_zone
   roles:
     - role: bloodymage.autonomy.nextcloud
       tags:
         - nextcloud
         - websites
 
-# - name: "Configure webservers and websites."
-#   hosts: mediawiki_servers
+# - name: "Configure Mediawiki websites."
+#   hosts: mediawiki_sites
 #   roles:
 #     - role: bloodymage.autonomy.mediawiki
 #       tags:
 #         - mediawiki
 #         - websites
 
-- name: "Configure webservers and websites."
-  hosts: drupal_servers
+- name: "Configure Drupal websites."
+  hosts: drupal_sites
   roles:
     - role: bloodymage.autonomy.drush
       tags:

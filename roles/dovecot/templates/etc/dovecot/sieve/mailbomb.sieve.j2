@@ -1,6 +1,7 @@
 # {{ ansible_managed }}
 
-require ["fileinto", "mailbox"];
+require ["include", "variables", "mailbox"];
+global ["level1", "level2", "level3", "level4", "level5", "level6", "level7"];
 
 if header :contains "Subject" [
                                "confirm your subscription",
@@ -11,7 +12,5 @@ if header :contains "Subject" [
                                "confirm mailing list subscription"
 ]
 {
-  fileinto :create "{{ __main_folder }}/Signups";
-  # Requires 3rd party plugin
-  #expire "day" "10";
+  set "level3" "Account";
 }

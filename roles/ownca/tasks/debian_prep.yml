@@ -1,0 +1,101 @@
+---
+- name: "Install packages."
+  ansible.builtin.apt:
+    name: "{{ autonomy_ownca_packages }}"
+    state: present
+  become: yes
+  when:
+    - inventory_hostname not in groups['virtual_hosts'] | default([])
+
+# ==================================================================================================
+#
+# Apache servers and openldap servers require different permissions for the private keys from other
+# server types.
+#
+# ==================================================================================================
+- name: "Check if host is in 'apache' or 'openldap' group."
+  ansible.builtin.set_fact:
+    ownca_private_key_group: "ssl-cert"
+    ownca_private_key_mode: "0640"
+    __ownca_private_key_dir_mode: "0750"
+    __ownca_private_key_dir_group: "ssl-cert"
+  when:
+    - inventory_hostname in groups['apache_servers'] | default([])
+    - inventory_hostname in groups['openldap_servers'] | default([])
+
+# ==================================================================================================
+#
+# Create SSL Private Key and CRS Directories
+#
+# Creates the following Directories:
+#   - {{ ownca_etc }}/private mode: 0700
+#   - {{ ownca_etc }}/csr     mode: 0700
+#   - {{ ownca_etc }}/certs   mode: 0755
+#
+# ==================================================================================================
+- name: "Create SSL Directories."
+  ansible.builtin.file:
+    path: "{{ ownca_etc }}/{{ item.name }}"
+    state: directory
+    owner: "{{ item.owner | default(ownca_etc_owner) }}"
+    group: "{{ item.group | default(ownca_etc_group) }}"
+    mode: "{{ item.mode }}"
+  become: yes
+  loop: "{{ ownca_host_certs_directories }}"
+
+- name: "Generate Host Private Key."
+  community.crypto.openssl_privatekey:
+    path: '{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key'
+    type: '{{ ownca_privatekey_type }}'
+    size: 4096
+    owner: "{{ ownca_etc_owner }}"
+    group: "{{ ownca_private_key_group }}"
+    mode: "{{ ownca_private_key_mode }}"
+    force: no
+  become: yes
+
+- name: "Generate Host CSR."
+  community.crypto.openssl_csr:
+    country_name: "{{ ownca_country_code | default(none) }}"
+    state_or_province_name: "{{ autonomy_region | default(none) }}"
+    locality_name: "{{ loc_city | default(none) }}"
+    organization_name: "{{ autonomy_org_name | title }}"
+    organizational_unit_name: "{{ autonomy_org_unit_name | title }}"
+    common_name: "{{ autonomy_fqdn }}"
+    key_usage: "{{ ownca_host_certs_key_usage }}"
+    key_usage_critical: yes
+    extended_key_usage: "{{ ownca_host_certs_extended_key_usage }}"
+    extended_key_usage_critical: yes
+    privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
+    subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
+    path: "{{ ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
+    mode: "0644"
+    owner: "{{ ownca_etc_owner }}"
+    group: "{{ ownca_etc_group }}"
+    backup: yes
+    force: "{{ __ownca_regenerate_csr }}"
+  become: yes
+
+# ==================================================================================================
+#
+# Tasks:
+#
+#
+# ==================================================================================================
+- name: Fetch CSRs.
+  ansible.builtin.fetch:
+    src: "{{ ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
+    dest: "{{ ownca_hosts_directory }}/csr/"
+    flat: yes
+  become: yes

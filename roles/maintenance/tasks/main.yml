@@ -1,0 +1,26 @@
+---
+# tasks file for dns-update
+- name: "Include DNS Tasks."
+  include_tasks: "dns.yml"
+  when:
+    __maintenance_tasks == "dns"
+
+- name: "Include Reboot Tasks."
+  include_tasks: "reboot.yml"
+  when:
+    __maintenance_tasks == "reboot"
+
+- name: "Include Service Restart Tasks."
+  include_tasks: "service_restart.yml"
+  when:
+    __maintenance_tasks == "service restart"
+
+- name: "Include System Upgrade Tasks."
+  include_tasks: "system_upgrade.yml"
+  when:
+    __maintenance_tasks == "upgrade"
+
+- name: "Include Wake-on-LAN Tasks."
+  include_tasks: "wake_on_lan.yml"
+  when:
+    __maintenance_tasks == "wakeonlan"

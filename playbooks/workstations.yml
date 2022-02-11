@@ -1,14 +1,12 @@
 - name: "Prepare playbook environment."
-  hosts: all:!wifi_access_points:!routers:!switches
+  hosts: all:!wifi_access_points:!routers:!switches:!printers
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
 
 - name: "Configure workstations."
-  hosts: workstations:!mythfrontend
+  hosts: workstations
   roles:
     - role: bloodymage.autonomy.cups
       tags:
@@ -33,7 +31,7 @@
         - evolution
 
 - name: "Configure desktop systems."
-  hosts: workstations:mythfrontend
+  hosts: workstations:mythtv_frontend
   roles:
     - role: bloodymage.autonomy.firefox
       tags:

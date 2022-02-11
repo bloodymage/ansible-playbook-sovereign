@@ -1,3 +1,4 @@
+---
 # ==================================================================================================
 #
 # This playbook configures the ansible control node, the host you are running asible from, aka
@@ -8,21 +9,22 @@
   hosts: localhost
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is not defined)
       tags:
         - always
+    - role: bloodymage.autonomy.ansible
+      tags:
+        - never
+        - ansible
     - role: bloodymage.autonomy.gnupg
       tags:
         - gnupg
     - role: bloodymage.autonomy.password_store
       tags:
-        - password_store
         - password-store
-    - role: bloodymage.autonomy.user_password_store
+    - role: bloodymage.autonomy.users
       vars:
         user_password_store_users:
-          - username: "{{ __autonomy_user }}"
+          - username: "{{ autonomy_user }}"
+        __user_tasks: "passwordstore"
       tags:
         - user-password-store
-        - user_password_store

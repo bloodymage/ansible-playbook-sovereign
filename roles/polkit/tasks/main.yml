@@ -1,31 +1,44 @@
 ---
 # tasks file for polkit
-- name: "Pre-tasks"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
-      tags:
-        - polkit
-        - polkit_debug
-        - polkit-debug
-        - install-packages
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - polkit
+    - polkit_debug
+    - polkit-debug
+    - install-packages
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-      tags:
-        - polkit
-        - polkit_debug
-        - polkit-debug
-        - install-packages
+# ==================================================================================================
+#
+# This task exists because on some debian based systems, the packages will not install correctly if
+# the 'polkitd' user does not exist.
+#
+# ==================================================================================================
+# - name: "Create Polkitd user."
+#   ansible.builtin.user:
+#     name: "{{ autonomy_polkit_user_name }}"
+#     comment: "{{ autonomy_polkit_user_comment }}"
+#     create_home: "{{ autonomy_polkit_user_create_home }}"
+#     home: "{{ autonomy_polkit_user_home }}"
+#     system: "{{ autonomy_polkit_user_system }}"
+#     state: present
+
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_polkit_packages }}"
+    state: present
+  become: yes
+  tags:
+    - polkit
+    - polkit_debug
+    - polkit-debug
+    - install-packages
 
 - name: Install rules
   ansible.builtin.template:

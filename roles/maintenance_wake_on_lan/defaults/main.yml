@@ -1,5 +1,0 @@
----
-# defaults file for maintenance_wake_on_lan
-autonomy__mac_address: ""
-autonomy__wol_broadcast: "255.255.255.255"
-autonomy__wol_port: 7

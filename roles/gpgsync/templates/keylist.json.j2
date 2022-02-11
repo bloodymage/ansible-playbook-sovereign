@@ -1,7 +1,7 @@
 {
   "metadata": {
     "signature_uri": "https://{{ autonomy_root_domain }}/pgp/keylist.json.asc",
-    "comment": "The GPG Sync example keylist"
+    "comment": "The GPG Sync keylist"
   },
   "keys": [
 {% for user in __realm_users %}
@@ -15,6 +15,15 @@
     }{{ "," if not loop.last else "" }}
       {% endfor %}
     {% endif %}
-      {% endfor %}
+  {% endfor %}
+  {% if autonomy_gpgsync_keylist is truthy %}
+    ,
+    {% for item in autonomy_gpgsync_keylist %}
+      {
+    "fingerprint": "{{ item.fingerprint }}",
+      "name": "{{ item.name }}"
+      }{{ "," if not loop.last else "" }}
+    {% endfor %}
+    {% endif %}
   ]
 }

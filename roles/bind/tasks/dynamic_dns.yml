@@ -7,7 +7,7 @@
 # Generate DNSSEC key, inspired by Michele Salerno (@mikysal78)
 #
 # ==================================================================================================
-- name: "DDNS keygen | Ensure keys directory is present."
+- name: "Ensure keys directory is present."
   ansible.builtin.file:
     path: "{{ bind_key_dir }}"
     state: directory
@@ -15,14 +15,35 @@
     group: "{{ bind_group }}"
     mode: '0750'
   become: yes
+  when:
+    - autonomy_virtual_host is falsy
 
+# ==================================================================================================
+#
 # Check if a keyfile exists.
+#
+# ==================================================================================================
 - name: "Check if a keyfile exists."
   ansible.builtin.stat:
-    path: "{{ bind_key_dir }}/{{ item.name }}.key"
-  loop: "{{ autonomy_zones }}"
+    path: "{{ bind_key_dir }}/{{ autonomy_zone_name }}.key"
   become: yes
   register: existing_ddns_keys
+
+# - name: "Print existing dynamic key information."
+#   ansible.builtin.debug:
+#     msg:
+#       - "Name:        {{ item['item']['name'] }}"
+#       - "Type:        {{ item['item']['type'] }}"
+#       - "Domain:      {{ item['item']['domain'] }}"
+#       - "File Status: {{ item['stat'] }}"
+#     verbosity: 1
+#   loop: "{{ existing_ddns_keys }}"
+
+- name: "Print complete existing dynamic key information."
+  ansible.builtin.debug:
+    msg:
+      - "{{ existing_ddns_keys }}"
+    verbosity: 1
 
 # ==================================================================================================
 #
@@ -33,63 +54,88 @@
   ansible.builtin.shell:
     cmd: >-
       set -o pipefail &&
-      cat "{{ item['invocation']['module_args']['path'] }}" |
+      cat "{{ existing_ddns_keys['stat']['path'] }}" |
       grep algorithm |
       cut -d\  -f4 |
       cut -d\; -f1
     executable: /bin/bash
-  loop: "{{ existing_ddns_keys.results }}"
   become: yes
   register: algorithms
+  changed_when: algorithms.stdout != autonomy_ddns_key_algorithm
   when:
-    - item['stat']['exists']
+    - existing_ddns_keys['stat']['exists'] is defined
+    - existing_ddns_keys['stat']['exists']
+
+# - name: "Print existing algorithm information."
+#   ansible.builtin.debug:
+#     msg:
+#       - "Algorithm Name: {{ item['item']['item']['item'] }}"
+#       - "Algorithm: {{ item['stdout'] }}"
+#     verbosity: 1
+#   loop: "{{ algorithms }}"
+
+- name: "Print complete existing algorithm information."
+  ansible.builtin.debug:
+    msg:
+      - "{{ algorithms }}"
+    verbosity: 1
 
 - name: "Add existing algorithm and keyfile status to zone information."
   ansible.builtin.set_fact:
     __bind_ddns_zones: "{{ __bind_ddns_zones + [__zone] }}"
-  loop: "{{ existing_ddns_keys.results | product(algorithms.results) }}"
   vars:
-    __existing_keys_name: "{{ item[0]['item']['name'] }}"
-    __algorithm_name: "{{ item[1]['item']['item']['name'] }}"
-    __key_type: "{{ item[0]['item']['type'] }}"
-    __key_domain: "{{ item[0]['item']['domain'] }}"
-    __samba_domain: "{{ item[0]['item']['samba_domain'] | default(__bind_dns_zone_samba_domain) }}"
-    __algorithm: "{{ item[1]['stdout'] | default(none) }}"
-    __nameserver_zone_type: "{{ autonomy_zone_type }}"
     __zone:
-      name: "{{ __existing_keys_name }}"
-      type: "{{ __key_type }}"
-      domain: "{{ __key_domain }}"
-      existing_algorithm: "{{ __algorithm | default(none) }}"
-      keyfile_status: "{{ item[0]['stat']['exists'] }}"
-      nameserver_zone_type: "{{ __nameserver_zone_type }}"
-      samba_domain: "{{ __samba_domain }}"
+      name: "{{ autonomy_zone_name }}"
+      domain: "{{ autonomy_domain }}"
+      existing_algorithm: "{{ algorithms['stdout'] | default(omit) }}"
+      keyfile_status: "{{ existing_ddns_keys['exists'] | default(false)}}"
+      samba_domain: "{{ __bind_dns_zone_samba_domain }}"
   delegate_to: localhost
   become: no
   when:
-    - __existing_keys_name == __algorithm_name
-    - item[1].skipped is not defined
+    - autonomy_virtual_host is falsy
+
+- name: "Print updated zone information."
+  ansible.builtin.debug:
+    msg:
+      - "{{ __bind_ddns_zones }}"
+    verbosity: 1
 
 # ==================================================================================================
 #
+# Generate missing and update existing keys
+#
+# This runs if the keyfile doesn't exist or
+# The current dynamic key algorithm doesn't match the desired algorithm
+#
+# Registers: bind_ddns_keys
+#
 # We're using shell instead of command here because we are using '&&' and pipes.
+#
+# Setting changed_when to false because we aren't actually changing anything.  Simply generating
+# a value to store in a variable.
 #
 # ==================================================================================================
 - name: "Generate missing keys and update existing keys."
   ansible.builtin.shell:
     cmd: >-
       set -o pipefail &&
-      {{ bind_ddns_confgen }} -a {{ autonomy_ddns_key_algorithm }} -k {{ item['name'] }} -z {{ item['domain'] }} |
+      {{ bind_ddns_confgen }} -a {{ autonomy_ddns_key_algorithm }} -k {{ autonomy_zone_name }} -z {{ autonomy_domain }} |
       grep secret |
       cut -d\" -f2
     executable: /bin/bash
-  loop: "{{ __bind_ddns_zones }}"
   become: yes
   register: bind_ddns_keys
+  changed_when: false
   when:
-    - (not item['keyfile_status'] or item['existing_algorithm'] != autonomy_ddns_key_algorithm)
-    - item['nameserver_zone_type'] == item['type']
-    - not item['samba_domain']
+    - (__bind_ddns_zones['keyfile_status'] is not defined or (__bind_ddns_zones is defined and not __bind_ddns_zones['keyfile_status']) or __bind_ddns_zones['existing_algorithm'] != autonomy_ddns_key_algorithm)
+    - inventory_hostname not in groups['samba_domain_controllers'] | default([])
+
+- name: "Print dynamic key information."
+  ansible.builtin.debug:
+    msg:
+      - "{{ bind_ddns_keys }}"
+    verbosity: 1
 
 # ==================================================================================================
 #
@@ -104,22 +150,20 @@
 - name: "Install Dynamic DNS Keys."
   ansible.builtin.template:
     src: "etc/bind/ddns_key.j2"
-    dest: "{{ bind_key_dir }}/{{ item['item']['name'] }}.key"
+    dest: "{{ bind_key_dir }}/{{ autonomy_zone_name }}.key"
     owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  loop: "{{ bind_ddns_keys['results'] }}"
+    group: bind
+    mode: "0640"
+  become: true
   notify: restart bind
+  #no_log: true
   vars:
-    __nameserver: "{{ inventory_hostname_short }}"
-    __force: "{% if item['item']['existing_algorithm'] != autonomy_ddns_key_algorithm %}yes{% else %}no{% endif %}"
-    __password_userpass: "userpass={{ item['stdout'] }}"
+    __force: "no"
+    __password_userpass: "userpass={{ bind_ddns_keys['stdout'] }}"
     __password_create: "create=true"
     __password_overwrite: "overwrite={{ __force }} backup={{ __force }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ item['item']['domain'] }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/bind_dyndns_secret"
     __password_lookup: "{{ __password_store_id }} {{ __password_userpass }} {{ __password_create }} {{__password_overwrite }}"
     bind_dyndns_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   when:
-    - bind_ddns_keys['results'] is defined
-    - item['stdout'] is defined
+    - bind_ddns_keys['skipped'] is not defined

@@ -5,22 +5,30 @@
 #
 #
 # ======================================================================
-- name: "Pre-tasks"
-  block:
-    - name: "Include OS-specific variables."
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
 
-    - name: "Install packages."
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_spamassassin_packages }}"
+    state: present
+  become: yes
+
+- name: "Ensure spamassassin users and groups are correct"
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    groups: "{{ item.group | default(omit) }}"
+    home: "{{ item.home }}"
+    shell: "{{ item.shell }}"
+    append: "{{ item.append | default(omit) }}"
+  become: yes
+  loop: "{{ autonomy_spamassassin_users }}"
 
 - name: "Ensure spamassasin directories exist with proper permissions."
   ansible.builtin.file:
@@ -30,17 +38,68 @@
     group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   become: yes
-  loop: "{{ spamassassin_directories }}"
+  loop: "{{ autonomy_spamassassin_directories }}"
 
+- name: "Ensure spamassassin logging directory exists with proper permissions."
+  ansible.builtin.file:
+    path: "{{ autonomy_spamassassin_syslog_dir }}"
+    state: directory
+    owner: "{{ spamassassin_spamd_user }}"
+    group: "{{ spamassassin_spamd_user }}"
+    mode: "0750"
+  become: yes
+  when:
+    - autonomy_spamassassin_syslog_dir is truthy
+    - autonomy_spamassassin_syslog_dir != "/var/log"
+
+# ==================================================================================================
+#
+# The default Debian spamd.conf provides a warning against having max children greater than 5.
+#
+# However I have found no other documentation as to why it should not be greater than 5 if the
+# circumstances allow for it.  This role, defaults max_children to 5, which also happens to be the
+# default value as per "man spamd(8p)".
+#
+# ==================================================================================================
+# - name: "Ensure spamassassin max-children setting is less than or equal to 5."
+#   ansible.builtin.set_fact:
+#     autonomy_spamassassin_max_children: 5
+#   when:
+#     - autonomy_spamassasin_max_children > 5
+
+# ==================================================================================================
+#
+# TODO: Split this into two tasks.  One for 'spamassassin/spamd' daemon and one for 'spamass-milter'
+# daemon.
+#
+# If spamass-milter is modified, postfix needs to be restarted as well.  If spamassassin/spamd is
+# modified, postfix does not need to be restarted.
+#
+# Is there a way to get the best of both?  Do this as a single task, but correctly restarting the
+# appropriate daemons?
+#
+# ==================================================================================================
 - name: "Install defaults."
   ansible.builtin.template:
-    src: "default_{{ item }}.j2"
+    src: "etc/default/{{ item }}.j2"
     dest: "/etc/default/{{ item }}"
     owner: root
     group: root
     mode: "0644"
   become: yes
-  loop: "{{ spamassassin_default_files }}"
+  loop: "{{ autonomy_spamassassin_default_files }}"
   notify:
     - "restart spamassassin"
     - "restart postfix"
+
+- name: "Install spamassasin config"
+  ansible.builtin.template:
+    src: "etc/spamassassin/{{ item }}.j2"
+    dest: "/etc/spamassassin/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+  become: yes
+  loop: "{{ autonomy_spamassassin_config_files }}"
+  notify:
+    - "restart spamassassin"

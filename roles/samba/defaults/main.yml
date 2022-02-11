@@ -1,18 +1,21 @@
 autonomy_packages:
   - acl
   - attr
+  - dnsutils
+  - krb5-config
+  - krb5-user
+  - libnss-winbind
+  - libpam-krb5
+  - libpam-winbind
+  - rsync
   - samba
   - samba-dsdb-modules
   - samba-vfs-modules
-  - winbind
-  - libpam-winbind
-  - libnss-winbind
-  - libpam-krb5
-  - krb5-config
-  - krb5-user
-  - dnsutils
+  - smbclient
   - unison
-  - rsync
+  - winbind
+
+autonomy_joined_as_domain_member: yes
 
 samba_domain_password_expiration: "{{ __samba_domain_password_expiration }}"
 samba_dns_backend: "BIND9_DLZ"
@@ -63,17 +66,17 @@ samba_schema_extensions:
 #  - libnss-winbind
 
 schema_update_allowed: no
-
 samba_log_level: 1
-
 winbind_enum_users: no
 winbind_enum_groups: no
 winbind_refresh_tickets: yes
-
+autonomy_samba_dns_zone_transfer_clients_allow: ""
 samba_security: user
 
 samba_services:
     - winbind
+
+autonomy_samba_kdc_enable_fast: ""
 
 # ==================================================================================================
 #
@@ -87,11 +90,11 @@ __samba_smbd_bin: "/usr/sbin/smbd"
 __samba_joined_as_domain_controller: no
 
 __dc_samba_shares:
-  - name: "netlogon"
-    path: "/var/lib/samba/sysvol/{{ autonomy_domain }}/scripts"
-    read_only: "No"
   - name: "sysvol"
     path: "/var/lib/samba/sysvol"
+    read_only: "No"
+  - name: "netlogon"
+    path: "/var/lib/samba/sysvol/{{ autonomy_domain }}/scripts"
     read_only: "No"
 
 # ==================================================================================================

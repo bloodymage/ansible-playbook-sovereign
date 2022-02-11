@@ -1,0 +1,21 @@
+---
+# defaults file for dodca
+autonomy_dodca_dir: "{{ ownca_usr_directory }}"
+autonomy_dodca_version: "v5.11"
+autonomy_dodca_version_alt: "v5-11"
+
+autonomy_dodca_zipfile: "unclass-certificates_pkcs7_DoD.zip"
+
+autonomy_dodca_url:
+  - source: "https://dl.dod.cyber.mil/wp-content/uploads/pki-pke/zip/{{ autonomy_dodca_zipfile }}"
+    file: "{{ autonomy_dodca_zipfile }}"
+    #exclude:
+    #  - "Certificates_PKCS7_{{ autonomy_dodca_version }}_DoD/README.txt"
+    #  - "Certificates_PKCS7_{{ autonomy_dodca_version }}_DoD/Certificate_PKCS7_{{ autonomy_dodca_version }}_DoD.sha256"
+
+autonomy_dodca_exclude:
+  - "README.txt"
+  - "Certificate_PKCS7_{{ autonomy_dodca_version }}_DoD.sha256"
+
+autonomy_dodca_pem_files:
+  - "DoD_PKE_CA_chain"

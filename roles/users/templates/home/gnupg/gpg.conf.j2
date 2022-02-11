@@ -1,0 +1,109 @@
+# {{ ansible_managed }}
+
+{% if item.gpg_keys is defined -%}
+  default-key {{ item.gpg_keys[0].key_id }}
+{% endif %}
+
+# Pinentry Settings
+{% if ((autonomy_user_dotfiles_gpg_pinentry_mode != "default") and
+       (autonomy_user_dotfiles_gpg_pinentry_mode != autonomy_gnupg_pinentry_mode)) -%}
+  pinentry-mode {{ autonomy_user_dotfiles_gpg_pinentry_mode }}
+{% endif %}
+
+# Cipher / Digest / Compless Preferences
+{% if ((autonomy_user_dotfiles_gpg_personal_cipher_preferences is truthy) and
+       (autonomy_user_dotfiles_gpg_personal_cipher_preferences !=
+        autonomy_gnupg_personal_cipher_preferences)) -%}
+  personal-cipher-preferences
+  {%- for item in autonomy_user_dotfiles_gpg_personal_cipher_preferences -%}
+    {{ " " }}{{ item }}
+  {%- endfor +%}
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_personal_digest_preferences is truthy) and
+       (autonomy_user_dotfiles_gpg_personal_digest_preferences !=
+        autonomy_gnupg_personal_digest_preferences)) -%}
+  personal-digest-preferences
+  {%- for item in autonomy_user_dotfiles_gpg_personal_digest_preferences -%}
+    {{ " " }}{{ item }}
+  {%- endfor +%}
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_personal_compress_preferences is truthy) and
+       (autonomy_user_dotfiles_gpg_personal_compress_preferences !=
+        autonomy_gnupg_personal_compress_preferences )) -%}
+  personal-compress-preferences
+  {%- for item in autonomy_user_dotfiles_gpg_personal_compress_preferences -%}
+    {{ " " }}{{ item }}
+  {%- endfor +%}
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_default_preference_list is truthy) and
+       (autonomy_user_dotfiles_gpg_default_preference_list !=
+        autonomy_gnupg_default_preference_list)) -%}
+  default-preference-list
+  {%- for item in autonomy_user_dotfiles_gpg_default_preference_list -%}
+    {{ " " }}{{ item }}
+  {%- endfor +%}
+{% endif %}
+
+# Miscellaneous Preferences
+{% if ((autonomy_user_dotfiles_gpg_cert_digest_algo is truthy) and
+       (autonomy_user_dotfiles_gpg_cert_digest_algo !=
+        autonomy_gnupg_cert_digest_algo)) -%}
+  {{ autonomy_user_dotfiles_gpg_cert_digest_algo }}
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_comment != autonomy_gnupg_comment -%}
+{% if autonomy_user_dotfiles_gpg_comment is truthy -%}
+  comment {{ autonomy_user_dotfiles_gpg_comment }}
+{% else -%}
+  no-comments
+{% endif %}
+{% endif %}
+{# Default is 'no-emit-version'.  We don't need to specify it if it's false. #}
+{% if ((autonomy_user_dotfiles_gpg_emit_version) and
+       (autonomy_user_dotfiles_gpg_emit_version != autonomy_gnupg_emit_version)) -%}
+  emit-version
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_greeting is false) and
+       (autonomy_user_dotfiles_gpg_greeting != autonomy_gnupg_greeting)) -%}
+  no-greeting
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_keyid_format is truthy) and
+       (autonomy_user_dotfiles_gpg_keyid_format != autonomy_gnupg_keyid_format)) -%}
+  keyid-format {{ autonomy_user_dotfiles_gpg_keyid_format }}
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_list_options is truthy) and
+       (autonomy_user_dotfiles_gpg_list_options != autonomy_gnupg_list_options)) -%}
+  list-options{{ " " }}
+  {%- for item in autonomy_user_dotfiles_gpg_list_options -%}
+    {{ item }}{{ "," if not loop.last else "" }}
+  {%- endfor +%}
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_verify_options is truthy) and
+       (autonomy_user_dotfiles_gpg_verify_options != autonomy_gnupg_verify_options)) -%}
+  verify-options{{ " " }}
+  {%- for item in autonomy_user_dotfiles_gpg_verify_options -%}
+    {{ item }}{{ "," if not loop.last else "" }}
+  {%- endfor +%}
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_with_fingerprint) and
+       (autonomy_user_dotfiles_gpg_with_fingerprint != autonomy_gnupg_with_fingerprint)) -%}
+  with-fingerprint
+{% endif %}
+{# Default value is true, no need to add the option if it is true #}
+{% if ((autonomy_user_dotfiles_gpg_require_cross_certification is false) and
+       (autonomy_user_dotfiles_gpg_require_cross_certification !=
+        autonomy_gnupg_require_cross_certification)) -%}
+  no-require-cross-certification
+{% endif %}
+{# Default value is true, no need to add the option if it is true #}
+{% if ((autonomy_user_dotfiles_gpg_symkey_cache is false) and
+       (autonomy_user_dotfiles_gpg_symkey_cache != autonomy_gnupg_symkey_cache)) -%}
+  no-symkey-cache
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_throw_keyids) and
+       (autonomy_user_dotfiles_gpg_throw_ids != autonomy_gnupg_throw_ids)) -%}
+  throw-keyids
+{% endif %}
+{% if ((autonomy_user_dotfiles_gpg_with_keygrip) and
+       (autonomy_user_dotfiles_gpg_with_keygrip != autonomy_gnupg_with_keygrip)) -%}
+  with-keygrip
+{% endif %}

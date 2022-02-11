@@ -2,10 +2,6 @@
 
 [![Ansile-Lint](https://github.com/bloodymage/ansible-collection-autonomy/workflows/Ansible%20Lint/badge.svg?event=push)](https://github.com/bloodymage/ansible-collection-autonomy/actions?query=workflow%3A%22Ansible+Lint%22)
 
-# Help Wanted
-
-Looking for help.  Let me know if you are interested.
-
 - [Description](#description)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -20,14 +16,14 @@ This collection is a set of ansible playbooks that you can use to build and main
 Initial services are:
 1. [Certificate Authorities](docs/CERTIFICATE_AUTHORITIES.md) (Internal and ACME)
 2. An SSH Certificate Authority
-3. DNS (Bind9)
+3. DNS (Bind9 / CloudFlare)
 4. Identity Management (Samba Active Directory)
 5. Email (Postfix and Dovecot)
 6. Address Book and Calendars (Nextcloud)
 7. Cloud Storage (Nextcloud)
 8. File server (Samba / NFS)
 
-For access to these services, a focus on centralized user management with a goal of single sign on across all services.  Eventually I will add smart card capabilities to minimize password requirements. 
+For access to these services, a focus on centralized user management with a goal of single sign on across all services.  Eventually I will add smart card capabilities to minimize password requirements.
 
 For single signon, I use native SSO capabilities where possible, keycloak Identity Provider native SSO doesn't work.
 
@@ -38,9 +34,15 @@ There are three reasons I had with creating this with this project.
 
 So far, each server is configured without using docker containers or any other group packages, for example: dovecot and postfix vs iRedMail.  I chose this route to learn as much as possible about each service and it's requirements.
 
-Some smaller goals that I have for this project is minimizing the variables I have to define in my inventory.  For each role, having sensible defaults which can be modified at runtime based on other configuration settings.  For example if you are using smart cards, enable smart card required settings.  These basic options can be set via inventories.  In addition, I have set it up to simplify password management for various services by using ansible's passwordstore lookup to generate and save any passwords necessary.
+Some smaller goals that I have for this project is minimizing the variables I have to define in my
+inventory.  For each role, having sensible defaults which can be modified at runtime based on other
+configuration settings.  For example if you are using smart cards, enable smart card required
+settings.  These basic options can be set via inventories.  In addition, I have set it up to
+simplify password management for various services by using ansible's passwordstore lookup to
+generate and save any passwords necessary.
 
-Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
+Another overall goal, is minimizing impact to the complete system if one piece fails.  This is why
+Samba uses Bind9 as it's DNS server rather than it's own internal DNS server.
 
 ## Installation
 ### Ansible Galaxy
@@ -63,22 +65,32 @@ Create a GPG key for the user that will be using ansible and the collection play
 
 ### Create your [inventory](docs/INVENTORY.md).
 
-Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables 
-are designed to be optional.  For the network zone it expects a naming scheme along the lines of: 
-"zone.example.com"
+Create your inventory.  Set variables according to [Variables](#Variables).  Again, most variables are designed to be optional.  For the network zone it expects a naming scheme along the lines of: "zone.example.com"
 
-For example, your internal network will be internal.example.com, and a dmz zone would be 
-dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) 
+For example, your internal network will be internal.example.com, and a dmz zone would be dmz.example.com, and each host will be named host.internal.example.com.  See [docs/INVENTORY.md](docs/INVENTORY.md) 
 for more information.
 
+First run:
+
+```
+ansible-playbook bloodymage/autonomy/playbooks/ansible.yml
+```
+
+Or
+```
+ansible-playbook bloodymage/autonomy/playbooks/control.yml --tags ansible
+```
+
+Both of the above will install all the necessary dependencies that this collection requires to run ansible.  It will also configure your ~/.ansible.cfg.  If you wish to reconfigure your ~/.ansible.cfg you can run either of the above again.
+
+After ansible is configured, from then on you run:
 ```
 ansible-playbook bloodymage/autonomy/playbooks/site.yml
 ```
 
 This will create your site.
 
-Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, 
-otherwise it will use internal certificate authority certs.
+Any host that you wish to be accessible from the outside world, will use letsencrypt for certs, otherwise it will use internal certificate authority certs.
 
 ### Roles ([Full list](docs/ROLES.md))
 
@@ -115,7 +127,7 @@ Options:
  - samba
  - openldap (planned for the future)
  - freeipa (planned for the future)
- 
+
 So far, this collection has really only been tested with this variable set to ```samba```.  You must set it yourself.  Things can, and most likely will go wrong if it's not set to ```samba```.
 
 ##### Network structure
@@ -139,7 +151,7 @@ autonomy_zones:
   - name: "internal"
     type: "internal"
     domain: "internal.{{ autonomy_root_domain }}"
-    samba_domain: yes                                         
+    samba_domain: yes
   - name: "dmz"
     type: "dmz"
     domain: "dmz.{{ autonomy_root_domain }}"
@@ -157,6 +169,11 @@ autonomy_zone_name: "internal"
 
 These are required to match the 'name' and 'type' set in the autonomy_zones listing.
 
+For Public Zones it's recommended you also add:
+```
+autonomy_root_domain: "{{ autonomy_zone_name }}.com" or .net, .org, etc
+autonomy_domain: "{{ autonomy_root_domain }}"
+```
 
 ##### Users
 ```
@@ -237,10 +254,16 @@ For sites that are publicly available, the site will use an acme ca  (Let's encr
   By default, all passwords default variables are set to "password."  When a password is encountered that is set to "password," a password will be generated using password_store, and the generated password will be used.  This creates the following advantages:
   1. You do not need to generate your passwords yourself.
   2. You can create backups, and distribute the passwords via git/gpg (Add specific user gpg keys to any folder you wish to grant access. )
-  
+
 Not yet implemented advantages:
   3. If you believe multiple passwords may be compromised, you can easily force a regeneration of all passwords.  Plan is to add a tags for password regeneration.  Currently, you can use the password store itself to modify the password(s).
-  
+
+### DNS
+
+This collection uses bind9 for internal dns, including internal access of public zones.
+
+For public access of public zones, it uses cloudflare dns.  Cloudflare DNS can configure MX, SPF (TXT), DMARC, and DKIM records for mail services, and will update them automatically.
+
 ### Role structure
 
 Each role is built with the idea of do one thing, and do it well.  So there will be many more roles than other projects might have.  The advantage is that you don't have to run every role every time.  Each role can be selected individually by using '--tag' with the role's name, for example '--tag dovecot' will run the dovecot role.  If you wish to run all roles related to email servers, you would run the playbook 'mailservers.yml'
@@ -331,5 +354,5 @@ The Hearthminion ansible collection expands on this collection adding in new fea
 [MIT](LICENSE.md)
 
 ## Author Information
-G Derber 
+G Derber
 gd.github@bloodymage.org

@@ -1,6 +1,6 @@
 ---
 # defaults file for mail-server
-autonomy_packages:
+autonomy_dovecot_packages:
   - dovecot-core
   - dovecot-imapd
   - dovecot-lmtpd
@@ -16,10 +16,13 @@ dovecot_etc: "/etc/dovecot"
 dovecot_confd: "{{ dovecot_etc }}/conf.d"
 dovecot_sieve_dir: "{{ dovecot_etc }}/sieve"
 dovecot_sieve_global_dir: "{{ dovecot_sieve_dir }}/global"
-
-dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
-
+autonomy_dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
 dovecot_use_inboxzero_namespace: no
+
+autonomy_dovecot_log_path: syslog
+autonomy_dovecot_log_dir: ""
+autonomy_dovecot_info_log_path: ""
+autonomy_dovecot_debug_log_path: ""
 
 # ==================================================================================================
 #
@@ -168,6 +171,7 @@ dovecot_sieve_before:
 dovecot_sieve_after:
   - "{{ dovecot_etc }}/sieve/after/"
 dovecot_sieve_global: "{{ dovecot_sieve_global_dir }}/"
+autonomy_dovecot_sieve_global_extensions: "+vnd.dovecot.pipe +vnd.dovecot.execute +vnd.dovecot.filter"
 
 dovecot_sieve_files:
   - name: "spam"
@@ -391,6 +395,8 @@ dovecot_imapsieve_mailboxes:
     timing: "before"
     type: "ham"
 
+autonomy_dovecot_mail_debug: "no"
+
 # ==================================================================================================
 #
 # Dovecot Authorization Configuration
@@ -465,6 +471,9 @@ dovecot_sieve_mime_flags:
 
 # The following variables are not modified from the application defaults.
 
+autonomy_dovecot_default_vsz_limit: "{{ __autonomy_dovecot_default_vsz_limit }}"
+autonomy_dovecot_process_min_avail: "{{ __autonomy_dovecot_process_min_avail }}"
+autonomy_dovecot_log_debug: ""
 
 # ==================================================================================================
 #
@@ -472,3 +481,5 @@ dovecot_sieve_mime_flags:
 #
 # ==================================================================================================
 __dovecot_sieve_global: ""
+__autonomy_dovecot_default_vsz_limit: "256M"
+__autonomy_dovecot_process_min_avail: 0

@@ -1,0 +1,14 @@
+---
+- name: "Cleanup acme challenge directory."
+  ansible.builtin.file:
+    path: "/srv/www/{{ item.name }}/.well-known/acme-challenge"
+    state: absent
+  loop: "{{ virtual_hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - virtual_hosts is defined
+  tags:
+    - acmeca
+    - acmeca-host-certs

@@ -5,26 +5,26 @@
 #
 #
 # ==================================================================================================
-- name: "Pre-tasks"
-  block:
-    - name: "Include OS-specific variables."
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
-      when:
-        - inventory_hostname not in groups['public_zone'] | default([])
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+  when:
+    - autonomy_virtual_host is falsy
+    - inventory_hostname not in groups['public_zone'] | default([])
 
-    - name: "Install packages."
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-      when:
-        - inventory_hostname not in groups['public_zone'] | default([])
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: yes
+  when:
+    - autonomy_virtual_host is falsy
+    - inventory_hostname not in groups['public_zone'] | default([])
 
 # ==================================================================================================
 #
@@ -37,60 +37,11 @@
 #       - "{{ ansible_facts.packages['bind9'][0]['version'] }}"
 #   when: "'bind9' in ansible_facts.packages"
 
-- name: "Query DNS for zone SOA."
-  ansible.builtin.set_fact:
-    __zone_soa: "{{ lookup('community.general.dig', autonomy_domain + '/SOA') }}"
-    __zone_all: "{{ lookup('community.general.dig', autonomy_domain, 'qtype=NS', wantlist=True) }}"
-  become: no
-
-- name: "Query DNS for reverse zone SOA."
-  ansible.builtin.set_fact:
-    __reverse_zone_soa: "{{ lookup('community.general.dig', bind_reverse_zone + '/SOA') }}"
-    __reverse_zone_all: "{{ lookup('community.general.dig', bind_reverse_zone, 'qtype=NS', wantlist=True) }}"
-  become: no
-  when:
-    - bind_reverse_zone is defined
-
-- name: "Get Forward Zone's Current Serial Number."
-  ansible.builtin.set_fact:
-    __zone_current_serial_number: "{{ __zone_soa.split(' ')[2] }}"
-  become: no
-  when:
-    - __zone_soa is defined
-
-- name: "Get Reverse Zone's Current Serial Number."
-  ansible.builtin.set_fact:
-    __reverse_zone_current_serial_number: "{{ __reverse_zone_soa.split(' ')[2] | default(bind_reverse_zone_serial_number) }}"
-  become: no
-  when:
-    - __reverse_zone_soa is defined
-
-- name: "Set new Forward Zone Serial Number."
-  ansible.builtin.set_fact:
-    bind_zone_serial_number: "{{ __zone_current_serial_number | int + 1 }}"
-  become: no
-  when:
-    - __zone_current_serial_number is defined
-    - __zone_current_serial_number >= bind_zone_serial_number
-
-- name: "Set new Reverse Zone Serial Number."
-  ansible.builtin.set_fact:
-    bind_reverse_zone_serial_number: "{{ __reverse_zone_current_serial_number | int + 1 }}"
-  become: no
-  when:
-    - __reverse_zone_current_serial_number is defined
-    - __reverse_zone_current_serial_number >= bind_reverse_zone_serial_number
-
-- name: "Check new serial number."
-  ansible.builtin.debug:
-    msg:
-      - "Current Serial Number: {{ __zone_current_serial_number }}"
-      - "New Serial Number:     {{ bind_zone_serial_number }}"
-    verbosity: 1
-  become: no
-  when:
-    - __zone_current_serial_number is defined
-
+# ==================================================================================================
+#
+# The included tasks generate keys used for dynamic dns
+#
+# ==================================================================================================
 - name: "Configure Dynamic DNS Keys."
   include_tasks: dynamic_dns.yml
 
@@ -106,16 +57,14 @@
     owner: root
     group: root
     mode: "0644"
-    validate: "/usr/sbin/named-checkconf %s"
+    #validate: "{{ __bind_named_checkconf }} %s"
   become: yes
-  loop:
-    - named.conf
-    - named.conf.options
-    - named.conf.default-zones
-    - named.conf.local
+  loop: "{{ bind_config_files }}"
   when:
     - bind_dyndns_secret is defined
     - inventory_hostname not in groups['public_zone'] | default([])
+    #- autonomy_virtual_host is falsy
+    - (autonomy_bind_forwardzones is defined or inventory_hostname in groups['samba_domain_controllers'] | default([]))
     - groups['dmz_dns_servers'] is defined # Temporary fix for #534
   notify: restart bind
 
@@ -125,10 +74,7 @@
 #   - /var/lib/bind/
 #   - /var/cache/bind/
 #
-# I choose 0775 permissions, why?  Why not 0755?  I am sure I had a reason, can't remember what it
-# was.
-#
-# TODO: Document why I am using 0775
+# These are set 0775 so that the bind group can make changes.
 #
 # ==================================================================================================
 - name: "Ensure Zone Directories Exists and are writable by bind user."
@@ -141,12 +87,30 @@
   become: yes
   loop: "{{ __autonomy_bind_zone_directories }}"
   when:
+    - autonomy_virtual_host is falsy
     - bind_dyndns_secret is defined
     - inventory_hostname not in groups['public_zone'] | default([])
 
 # ==================================================================================================
 #
+# Flush the handlers (restart bind9) to ensure bind is running with the current configuration. This
+# fixes a problem where the root dns zone file can not be downloaded because bind is not running,
+# which causes dns lookup errors on the next step.
+#
+# It also will cause the play to end for any host that has an invalid configuration right away.
+#
+# ==================================================================================================
+- name: "Ensure bind is up and running."
+  ansible.builtin.meta: flush_handlers
+
+# ==================================================================================================
+#
 # Install Zone Files
+#
+# FIXME: This fails if bind daemon is not running.
+#
+# Set 'force' to 'no' because once installed bind will update the file itself.  Only needed if the
+# file does not exist.
 #
 # ==================================================================================================
 - name: "Download Root Zone file."
@@ -156,8 +120,10 @@
     owner: bind
     group: bind
     mode: "0644"
+    force: no
   become: yes
   when:
+    - autonomy_virtual_host is falsy
     - bind_dyndns_secret is defined
     - inventory_hostname not in groups['public_zone'] | default([])
 
@@ -171,31 +137,32 @@
 - name: "Installing Forward Zone files."
   ansible.builtin.template:
     src: "var/lib/bind/forwardzone.j2"
-    dest: "{{ bind_zone_dir }}/db.{{ item['domain'] }}.test"
+    dest: "{{ bind_zone_dir }}/db.{{ autonomy_domain }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "0644"
     force: no
-    validate: "/usr/sbin/named-checkzone {{ item['domain'] }} %s"
-  loop: "{{ __bind_ddns_zones }}"
+    #validate: "{{ __bind_named_checkzone }} {{ item['domain'] }} %s"
   become: yes
   register: forwardzone_refresh
   when:
-    - item['nameserver_zone_type'] == item['type']
-    - not item['samba_domain']
+    - not autonomy_bind_zone_samba_controlled
+    - inventory_hostname not in groups['samba_domain_controllers'] | default([])
   notify: restart bind
 
 - name: "Installing Reverse Zone files."
   ansible.builtin.template:
     src: "var/lib/bind/reversezone.j2"
-    dest: "{{ bind_zone_dir }}/db.{{ bind_reverse_zone }}"
+    dest: "{{ bind_zone_dir }}/db.{{ item['name'] }}"
     owner: "{{ bind_owner }}"
     group: "{{ bind_group }}"
     mode: "0644"
     force: no
-    validate: "/usr/sbin/named-checkzone {{ bind_reverse_zone }} %s"
+    #validate: "{{ __bind_named_checkzone }} {{ item.name }} %s"
+  loop: "{{ autonomy_bind_reversezones }}"
   become: yes
   register: reversezone_refresh
   when:
-    - bind_reverse_zone is defined
+    - autonomy_bind_reversezones is defined
+    - inventory_hostname not in groups['samba_domain_controllers'] | default([])
   notify: restart bind

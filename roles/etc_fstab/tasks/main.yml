@@ -1,0 +1,25 @@
+---
+# tasks file for etc_fstab
+# - name: "Ensure mount points exist."
+#   ansible.builtin.file:
+#     dest: "{{ item.path }}"
+#     state: directory
+#     owner: "{{ item.owner | default('root') }}"
+#     group: "{{ item.group | default('root') }}"
+#     mode: "0755"
+#   loop: "{{ autonomy_fstab }}"
+#   become: yes
+
+# - name: "Add custom mount points to fstab."
+#   ansible.posix.mount:
+#     path: "{{ item.path }}"
+#     src: "{{ item.src }}"
+#     fstype: "{{ item.fstype }}"
+#     opts: "{{ item.opts | default('defaults') }}"
+#     dump: "{{ item.dump | default(omit) }}"
+#     passno: "{{ item.passno | default(omit) }}"
+#     boot: "{{ item.boot | default(omit) }}"
+#     state: present
+#     backup: yes
+#   loop: "{{ autonomy_fstab }}"
+#   become: yes

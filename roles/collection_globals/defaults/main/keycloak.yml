@@ -1,0 +1,3 @@
+---
+keycloak_name: "keycloak"
+keycloak_home: "/opt/{{ keycloak_name }}"

@@ -1,5 +1,5 @@
 ---
-autonomy_packages:
+autonomy_aptitude_packages:
   - aptitude
 
 system_upgrade_deb_src: false

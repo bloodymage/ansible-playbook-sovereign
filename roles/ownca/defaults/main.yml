@@ -1,11 +1,85 @@
 ---
-autonomy_packages:
+autonomy_ownca_packages:
   - python3-cryptography
+  - python3-openssl
   - rng-tools
   - ca-certificates
 
 ownca_intermediate_ca: "{{ autonomy_org_unit_name | lower }}"
 
+ownca_user_pki_dir: ".pki"
+ownca_user_cert_dir: "{{ ownca_user_pki_dir }}/certs"
+ownca_user_csr_dir: "{{ ownca_user_pki_dir }}/csr"
+ownca_user_private_dir: "{{ ownca_user_pki_dir }}/private"
+ownca_user_pkcs12_dir: "{{ ownca_user_pki_dir }}/pkcs12"
+ownca_home_dir: "/home/{{ autonomy_org_unit_name | upper }}"
+ownca_hosts_directory: "{{ ownca_directory }}/hosts"
+
+ownca_host_certs_directories:
+  - name: private
+    mode: "{{ __ownca_private_key_dir_mode }}"
+    group: "{{ __ownca_private_key_dir_group }}"
+  - name: csr
+    mode: "0700"
+  - name: pkcs12
+    mode: "0700"
+  - name: certs
+    mode: "0755"
+  - name: crls
+    mode: "0755"
+  - name: dhparams
+    mode: "0755"
+
+ownca_user_pki_dirs:
+  - name: private
+    mode: "0755"
+  - name: csr
+    mode: "0755"
+  - name: "certs"
+    mode: "0755"
+  - name: "pkcs12"
+    mode: "0755"
+  - name: "ssh"
+    mode: "0755"
+
+ownca_user_directories:
+  - name: "csr"
+    mode: "0755"
+  - name: "certs"
+    mode: "0755"
+
+ownca_private_key_group: "root"
+ownca_private_key_mode: "0600"
+
+ownca_generate_locally: no
+
+ownca_host_certs_pkcs12_password: "password"
+ownca_host_certs_subject_alt_name:
+  - "DNS:{{ autonomy_fqdn }}"
+  - "IP:{{ ansible_host }}"
+
+ownca_host_certs_extended_key_usage:
+  - serverAuth
+  - clientAuth
+
+ownca_host_certs_key_usage:
+  - digitalSignature
+  - keyEncipherment
+
+ownca_objectguid: ""
+
 ownca_revoked_certificates: []
 
+
+# ==================================================================================================
+#
+# The following variables are modified based on system information (host groups, OS Family, etc).
+#
+# These variables are not designed for user configuration.
+#
+# ==================================================================================================
+__ownca_private_key_dir_mode: "0700"
+__ownca_private_key_dir_group: "root"
+__host_cert_force_regeneration: no
 __ownca_force_regeneration: no
+__user_cert_force_regeneration: no

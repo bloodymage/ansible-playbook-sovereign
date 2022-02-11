@@ -1,4 +1,6 @@
 ---
 # defaults file for chromium
-autonomy_packages:
+autonomy_chromium_packages:
   - chromium
+
+autonomy_chromium_snap: false
