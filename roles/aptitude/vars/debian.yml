@@ -1,5 +1,6 @@
 ---
 deb_repo_url: "http://deb.debian.org/debian/"
-#deb_src_repo_url: "http://archive.raspbian.org/raspbian/"
+#deb_src_repo_url: "http://deb.debian.org/debian/"
+#deb_updates_repo_url: http://deb.debian.org/debian/ bullseye-updates main
 deb_repos: "main contrib non-free"
 debian_security_updates_repo_url: "http://deb.debian.org/debian-security"

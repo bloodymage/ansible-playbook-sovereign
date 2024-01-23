@@ -1,2 +1,7 @@
 # {{ ansible_managed }}
-{{ autonomy_root_domain }} {{ autonomy_root_domain }}:{{ opendkim_mail_service }}:{{ opendkim_mail_privatekey_path }}
+
+{% for item in autonomy_zones %}
+{% if item.type == "public" %}
+{{ item.domain }} {{ item.domain }}:{{ opendkim_mail_service }}:{{ opendkim_key_dir }}/{{ opendkim_mail_service }}_{{ item.name }}.private
+{% endif %}
+{% endfor %}

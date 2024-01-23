@@ -1,4 +1,4 @@
 ---
 # defaults file for ddclient
-autonomy_packages:
+autonomy_ddclient_packages:
   - ddclient

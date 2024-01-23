@@ -1,0 +1,56 @@
+---
+# ==================================================================================================
+#
+# These tasks update routeros devices' hostname.
+#
+# RouterOS commands are not idempotent, which adds to the process.
+# First we get the current hostname, and set "changed_when" to false since we are only gathering
+# information.  No actual changes have been made to the system at this time.
+#
+# Then we update the hostname, only if the current hostname and the desired hostname do not match.
+#
+# ==================================================================================================
+- name: "RouterOS: Get Hostname."
+  community.routeros.command:
+    commands:
+      - "/system identity print"
+  become: no
+  register: __autonomy_routeros_identity
+  changed_when: False
+  tags:
+    - hostname
+
+# ==================================================================================================
+#
+# TODO: FIXME
+#
+# This feels like a blunt instrument to check the current hostname.
+#
+# Without the final '[:-1]' check on the string the hostname returns as "hostname'" instead of
+# "hostname".  What should be done is spliting the string on the single quote ' instead of simlpy
+# removing the last character.
+#
+# This is a temporary work around until I find a better solution.
+#
+# ==================================================================================================
+- name: "RouterOS: Parse Hostname"
+  ansible.builtin.set_fact:
+    __detected_hostname: "{{ __detected_name.split(']')[0][:-1] }}"
+  vars:
+    __detected_name: "{{ __stdout_line.split(' ')[1] }}"
+    __stdout_line: "{{ __autonomy_routeros_identity.stdout_lines | regex_search('name.+') }}"
+
+# - name: "RouterOS: Print Current name"
+#   ansible.builtin.debug:
+#     msg:
+#       - "{{ __detected_hostname }}"
+
+- name: "RouterOS: Set Hostname."
+  community.routeros.command:
+    commands:
+      - "/system identity set name={{ autonomy_hostname }}"
+  become: no
+  when:
+    - __detected_hostname != autonomy_hostname
+  tags:
+    - hostname

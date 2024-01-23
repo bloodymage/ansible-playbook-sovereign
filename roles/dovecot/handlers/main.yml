@@ -1,2 +1,13 @@
 ---
 # handlers file for dovecot
+- name: "Recompile Sieve Scripts."
+  ansible.builtin.command:
+    cmd: "/usr/bin/sievec {{ item }}"
+    chdir: "{{ dovecot_sieve_dir }}"
+  loop:
+    - before
+    - after
+    - global
+  become: true
+  listen:
+    - "recompile sieve"

@@ -1,0 +1,7 @@
+# {{ ansible_managed }}
+
+{% for item in autonomy_postfix_domains %}
+{% if item.privkey is defined and item.fullchain is defined %}
+mail.{{ item.domain.ljust(24) }} {{ item.privkey.ljust(64) }} {{ item.fullchain }}
+{% endif %}
+{% endfor %}

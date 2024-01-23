@@ -1,0 +1,20 @@
+---
+# handlers file for acmeca_challenge_site
+- name: "Backup Old Certificates."
+  ansible.builtin.copy:
+    content: "{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/{{ item }}.pem"
+    dest: "{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/{{ item }}.pem.{{ __acmeca_timestamp }}~"
+    owner: root
+    group: root
+    mode: "0644"
+  become: true
+  loop:
+    - cert
+    - chain
+    - fullchain
+  listen:
+    - "backup certs"
+  when:
+    - acmeca_backup_old_certs
+    - acme_challenge is defined
+    - acme_challenge.changed

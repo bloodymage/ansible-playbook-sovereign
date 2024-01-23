@@ -1,0 +1,98 @@
+# {{ ansible_managed }}
+
+[Match]
+Name={{ item.name }}
+{% if item.ssid is defined %}
+SSID={{ item.ssid }}
+{% endif %}
+
+{% if item.link is defined and item.link is truthy %}
+[Link]
+{% if item.mac_address is defined %}
+MACAddress={{ item.mac_address }}
+{% endif %}
+{% endif %}
+
+[Network]
+{% if item.description is defined %}
+Description={{ item.description }}
+{% endif %}
+{% if item.bond is defined %}
+Bond={{ item.bond }}
+{% if item.primary_slave is defined %}
+PrimarySlave={{ item.primary_slave }}
+{% endif %}
+{% endif %}
+{% if item.dhcp is defined %}
+DHCP={{ item.dhcp }}
+{% else %}
+{% if item.address is defined and item.gateway is defined %}
+Address={{ item.address }}
+Gateway={{ item.gateway }}
+{% endif %}
+{% endif %}
+{% if item.dns is defined %}
+DNS=
+{%- for ip in item.dns -%}
+{{ ip }}{{ " " if not loop.last else "" }}
+{%- endfor %}
+{% endif %}
+{% if item.domains is defined +%}
+Domains=
+{%- for domain in item.domains -%}
+{{ domain }}{{ " " if not loop.last else "" }}
+{% endfor %}
+{% endif %}
+{% if item.llmnr is defined %}
+LLMNR={{ item.llmnr }}
+{% endif %}
+{% if item.multicast_dns is defined +%}
+MulticastDNS={{ item.multicast_dns }}
+{% endif %}
+{% if item.dns_over_tls is defined %}
+DNSOverTLS={{ item.dns_over_tls }}
+{% endif %}
+{% if item.dnssec is defined %}
+DNSSEC={{ item.dnssec }}
+{% endif %}
+{% if item.dnssec_negative_trust_anchors is defined %}
+DNSSECNegativeTrustAnchors={{ item.dns_negative_trust_anchors }}
+{% endif %}
+{% if item.lldp is defined %}
+LLDP={{ item.lldp }}
+{% endif %}
+{% if item.emit_lldp is defined %}
+EmitLLDP={{ item.emit_lldp }}
+{% endif %}
+{% if item.bind_carrier is defined %}
+BindCarrier={{ item.bind_carrier }}
+{% endif %}
+{% if item.dns_default_route is defined %}
+DNSDefaultRoute={{ item.dns_default_route }}
+{% endif %}
+{% if item.ntp is defined %}
+{% for ntp_server in item.ntp %}
+NTP={{ ntp_server }}
+{% endfor %}
+{% endif %}
+{% if item.vlans is defined %}
+
+# VLANs
+{% for vlan in item.vlans %}
+VLAN={{ vlan }}
+{% endfor %}
+{% endif %}
+{% if item.macvlans is defined %}
+
+# MACVLANs
+{% for vlan in item.macvlans %}
+MACVLAN={{ vlan }}
+{% endfor %}
+{% endif %}
+{% if item.dhcpv4 is defined and item.dhcpv4 is truthy %}
+
+[DHCPV4]
+{% if item.hostname is defined %}
+Hostname={{ item.hostname }}
+{% endif %}
+{% endif %}

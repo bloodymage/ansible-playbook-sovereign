@@ -6,12 +6,17 @@
 
 # Log file to use for error messages. "syslog" logs to syslog,
 # /dev/stderr logs to stderr.
-#log_path = syslog
-
+{% if autonomy_dovecot_log_path != "syslog" %}
+log_path = {{ autonomy_dovecot_log_path }}
+{% endif %}
 # Log file to use for informational messages. Defaults to log_path.
-#info_log_path = 
+{% if autonomy_dovecot_info_log_path is truthy -%}
+  info_log_path = {{ autonomy_dovecot_info_log_path }}
+{% endif %}
 # Log file to use for debug messages. Defaults to info_log_path.
-#debug_log_path = 
+{% if autonomy_dovecot_debug_log_path is truthy -%}
+  debug_log_path = {{ autonomy_dovecot_debug_log_path }}
+{% endif %}
 
 # Syslog facility to use if you're logging to syslog. Usually if you don't
 # want to use "mail", you'll use local0..local7. Also other standard
@@ -22,21 +27,23 @@
 ## Logging verbosity and debugging.
 ##
 
-# Log filter is a space-separated list conditions. If any of the conditions
-# match, the log filter matches (i.e. they're ORed together). Parenthesis
-# are supported if multiple conditions need to be matched together.
-# Supported conditions are:
-#  event:<name wildcard> - Match event name. '*' and '?' wildcards supported.
-#  source:<filename>[:<line number>] - Match source code filename [and line]
-#  field:<key>=<value wildcard> - Match field key to a value. Can be specified
-#    multiple times to match multiple keys.
-#  cat[egory]:<value> - Match a category. Can be specified multiple times to
-#    match multiple categories.
-# For example: event:http_request_* (cat:error cat:storage)
+{# # Log filter is a space-separated list conditions. If any of the conditions #}
+{# # match, the log filter matches (i.e. they're ORed together). Parenthesis #}
+{# # are supported if multiple conditions need to be matched together. #}
+{# # Supported conditions are: #}
+{# #  event:<name wildcard> - Match event name. '*' and '?' wildcards supported. #}
+{# #  source:<filename>[:<line number>] - Match source code filename [and line] #}
+{# #  field:<key>=<value wildcard> - Match field key to a value. Can be specified #}
+{# #    multiple times to match multiple keys. #}
+{# #  cat[egory]:<value> - Match a category. Can be specified multiple times to #}
+{# #    match multiple categories. #}
+{# # For example: event:http_request_* (cat:error cat:storage) #}
 
-# Filter to specify what debug logging to enable. This will eventually replace
-# mail_debug and auth_debug settings.
-#log_debug = 
+{# Filter to specify what debug logging to enable. This will eventually replace #}
+{# mail_debug and auth_debug settings. #}
+{% if autonomy_dovecot_log_debug is truthy -%}
+  log_debug = {{ autonomy_dovecot_log_debug }}
+{% endif %}
 
 # Crash after logging a matching event. For example category:error will crash
 # any time an error is logged, which can be useful for debugging.
@@ -61,7 +68,7 @@
 
 # Enable mail process debugging. This can help you figure out why Dovecot
 # isn't finding your mails.
-#mail_debug = yes
+#mail_debug = {{ autonomy_dovecot_mail_debug }}
 
 # Show protocol level SSL errors.
 #verbose_ssl = no

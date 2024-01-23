@@ -1,2 +1,73 @@
 ---
 # defaults file for ntp
+autonomy_ntp_packages:
+  - ntpsec
+
+autonomy_ntp_conflicts:
+  - systemd-timesyncd
+
+autonomy_ntp_user: "ntpsec"
+autonomy_ntp_group: "{{ autonomy_ntp_user }}"
+
+autonomy_ntp_daemon_options: "-g -N"
+autonomy_ntp_samba_socket_directory: "/var/lib/samba/ntp_signd"
+autonomy_ntp_config_files:
+  - name: "etc/default/ntpsec"
+    mode: "0644"
+  - name: "etc/ntpsec/ntp.conf"
+    mode: "0644"
+
+# ==================================================================================================
+#
+# ntp.conf configuration options
+#
+# See https://docs.ntpsec.org/latest/ntp_conf.html for details
+#
+# ==================================================================================================
+autonomy_ntp_logfile: "/var/log/ntp.log"
+autonomy_ntp_enable_logging: true
+autonomy_ntp_statistics_dir: "/var/log/ntpsec"
+autonomy_ntp_enable_statistics: false
+
+autonomy_ntp_server_addresses:
+  - 0.pool.ntp.org
+  - 1.pool.ntp.org
+  - 2.pool.ntp.org
+  - 3.pool.ntp.org
+
+autonomy_ntp_association_options:
+  - iburst
+
+autonomy_ntp_tos_ceiling: 15
+autonomy_ntp_tos_floor: 1
+
+# ==================================================================================================
+#
+# The clustering algorithm repeatedly casts out outlier associations until no more than minclock
+# associations remain. This value defaults to 3, but can be changed to any number from 1 to the
+# number of configured sources.
+#
+# ==================================================================================================
+autonomy_ntp_tos_minclock: >-
+  {%- if autonomy_ntp_server_address is string -%}
+  1
+  {%- elif autonomy_ntp_server_addresses is iterable -%}
+  {{ autonomy_ntp_server_addresses | length }}
+  {%- else -%}
+  1
+  {%- endif -%}
+
+# ==================================================================================================
+#
+# This is the minimum number of candidates available to the clock selection algorithm in order to
+# produce one or more truechimers for the clustering algorithm. If fewer than this number are
+# available, the clock is undisciplined and allowed to run free. The default is 1 for legacy
+# purposes. However, according to principles of Byzantine agreement, minsane should be at least 4 in
+# order to detect and discard a single falseticker.
+#
+# ==================================================================================================
+autonomy_ntp_tos_minsane: 4
+
+autonomy_ntp_restrict_ip_addresses:
+  - "127.0.0.1"
+  - "::1"

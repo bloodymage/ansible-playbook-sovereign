@@ -1,4 +1,5 @@
 ---
 # defaults file for emacs
-autonomy_packages:
+autonomy_emacs_packages:
   - emacs-nox
+  - global

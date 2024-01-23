@@ -11,9 +11,25 @@ ff02::2 ip6-allrouters
 ff02::3 ip6-allhosts
 
 # IPv4 Address
-{{ ansible_host }}    {{ inventory_hostname }} {{ inventory_hostname_short }}
+{{ ansible_host.ljust(20) }}{{ inventory_hostname }} {{ inventory_hostname_short }}
+{% if autonomy_hosts_ipv4 is truthy %}
+{%- for item in autonomy_hosts_ipv4 %}
+{{ item.address.ljust(20) }}
+{%- for name in item.names -%}
+{{ name }}{{ " " if not loop.last else "" }}
+{%- endfor +%}
+{% endfor %}
+{% endif %}
 
-#{% if ansible_default_ipv6.address is defined -%}
-##IPv6 Address
+{% if ansible_default_ipv6.address is defined %}
+# IPv6 Address
 {{ ansible_default_ipv6.address }} {{ inventory_hostname }} {{ inventory_hostname_short }}
-#{% endif %}
+{% endif %}
+{% if autonomy_hosts_ipv6 is truthy -%}
+{% for item in autonomy_hosts_ipv6 -%}
+{{ item.address }}{{ " " }}
+{%- for name in item.names -%}
+{{ name }}{{ " " if not loop.last else "" }}
+{%- endfor +%}
+{% endfor %}
+{% endif %}

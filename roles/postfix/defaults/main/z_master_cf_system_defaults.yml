@@ -105,7 +105,7 @@ __postfix_master_error_service_command: "error"
 __postfix_master_error_service_args: ""
 
 __postfix_master_retry_service_type: "unix"
-__postfix_master_retry_service_command: "retry"
+__postfix_master_retry_service_command: "error"
 __postfix_master_retry_service_args: ""
 
 __postfix_master_discard_service_type: "unix"

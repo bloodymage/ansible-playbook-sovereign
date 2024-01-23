@@ -5,11 +5,9 @@
 #
 # ==================================================================================================
 - name: "Configure environment for database server configuration."
-  hosts: all:!wifi_access_points:!routers:!switches
+  hosts: all:!wifi_access_points:!routers:!switches:!printers
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
 

@@ -1,6 +1,6 @@
 ; ==================================================================================================
 ;
-; BIND data file for {{ bind_reverse_zone }}
+; BIND data file for {{ item.name }}
 ;
 ; {{ ansible_managed }}
 ;
@@ -15,9 +15,9 @@ $TTL	{{ bind_zone_ttl }}
 )  
 
 {% for ns in groups[autonomy_zone_name + '_dns_servers'] -%}
-  {{ hostvars[ns]['ansible_host'].split('.')[1] }}.{{ hostvars[ns]['ansible_host'].split('.')[0] }}.in-addr.arpa.  {{ 'IN NS'.ljust(6) }}{{ hostvars[ns]['inventory_hostname_short'] }}.{{ autonomy_domain }}.
+  {{ item['name'].split('.')[1] }}.{{ item['name'].split('.')[0] }}.in-addr.arpa.  {{ 'IN NS'.ljust(6) }}{{ hostvars[ns]['inventory_hostname_short'] }}.{{ item['domain'] }}.
 {% endfor %}
 
 {% for ns in groups[autonomy_zone_name + '_dns_servers'] -%}
-  {{ hostvars[ns]['ansible_host'].split('.')[3] }}.{{ hostvars[ns]['ansible_host'].split('.')[2] }}.{{ hostvars[ns]['ansible_host'].split('.')[1] }}.{{ hostvars[ns]['ansible_host'].split('.')[0] }}      IN PTR  {{ hostvars[ns]['inventory_hostname_short'] }}.{{ autonomy_domain }}.
+  {{ hostvars[ns]['ansible_host'].split('.')[3] }}.{{ hostvars[ns]['ansible_host'].split('.')[2] }}      IN PTR  {{ hostvars[ns]['inventory_hostname_short'] }}.{{ item['domain'] }}.
 {% endfor %}

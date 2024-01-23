@@ -6,7 +6,9 @@
 # Default VSZ (virtual memory size) limit for service processes. This is mainly
 # intended to catch and kill processes that leak memory before they eat up
 # everything.
-#default_vsz_limit = 256M
+{% if autonomy_dovecot_default_vsz_limit != __autonomy_dovecot_default_vsz_limit -%}
+  default_vsz_limit = {{ autonomy_dovecot_default_vsz_limit }}
+{% endif %}
 
 # Login user is internally used by login processes. This is the most untrusted
 # user in Dovecot system. It shouldn't have access to anything at all.
@@ -25,15 +27,18 @@ service imap-login {
     #ssl = yes
   }
 
-  # Number of connections to handle before starting a new process. Typically
-  # the only useful values are 0 (unlimited) or 1. 1 is more secure, but 0
-  # is faster. <doc/wiki/LoginProcess.txt>
+{# Number of connections to handle before starting a new process. Typically #}
+{# the only useful values are 0 (unlimited) or 1. 1 is more secure, but 0 #}
+{# is faster. <doc/wiki/LoginProcess.txt> #}
   #service_count = 1
 
-  # Number of processes to always keep waiting for more connections.
-  #process_min_avail = 0
+{# Number of processes to always keep waiting for more connections. #}
+{% if autonomy_dovecot_process_min_avail != __autonomy_dovecot_process_min_avail %}
+  process_min_avail = {{ autonomy_dovecot_process_min_avail }}
+{% endif %}
 
-  # If you set service_count=0, you probably need to grow this.
+
+{# If you set service_count=0, you probably need to grow this. #}
   #vsz_limit = $default_vsz_limit
 }
 

@@ -1,0 +1,80 @@
+---
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: true
+  notify: "restart systemd-networkd"
+
+- name: "Install Netdev Files."
+  ansible.builtin.template:
+    src: "netdev.j2"
+    dest: "/etc/systemd/network/{{ item.id }}-{{ item.name }}.netdev"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ autonomy_systemd_netdev }}"
+  become: true
+  notify: "restart systemd-networkd"
+  when:
+    - autonomy_systemd_netdev is defined
+
+- name: "Install Network Files."
+  ansible.builtin.template:
+    src: "network.j2"
+    dest: "/etc/systemd/network/{{ item.id }}-{{ item.name }}.network"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ autonomy_systemd_network }}"
+  become: true
+  notify: "restart systemd-networkd"
+  when:
+    - autonomy_systemd_network is defined
+
+- name: "Disable networking."
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: false
+    masked: true
+  loop: "{{ autonomy_systemd_old_networking_services }}"
+  become: true
+  when: (autonomy_systemd_netdev is defined) or (autonomy_systemd_network is defined)
+  ignore_errors: true
+
+- name: "Enable Systemd-Networkd"
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: true
+    masked: false
+  loop:
+    - systemd-networkd
+    - systemd-resolved
+  become: true
+  when: (autonomy_systemd_netdev is defined) or (autonomy_systemd_network is defined)
+
+- name: "Link resolv.conf"
+  ansible.builtin.file:
+    src: "/run/systemd/resolve/stub-resolv.conf"
+    dest: "/etc/resolv.conf"
+    owner: root
+    group: root
+    state: link
+  become: true
+  when: (autonomy_systemd_netdev is defined) or (autonomy_systemd_network is defined)
+
+# ==================================================================================================
+#
+# This last section cleans up anything leftover from old networking config.
+#
+# ==================================================================================================
+- include_tasks: "networkd_{{ ansible_os_family | lower }}.yml"
+
+- name: "Remove unnecessary folders."
+  ansible.builtin.file:
+    path: "/etc/{{ item }}"
+    state: absent
+  loop:
+    - network
+    - dhcp
+  become: true

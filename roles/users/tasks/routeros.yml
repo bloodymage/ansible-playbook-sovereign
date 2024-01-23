@@ -6,8 +6,3 @@
       - /user remove {{ __default_mikrotik_device_user }}
       #- /user set 0 allowed-addres=""
   register: routeros_resources
-  tags:
-    - users
-    - users_debug
-    - users-debug
-    - install-packages

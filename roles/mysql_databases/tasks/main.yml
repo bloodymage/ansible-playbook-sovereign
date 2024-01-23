@@ -42,7 +42,7 @@
   loop: "{{ __databases_to_create }}"
   become: yes
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ autonomy_zone_name }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/mysql/{{ autonomy_zone_name }}"
     __password_lookup: "{{ __password_store_id }}"
   tags:
     - mysql_databases
@@ -64,13 +64,13 @@
   loop: "{{ __databases_to_create }}"
   become: yes
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ item['user'] }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/mysql/{{ item['user'] }}"
     __password_length: "length={{ autonomy_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-    __login_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ autonomy_zone_name }}"
+    __login_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/mysql/{{ autonomy_zone_name }}"
     __login_lookup: "{{ __login_store_id }}"
   #no_log: true
   tags:

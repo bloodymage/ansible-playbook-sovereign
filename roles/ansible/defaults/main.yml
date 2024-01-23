@@ -1,0 +1,62 @@
+---
+autonomy_ansible_packages:
+  - nmap
+  - python3-dnspython
+  - python3-ldap
+  - python3-paramiko
+  - python3-winrm
+
+autonomy_ansible_default_host_list:
+  - "/etc/ansible/hosts"
+
+autonomy_ansible_gathering: "smart"
+autonomy_ansible_stdout_callback: "default"
+autonomy_ansible_interpreter_python: ""
+autonomy_ansible_log_path: ""
+autonomy_ansible_vault_password_file: ""
+autonomy_ansible_nocows: no
+autonomy_ansible_cow_selection: "default"
+autonomy_ansible_cowsay_enabled_stencils:
+  - bud-frogs
+  - bunny
+  - C3PO
+  - calvin
+  - cheese
+  - daemon
+  - default
+  - dragon
+  - elephant-in-snake
+  - elephant
+  - eyes
+  - hellokitty
+  - kitty
+  - luke-koala
+  - meow
+  - milk
+  - moofasa
+  - moose
+  - queen
+  - R2-D2
+  - ren
+  - sheep
+  - small
+  - stegosaurus
+  - stimpy
+  - supermilker
+  - three-eyes
+  - turkey
+  - turtle
+  - tux
+  - udder
+  - vader-koala
+  - vader
+  - www
+
+autonomy_ansible_nocolor: no
+
+autonomy_ansible_inventory_plugins:
+  - host_list
+  - script
+  - yaml
+  - ini
+  - auto

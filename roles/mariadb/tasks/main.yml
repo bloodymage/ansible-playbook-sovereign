@@ -7,34 +7,34 @@
 # Installs a set of common apps for all systems on the network
 #
 # ==================================================================================================
-- name: Check if MySQL is already installed.
+- name: "Check if MySQL is already installed."
   ansible.builtin.stat: path=/etc/init.d/mysql
   register: mysql_installed
-  become: no
+  become: false
   tags:
     - mariadb
     - mariadb-debug
     - mariadb_debug
 
-- name: Include OS-specific variables.
+- name: "Include OS-specific variables."
   include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
       files: "{{ __os_variables_files }}"
       paths:
         - "vars"
-  become: no
+  become: false
   tags:
     - mariadb
     - mariadb-debug
     - mariadb_debug
     - install-packages
 
-- name: "Install packages"
+- name: "Install packages."
   ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present
-  become: yes
+  become: true
   tags:
     - mariadb
     - mariadb
@@ -43,94 +43,113 @@
 
 # Because Ubuntu starts MySQL as part of the install process, we need to stop
 # mysql and remove the logfiles in case the user set a custom log file size.
-- name: Ensure MySQL is stopped after initial install.
+- name: "Ensure MySQL is stopped after initial install."
   ansible.builtin.service:
     name: "{{ mysql_daemon }}"
     state: stopped
   when: not mysql_installed.stat.exists
-  become: yes
+  become: true
   tags:
     - mariadb
     - mariadb-debug
     - mariadb_debug
 
-- name: Delete innodb log files created by apt package after initial install.
+- name: "Delete innodb log files created by apt package after initial install."
   ansible.builtin.file:
     path: "{{ mysql_datadir }}/{{ item }}"
     state: absent
-  become: yes
+  become: true
   with_items:
     - ib_logfile0
     - ib_logfile1
-  when: not mysql_installed.stat.exists
+  when:
+    - not mysql_installed.stat.exists
   tags:
     - mariadb
     - mariadb-debug
     - mariadb_debug
 
-- name: "Ensure we have a password for the Administrative User"
+- name: "Ensure we have a password for the Administrative User."
   ansible.builtin.set_fact:
     mysql_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ mysql_administrator }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/mysql/{{ mysql_administrator }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
-  no_log: yes
-  become: no
+  no_log: true
+  become: false
   when:
     - mysql_administrator_password == "password"
   tags:
     - mariadb
     - mariadb-debug
-    - mariadb_debug
 
-- name: "Ensure we have a password for the System Maintenance User"
+- name: "Ensure we have a password for the System Maintenance User."
   ansible.builtin.set_fact:
     mysql_system_maintenance_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/mysql/{{ mysql_system_maintenance_user }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
-  no_log: yes
-  become: no
+  no_log: true
+  become: false
   when:
     - mysql_system_maintenance_user_password == "password"
   tags:
     - mariadb
     - mariadb-debug
-    - mariadb_debug
 
-# - name: Ensure MySQL Root user password is set
-#   mysql_user:
+# - name: "Ensure MySQL Root user password is set."
+#   community.mysql.mysql_user:
 #     name: "{{ mysql_administrator }}"
 #     password: "{{ mysql_administrator_password }}"
 #     state: present
-#   become: yes
+#     login_unix_socket: "/var/run/mysqld/mysqld.sock"
+#   become: true
 #   tags:
 #     - mariadb
 #     - mariadb-debug
-#     - mariadb_debug
 
-- name: Removes all anonymous user accounts
+- name: "Install System Maintenance config."
+  ansible.builtin.template:
+    src: "etc/mysql/debian.cnf.j2"
+    dest: "/etc/mysql/debian.cnf"
+    owner: root
+    group: root
+    mode: 600
+  become: true
+  when:
+    - ansible_os_family == "Debian"
+  notify:
+    - "restart mariadb"
+  tags:
+    - mariadb
+    - mariadb-debug
+    - mariadb_debug
+
+- name: "Flush Handlers."
+  ansible.builtin.meta: flush_handlers
+
+- name: "Remove all anonymous user accounts."
   community.mysql.mysql_user:
     name: ''
     host_all: yes
     state: absent
     login_user: "{{ mysql_administrator }}"
     login_password: "{{ mysql_administrator_password }}"
-  become: no
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  become: false
   tags:
     - mariadb
     - mariadb-debug
-    - mariadb_debug
 
 - name: "Add Debian Upgrade User."
   community.mysql.mysql_user:
@@ -139,22 +158,8 @@
     state: present
     login_user: "{{ mysql_administrator }}"
     login_password: "{{ mysql_administrator_password }}"
-  become: no
-  tags:
-    - mariadb
-    - mariadb-debug
-    - mariadb_debug
-
-- name: "Install System Maintenance config."
-  ansible.builtin.template:
-    src: "mysql/debian.cnf.j2"
-    dest: "/etc/mysql/debian.cnf"
-    owner: root
-    group: root
-    mode: 600
-  become: yes
-  when:
-    - ansible_os_family == "Debian"
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  become: false
   tags:
     - mariadb
     - mariadb-debug
@@ -169,10 +174,11 @@
     state: present
     login_user: "{{ mysql_administrator }}"
     login_password: "{{ mysql_administrator_password }}"
-  become: no
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  become: false
   loop: "{{ autonomy_zones }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ item.domain }}/services/mysql/{{ item.name | lower }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/services/mysql/{{ item.name | lower }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -194,10 +200,11 @@
     state: present
     login_user: "{{ mysql_administrator }}"
     login_password: "{{ mysql_administrator_password }}"
-  become: no
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  become: false
   loop: "{{ autonomy_zones }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ item.domain }}/services/mysql/{{ item.name | lower }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/services/mysql/{{ item.name | lower }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"

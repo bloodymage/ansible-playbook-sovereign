@@ -1,0 +1,31 @@
+# {{ ansible_managed }}
+
+logging {
+{% for channel in autonomy_bind_logging_channels %}
+  channel {{ channel.name }} {
+  {% if channel.target is defined -%}
+      {{ channel.target }};
+  {% elif channel.file is defined -%}
+      file "{{ channel.file }}"{% if channel.versions is defined %} versions {{ channel.versions }}{% endif %}{% if channel.size is defined %} size {{ channel.size}}{% endif %};
+    {% if channel.print_category is defined -%}
+      print-category {{ channel.print_category }};
+    {% endif -%}
+    print-severity {{ channel.print_severity }};
+    print-time {{ channel.print_time }};
+  {% endif %}
+  {% if channel.severity is defined -%}
+    severity {{ channel.severity }};
+  {% endif -%}
+  };
+
+{% endfor %}
+
+{% for category in autonomy_bind_logging_categories %}
+  category {{ category.name }} {
+  {% for channel in category.channels %}
+    {{ channel }};
+  {% endfor -%}
+  };
+
+{% endfor %}
+};  

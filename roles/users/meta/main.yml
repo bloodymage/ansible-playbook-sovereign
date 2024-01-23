@@ -25,4 +25,4 @@ galaxy_info:
     - users
 
 dependencies:
-  - role: bloodymage.autonomy.collection_handlers
+  - role: bloodymage.autonomy.collection_globals

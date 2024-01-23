@@ -1,0 +1,18 @@
+---
+- hosts: all
+  roles:
+    - role: bloodymage.autonomy.config_environment
+      tags:
+        - always
+      when:
+        - ansible_date_time.weekday == "Monday"
+
+- name: "Update ACME Certificates."
+  hosts: web_servers:mail_servers:mosquitto_servers:&public_zone
+  roles:
+    - role: bloodymage.autonomy.acmeca
+      vars:
+        __acmeca_tasks: "account"
+    - role: bloodymage.autonomy.acmeca
+      vars:
+        __acmeca_tasks: "certs"

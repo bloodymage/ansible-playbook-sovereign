@@ -31,14 +31,16 @@ Host *.{{ autonomy_root_domain }}
 
 {% if inventory_hostname in groups['workstations'] %}
 {% if autonomy_smart_card_login -%}
-  {% if openssh_github -%}
+{% if openssh_github -%}
   Host github.com
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
-  {% endif %}
-  {% if openssh_github -%}
+  IdentityFile ~/.ssh/%u.pub
+{% endif %}
+{% if openssh_github -%}
   Host gitlab.com
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
-  {% endif %}
+  IdentityFile ~/.ssh/%u.pub
+{% endif %}
 {% endif %}
 {% endif %}
 

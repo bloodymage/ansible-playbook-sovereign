@@ -9,7 +9,7 @@
   notify: restart samba file server
   vars:
     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   no_log: yes
   when:
@@ -23,24 +23,43 @@
     - recreate-realm-debug
 
 # TODO: Configure nsswitch
-# TODO: Add flush handlers
-- name: "Set SeDiskOperatorPrivilege for unixadmins so they can set ACLs."
-  ansible.builtin.expect:
-    command: >
-      net rpc rights grant "{{ autonomy_org_unit_name | upper }}\unixadmins"
-      SeDiskOperatorPrivilege -U "{{ autonomy_org_unit_name | upper }}\Administrator"
-    responses:
-      (?i)password: "{{ __samba_administrator_password }}"
-  become: yes
-  vars:
-    __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
-    __password_lookup: "{{ __password_store_id }}"
-  tags:
-    - samba_file_server
-    - samba-file-server
-    - samba_file_server_debug
-    - samba-file-server-debug
-    - recreate-realm
-    - recreate-realm-debug
+- name: "Ensure services are in proper state after package installation."
+  ansible.builtin.meta: flush_handlers
+
+# ==================================================================================================
+#
+# Due to CVE-2020-25717
+#
+# The only way for this to work is to temporarily set "min domain id" to "0" by adding:
+# "min domain uid = 0" to smb.conf
+#
+# Disabled until a permanent solution is available.
+#
+# Permanent solution, should only run this the upon initializing the samba file server.  It does not
+# need to be run every time.
+#
+# References:
+#   - https://lists.samba.org/archive/samba/2021-November/238643.html
+#   - https://wiki.samba.org/index.php/CVE-2020-25717
+#
+# ==================================================================================================
+# - name: "Set SeDiskOperatorPrivilege for unixadmins so they can set ACLs."
+#   ansible.builtin.expect:
+#     command: >
+#       net rpc rights grant "{{ autonomy_org_unit_name | upper }}\unixadmins"
+#       SeDiskOperatorPrivilege -U "{{ autonomy_org_unit_name | upper }}\Administrator"
+#     responses:
+#       (?i)password: "{{ __samba_administrator_password }}"
+#   become: yes
+#   vars:
+#     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+#     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/administrator/password"
+#     __password_lookup: "{{ __password_store_id }}"
+#   tags:
+#     - samba_file_server
+#     - samba-file-server
+#     - samba_file_server_debug
+#     - samba-file-server-debug
+#     - recreate-realm
+#     - recreate-realm-debug
 

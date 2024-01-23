@@ -1,6 +1,7 @@
 ---
 # defaults file for nextcloud
-nextcloud_version: "23.0.1"
+nextcloud_version: "28.0.1"
+autonomy_nextcloud_upgrade: false
 
 __packages_base:
   - apache2
@@ -85,7 +86,6 @@ nextcloud_hosts_max_age: 15552000
 nextcloud_data_directory: "/srv/www-data"
 
 nextcloud_apps:
-  - accessibility
   - activity
   - admin_audit
   - cloud_federation_api
@@ -236,7 +236,6 @@ nextcloud_saml_config:
 #
 # ==================================================================================================
 __nextcloud_default_apps:
-  - accessibility
   - activity
   - admin_audit
   - cloud_federation_api

@@ -1,0 +1,66 @@
+---
+# ==================================================================================================
+#
+# Generate Let's Encrypt Account Private Key.
+#
+# Variables:
+#   - acmeca_account_key_path: string, defined in role/acmeca_host_certs/defaults/main.yml
+#   - acmeca_account_key_type: string, defined in role/acmeca_host_certs/defaults/main.yml
+#   - acmeca_account_key_size: string, defined in role/acmeca_host_certs/defaults/main.yml
+#   - __acmeca_regenerate_acme_account_private_key: bool,
+#     defined by task in role/config_acmeca_environment/tasks/main.yml
+#
+# ==================================================================================================
+- name: "Generate ACMECA Account private key."
+  community.crypto.openssl_privatekey:
+    path: "{{ autonomy_acmeca_account_key_path }}"
+    type: "{{ __type }}"
+    size: "{{ autonomy_acmeca_account_key_size }}"
+    passphrase: "{{ __password }}"
+    cipher: "auto"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0600"
+    backup: yes
+    regenerate: "full_idempotence"
+    force: "{{ __acmeca_regenerate_account_key }}"
+    state: "present"
+  become: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/acmeca/account_password"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{% if autonomy_acmeca_account_key_password == 'password' %}{{ lookup('community.general.passwordstore', __password_lookup) }}{% else %}{{ autonomy_acmeca_account_key_password }}{% endif %}"
+    __tmp_type: "{{ autonomy_acmeca_account_key_type }}"
+    __type: "{% if __tmp_type.lower() in ['ed25519','ed448'] %}{{ __tmp_type | capitalize }}{% else %}{{ __tmp_type | upper }}{% endif %}"
+  tags:
+    - acmeca
+    - acmeca-account
+
+- name: "Make sure account exists and has given contacts. We agree to TOS."
+  community.crypto.acme_account:
+    account_key_src: "{{ autonomy_acmeca_account_key_path }}"
+    account_key_passphrase: "{{ __password }}"
+    acme_directory: "{{ autonomy_acmeca_directory_url }}"
+    acme_version: "{{ autonomy_acmeca_version }}"
+    state: present
+    terms_agreed: true
+    contact:
+      - mailto:{{ autonomy_acmeca_account_email }}
+    validate_certs: true
+  become: true
+  delegate_to: localhost
+  run_once: true
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/acmeca/account_password"
+    __password_create: "create=false"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }}"
+    __password: "{% if autonomy_acmeca_account_key_password == 'password' %}{{ lookup('community.general.passwordstore', __password_lookup) }}{% else %}{{ autonomy_acmeca_account_key_password }}{% endif %}"
+  tags:
+    - acmeca
+    - acmeca-account

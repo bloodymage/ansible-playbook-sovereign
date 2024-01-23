@@ -1,0 +1,3 @@
+---
+# defaults file for diagnostics_ping
+autonomy_diagnostics_host_status: Online

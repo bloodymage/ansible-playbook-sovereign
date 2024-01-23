@@ -3,10 +3,10 @@
   hosts: certificate_authorities
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
     - role: bloodymage.autonomy.sshca
+      vars:
+        __sshca_tasks: "sshca"
       tags:
         - sshca

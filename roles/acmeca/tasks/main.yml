@@ -1,0 +1,109 @@
+---
+# tasks file for acmeca_challenge_site
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - acmeca
+    - acmeca-account
+    - acmeca-http
+    - acmeca-dns
+
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_acmeca_packages }}"
+    state: present
+  become: yes
+  tags:
+    - acmeca
+    - acmeca-account
+    - acmeca-certs
+    - acmeca-http
+    - acmeca-dns
+
+- name: "Force account private key regeneration."
+  ansible.builtin.set_fact:
+    __acmeca_regenerate_account_key: yes
+  become: no
+  tags:
+    - never
+    - regenerate-keys
+    - regenerate-acmeca-keys
+    - regenerate-acmeca-account-key
+
+- name: "Force host private key regeneration."
+  ansible.builtin.set_fact:
+    __acmeca_regenerate_host_key: yes
+  become: no
+  tags:
+    - never
+    - regenerate-keys
+    - regenerate-acmeca-keys
+    - regenerate-acmeca-host-key
+
+- name: "Determine whether to use production or staging configuration."
+  ansible.builtin.set_fact:
+    autonomy_acmeca_directory: "{{ __letsencrypt_staging_directory }}"
+    autonomy_acmeca_directory_url: "{{ __letsencrypt_staging_url }}"
+  become: no
+  tags:
+    - never
+    - acmeca-test
+    - acmeca-test-run
+
+# ==================================================================================================
+#
+# Ensure we have the required directories for acmeca.
+#
+# This is designed to closely, but not exactly match the structure used by 'letsencrypt.'
+#
+# /etc/letsencrypt/
+#   |- accounts/
+#   |- archive/
+#   |- csr/
+#   |- keys/
+#   |- live/
+#
+# Variables:
+#  - All variables defined in role/acmeca_host_certs/defaults/main.yml
+#
+# ==================================================================================================
+- name: "Create required directories."
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0700"
+  loop:
+    - "{{ autonomy_acmeca_pki_account_dir }}"
+    - "{{ autonomy_acmeca_pki_csr_dir }}"
+    - "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}"
+  become: true
+  delegate_to: localhost
+  tags:
+    - acmeca
+    - acmeca-account
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Run ACME Account Tasks."
+  include_tasks: "acme_account.yml"
+  when:
+    __acmeca_tasks == "account"
+  tags:
+    - acmeca
+    - acmeca-account
+
+- name: "Create Certificate."
+  include_tasks: "acme_certificate.yml"
+  when:
+    __acmeca_tasks == "certs"
+  tags:
+    - acmeca
+    - acmeca-certs

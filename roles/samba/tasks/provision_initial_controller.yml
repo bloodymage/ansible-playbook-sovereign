@@ -1,11 +1,15 @@
+---
 # ==================================================================================================
 #
 # Provision First Active Directory Domain Controller
 #
 # TODO: This also needs to happen if the realm does not exist
 #
+# any_errors_fatal is set to true, because if the initial domain controller fails, everything else
+# will eventually fail too, so we might as well stop quickly.
+#
 # ==================================================================================================
-- name: "Provision First Active Directory Domain Controller"
+- name: "Provision First Active Directory Domain Controller."
   ansible.builtin.command:
     cmd: >
       samba-tool domain provision
@@ -17,6 +21,7 @@
       --adminpass="{{ samba_administrator_password }}"
   register: samba_ad_created
   become: yes
+  any_errors_fatal: true
   notify:
     - "restart bind"
     - "start samba-ad-dc"
@@ -24,11 +29,22 @@
     - __samba_recreate_realm
     - autonomy_fqdn == __samba_schema_master
 
+- name: "Configure smb.conf file."
+  ansible.builtin.template:
+    src: "smb.conf.j2"
+    dest: "/etc/samba/smb.conf"
+    owner: root
+    group: root
+    mode: 0644
+    validate: "/usr/bin/testparm -s %s"
+  become: yes
+  notify: restart samba
+  when:
+    - __samba_recreate_realm
+    - autonomy_fqdn == __samba_schema_master
+
 - name: "Ensure services are in proper state after package installation."
   ansible.builtin.meta: flush_handlers
-  when:
-    - autonomy_fqdn == __samba_schema_master
-    - __samba_recreate_realm
 
 - name: "Create Reverse Zone."
   ansible.builtin.command:
@@ -91,7 +107,7 @@
     - autonomy_fqdn == __samba_schema_master
 
 - name: "(Tests) KDC get ticket."
-  expect:
+  ansible.builtin.expect:
     command: kinit administrator
     responses:
       (?i)password: "{{ samba_administrator_password }}"

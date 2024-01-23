@@ -12,19 +12,17 @@ galaxy_info:
   platforms:
     - name: Rasbian
       versions:
-        - 10
+        - 12
     - name: Debian
       versions:
-        - 10
+        - 12
     - name: Ubuntu
       versions:
-        - 18.04
-        - 20.04
+        - 22.04
 
   galaxy_tags:
     - bloodymage
     - packages
 
 dependencies:
-  - role: bloodymage.autonomy.config_defaults
-  - role: bloodymage.autonomy.collection_handlers
+  - role: bloodymage.autonomy.collection_globals

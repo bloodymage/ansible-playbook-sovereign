@@ -17,34 +17,10 @@
   tags:
     - nginx
 
-- name: "Install packages"
-  package:
+- name: "Install packages."
+  ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present
   tags:
     - nginx
     - install-packages
-
-- name: "Install Default Sites file"
-  template:
-    src: "nginx-site.j2"
-    dest: "/etc/nginx/sites-available/default"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  notify: restart nginx
-  tags:
-    - nginx
-
-- name: "Install ssl snippets"
-  template:
-    src: "ssl-snippets.conf.j2"
-    dest: "/etc/nginx/snippets/{{ inventory_hostname_short }}.conf"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  notify: restart nginx
-  tags:
-    - nginx

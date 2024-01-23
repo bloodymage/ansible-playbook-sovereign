@@ -1,0 +1,307 @@
+---
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+
+# ==================================================================================================
+#
+# Create cname records
+#
+# ==================================================================================================
+# - name: "Set subject alt name based on role."
+#   ansible.builtin.set_fact:
+#     __cname_records: "{{ __cname_records + __cname }}"
+#   become: no
+#   loop:
+#     - name: "db_servers"
+#       alt_name: "db"
+#     - name: "file_servers"
+#       alt_name: "fs"
+#     - name: "git_servers"
+#       alt_name: "git"
+#     - name: "homeassistant"
+#       alt_name: "home"
+#     - name: "auth_servers"
+#       alt_name: "auth"
+#     - name: "ldap_servers"
+#       alt_name: "ldap"
+#     - name: "mail_servers"
+#       alt_name: "mail"
+#     - name: "dovecot_servers"
+#       alt_name: "imap"
+#     - name: "postfix_servers"
+#       alt_name: "smtp"
+#     - name: "dlna_servers"
+#       alt_name: "dlna"
+#     - name: "mosquitto_servers"
+#       alt_name: "mqtt"
+#     - name: "radius_servers"
+#       alt_name: "radius"
+#     - name: "redis_servers"
+#       alt_name: "redis"
+#     - name: "samba_domain_controllers"
+#       alt_name: "dc"
+#     - name: "web_servers"
+#       alt_name: "www"
+#     - name: "zwavecontrollers"
+#       alt_name: "zwave"
+#     - name: "printers"
+#       alt_name: "printer"
+#   vars:
+#     __group_id: "{{ autonomy_zone_name }}_{{ item.name }}"
+#     __host_index: "{{ groups[__group_id].index(inventory_hostname) + 1 }}"
+#     __padded_index: "{{ '%02d' % __host_index | int }}"
+#     __padded_cname: "{{ item.alt_name }}{{ __padded_index }}"
+#     __cname:
+#       - "{{ __padded_cname }}"
+#       - "{{ item.alt_name }}"
+#   when:
+#     - inventory_hostname not in groups ['public_zone'] | default([])
+#     - inventory_hostname in groups[item.name] | default([])
+#     - item.alt_name != inventory_hostname_short
+
+- name: "NSUPDATE: Remove old CNAME records."
+  community.general.nsupdate:
+    key_name: "{{ autonomy_zone_name }}"
+    key_secret: "{{ __key_secret }}"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    server: "{{ hostvars[item]['ansible_host'] }}"
+    zone: "{{ autonomy_domain }}"
+    record: "{{ inventory_hostname_short }}"
+    type: "CNAME"
+    state: absent
+  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
+  become: true
+  vars:
+    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+  delegate_to: localhost
+  ignore_unreachable: yes
+  when:
+    - not samba_domain
+    - groups[__dns_servers] is defined
+    - autonomy_dns_cname_records is falsy
+
+- name: "NSUPDATE: Add or modify host A records."
+  community.general.nsupdate:
+    key_name: "{{ autonomy_zone_name }}"
+    key_secret: "{{ __key_secret }}"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    server: "{{ hostvars[item]['ansible_host'] }}"
+    zone: "{{ autonomy_domain }}"
+    record: "{{ inventory_hostname_short }}"
+    value: "{{ autonomy_dns_ipv4_addresses | default(ansible_host) }}"
+    type: "A"
+    state: present
+  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
+  become: no
+  vars:
+    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+  delegate_to: localhost
+  ignore_unreachable: yes
+  when:
+    - not samba_domain
+    - groups[__dns_servers] is defined
+
+- name: "NSUPDATE: Add or modify host AAAA records."
+  community.general.nsupdate:
+    key_name: "{{ autonomy_zone_name }}"
+    key_secret: "{{ __key_secret }}"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    server: "{{ hostvars[item]['ansible_host'] }}"
+    zone: "{{ autonomy_domain }}"
+    record: "{{ inventory_hostname_short }}"
+    value: "{{ autonomy_dns_ipv6_addresses | default(autonomy_ipv6_address) }}"
+    type: "AAAA"
+    state: present
+  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
+  become: no
+  vars:
+    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+  delegate_to: localhost
+  ignore_unreachable: yes
+  when:
+    - autonomy_ipv6_address is truthy
+    - not samba_domain
+    - groups[__dns_servers] is defined
+
+- name: "NSUPDATE: Add or modify host PTR records (IPv4)."
+  community.general.nsupdate:
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    key_name: "{{ autonomy_bind_reversezone_keyname | default(autonomy_zone_name) }}"
+    key_secret: "{{ __key_secret }}"
+    port: 53
+    protocol: tcp
+    record: "{{ autonomy_bind_ipv4_ptr_record }}"
+    server: "{{ hostvars[item]['ansible_host'] }}"
+    ttl: 3600
+    type: "PTR"
+    value: "{{ autonomy_fqdn | default(inventory_hostname) }}."
+    zone: "{{ autonomy_dns_ipv4_reverse_zone_formatted }}.in-addr.arpa"
+    state: present
+  loop: "{{ groups[__dns_servers] }}"
+  become: yes
+  remote_user: root
+  vars:
+    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_reversezone_domain | default(autonomy_domain) }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+    __autonomy_dns_ipv4_reverse_zone: "{{ autonomy_bind_ipv4_address.split('.')[0] }}.{{ autonomy_bind_ipv4_address.split('.')[1] }}"
+  delegate_to: "{{ hostvars[item]['ansible_host'] }}"
+  when:
+    - groups[__dns_servers] is defined
+    - not samba_domain
+    - autonomy_zone_type != "public"
+    - autonomy_dns_ipv4_reverse_zone == __autonomy_dns_ipv4_reverse_zone
+
+# - name: "NSUPDATE: Add or modify NS records."
+#   community.general.nsupdate:
+#     key_name: "{{ autonomy_zone_name }}"
+#     key_secret: "{{ __key_secret }}"
+#     key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+#     server: "{{ inventory_hostname }}"
+#     zone: "{{ autonomy_domain }}"
+#     record: "{{ autonomy_domain }}"
+#     value: "{{ hostvars[item]['ansible_host'] }}"
+#     type: "NS"
+#     state: present
+#   loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
+#   become: no
+#   vars:
+#     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/bind_dyndns_secret"
+#     __password_lookup: "{{ __password_store_id }}"
+#     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+#     __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+#   delegate_to: localhost
+#   ignore_unreachable: yes
+#   when:
+#     - not samba_domain
+#     - groups[__dns_servers] is defined
+#     - inventory_hostname in groups[__dns_servers]
+
+# Cleanup old records
+# - name: "NSUPDATE: Remove old A records."
+#   community.general.nsupdate:
+#     key_name: "{{ autonomy_zone_name }}"
+#     key_secret: "{{ __key_secret }}"
+#     key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+#     server: "{{ hostvars[item]['ansible_host'] }}"
+#     zone: "{{ autonomy_domain }}"
+#     record: "{{ inventory_hostname_short }}"
+#     type: "A"
+#     state: absent
+#   loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
+#   become: no
+#   vars:
+#     __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
+#     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
+#     __password_lookup: "{{ __password_store_id }}"
+#     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+#     __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+#   delegate_to: localhost
+#   ignore_unreachable: yes
+#   when:
+#     - autonomy_ipv6_address is falsy
+#     - not samba_domain
+#     - groups[__dns_servers] is defined
+
+- name: "NSUPDATE: Remove old AAAA records."
+  community.general.nsupdate:
+    key_name: "{{ autonomy_zone_name }}"
+    key_secret: "{{ __key_secret }}"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    server: "{{ hostvars[item]['ansible_host'] }}"
+    zone: "{{ autonomy_domain }}"
+    record: "{{ inventory_hostname_short }}"
+    type: "AAAA"
+    state: absent
+  loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
+  become: no
+  vars:
+    __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+  delegate_to: localhost
+  ignore_unreachable: yes
+  when:
+    - autonomy_ipv6_address is falsy
+    - not samba_domain
+    - groups[__dns_servers] is defined
+
+# ==================================================================================================
+#
+# Ideally this would dynamically identify hosts that have dns records, but do not exist in the
+# inventory.
+#
+# I have no idea how to do that.
+#
+# ==================================================================================================
+- name: "NSUPDATE: Remove old A records (Host No Longer Exists)."
+  community.general.nsupdate:
+    key_name: "{{ autonomy_zone_name }}"
+    key_secret: "{{ __key_secret }}"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    server: "{{ inventory_hostname }}"
+    zone: "{{ autonomy_domain }}"
+    record: "{{ item }}"
+    type: "A"
+    state: absent
+  loop: "{{ autonomy_dns_nsupdate_remove_a_records }}"
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/bind_dyndns_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+  delegate_to: localhost
+  ignore_unreachable: yes
+  when:
+    - autonomy_dns_nsupdate_remove_a_records is truthy
+    - not samba_domain
+    - groups[__dns_servers] is defined
+    - inventory_hostname in groups[__dns_servers]
+
+- name: "NSUPDATE: Remove old AAAA records (Host No Longer Exists)."
+  community.general.nsupdate:
+    key_name: "{{ autonomy_zone_name }}"
+    key_secret: "{{ __key_secret }}"
+    key_algorithm: "{{ autonomy_ddns_key_algorithm }}"
+    server: "{{ inventory_hostname }}"
+    zone: "{{ autonomy_domain }}"
+    record: "{{ item }}"
+    type: "AAAA"
+    state: absent
+  loop: "{{ autonomy_dns_nsupdate_remove_aaaa_records }}"
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/bind_dyndns_secret"
+    __password_lookup: "{{ __password_store_id }}"
+    __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
+  delegate_to: localhost
+  ignore_unreachable: yes
+  when:
+    - autonomy_dns_nsupdate_remove_aaaa_records is truthy
+    - not samba_domain
+    - groups[__dns_servers] is defined
+    - inventory_hostname in groups[__dns_servers]

@@ -1,3 +1,4 @@
+---
 # ==================================================================================================
 #
 # This playbook is a small selection of tasks for daily execution.  Ensuring systems are up to date.
@@ -6,41 +7,3 @@
 # NOTE: This should only be run after everything is setup (site.yml)
 #
 # ==================================================================================================
-- hosts: all
-  ignore_unreachable: true
-  roles:
-    - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
-      tags:
-        - always
-        
-- hosts: all:!localhost
-  ignore_unreachable: true
-  roles:
-    - role: bloodymage.autonomy.dns_forwardzones
-      tags:
-        - dns
-
-# TODO: Find out why routeros fails on reverse zones.
-- hosts: all:!localhost:!routeros
-  ignore_unreachable: true
-  roles:
-    - role: bloodymage.autonomy.dns_reversezones
-      tags:
-        - dns
-
-- hosts: all:!localhost:!public_zone:!virtual_hosts
-  roles:
-    - role: bloodymage.autonomy.system_upgrade
-      tags:
-        - system-upgrade
-        - system_upgrade
-
-- hosts: all:!localhost:!public_zone:!routeros:!virtual_hosts
-  roles:
-    - role: bloodymage.autonomy.user_dotfiles
-      tags:
-        - dotfiles
-        - user-dotfiles
-        - user_dotfiles

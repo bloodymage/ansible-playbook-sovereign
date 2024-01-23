@@ -12,3 +12,15 @@
   include_tasks: "{{ ansible_system | lower }}.yml"
   when:
     - ansible_system
+    - inventory_hostname != "localhost"
+    - inventory_hostname not in groups['gpgsync_server'] | default([])
+
+- name: "Include Localhost Tasks"
+  include_tasks: "localhost.yml"
+  when:
+    - inventory_hostname == "localhost"
+
+- name: "Include Webserver tasks"
+  include_tasks: "webserver.yml"
+  when:
+    - inventory_hostname in groups['gpgsync_server'] | default([])

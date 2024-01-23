@@ -1,0 +1,489 @@
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
+- name: "Add intermediate Certificate Authorities."
+  ansible.builtin.set_fact:
+    ownca_certificate_authorities: "{{ ownca_certificate_authorities + [__certificate_authority] }}"
+  loop: "{{ autonomy_zones }}"
+  vars:
+    ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    __certificate_authority:
+      name: "{{ item.name }}"
+      common_name: "{{ autonomy_org_name | title }} {{ item.name | title }} CA"
+      ownca: "root"
+      provider: "ownca"
+      ca_id: "intermediate"
+      zone_name: "{{ item.name }}."
+      keyusage:
+        - keyCertSign
+        - cRLSign
+      keyusage_critical: yes
+      basic_constraints:
+        - 'CA:TRUE'
+      private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key_file }}"
+      org_unit_name: "{{ item.name }}"
+      domain: "{{ item.domain }}"
+  when:
+    - item.type != "public"
+    - item.type != "overlay"
+
+- name: "Add issuing Certificate Authorities."
+  ansible.builtin.set_fact:
+    ownca_certificate_authorities: "{{ ownca_certificate_authorities + [__certificate_authority] }}"
+  loop: "{{ autonomy_zones | product(ownca_issuing_authorities) }}"
+  vars:
+    ownca_issuing_ca_key_file: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}-ca.key"
+    __certificate_authority:
+      name: "{{ item[0].name }}-{{ item[1] }}"
+      common_name: "{{ autonomy_org_name | title }} {{ item[0].name | title }} {{ item[1] | title}} CA"
+      ownca: "intermediate"
+      provider: "ownca"
+      ca_id: "{{ item[1] }}"
+      zone_name: "{{ item[0].name }}."
+      keyusage:
+        - keyCertSign
+        - cRLSign
+      keyusage_critical: yes
+      basic_constraints:
+        - 'CA:TRUE'
+      private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_issuing_ca_key_file }}"
+      org_unit_name: "{{ item[0].name }}"
+      domain: "{{ item[0].domain }}"
+  when:
+    - item[0].type != "public"
+    - item[0].type != "overlay"
+
+# ==================================================================================================
+#
+# Tasks: Create Directories
+#
+#
+#
+# ==================================================================================================
+- name: "Create PKI Directory."
+  ansible.builtin.file:
+    path: '{{ ownca_ca_directory }}/{{ item }}'
+    state: directory
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: '0700'
+  loop:
+    - private
+    - certs
+    - crl
+    - csr
+    - newcerts
+    - db
+  delegate_to: localhost
+  run_once: true
+  become: no
+
+- name: "Create crl serial file."
+  ansible.builtin.template:
+    src: "serial.j2"
+    dest: "{{ ownca_ca_directory }}/db/{{ autonomy_org_name }}-{{ item.name }}-ca.crl.srl"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0600"
+    force: no
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  become: no
+
+# ==================================================================================================
+#
+# Task: Generate CA Private Key
+#
+# ==================================================================================================
+- name: "Generate CA Private Key."
+  community.crypto.openssl_privatekey:
+    path: "{{ item.private_key_path | default(__private_key_path) }}"
+    passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    type: "{{ ownca_privatekey_type }}"
+    size: "{{ ownca_privatekey_size }}"
+    cipher: "auto"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0400"
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_length: "length={{ autonomy_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+
+- name: "Generate Root Certificate Authority Certificate Signing Requests (CSR)."
+  community.crypto.openssl_csr:
+    path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
+    privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    common_name: "{{ item.common_name }}"
+    country_name: "{{ item.country_name | default(omit) }}"
+    email_address: "{{ item.email_address | default(omit) }}"
+    organization_name: "{{ item.organization_name | default(autonomy_org_name | title ) }}"
+    organizational_unit_name: "{{ item.org_unit_name | default(omit) | title }}"
+    state_or_province_name: "{{ item.region_name | default(omit) }}"
+    key_usage: "{{ item.keyusage }}"
+    key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
+    basic_constraints: "{{ item.basic_constraints }}"
+    basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
+    create_subject_key_identifier: yes
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0400"
+    backup: yes
+    state: present
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_lookup: "{{ __password_store_id }}"
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+  when:
+    - item.name == "root"
+
+- name: "Generate Root Certificate Authority Selfsigned Certificate."
+  community.crypto.x509_certificate:
+    path: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    ownca_not_after: "{{ ownca_root_not_after }}"
+    provider: "{{ item.provider }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0644"
+    backup: yes
+    state: present
+    force: "{{ __ownca_regenerate }}"
+    return_content: yes
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/ownca/ownca_root_password"
+    __password_lookup: "{{ __password_store_id }}"
+  notify:
+    - "regenerate certificates"
+  when:
+    - item.provider == "selfsigned"
+  register: __new_root
+
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
+
+- name: "Get Root CA Cert information."
+  community.crypto.x509_certificate_info:
+    path: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-root-ca.crt"
+  register: root_cert_info
+
+- name: "Generate Intermediate Certificate Authority Certificate Signing Requests (CSR)."
+  community.crypto.openssl_csr:
+    path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
+    privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    common_name: "{{ item.common_name }}"
+    country_name: "{{ item.country_name | default(omit) }}"
+    email_address: "{{ item.email_address | default(omit) }}"
+    organization_name: "{{ item.organization_name | default(autonomy_org_name | title ) }}"
+    organizational_unit_name: "{{ item.org_unit_name | default(omit) | title }}"
+    state_or_province_name: "{{ item.region_name | default(omit) }}"
+    key_usage: "{{ item.keyusage }}"
+    key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
+    basic_constraints: "{{ item.basic_constraints }}"
+    basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
+    create_subject_key_identifier: yes
+    authority_cert_issuer: "{{ root_cert_info.subject_alt_name }}"
+    authority_cert_serial_number: "{{ root_cert_info.serial_number }}"
+    authority_key_identifier: "{{ root_cert_info.subject_key_identifier }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    backup: yes
+    state: present
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_lookup: "{{ __password_store_id }}"
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+  when:
+    - item.provider == "ownca"
+    - item.ownca == "root"
+
+- name: "Generate Intermediate CA Signed Certificate."
+  community.crypto.x509_certificate:
+    path: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    csr_path: "{{ ownca_ca_csr_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    ownca_path: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca.crt"
+    ownca_privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca.key"
+    ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    ownca_not_after: "{{ ownca_intermediate_not_after }}"
+    ownca_create_authority_key_identifier: yes
+    ownca_create_subject_key_identifier: create_if_not_provided
+    provider: "{{ item.provider }}"
+    backup: yes
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0644"
+    force: "{{ __ownca_force_regenerate_intermediate_ca }}"
+    state: present
+  loop: "{{ ownca_certificate_authorities }}"
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/ownca/ownca_root_password"
+    __password_lookup: "{{ __password_store_id }}"
+  notify:
+    - "regenerate issuing ca certificates"
+  when:
+    - item.provider == "ownca"
+    - item.ownca == "root"
+
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
+
+- name: "Get Intermediate CA Cert information."
+  community.crypto.x509_certificate_info:
+    path: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+  loop: "{{ ownca_certificate_authorities }}"
+  register: intermediate_cert_info
+  when:
+    - item.provider == "ownca"
+    - item.ownca == "root"
+
+# - name: "Print intermediate cert info"
+#   ansible.builtin.debug:
+#     msg:
+#       - "{{ item[1].item.org_unit_name }}"
+#       - "{{ item[1].serial_number }}"
+#       - "{{ item[1].subject_alt_name }}"
+#       - "{{ item[1].subject_key_identifier }}"
+#       - "{{ item[0].name }}"
+#       - "{{ item[0].common_name }}"
+#       - "{{ item[0].org_unit_name }}"
+#   loop: "{{ ownca_certificate_authorities | product(intermediate_cert_info.results) }}"
+#   when:
+#     - item[1].serial_number is defined
+#     - item[0].org_unit_name is defined
+
+# ==================================================================================================
+#
+# Generate's the Issing CA's CSR.
+#
+# Note:
+# - item[0].org_unit_name check in when clause is added because this loops through all Certificate
+#   Authorities.  The 'Root' CA does not have an organizational unit.  It is the organization.
+#
+# ==================================================================================================
+- name: "Generate Issuing Certificate Authority Certificate Signing Requests (CSR)."
+  community.crypto.openssl_csr:
+    path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item[0].name }}-ca.csr"
+    privatekey_path: "{{ item[0].private_key_path | default(__private_key_path) }}"
+    privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    common_name: "{{ item[0].common_name }}"
+    country_name: "{{ item[0].country_name | default(omit) }}"
+    email_address: "{{ item[0].email_address | default(omit) }}"
+    organization_name: "{{ item[0].organization_name | default(autonomy_org_name | title ) }}"
+    organizational_unit_name: "{{ item[0].org_unit_name | default(omit) | title }}"
+    state_or_province_name: "{{ item[0].region_name | default(omit) }}"
+    key_usage: "{{ item[0].keyusage }}"
+    key_usage_critical: "{{ item[0].keyusage_critical | default('no') }}"
+    basic_constraints: "{{ item[0].basic_constraints }}"
+    basic_constraints_critical: "{{ item[0].basic_constraints_critical | default('no') }}"
+    create_subject_key_identifier: yes
+    authority_cert_issuer: "{{ item[1].subject_alt_name }}"
+    authority_cert_serial_number: "{{ item[1].serial_number }}"
+    authority_key_identifier: "{{ item[1].subject_key_identifier }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item[0].name }}-ca.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    backup: yes
+    state: present
+  loop: "{{ ownca_certificate_authorities | product(intermediate_cert_info.results) }}"
+  delegate_to: localhost
+  run_once: yes
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ item[0].domain }}/ownca/ownca_{{ item[0].ca_id }}_password"
+    __password_lookup: "{{ __password_store_id }}"
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item[0].name }}-ca.key"
+  when:
+    - item[0].provider == "ownca"
+    - item[0].ownca == "intermediate"
+    - item[0].org_unit_name is defined
+    - item[1].item.org_unit_name is defined
+    - item[1].subject_key_identifier is defined
+    - item[1].subject_alt_name is defined
+    - item[1].serial_number is defined
+    - item[0].org_unit_name == item[1].item.org_unit_name
+
+- name: "Generate Issuing CA Signed Certificate."
+  community.crypto.x509_certificate:
+    path: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    csr_path: "{{ ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    ownca_path: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.org_unit_name }}-ca.crt"
+    ownca_privatekey_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.org_unit_name }}-ca.key"
+    ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    provider: "{{ item.provider }}"
+    backup: yes
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    force: "{{ __ownca_force_regenerate_issuing_ca }}"
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_intermediate_password"
+    __password_lookup: "{{ __password_store_id }}"
+  notify:
+    - "regenerate host certificates"
+    - "regenerate user certificates"
+  when:
+    - item.provider == "ownca"
+    - item.ownca == "intermediate"
+
+# ==================================================================================================
+#
+# Create PEM Bundles
+#
+# ==================================================================================================
+- name: "Find root certificate for issuing CA chain."
+  community.crypto.certificate_complete_chain:
+    input_chain: "{{ lookup('file', __input_chain_path) }}"
+    intermediate_certificates:
+      - "{{ __intermediate_cert_path }}"
+    root_certificates:
+      - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
+  vars:
+    __intermediate_cert_file: "{{ autonomy_org_name }}-{{ item.name.split('-')[0] }}-ca.crt"
+    __intermediate_cert_path: "{{ ownca_ca_certs_directory }}/{{ __intermediate_cert_file }}"
+    __input_chain_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    __input_chain_path: "{{ ownca_ca_certs_directory }}/{{ __input_chain_file }}"
+  loop: "{{ ownca_certificate_authorities }}"
+  register: parent_cert_authorities
+  delegate_to: localhost
+  become: no
+  when:
+    - item.ca_id != "root"
+    - item.ca_id != "intermediate"
+ 
+- name: "Find root certificate for intermediate CA chain."
+  community.crypto.certificate_complete_chain:
+    input_chain: "{{ lookup('file', __input_chain_path) }}"
+    root_certificates:
+      - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
+  vars:
+    __input_chain_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    __input_chain_path: "{{ ownca_ca_certs_directory }}/{{ __input_chain_file }}"
+  loop: "{{ ownca_certificate_authorities }}"
+  register: root_cert_authorities
+  delegate_to: localhost
+  become: no
+  when:
+    - item.ca_id == "intermediate"
+
+- name: "Write complete chain to disk."
+  ansible.builtin.copy:
+    dest: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.item.name }}-ca-chain.crt"
+    content: "{{ ''.join(item.complete_chain) }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0644"
+  loop: "{{ parent_cert_authorities.results }}"
+  delegate_to: localhost
+  become: no
+  when:
+    - item.complete_chain is defined
+ 
+- name: "Write root chain (intermediates and root) to disk."
+  ansible.builtin.copy:
+    dest: "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.item.name }}-ca-chain.crt"
+    content: "{{ ''.join(item.complete_chain) }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0644"
+  loop: "{{ root_cert_authorities.results }}"
+  delegate_to: localhost
+  become: no
+  when:
+    - item.complete_chain is defined
+ 
+# ==================================================================================================
+#
+# Convert these certificate from PEM to DER format.
+#
+# This is done because Windows frequently needs DER format.
+#
+# Currently split into two tasks.  The 'root' ca does not have a chain file.  Need a way to make
+# this idempotent.
+#
+# ==================================================================================================
+- name: "Convert CA Certificates to DER format."
+  ansible.builtin.command:
+    cmd: >
+      openssl x509
+      -in {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crt -inform PEM
+      -out {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.der -outform DER
+    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca.der"
+  become: no
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Convert CA Certificates to DER format."
+  ansible.builtin.command:
+    cmd: >
+      openssl x509
+      -in {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt -inform PEM
+      -out {{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der -outform DER
+    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
+  become: no
+  loop: "{{ ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - item.name != "root"

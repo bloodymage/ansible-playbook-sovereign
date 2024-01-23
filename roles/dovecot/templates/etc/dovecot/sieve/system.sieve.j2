@@ -1,6 +1,7 @@
 # {{ ansible_managed }}
 
 require ["variables", "envelope", "fileinto", "subaddress", "mailbox","regex"];
+global ["level1", "level2", "level3", "level4", "level5", "level6", "level7"];
 
 # ==================================================================================================
 #
@@ -12,7 +13,6 @@ if anyof (
           address :contains "from" "postmaster@"
           )
 {
-  fileinto :create "{{ __main_folder }}/Mailer Daemon";
-  stop;
+  set "level3" "Mailer Daemon"
 }
 

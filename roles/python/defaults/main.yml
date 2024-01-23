@@ -1,6 +1,6 @@
 ---
 # defaults file for python
-autonomy_packages:
+autonomy_python_packages:
   - python3
   - python3-pip
   - python3-setuptools

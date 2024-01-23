@@ -1,7 +1,7 @@
 ---
 - name: "Install packages"
   ansible.builtin.package:
-    name: "{{ autonomy_packages }}"
+    name: "{{ autonomy_emacs_packages }}"
     state: present
   become: yes
 
@@ -18,7 +18,7 @@
 - name: "Enable service emacs and ensure it is not masked."
   ansible.builtin.systemd:
     name: emacs
-    enabled: yes
+    enabled: no
     masked: no
     scope: global
   become: yes
@@ -36,6 +36,3 @@
     group: root
     mode: "0644"
   become: yes
-  tags:
-    - global-packages
-    - global-packages

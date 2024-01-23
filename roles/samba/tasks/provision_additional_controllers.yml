@@ -13,7 +13,7 @@
   register: samba_ad_created
   become: yes
   notify:
-    - "Update krb5"
+    #- "Update krb5"
     - "start samba-ad-dc"
   when:
     - not __samba_joined_as_domain_controller
@@ -99,6 +99,3 @@
 
 - name: "Ensure services are in proper state after package installation."
   ansible.builtin.meta: flush_handlers
-  when:
-    - autonomy_fqdn != __samba_schema_master
-    - __samba_recreate_realm

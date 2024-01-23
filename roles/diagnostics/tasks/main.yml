@@ -1,0 +1,22 @@
+---
+# tasks file for diagnostics
+- name: "Check connectivity."
+  include_tasks: "ping.yml"
+  tags:
+    - connectivity
+
+- name: "Get host facts."
+  include_tasks: "host_facts.yml"
+  tags:
+    - host-domain
+    - host-facts
+    - host-info
+    - host-ipv4
+    - host-ipv6
+    - host-packages
+    - host-system
+
+- name: "Display host groups."
+  include_tasks: "host_groups.yml"
+  tags:
+    - host-groups

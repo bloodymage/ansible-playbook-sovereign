@@ -48,38 +48,38 @@
 # Is it possible to use the ldap_attrs to update a 'binary' definition?  How would that work?
 #
 # ==================================================================================================
-- name: "Delete old cert"
-  community.general.ldap_attrs:
-    dn: "CN={{ __dn }},{{ autonomy_user_dn }}"
-    attributes:
-      userCertificate: []
-    state: exact
-    bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
-    bind_pw: "{{ __samba_administrator_password }}"
-    start_tls: yes
-    server_uri: "ldap://{{ autonomy_fqdn }}"
-  loop: "{{ __realm_users }}"
-  vars:
-    __dn: "{{ item.username }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
-    __password_lookup: "{{ __password_store_id }}"
-    __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  when:
-    - item.id_number is defined
+# - name: "Delete old cert"
+#   community.general.ldap_attrs:
+#     dn: "CN={{ __dn }},{{ autonomy_user_dn }}"
+#     attributes:
+#       userCertificate: []
+#     state: exact
+#     bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
+#     bind_pw: "{{ __samba_administrator_password }}"
+#     start_tls: yes
+#     server_uri: "ldap://{{ autonomy_fqdn }}"
+#   loop: "{{ __realm_users }}"
+#   vars:
+#     __dn: "{{ item.username }}"
+#     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/administrator/password"
+#     __password_lookup: "{{ __password_store_id }}"
+#     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+#   when:
+#     - item.id_number is defined
 
-- name: "Install user certificates into ldap attributes."
-  ansible.builtin.command:
-    cmd: >
-      ldbmodify
-      -H /var/lib/samba/private/sam.ldb
-      "/tmp/{{ item[0].username }}_{{ item[1].name }}.ldif"
-      --option='dsdb:schema update allowed'=true
-  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
-  become: yes
-  ignore_errors: yes
-  when:
-    - item[0].id_number is defined
-    - item[1].name == "authentication"
+# - name: "Install user certificates into ldap attributes."
+#   ansible.builtin.command:
+#     cmd: >
+#       ldbmodify
+#       -H /var/lib/samba/private/sam.ldb
+#       "/tmp/{{ item[0].username }}_{{ item[1].name }}.ldif"
+#       --option='dsdb:schema update allowed'=true
+#   loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
+#   become: yes
+#   ignore_errors: yes
+#   when:
+#     - item[0].id_number is defined
+#     - item[1].name == "authentication"
 
 # ==================================================================================================
 #
@@ -102,7 +102,7 @@
 #   vars:
 #     __dn: "{{ item.usernam }}"
 #     __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"  
-#     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
+#     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/administrator/password"
 #     __password_lookup: "{{ __password_store_id }}"
 #     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
 #   when:

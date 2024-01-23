@@ -1,42 +1,40 @@
 ---
 # tasks file for mail-server
-- name: "Prepare Host"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
-      tags:
-        - postfix
-        - postfix_debug
-        - postfix-debug
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: false
+  tags:
+    - install-packages
 
-    - name: "Check if we need ldap related packages."
-      ansible.builtin.set_fact:
-        autonomy_packages: "{{ autonomy_packages }} + ['postfix-ldap']"
-      when:
-        - autonomy_realm_identity_management_system is truthy
+- name: "Check if we need ldap related packages."
+  ansible.builtin.set_fact:
+    autonomy_postfix_packages: "{{ autonomy_postfix_packages + ['postfix-ldap'] }}"
+  when:
+    - autonomy_realm_identity_management_system is truthy
+    - autonomy_zone_type == "internal"
+  tags:
+    - install-packages
 
-    - name: "Check if we need mysql related packages."
-      ansible.builtin.set_fact:
-        autonomy_packages: "{{ autonomy_packages }} + ['postfix-mysql']"
-      when:
-        - postfix_use_mysql_backend
+- name: "Check if we need mysql related packages."
+  ansible.builtin.set_fact:
+    autonomy_postfix_packages: "{{ autonomy_postfix_packages + ['postfix-mysql'] }}"
+  when:
+    - postfix_use_mysql_backend
+  tags:
+    - install-packages
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-      tags:
-        - postfix
-        - postfix_debug
-        - postfix-debug
-        - install-packages
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_postfix_packages }}"
+    state: present
+  become: true
+  tags:
+    - install-packages
 
 - name: "Check if we are using Active Directory."
   ansible.builtin.set_fact:
@@ -76,9 +74,10 @@
         result_attribute: "userPrincipalName"
         leaf_result_attribute: "mail"
         scope: "sub"
-  become: no
+  become: false
   when:
-    - autonomy_realm_identity_management_system == "samba"
+    - autonomy_realm_identity_management_system is truthy
+    - autonomy_zone_type == "internal"
 
 - name: "Check if we are using dovecot."
   ansible.builtin.set_fact:
@@ -87,7 +86,7 @@
     postfix_smtpd_sasl_path: "private/auth"
     postfix_smtpd_sasl_type: "dovecot"
     postfix_virtual_transport: "dovecot"
-  become: no
+  become: false
   when:
     - inventory_hostname in groups['dovecot_servers']
 
@@ -102,18 +101,14 @@
     __mail_user: "{{ mail_user }}"
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
     __password_lookup: "{{ __password_store_id }}"
   no_log: yes
-  become: no
+  become: false
   delegate_to: localhost
   register: domain_user_list
   when:
-    - autonomy_realm_identity_management_system == "samba"
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
+    - autonomy_realm_identity_management_system is truthy
 
 # ==================================================================================================
 #
@@ -124,6 +119,20 @@
 # change if this is set.
 #
 # ==================================================================================================
+- name: "Get default relay users password."
+  ansible.builtin.set_fact:
+    postfix_sasl_auth_user_password: "{{ __password }}"
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ postfix_sasl_auth_user }}"
+    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  when:
+    - postfix_sender_relay is truthy
+
 - name: "Get relay users password."
   ansible.builtin.set_fact:
     __postfix_sasl_auth_users_list: "{{ __postfix_sasl_auth_users_list + __user }}"
@@ -140,7 +149,7 @@
       - origin: "{{ item.origin }}"
         destination: "{{ item.destination }}"
         password: "{{ item.password | default(__password) }}"
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ item.destination }}"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -153,75 +162,18 @@
 - name: "Identify relay domains."
   ansible.builtin.set_fact:
     __postfix_relay_domains: "{{ __postfix_relay_domains + [item.domain] }}"
-  become: no
+  become: false
   loop: "{{ autonomy_zones }}"
   when:
     - autonomy_zone_type == "dmz"
     - item.type == "public"
-
-- name: "Install configuration files"
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "/etc/postfix/{{ item }}"
-    owner: root
-    group: root
-    mode: "0644"
-    #validate: "/usr/sbin/postfix check"
-  become: yes
-  loop:
-    - dynamicmaps.cf
-    - main.cf
-    - makedefs.out
-    - master.cf
-  notify: restart postfix
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
-
-- name: "Install ldap user and group map files"
-  ansible.builtin.template:
-    src: "ldap_maps.j2"
-    dest: "/etc/postfix/{{ item.name }}.cf"
-    owner: root
-    group: root
-    mode: "0644"
-  loop: "{{ postfix_ldap_maps }}"
-  become: yes
-  when:
-    - inventory_hostname in groups['samba_domain']
-    - __mail_user_password is defined
-    - postfix_ldap_maps is defined
-  notify: restart postfix
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
-
-- name: "Install Configuration files (postmap update required)"
-  ansible.builtin.template:
-    src: "{{ item }}.j2"
-    dest: "/etc/postfix/{{ item }}"
-    owner: root
-    group: root
-    mode: "0644"
-  become: yes
-  loop:
-    - client_access
-    - helo_access
-    - transport
-  notify: map {{ item }}
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
 
 - name: "Identify virtual domains."
   ansible.builtin.set_fact:
     __postfix_virtual_mailbox_domain_maps:
       - name: "{{ autonomy_domain }}"
         status: "OK"
-  become: no
+  become: false
   when:
     - autonomy_zone_type == "dmz"
     - inventory_hostname not in groups['dovecot_servers']
@@ -229,7 +181,7 @@
 - name: "Identify virtual domains."
   ansible.builtin.set_fact:
     __postfix_virtual_mailbox_domain_maps: "{{ __postfix_virtual_mailbox_domain_maps + [__domain] }}"
-  become: no
+  become: false
   vars:
     __domain:
       name: "{{ item.domain }}"
@@ -239,61 +191,87 @@
     - (item.type == "internal" or item.type == "public")
     - inventory_hostname in groups['dovecot_servers']
 
-- name: "Install virtual mailboxes' configuration files (postmap update required)"
+# ==================================================================================================
+#
+# Now that we have identified all conditional settings ,we start creating directories and files.
+#
+# ==================================================================================================
+- name: "Ensure log directory exists."
+  ansible.builtin.file:
+    path: "/var/log/postfix"
+    owner: root
+    group: root
+    mode: "0755"
+    state: directory
+  become: true
+
+- name: "Install configuration files."
   ansible.builtin.template:
-    src: "virtual.j2"
+    src: "etc/postfix/{{ item }}.j2"
+    dest: "/etc/postfix/{{ item }}"
+    owner: root
+    group: root
+    mode: "0644"
+    #validate: "/usr/sbin/postfix check"
+  become: true
+  loop:
+    - dynamicmaps.cf
+    - main.cf
+    - makedefs.out
+    - master.cf
+  notify:
+    - "restart postfix"
+
+- name: "Install ldap user and group map files."
+  ansible.builtin.template:
+    src: "etc/postfix/ldap_maps.j2"
+    dest: "/etc/postfix/{{ item.name }}.cf"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ postfix_ldap_maps }}"
+  become: true
+  notify:
+    - "restart postfix"
+  when:
+    - __mail_user_password is defined
+    - postfix_ldap_maps is defined
+
+- name: "Install Configuration files (postmap update required)."
+  ansible.builtin.template:
+    src: "etc/postfix/{{ item.filename }}.j2"
+    dest: "/etc/postfix/{{ item.filename }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode }}"
+  become: true
+  loop: "{{ autonomy_postfix_config_map_files }}"
+  notify:
+    - "map {{ item.filename }}"
+  when:
+    - item.install
+
+- name: "Install virtual mailboxes' configuration files (postmap update required)."
+  ansible.builtin.template:
+    src: "etc/postfix/virtual.j2"
     dest: "/etc/postfix/{{ item.type }}"
     owner: root
     group: root
     mode: "0644"
-  become: yes
+  become: true
   loop: "{{ __postfix_virtual_mailboxes }}"
-  notify: map {{ item.type }}
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
-
-- name: "Get default relay users password."
-  ansible.builtin.set_fact:
-    postfix_sasl_auth_user_password: "{{ __password }}"
-  vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ postfix_sender_relay }}/{{ postfix_sasl_auth_user }}"
-    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  when:
-    - postfix_sender_relay is truthy
-
-- name: "Install Configuration files (postmap update required)"
-  ansible.builtin.template:
-    src: "{{ item.filename }}.j2"
-    dest: "/etc/postfix/{{ item.filename }}"
-    owner: root
-    group: root
-    mode: "{{ item.mode  }}"
-  become: yes
-  loop: "{{ postfix_sasl_relay_files }}"
-  notify: map {{ item.filename }}
-  when:
-    - __postfix_sasl_auth_users_list is defined
-    - postfix_sender_relay is truthy
-  tags:
-    - postfix
-    - postfix_debug
-    - postfix-debug
+  notify:
+    - "map {{ item.type }}"
 
 - name: "Install SMTP Header Checks."
   ansible.builtin.template:
-    src: "smtp_header_checks.j2"
+    src: "etc/postfix/smtp_header_checks.j2"
     dest: "/etc/postfix/smtp_header_checks"
     owner: root
     group: root
     mode: "0644"
-  become: yes
-  notify: restart postfix
+  become: true
+  notify:
+    - "restart postfix"
   when:
     - postfix_smtp_header_checks != __postfix_smtp_header_checks

@@ -9,6 +9,7 @@
 // If you are just adding zones, please do that in /etc/bind/named.conf.local
 
 include "{{ bind_options_file }}";
+include "{{ autonomy_bind_logging_file }}";
 include "{{ bind_local_file }}";
 include "{{ bind_default_zone_file }}";
 {% if groups['samba_domain_controllers'] is defined %}

@@ -1,12 +1,68 @@
 ---
 # tasks file for ntp
-- name: Set timezone
-  community.general.timezone:
-    name: "America/New_York"
-  become: yes
-  notify: restart ntp
+# ======================================================================
+#
+# Tasks:
+#  
+#
+# ======================================================================
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
   tags:
-    - ntp
-    - ntp_debug
-    - ntp-debug
+    - install-packages
 
+- name: "Remove conflicting packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_ntp_conflicts }}"
+    state: absent
+  become: yes
+  tags:
+    - install-packages
+
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_ntp_packages }}"
+    state: present
+  become: yes
+  tags:
+    - install-packages
+
+- name: "Ensure we have proper permissions set for samba socket directory."
+  ansible.builtin.file:
+    name: "{{ autonomy_ntp_samba_socket_directory }}"
+    state: directory
+    owner: root
+    group: "{{ autonomy_ntp_group }}"
+    mode: "0750"
+  become: yes
+  when:
+    - inventory_hostname in groups['samba_domain_controllers']
+
+- name: "Ensure we have the proper directory for statistics."
+  ansible.builtin.file:
+    name: "{{ atuonomy_ntp_statistics_dir }}"
+    state: directory
+    owner: "{{ autonomy_ntp_user }}"
+    group: "{{ autonomy_ntp_group }}"
+    mode: "0750"
+  become: yes
+  when:
+    - autonomy_ntp_enable_statistics
+
+- name: "Install Configuration files."
+  ansible.builtin.template:
+    src: "{{ item.name }}.j2"
+    dest: "/{{ item.name }}"
+    owner: root
+    group: root
+    mode: "{{ item.mode | default('0644') }}"
+    backup: yes
+  become: yes
+  loop: "{{ autonomy_ntp_config_files }}"
+  notify: restart ntp

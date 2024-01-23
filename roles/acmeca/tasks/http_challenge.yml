@@ -1,0 +1,47 @@
+---
+- name: "Create acmeca challenge host."
+  ansible.builtin.template:
+    src: "etc/apache/sites-available/apache-site.conf.j2"
+    dest: "/etc/apache2/sites-available/{{ item.name }}.conf"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop: "{{ autonomy_virtual_hosts }}"
+  when:
+    - autonomy_virtual_hosts is defined
+    - item.certificate == "acme"
+    - item.content is not defined
+    - inventory_hostname in groups['apache_servers']
+  tags:
+  tags:
+    - acmeca
+    - acmeca-challenge-site
+
+- name: "Create .well-known/acme-challenge directory"
+  ansible.builtin.file:
+    path: /srv/www/{{ item.name }}/.well-known/acme-challenge
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+  loop: "{{ virtual_hosts }}"
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.certificate == "acme"
+
+- name: "Implement http-01 challenge files"
+  ansible.builtin.copy:
+    content: "{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource_value'] }}"
+    dest: "/srv/www/{{ item.name }}/{{ acme_challenge['results'][my_index]['challenge_data'][item.name]['http-01']['resource'] }}"
+    owner: www-data
+    group: www-data
+    mode: "0644"
+  loop: "{{ virtual_hosts }}"
+  loop_control:
+    index_var: my_index
+  become: yes
+  when:
+    - virtual_hosts is defined
+    - item.certificate == "acme"
+    - acme_challenge['results'][my_index]['challenge_data'][item.name] is defined

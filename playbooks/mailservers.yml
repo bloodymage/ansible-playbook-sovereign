@@ -1,23 +1,34 @@
 ---
-- hosts: all:!wifi_access_points:!routers:!switches
+- name: "Configure Environment"
+  hosts: all:!wifi_access_points:!routers:!switches:!printers
   roles:
     - role: bloodymage.autonomy.config_environment
-      when:
-        - (not __autonomy_configuration_complete) or (__autonomy_configuration_complete is undefined)
       tags:
         - always
 
-- hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts
+- name: "Aliases"
+  hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts
   roles:
     - role: bloodymage.autonomy.etc_aliases
       tags:
         - aliases
 
-- hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts:!mail_servers
+- name: "Exim Hosts"
+  hosts: linux:!localhost:!routeros:!wifi_access_points:!printers:!public_zone:!virtual_hosts:!mail_servers
   roles:
     - role: bloodymage.autonomy.exim
       tags:
         - exim
+
+- name: "Configure ACME CA."
+  hosts: mail_servers:&public_zone
+  roles:
+    - role: bloodymage.autonomy.acmeca
+      vars:
+        __acmeca_tasks: "account"
+    - role: bloodymage.autonomy.acmeca
+      vars:
+        __acmeca_tasks: "certs"
 
 - name: "Configure mailservers."
   hosts: mail_servers:!public_zone
@@ -29,21 +40,21 @@
     #  tags:
     #    - clamav
 
-- name: "Configure mailservers."
+- name: "Configure OpenDKIM Servers."
   hosts: opendkim_servers
   roles:
     - role: bloodymage.autonomy.opendkim
       tags:
         - opendkim
 
-- name: "Configure mailservers."
-  hosts: imap_servers:!public_zone
+- name: "Configure Dovecot Servers."
+  hosts: dovecot_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.dovecot
       tags:
         - dovecot
 
-- name: "Configure mailservers."
+- name: "Configure Postfix Servers."
   hosts: postfix_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.postfix

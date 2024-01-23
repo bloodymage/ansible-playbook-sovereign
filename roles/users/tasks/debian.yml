@@ -3,11 +3,7 @@
   ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present
-  tags:
-    - users
-    - users_debug
-    - users-debug
-    - install-packages
+  become: true
 
 # ==================================================================================================
 #
@@ -16,7 +12,7 @@
 # ==================================================================================================
 - name: "Ensure we have user groups required by host role."
   ansible.builtin.set_fact:
-    user_groups: "{{ user_groups + [ item.group ] }}"
+    __user_groups: "{{ __user_groups + autonomy_user_groups + [ item.group ] }}"
   loop:
     - name: "mythtv"
       group: "{{ user_mythtv_group }}"
@@ -35,14 +31,10 @@
   when:
     - inventory_hostname in groups [item.name] | default([])
   become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 - name: "Ensure we have users required by host role."
   ansible.builtin.set_fact:
-    users: "{{ users + [ item.user ] }}"
+    __users: "{{ __users + [ item.user ] }}"
   loop:
     - name: "mythtv"
       user: "{{ user_mythtv }}"
@@ -61,10 +53,6 @@
   when:
     - inventory_hostname in groups[item.name] | default([])
   become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 - name: "Create groups."
   ansible.builtin.group:
@@ -72,12 +60,8 @@
     state: present
     system: "{{ item.system | default('no') }}"
     gid: "{{ item.gid | default(omit) }}"
-  loop: "{{ user_groups + __user_groups }}"
+  loop: "{{ __user_groups }}"
   become: yes
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 # ==================================================================================================
 #
@@ -93,7 +77,7 @@
   ansible.builtin.user:
     name: "{{ item['username'] }}"
     password: "{{ __password_hash }}"
-    groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"
+    groups: "{{ item['groups'] + [autonomy_user_group_ansible_managed] | default([autonomy_user_group_ansible_managed]) }}"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
     system: no                         # Defaults to no
@@ -103,52 +87,45 @@
     uid:  "{{ item['id_number'] | default(omit) }}"
     update_password: always
     move_home: yes
-  loop: "{{ users }}"
+  loop: "{{ __users }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password_hash: "{{ __password | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string ) }}" 
+    __password_hash: "{{ __password | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string ) }}"
   loop_control:
     index_var: index
   become: yes
   when:
-    - users is defined
+    - __users is defined
     - item.id_number is defined
-    - (item.id_number == 1000) or (item.id_number == 1001)
-  tags:
-    - users
-    - users_debug
-    - users-debug
+    - item.id_number >= autonomy_user_password_min_id
+    - item.id_number <= autonomy_user_password_max_id
 
 - name: "Create login users (Password Disabled)."
   ansible.builtin.user:
-    name: "{{ item.username }}"
-    groups: "{{ item['groups'] + [user_group_ansible_managed] | default([user_group_ansible_managed]) }}"
+    name: "{{ item['username'] }}"
+    groups: "{{ item['groups'] + [autonomy_user_group_ansible_managed] | default([autonomy_user_group_ansible_managed]) }}"
     state: present
-    shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
-    system: "{{ item['system'] | default('no') }}"          # Defaults to no
-    create_home: yes                                     # Defaults to yes
+    shell: "{{ item['shell'] | default('/bin/bash') }}"
+    system: "{{ item['system'] | default('no') }}"
+    create_home: true
     comment: "{{ item['name'] | default(none) }}"
     home: "{{ item['unix_home'] | default('/nonexistent') }}"
     move_home: yes
     uid:  "{{ item['id_number'] | default(omit) }}"
-  loop: "{{ users }}"
+  loop: "{{ __users }}"
   loop_control:
     index_var: index
   become: yes
   when:
-    - users is defined
+    - __users is defined
     - user_password_list.results[index].ansible_facts.password is not defined
-    - item.username != "root"
-  tags:
-    - users
-    - users_debug
-    - users-debug
+    - item.create_user is not defined or item.create_user is true
 
 # ==================================================================================================
 #
@@ -161,12 +138,12 @@
     generate_ssh_key: yes
     ssh_key_type: "{{ item['ssh_keytype'] | default('ed25519') }}"
     ssh_key_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  loop: "{{ users }}"
+  loop: "{{ __users }}"
   loop_control:
     index_var: index
   become: yes
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item['username'] }}/ssh_key_password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item['username'] }}/ssh_key_password"
     __password_length: "length={{ item['password_legnth'] | default(autonomy_password_length) }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -175,10 +152,6 @@
   when:
     - item.ssh_cert is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 - name: "Ensure auth_principals directory exists."
   ansible.builtin.file:
@@ -191,19 +164,15 @@
 
 - name: "Create SSH Principals file for users."
   ansible.builtin.template:
-    src: "ssh_principals.j2"
+    src: "etc/ssh/auth_principals/ssh_principals.j2"
     dest: "/etc/ssh/auth_principals/{{ item['username'] }}"
     owner: root
     group: root
     mode: '0644'
-  loop: "{{ users }}"
+  loop: "{{ __users }}"
   become: yes
   when:
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 # ==================================================================================================
 #
@@ -214,21 +183,17 @@
 # ==================================================================================================
 - name: "Setup Sudoers file for users"
   ansible.builtin.template:
-    src: "user_sudoers.j2"
+    src: "etc/sudoers.d/user_sudoers.j2"
     dest: "/etc/sudoers.d/user_{{ item['username'] }}"
     owner: "root"
     group: "root"
     mode: "0440"
     validate: /usr/sbin/visudo -csf %s
-  loop: "{{ users }}"
+  loop: "{{ __users }}"
   become: yes
   when:
     - item.sudoers is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 # - name: "Setup Sudoers file for applications"
 #   ansible.builtin.template:
@@ -256,31 +221,23 @@
   ansible.builtin.shell:
     cmd: >-
       set -o pipefail &&
-      grep {{ user_group_ansible_managed }} /etc/group |
+      grep {{ autonomy_user_group_ansible_managed }} /etc/group |
       cut -d: -f4 |
       tr "," "\n"
     executable: "/bin/bash"
   changed_when: false
   register: existing_users
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 - name: "Get inventory defined users into a list."
   ansible.builtin.set_fact:
     __username_list: "{{ __username_list + [ item.username ] }}"
-  loop: "{{ users }}"
+  loop: "{{ __users }}"
 
 # This currently fails because it needs a straight list of users.  Currently "users" list each item
 # is a dictionary.  Containing user configuration options
 - name: "Identify user accounts to be removed."
   ansible.builtin.set_fact:
     __removed_users: "{{ existing_users.stdout_lines | difference(__username_list) }}"
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 - name: "Delete user accounts to be removed."
   ansible.builtin.user:
@@ -288,10 +245,6 @@
     state: absent
   loop: "{{ __removed_users }}"
   become: yes
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 - name: "Remove sudoers for accounts that no longer exist."
   ansible.builtin.file:
@@ -299,10 +252,6 @@
     state: absent
   loop: "{{ __removed_users }}"
   become: yes
-  tags:
-    - users
-    - users_debug
-    - users-debug
 
 # ==================================================================================================
 #
@@ -319,10 +268,31 @@
 #     - users_debug
 #     - users-debug
 
-# - name: Add users' SSH keys to Github.
-#   authorized_key:
-#     user: "{{ item }}"
-#     exclusive: yes
-#     key: https://github.com/{{ item }}.keys
-#     state: present
-#   with_items: "{{ developers }}"
+# ==================================================================================================
+#
+# This fails miserably.  Disabled for now.
+#
+# The goal for this, is to allow users to declare a variable 'autonomy_github_users' which is a list
+# of usernames that are authorized to access github.  If that variable is defined, then those users
+# will have their ssh public key copied to github.
+#
+# ==================================================================================================
+- name: "Authorize key with GitHub."
+  community.general.github_key:
+    name: "{{ __realm_username }}"
+    pubkey: "{{ lookup('file', __ssh_pubkey) }}"
+    token: '{{ autonomy_github_oauth_token }}'
+    state: present
+    force: true
+  loop: "{{ __realm_users }}"
+  delegate_to: localhost
+  become: false
+  vars:
+    __realm_username: "{{ item.username | lower }}@{{ autonomy_domain }}"
+    __host_username: "{{ item.username | lower }}@{{ inventory_hostname }}"
+    __ssh_pubkey: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
+  when:
+    - autonomy_github_users is truthy
+    - autonomy_github_oauth_token is truthy
+    - item.id_number is defined
+    - item.username in autonomy_github_users

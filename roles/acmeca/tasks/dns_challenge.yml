@@ -1,0 +1,49 @@
+---
+- name: "Creating dns-01 challenge DNS entries."
+  community.general.cloudflare_dns:
+    api_token: "{{ __cloudflare_key }}"
+    zone: "{{ autonomy_domain }}"
+    record: "{{ item.key }}"
+    type: TXT
+    value: "{{ item.value[0] }}"
+    solo: true
+    state: "present"
+    ttl: 60
+  with_dict:  "{{ acme_challenge['challenge_data_dns'] }}"
+  become: false
+  vars:
+    __password_lookup: "{{ autonomy_passdb }}/{{ autonomy_domain }}/external/cloudflare/dns"
+    __cloudflare_key: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+  notify:
+    - "backup certs"
+  tags:
+    - acmeca
+    - acmeca-dns
+
+# ==================================================================================================
+#
+# FIXME: This always fails, I have no idea why.
+#
+# ==================================================================================================
+# - name: "Wait for dns records."
+#   community.dns.wait_for_txt:
+#     records:
+#       - name: "{{ acme_challenge['challenge_data'][inventory_hostname]['dns-01'].record }}"
+#         values: "{{ acme_challenge['challenge_data'][inventory_hostname]['dns-01'].resource_value }}"
+#         mode: "equals"
+#     timeout: 120
+#   become: false
+#   delegate_to: localhost
+#   run_once: true
+#   tags:
+#     - acmeca
+#     - acmeca-dns
+
+- name: "Wait for dns records."
+  ansible.builtin.wait_for:
+    timeout: 120
+  delegate_to: localhost
+  become: false
+  tags:
+    - acmeca
+    - acmeca-dns

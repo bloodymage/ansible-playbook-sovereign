@@ -1,7 +1,7 @@
-Role Name
+GnuPG
 =========
 
-A brief description of the role goes here.
+Installs and configures global settings for GnuPG
 
 Requirements
 ------------
@@ -11,7 +11,19 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+Two servers are known to allow deleting gpg keys.
+```
+autonomy_gnupg_keyservers:
+  - name: "hkps://keys.openpgp.org"
+    options: []
+  - name: "hkps://keys.mailvelope.com"
+    options: []
+```
+
+Other servers include:
+- hkp://keys.gnupg.net
+- hkp://keyserver.ubuntu.com
+- hkp://keyserver.debian.org
 
 Dependencies
 ------------

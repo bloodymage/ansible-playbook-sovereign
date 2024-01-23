@@ -1,0 +1,54 @@
+---
+# defaults file for dns_forwardzones
+autonomy_maintenance_dns_packages:
+  - python3-dnspython
+
+system_upgrade_deb_src: false
+system_upgrade_distribution_release: "{{ ansible_distribution_release }}"
+system_upgrade_raspberrypi_distribution_release: "{{ ansible_distribution_release }}"
+
+autonomy_bind_ipv4_address: "{{ ansible_host }}"
+autonomy_bind_ipv4_ptr_record: "{{ autonomy_bind_ipv4_address.split('.')[3] }}.{{ autonomy_bind_ipv4_address.split('.')[2] }}.{{ autonomy_bind_ipv4_address.split('.')[1] }}.{{ autonomy_bind_ipv4_address.split('.')[0] }}.in-addr.arpa."
+
+
+# ==================================================================================================
+#
+# DNS Settings
+#
+# ==================================================================================================
+# Options are: "cloudflare", ...
+autonomy_dns_protocol: ""
+autonomy_dns_cname_records: []
+autonomy_dns_mx_record_priority: 1
+autonomy_domain_level_records: []
+
+autonomy_dns_public_host: "{{ inventory_hostname_short }}"
+
+autonomy_dns_spf_mail_servers: "mx"
+autonomy_dns_spf_record_includes: ""
+autonomy_dns_spf_record_fail: "-all"
+
+autonomy_dns_dmarc_policy: "reject"
+autonomy_dns_dmarc_percent: 100
+autonomy_dns_dmarc_local_email: "postmaster@{{ autonomy_root_domain }}"
+
+# 's' for strict, 'r' for relaxed
+autonomy_dns_dmarc_aspf: "s"
+autonomy_dns_dmarc_adkim: "s"
+
+autonomy_dns_nsupdate_remove_a_records: []
+autonomy_dns_nsupdate_remove_aaaa_records: []
+
+# Cloudflare Settings
+autonomy_dns_cloudflare_proxied: true
+autonomy_dns_cloudflare_solo: true
+autonomy_dns_cloudflare_solo_mx: true
+autonomy_dns_cloudflare_timeout: 30
+autonomy_dns_cloudflare_ttl: 1
+autonomy_dns_dmarc_cloudflare_email: ""
+
+
+# FIXME: The cloudflare dmarc email should only be an entry if it is truthy
+autonomy_dns_dmarc_email:
+  - "{{ autonomy_dns_dmarc_cloudflare_email }}"
+  - "{{ autonomy_dns_dmarc_local_email }}"

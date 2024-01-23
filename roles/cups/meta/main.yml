@@ -25,4 +25,4 @@ galaxy_info:
     - samba
 
 dependencies:
-  - role: bloodymage.autonomy.config_defaults
+  - role: bloodymage.autonomy.collection_globals

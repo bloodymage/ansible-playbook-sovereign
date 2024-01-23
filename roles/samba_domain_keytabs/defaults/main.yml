@@ -1,2 +1,9 @@
 ---
 # defaults file for samba_domain_keytabs
+__domain_mail_user_spns: []
+
+__domain_system_users:
+  - "{{ domain_user_vmail }}"
+  - "{{ domain_user_keycloak }}"
+  - "{{ domain_user_mediawiki }}"
+  - "{{ domain_user_nextcloud }}"

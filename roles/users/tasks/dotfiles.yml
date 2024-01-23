@@ -1,0 +1,333 @@
+---
+# task file for user_dotfiles
+# ==================================================================================================
+#
+# This is used to create user dotfiles for both the host's local users and domain controlled users.
+# Any tasks that are set "item.id_number >= autonomy_min_domain_id_number" is for domain users only.
+#
+# ==================================================================================================
+- name: "Ensure User Home directory exists."
+  ansible.builtin.file:
+    dest: "{{ __dotfiles_home }}"
+    state: directory
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "{{ __mode }}"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode| default(autonomy_user_dotfiles_mode) }}"
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.username is defined
+    - item.id_number is defined
+    - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+
+- name: "Install User gitconfig."
+  ansible.builtin.template:
+    src: "home/gitconfig.j2"
+    dest: "{{ __dotfiles_home }}/.gitconfig"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+
+# ==================================================================================================
+#
+# GnuPG Settings
+#
+# ==================================================================================================
+- name: "Ensure user .gnupg folder exists."
+  ansible.builtin.file:
+    path: "{{ __dotfiles_home }}/.gnupg"
+    state: directory
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0700"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode | default(autonomy_user_dotfiles_mode) }}"
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+
+- name: "Install gpg.conf."
+  ansible.builtin.template:
+    src: "home/gnupg/gpg.conf.j2"
+    dest: "{{ __dotfiles_home }}/.gnupg/gpg.conf"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+
+- name: "Install gpg-agent.conf."
+  ansible.builtin.template:
+    src: "home/gnupg/gpg-agent.conf.j2"
+    dest: "{{ __dotfiles_home }}/.gnupg/gpg-agent.conf"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+  become: yes
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+
+- name: "Install sshcontrol."
+  ansible.builtin.template:
+    src: "home/gnupg/sshcontrol.j2"
+    dest: "{{ __dotfiles_home }}/.gnupg/sshcontrol"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+  become: yes
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.id_number is defined
+    - item.gpg_keys is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+
+- name: "Install scdaemon.conf."
+  ansible.builtin.template:
+    src: "home/gnupg/scdaemon.conf.j2"
+    dest: "{{ __dotfiles_home }}/.gnupg/scdaemon.conf"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+  become: yes
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - autonomy_smart_card_login
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+
+
+# ==================================================================================================
+#
+# Autostart Configuration
+#
+# ==================================================================================================
+- name: "Ensure User ~/.config/autostart directory exists."
+  ansible.builtin.file:
+    dest: "{{ __dotfiles_home }}/.config/autostart"
+    state: directory
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "{{ __mode }}"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode | default(autonomy_user_dotfiles_mode) }}"
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.username is defined
+    - item.id_number is defined
+    - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+    - (item.id_number | int) >= autonomy_min_domain_id_number
+
+# ==================================================================================================
+#
+# GPG Sync Configuration
+#
+# ==================================================================================================
+- name: "Ensure User ~/.config/gpgsync directory exists."
+  ansible.builtin.file:
+    dest: "{{ __dotfiles_home }}/.config/gpgsync"
+    state: directory
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "{{ __mode }}"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_dir_mode | default(autonomy_user_dotfiles_mode) }}"
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.username is defined
+    - item.id_number is defined
+    - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
+    - (item.id_number | int) >= autonomy_min_domain_id_number
+
+# ==================================================================================================
+#
+# This file is modified each time gpgsync runs, therefore we only want to install it if it does not
+# currently exist.  Set Force = "no"
+#
+# ==================================================================================================
+- name: "Install gpgsync settings.json"
+  ansible.builtin.template:
+    src: "home/config/gpgsync/settings.json.j2"
+    dest: "{{ __dotfiles_home }}/.config/gpgsync/settings.json"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+    force: no
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+  become: yes
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+    - (item.id_number | int) >= autonomy_min_domain_id_number
+
+# - name: "Install gpgsync.desktop"
+#   ansible.builtin.copy:
+#     src: "config/autostart/gpgsync.desktop"
+#     dest: "{{ __dotfiles_home }}/.config/autostart/gpgsync.desktop"
+#     owner: "{{ __dotfiles_owner }}"
+#     group: "{{ __dotfiles_group }}"
+#     mode: "0644"
+#   loop: "{{ autonomy_user_dotfiles_users }}"
+#   vars:
+#     __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+#     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+#     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+#     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+#   become: yes
+#   when:
+#     - autonomy_user_dotfiles_users is defined
+#     - item.id_number is defined
+#     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+#     - (item.id_number | int) >= autonomy_min_domain_id_number
+
+# ==================================================================================================
+#
+# Set .k5login
+#
+# This is required by ssh to allow GSSAPI logins
+#
+# ==================================================================================================
+- name: "Install .k5login."
+  ansible.builtin.template:
+    src: "home/k5login.j2"
+    dest: "{{ __dotfiles_home }}/.k5login"
+    owner: "{{ __dotfiles_owner }}"
+    group: "{{ __dotfiles_group }}"
+    mode: "0644"
+  loop: "{{ autonomy_user_dotfiles_users }}"
+  become: yes
+  vars:
+    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+    __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+    __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+  when:
+    - autonomy_user_dotfiles_users is defined
+    - item.id_number is defined
+    - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+    - (item.id_number | int) >= autonomy_min_domain_id_number
+
+# ==================================================================================================
+#
+# Emacs.d
+#
+# ==================================================================================================
+# - name: "Ensure Emacs.d exists for users."
+#   ansible.builtin.file:
+#     path: "{{ __dotfiles_home }}/.emacs.d"
+#     owner: "{{ __dotfiles_owner }}"
+#     group: "{{ __dotfiles_group }}"
+#     mode: "0755"
+#     state: "directory"
+#   loop: "{{ autonomy_user_dotfiles_users }}"
+#   become: yes
+#   vars:
+#     __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+#     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
+#     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
+#     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+
+# - name: "Install Emacs.d for users."
+#   ansible.builtin.git:
+#     repo: "{{ __repo }}"
+#     dest: "{{ __dotfiles_home }}/.emacs.d"
+#     remote: "{{ autonomy_user_dotfiles_emacsd_repo_remote }}"
+#     version: "{{ autonomy_user_dotfiles_emacsd_repo_version }}"
+#     clone: true
+#     update: true
+#   loop: "{{ autonomy_user_dotfiles_users }}"
+#   become: true
+#   become_user: "{{ __user }}"
+#   vars:
+#     __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+#     __user: "{{ item.username }}"
+#     __repo: "{{ autonomy_user_dotfiles_emacsd_repo }}"
+#     __ssh_repo: "{{ autonomy_user_dotfiles_emacsd_ssh_repo }}"
+#     __repo: "{% if __user in autonomy_github_users %}{{ __ssh_repo }}{% else %}{{ __http_repo }}{% endif %}"
+#   when:
+#     - autonomy_user_dotfiles_users is defined
+#     - autonomy_user_dotfiles_emacsd_repo is truthy
+#     - autonomy_enable_emacs
+#     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
+
+# ==================================================================================================
+#
+# Include Other Git Repos
+#
+# ==================================================================================================
+# - name: "Download other git repos."
+#   include_tasks: "git_repos.yml"
+#   loop:  "{{ autonomy_user_dotfiles_users }}"
+#   loop_control:
+#     loop_var: user
+#     index_var: user_index
+#   when:
+#     - autonomy_user_dotfiles_users is defined
+#     - user.git_repos is defined

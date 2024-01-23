@@ -1,0 +1,12 @@
+---
+# handlers file for systemd_networkd
+- name: "Restart Systemd-Networkd."
+  ansible.builtin.service:
+    name: "{{ item }}"
+    enabled: yes
+    state: restarted
+  loop:
+    - systemd-networkd
+  become: yes
+  listen:
+    - "restart systemd-networkd"

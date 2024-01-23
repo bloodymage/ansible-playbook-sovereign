@@ -1,0 +1,20 @@
+---
+# ==================================================================================================
+#
+# Diagnostics Playbook
+#
+# ==================================================================================================
+- name: "Run control node diagnostics"
+  hosts: localhost
+  roles:
+    - role: bloodymage.autonomy.diagnostics
+      tags:
+        - localhost
+
+- name: "Run Diagnostics"
+  hosts: all:!localhost
+  serial: 1
+  roles:
+    - role: bloodymage.autonomy.diagnostics
+      when:
+        - ansible_connection != "local"

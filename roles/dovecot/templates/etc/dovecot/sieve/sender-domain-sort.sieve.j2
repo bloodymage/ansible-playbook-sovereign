@@ -1,7 +1,7 @@
 # {{ ansible_managed }}
 
 require ["include", "variables", "fileinto", "mailbox", "envelope", "subaddress", "regex", "imap4flags"];
-global ["autonomy_category", "autonomy_explicit_group", "autonomy_listname", "autonomy_detail", "autonomy_detected_domain", "autonomy_explicit_subgroup", "autonomy_generic_subgroup"];
+global ["level1", "level2", "level3", "level4", "level5", "level6", "level7"];
 
 # ==================================================================================================
 #
@@ -12,7 +12,9 @@ if anyof (
   address :contains "from" "openpgp.org"
 )
 {
-  set "autonomy_category" "Accounts";
+  set "level1" "Businesses";
+  set "level2" "OpenPGP";
+  set "level3" "Account";
 }
 
 # ==================================================================================================
@@ -24,8 +26,8 @@ if anyof (
           address :contains "from" "facebookmail.com"
 )
 {
-  set "autonomy_category" "Social";
-  set "autonomy_explicit_group" "Facebook";
+  set "level1" "Social";
+  set "level2" "Facebook";
 }
 
 # ==================================================================================================
@@ -37,28 +39,17 @@ if anyof (
           address :contains "from" "firefox.com"
           )
 {
-  set "autonomy_category" "Accounts";
-  set "autonomy_explicit_group" "Firefox";
+  set "level1" "Businesses";
+  set "level2" "Firefox";
+  set "level3" "Account";
 }
 
-if address :contains "from" "github.com"
-{
-  set "autonomy_category" "Accounts";
-  set "autonomy_explicit_group" "Github";
-}
-
-# ==================================================================================================
-#
-# Google
-#
-# ==================================================================================================
 if anyof (
-          address :contains "from" "google.com",
-          address :contains "from" "googlemail.com"
-          )
+  address :contains "from" "github.com"
+)
 {
-  set "autonomy_category" "Accounts";
-  set "autonomy_explicit_group" "Google";
+  set "level1" "Businesses";
+  set "level2" "Github";
 }
 
 # ==================================================================================================
@@ -86,8 +77,8 @@ if anyof (
           address :contains "from" "linkedin.com"
           )
 {
-  set "autonomy_category" "Social";
-  set "autonomy_explicit_group" "LinkedIn";
+  set "level1" "Social";
+  set "level2" "LinkedIn";
 }
 
 # ==================================================================================================
@@ -106,8 +97,8 @@ if anyof (
           address :contains "from" "pinterest.com"
           )
 {
-  set "autonomy_category" "Social";
-  set "autonomy_explicit_group" "Pinterest";
+  set "level1" "Social";
+  set "level2" "Pinterest";
 }
 
 # ==================================================================================================
@@ -120,8 +111,8 @@ if anyof (
           address :is "from" "noreply@redditmail.com"
           )
 {
-  set "autonomy_category" "Social";
-  set "autonomy_explicit_group" "Reddit";
+  set "level1" "Social";
+  set "level2" "Reddit";
 }
 
 # ==================================================================================================
@@ -136,23 +127,8 @@ if anyof (
           address :contains "from" "twitter.com"
           )
 {
-  set "autonomy_category" "Social";
-  set "autonomy_explicit_group" "Twitter";
-}
-
-# ==================================================================================================
-#
-# Youtube
-#
-# ==================================================================================================
-if anyof (
-          address :is "from" "no-reply@youtube.com",
-          address :is "from" "noreply@youtube.com"
-          )
-{
-  set "autonomy_category" "Accounts";
-  set "autonomy_explicit_group" "Google";
-  set "autonomy_explicit_subgroup" "Youtube";
+  set "level1" "Social";
+  set "level2" "Twitter";
 }
 
 # ==================================================================================================
@@ -169,6 +145,8 @@ if address :domain :regex "from" "([^.]*)\\.?([^.]*)\\.?([^.]*)\\.?([^.]*)\\.?([
   if string :is "${6}" "" {} else { set :lower "part6" "${6}"; }
 
   set :lower "autonomy_detected_domain" "${part1}${part2}${part3}${part4}${part5}${part6}";
+  set "level2" "${autonomy_detected_domain}";
+  
 }
 
 # ==================================================================================================
@@ -192,7 +170,6 @@ if anyof (
 {% endfor %}
   )
   {
-    set "autonomy_category" "Systems";
-    set "autonomy_explicit_group" "${autonomy_detected_domain}";
+    set "level1" "Systems";
   }
 }

@@ -14,15 +14,11 @@
       paths:
         - "vars"
   become: no
-  tags:
-    - apache
-    - apache_debug
-    - apache-debug
 
 - name: "Check to determine if we need krb5 support"
   ansible.builtin.set_fact:
-    autonomy_packages: "{{ autonomy_packages + apache_krb5_packages }}"
-    apache_modules: "{{ apache_modules + apache_kerberos_ad_sso_modules }}"
+    autonomy_packages: "{{ autonomy_apache_packages + autonomy_apache_krb5_packages }}"
+    apache_modules: "{{ autonomy_apache_modules + autonomy_apache_kerberos_ad_sso_modules }}"
   become: no
   when:
     - inventory_hostname in groups['internal_zone']
@@ -30,25 +26,17 @@
 
 - name: "Check to determine if we need ldap support"
   ansible.builtin.set_fact:
-    apache_modules: "{{ apache_modules + apache_ldap_modules  }}"
+    autonomy_apache_modules: "{{ autonomy_apache_modules + autonomy_apache_ldap_modules  }}"
   become: no
   when:
     - autonomy_realm_identity_management_system is truthy
 
 - name: "Install packages"
   ansible.builtin.package:
-    name: "{{ autonomy_packages }}"
+    name: "{{ autonomy_apache_packages }}"
     state: present
   become: yes
 
-# ==================================================================================================
-#
-# The conditional needs work.
-#
-# I need it to enable the modules in apache_modules, but only if one of the virtual hosts
-# is a mediawiki website.
-#
-# ==================================================================================================
 - name: "http service state"
   ansible.builtin.service:
     name: apache2
@@ -60,12 +48,12 @@
   community.general.apache2_module:
     state: present
     name: "{{ item }}"
-  loop: "{{ apache_modules }}"
+  loop: "{{ autonomy_apache_modules }}"
   become: yes
+  notify: restart apache
   when:
     - virtual_hosts is defined
     - inventory_hostname in groups['apache_servers']
-  notify: restart apache
 
 # ======================================================================
 #
@@ -78,19 +66,6 @@
 #     state: true
 #     persistent: yes
 #   when: sestatus.rc != 0
-
-- name: "Check virtual hosts"
-  ansible.builtin.debug:
-    msg:
-      - "{{ virtual_hosts }}"
-    verbosity: 2
-  become: no
-  when:
-    - virtual_hosts is defined
-  tags:
-    - never
-    - apache_debug
-    - apache-debug
 
 - name: "Create file directories for each site"
   ansible.builtin.file:
@@ -105,10 +80,6 @@
   when:
     - virtual_hosts is defined
     - item.name is defined
-  tags:
-    - apache
-    - apache_debug
-    - apache-debug
 
 # ======================================================================
 #
@@ -130,11 +101,6 @@
     - virtual_hosts is defined
     - item.enable is defined
     - item.enabled
-  tags:
-    - apache
-    - apache_debug
-    - apache-debug
-    - websites
 
 - name: "Create log directories for each site"
   ansible.builtin.file:
@@ -150,8 +116,3 @@
     - virtual_hosts is defined
     - item.enable is defined
     - item.enabled
-  tags:
-    - apache
-    - apache_debug
-    - apache-debug
-    - websites

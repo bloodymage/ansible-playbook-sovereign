@@ -1,0 +1,96 @@
+---
+- name: Set Host Status
+  ansible.builtin.set_fact:
+    autonomy_diagnostics_host_status: "Unreachable"
+  when:
+    - unreachable is defined
+  tags:
+    - host-info
+    - host-system
+
+- name: "Print System Information."
+  ansible.builtin.debug:
+    msg:
+      - "System {{ inventory_hostname }}"
+      - "    I. Hostname:  {{ inventory_hostname_short }}"
+      - "    Hostname:     {{ ansible_hostname | default(inventory_hostname_short) }}"
+      - "    FQDN:         {{ ansible_fqdn | default(inventory_hostname) }}"
+      - "    Domain:       {{ ansible_domain | default(none) }}"
+      - "    System:       {{ ansible_system | default(none) }}"
+      - "    OS:           {{ ansible_os | default(none) }}"
+      - "    Network OS:   {{ ansible_network_os | default(none) }}"
+      - "    OS Family:    {{ ansible_os_family | default(none) }}"
+      - "    Distro:       {{ ansible_distribution | default(none) }}"
+      - "    Distro ID:    {{ ansible_lsb.id | default(none) }}"
+      - "    Release       {{ ansible_distribution_release | default(none) }}"
+      - "    Status:       {{ autonomy_diagnostics_host_status }}"
+      - "  Inventory:      {{ inventory_dir }}"
+  tags:
+    - host-info
+    - host-system
+
+- name: "Print Host Network Information (IPv4)."
+  ansible.builtin.debug:
+    msg:
+      - "System {{ inventory_hostname }}"
+      - "    IPv4 Addr:    {{ ansible_host }}"
+      - "    IPv4 Gateway: {{ ansible_default_ipv4['gateway'] | default(none) }}"
+      - "    Alias:        {{ ansible_default_ipv4['alias'] | default(none) }}"
+      - "    Broadcast:    {{ ansible_default_ipv4['broadcast'] | default(none) }}"
+      - "    Interface:    {{ ansible_default_ipv4['interface'] | default(none) }}"
+      - "    Mac Address:  {{ ansible_default_ipv4['macaddress'] | default(none) }}"
+      - "    MTU:          {{ ansible_default_ipv4['mtu'] | default(none) }}"
+      - "    Netmask:      {{ ansible_builtin_ipv4['netmask'] | default(none) }}"
+      - "    Network:      {{ ansible_builtin_ipv4['network'] | default(none) }}"
+      - "    Type:         {{ ansible_builtin_ipv4['type'] | default(none) }}"
+  tags:
+    - host-info
+    - host-ipv4
+
+- name: "Print Host Network Information (IPv6)."
+  ansible.builtin.debug:
+    msg:
+      - "System {{ inventory_hostname }}"
+      - "    IPv6 Addr:    {{ ansible_default_ipv6.address | default(none) }}"
+  tags:
+    - host-info
+    - host-ipv6
+
+# - name: "Print Domain Information"
+#   ansible.builtin.debug:
+#     msg:
+#       - "System {{ inventory_hostname }}"
+#       - "    Domain:       {{ ansible_domain  | default(none) }}"
+#       - "    Realm:        {{ realm | upper }}"
+#       - "    Workgroup:    {{ workgroup | upper }}"
+#       - "    Lets Encrypt: {{ letsencrypt_hosts  | default(none) }}"
+#   tags:
+#     - host-info
+#     - host-domain
+- name: "Get package information."
+  ansible.builtin.package_facts:
+    manager: auto
+  when:
+    - ansible_connection != "local"
+  tags:
+    - host-info
+    - host-packages
+
+- name: "Print Host Network Information (IPv6)."
+  ansible.builtin.debug:
+    msg:
+      - "System {{ inventory_hostname }}"
+      - "  Packages:    {{ ansible_facts['packages'] | default(none) }}"
+  tags:
+    - host-info
+    - host-packages
+
+- name: "Display all variables/facts known for a host"
+  ansible.builtin.debug:
+    msg:
+      - "All facts for {{ inventory_hostname }}"
+      - "{{ hostvars[inventory_hostname] }}"
+  tags:
+    - host-info
+    - host-facts
+

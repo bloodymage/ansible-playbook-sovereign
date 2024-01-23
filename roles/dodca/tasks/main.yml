@@ -1,0 +1,29 @@
+---
+# tasks file for dodca
+- name: "Download DoD Certs."
+  ansible.builtin.get_url:
+    url: "{{ item.source }}"
+    dest: "/tmp/{{ item.file }}"
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: "0644"
+  loop: "{{ autonomy_dodca_url }}"
+  become: yes
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Include OS Family Tasks."
+  include_tasks: "{{ ansible_os_family | lower }}.yml"
+  when:
+    - ansible_network_os is not defined
+    - ansible_os_family is defined
+    - not ownca_generate_locally
+
+- name: "Cleanup downloaded files."
+  ansible.builtin.file:
+    path: "/tmp/{{ item.file }}"
+    state: absent
+  loop: "{{ autonomy_dodca_url }}"
+  become: yes
+  delegate_to: localhost
+  run_once: yes

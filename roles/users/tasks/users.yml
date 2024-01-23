@@ -1,0 +1,10 @@
+---
+- name: "Include Family Tasks."
+  include_tasks: "{{ ansible_os_family | lower }}.yml"
+  when:
+    - ansible_network_os is not defined
+
+- name: "Include NetworkOS tasks."
+  include_tasks: "{{ ansible_network_os.split('.')[2] | lower }}.yml"
+  when:
+    - ansible_network_os is defined

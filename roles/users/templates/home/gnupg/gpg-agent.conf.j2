@@ -1,0 +1,28 @@
+# {{ ansible_managed }}
+
+pinentry-program {{ autonomy_user_dotfiles_gpg_pinentry_program }}
+{# Default value is true, no need to add the option if it is true #}
+{% if autonomy_user_dotfiles_gpg_allow_loopback_pinentry is false -%}
+ no-allow-loopback-pinentry
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_allow_emacs_pinentry -%}
+  allow-emacs-pinentry
+{% endif %}
+
+{% if autonomy_user_dotfiles_gpg_default_cache_ttl != 600 -%}
+  default-cache-ttl {{ autonomy_user_dotfiles_gpg_default_cache_ttl }}
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_default_cache_ttl_ssh != 1800 -%}
+  default-cache-ttl-ssh {{ autonomy_user_dotfiles_gpg_default_cache_ttl_ssh }}
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_max_cache_ttl != 7200 -%}
+  max-cache-ttl {{ autonomy_user_dotfiles_gpg_max_cache_ttl }}
+{% endif %}
+{% if autonomy_user_dotfiles_gpg_max_cache_ttl_ssh != 7200 -%}
+  max-cache-ttl-ssh {{ autonomy_user_dotfiles_gpg_max_cache_ttl_ssh }}
+{% endif %}
+
+# SSH
+{% if autonomy_user_dotfiles_gpg_enable_ssh_support -%}
+  enable-ssh-support
+{% endif %}

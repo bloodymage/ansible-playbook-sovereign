@@ -51,9 +51,9 @@
 {{ "*demoCommand:".ljust(40) }}{{ xscreensaver_demo_command }}
 {{ "*helpURL:".ljust(40) }}{{ xscreensaver_help_url }}
 {{ "*loadURL:".ljust(40) }}{{ xscreensaver_load_url }}
-{# *manualCommand: yelp man:%s || \ #}
-{# 			x-terminal-emulator -title "%s manual" \ #}
-{# 			  -e /bin/sh -c 'man "%s'" #}
+*manualCommand: yelp man:%s || \
+			x-terminal-emulator -title '%s manual' \
+			  -e /bin/sh -c 'man "%s"'
 
 {{ "*dateFormat:".ljust(40) }}{{ xscreensaver_date_format }}
 {{ "*newLoginCommand:".ljust(40) }}{{ xscreensaver_new_login_command }}
@@ -117,9 +117,9 @@
   {{ " ".ljust(8) }}
 {%- endif -%}
 {%- if program.options is defined -%}
-  {{ program.name }}{{ " " }}{{ program.options.ljust(16) }}
+  {{ program.name }}{{ " " }}{{ program.options.ljust(256) }}
 {%- else -%}
-  {{ program.name }}{{ " " }}{{ "-root".ljust(16) }}
+  {{ program.name }}{{ " " }}{{ "-root".ljust(256) }}
 {%- endif -%}
 {{ '\\n\\' if not loop.last else '\\n' }}
 {% endfor %}

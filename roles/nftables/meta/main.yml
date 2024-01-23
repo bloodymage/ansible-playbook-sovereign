@@ -25,5 +25,4 @@ galaxy_info:
     - nftables
 
 dependencies:
-  - role: bloodymage.autonomy.collection_handlers
-  #- role: bloodymage.autonomy.system_upgrade
+  - role: bloodymage.autonomy.collection_globals

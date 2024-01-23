@@ -1,0 +1,17 @@
+---
+autonomy_apache_daemon: "apache2"
+autonomy_bind9_daemon: "bind9"
+autonomy_cron_daemon: "cron"
+autonomy_ddclient_daemon: "ddclient"
+autonomy_dovecot_daemon: "dovecot"
+autonomy_ntp_daemon: "ntpsec"
+autonomy_spamassassin_daemon: "spamd"
+
+autonomy_apache_package: "apache2"
+autonomy_bind9_package: "bind9"
+autonomy_ddclient_package: "ddclient"
+autonomy_etckeeper_package: "etckeeper"
+autonomy_nginx_package: "nginx"
+autonomy_postfix_package: "postfix"
+autonomy_samba_package: "samba"
+autonomy_sssd_package: "sssd"

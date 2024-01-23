@@ -1,0 +1,280 @@
+---
+- name: "Create required directories."
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  loop:
+    - "{{ autonomy_acmeca_csr_dir }}"
+    - "{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}"
+    - "{{ autonomy_acmeca_keys_dir }}"
+    - "{{ autonomy_acmeca_live_dir }}/{{ inventory_hostname }}"
+  become: yes
+  when:
+    - autonomy_zone_type == "public"
+  tags:
+    - acmeca
+    - acmeca-account
+    - acmeca-http
+    - acmeca-dns
+
+- name: "Generate Let's Encrypt Certificate private key."
+  community.crypto.openssl_privatekey:
+    path: '{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/privkey.pem'
+    type: '{{ __type }}'
+    size: "{{ autonomy_acmeca_certificate_key_size }}"
+    owner: "{{ autonomy_acmeca_certificate_key_owner }}"
+    group: "{{ autonomy_acmeca_certificate_key_group }}"
+    mode: "{{ autonomy_acmeca_certificate_key_mode }}"
+    regenerate: "full_idempotence"
+    force: "{{ __acmeca_regenerate_host_key }}"
+    state: "present"
+    backup: true
+  become: true
+  vars:
+    __tmp_type: "{{ autonomy_acmeca_account_key_type }}"
+    __type: "{% if __tmp_type.lower() in ['ed25519','ed448'] %}{{ __tmp_type | capitalize }}{% else %}{{ __tmp_type | upper }}{% endif %}"
+  when:
+    - autonomy_zone_type == "public"
+  notify:
+    - "backup certs"
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Generate Let's Encrypt CSR."
+  community.crypto.openssl_csr:
+    path: "{{ autonomy_acmeca_csr_dir }}/{{ inventory_hostname }}.csr"
+    common_name: "{{ inventory_hostname }}"
+    key_usage: "{{ autonomy_acmeca_key_usage }}"
+    extended_key_usage: "{{ autonomy_acmeca_extended_key_usage }}"
+    subject_alt_name: "{{ autonomy_acmeca_host_subject_alt_name }}"
+    privatekey_path: "{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/privkey.pem"
+    ocsp_must_staple: "{{ autonomy_acmeca_ocsp_must_staple }}"
+    use_common_name_for_san: false
+    owner: root
+    group: root
+    mode: "0644"
+    backup: yes
+    force: "{{ __acmeca_regenerate_host_key }}"
+  become: yes
+  when:
+    - autonomy_zone_type == "public"
+  notify:
+    - "backup certs"
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Fetch CSR."
+  ansible.builtin.fetch:
+    src: "{{ autonomy_acmeca_csr_dir }}/{{ inventory_hostname }}.csr"
+    dest: "{{ autonomy_acmeca_pki_csr_dir }}/{{ inventory_hostname }}.csr"
+    flat: true
+  when:
+    - autonomy_zone_type == "public"
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Begin Let's Encrypt challenges."
+  community.crypto.acme_certificate:
+    dest: "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}/cert.pem"
+    chain_dest: "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}/chain.pem"
+    fullchain_dest: "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}/fullchain.pem"
+    csr: "{{ autonomy_acmeca_pki_csr_dir }}/{{ inventory_hostname }}.csr"
+    acme_directory: "{{ autonomy_acmeca_directory_url }}"
+    acme_version: "{{ autonomy_acmeca_version }}"
+    account_email: "{{ autonomy_acmeca_account_email }}"
+    account_key_src: "{{ autonomy_acmeca_account_key_path }}"
+    account_key_passphrase: "{{ __password }}"
+    modify_account: false
+    challenge: "{{ autonomy_acmeca_challenge_type }}"
+    remaining_days: 10
+    force: "{{ __acmeca_regenerate_host_key }}"
+    request_timeout: 10
+    validate_certs: true
+  become: false
+  delegate_to: localhost
+  register: acme_challenge
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/acmeca/account_password"
+    __password_create: "create=false"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }}"
+    __password: "{% if autonomy_acmeca_account_key_password == 'password' %}{{ lookup('community.general.passwordstore', __password_lookup) }}{% else %}{{ autonomy_acmeca_account_key_password }}{% endif %}"
+  when:
+    - autonomy_zone_type == "public"
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Print acme_challenge."
+  ansible.builtin.debug:
+    msg:
+      - "{{ acme_challenge }}"
+    verbosity: 2
+  become: false
+  when:
+    - acme_challenge is defined
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Print acme_challenge."
+  ansible.builtin.debug:
+    msg:
+      - record: "{{ __record }}"
+      - value: "{{ __value }}"
+    verbosity: 1
+  become: false
+  vars:
+    __record: "{{ acme_challenge['challenge_data'][inventory_hostname]['dns-01'].record }}"
+    __value: "{{ acme_challenge['challenge_data'][inventory_hostname]['dns-01'].resource_value }}"
+  when:
+    - acme_challenge is defined
+    - acme_challenge['challenge_data'][inventory_hostname] is defined
+    - acme_challenge.changed
+    - autonomy_acmeca_challenge_type == "http-01"
+  tags:
+    - acmeca
+    - acmeca-http
+
+- name: "Print acme_challenge DNS."
+  ansible.builtin.debug:
+    msg:
+      - record: "{{ item.key }}"
+      - value: "{{ item.value[0] }}"
+    verbosity: 1
+  become: false
+  with_dict: "{{ acme_challenge['challenge_data_dns'] }}"
+  when:
+    - acme_challenge is defined
+    - acme_challenge['challenge_data_dns'] is defined
+    - acme_challenge.changed
+    - autonomy_acmeca_challenge_type == "dns-01"
+  tags:
+    - acmeca
+    - acmeca-http
+
+- name: "Run HTTP-01 Challenge Tasks."
+  include_tasks: "http_challenge.yml"
+  when:
+    - autonomy_acmeca_challenge_type == "http-01"
+    - acme_challenge is defined
+    - acme_challenge['challenge_data'][inventory_hostname] is defined
+    - acme_challenge.changed
+  tags:
+    - acmeca
+    - acmeca-http
+
+- name: "Run DNS-01 Challenge Tasks."
+  include_tasks: "dns_challenge.yml"
+  when:
+    - autonomy_acmeca_challenge_type == "dns-01"
+    - acme_challenge is defined
+    - acme_challenge['challenge_data_dns'] is defined
+    - acme_challenge.changed
+  tags:
+    - acmeca
+    - acmeca-dns
+
+- name: "Force all notified handlers to run."
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Complete Let's Encrypt challenges."
+  community.crypto.acme_certificate:
+    dest: "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}/cert.pem"
+    chain_dest: "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}/chain.pem"
+    fullchain_dest: "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}/fullchain.pem"
+    acme_directory: "{{ autonomy_acmeca_directory_url }}"
+    acme_version: "{{ autonomy_acmeca_version }}"
+    account_key_src: "{{ autonomy_acmeca_account_key_path }}"
+    account_key_passphrase: "{{ __password }}"
+    modify_account: no
+    challenge: "{{ autonomy_acmeca_challenge_type }}"
+    csr: "{{ autonomy_acmeca_pki_csr_dir }}/{{ inventory_hostname }}.csr"
+    data: "{{ acme_challenge }}"
+    force: "{{ __acmeca_regenerate_host_key }}"
+    validate_certs: yes
+  become: false
+  delegate_to: localhost
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/acmeca/account_password"
+    __password_create: "create=false"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }}"
+    __password: "{% if autonomy_acmeca_account_key_password == 'password' %}{{ lookup('community.general.passwordstore', __password_lookup) }}{% else %}{{ autonomy_acmeca_account_key_password }}{% endif %}"
+  when:
+    - acme_challenge is defined
+    - acme_challenge['challenge_data_dns'] is defined
+    - acme_challenge.changed
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Copy Certificates to host."
+  ansible.builtin.copy:
+    src: "{{ autonomy_acmeca_pki_cert_dir }}/{{ inventory_hostname }}/{{ item }}.pem"
+    dest: "{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/{{ item }}.pem"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+  loop:
+    - "cert"
+    - "chain"
+    - "fullchain"
+  become: true
+  notify:
+    - restart acmeca
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+- name: "Create live link certs."
+  ansible.builtin.file:
+    src: "{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/{{ item }}.pem"
+    dest: "{{ autonomy_acmeca_live_dir }}/{{ inventory_hostname }}/{{ item }}.pem"
+    state: link
+    owner: root
+    group: root
+    follow: false
+  loop:
+    - "cert"
+    - "chain"
+    - "fullchain"
+    - "privkey"
+  become: yes
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http
+
+# - name: "Run http-01 Clean-Up Tasks."
+#   include_tasks: "http_clean_up.yml"
+#   when:
+#     - autonomy_acmeca_challenge_type == "http-01"
+#   tags:
+#     - acmeca-http
+
+- name: "Run DNS-01 clean up tasks."
+  include_tasks: "dns_clean_up.yml"
+  when:
+    - autonomy_acmeca_challenge_type == "dns-01"
+    - acme_challenge is defined
+    - acme_challenge['challenge_data_dns'] is defined
+  tags:
+    - acmeca
+    - acmeca-dns
+    - acmeca-http

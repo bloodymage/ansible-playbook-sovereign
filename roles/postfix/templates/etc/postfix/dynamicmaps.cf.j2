@@ -1,0 +1,6 @@
+# {{ ansible_managed }}
+
+# dict-type	so-name (pathname)	dict-function	  mkmap-function
+{% if autonomy_realm_identity_management_system is truthy -%}
+  {{ 'ldap'.ljust(15) }}{{ 'postfix-ldap.so'.ljust(24) }}{{ 'dict_ldap_open'.ljust(18) }}
+{% endif %}

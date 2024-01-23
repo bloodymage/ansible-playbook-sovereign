@@ -1,0 +1,27 @@
+---
+# tasks file for systemd
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: false
+  tags:
+    - systemd-networkd
+    - systemd-timesyncd
+
+- name: "Configure Systemd-Networkd."
+  include_tasks: "networkd.yml"
+  when:
+    - __systemd_tasks == "networkd"
+  tags:
+    - systemd-networkd
+
+- name: "Configure Systemd-Timesyncd."
+  include_tasks: "timesyncd.yml"
+  when:
+    - __systemd_tasks == "timesyncd"
+  tags:
+    - systemd-timesyncd

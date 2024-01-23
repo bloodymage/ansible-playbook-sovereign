@@ -1,25 +1,23 @@
 ---
 # tasks file for aliases
-- name: "Prepare Host"
-  block:
-    - name: "Include OS-specific variables."
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
 
-    - name: "Install packages."
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: yes
 
 - name: "Ensure we have users required by host role."
   ansible.builtin.set_fact:
-    users: "{{ users + [ item.user ] }}"
+    autonomy_users: "{{ autonomy_users + [ item.user ] }}"
   loop:
     - name: "mythtv"
       user: "{{ user_mythtv }}"
@@ -49,3 +47,5 @@
   become: yes
   loop:
     - aliases
+  when:
+    - autonomy_users is defined

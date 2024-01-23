@@ -36,13 +36,17 @@ pam_cert_db_path = {{ ownca_identity_ca_chain_file_path }}
   pam_verbosity = {{ sssd_pam_verbosity }}
 {% endif %}
 
-[domain/{{ autonomy_domain }}]
+[domain/{{ autonomy_domain | upper }}]
 ad_domain = {{ autonomy_domain }}
-ad_server = dc.{{ autonomy_domain }}
-krb5_realm = {{ autonomy_realm }}
+ad_server =
+{%- for server in groups['samba_domain_controllers'] -%}
+  {{ server }}{{ "," if not loop.last else "" }}
+{%- endfor %}
+
+krb5_realm = {{ autonomy_domain | upper }}
 id_provider = ad
 access_provider = ad
-realmd_tags = manages-system joined-with-adcli 
+realmd_tags = manages-system joined-with-adcli
 krb5_store_password_if_offline = True
 cache_credentials = True
 use_fully_qualified_names = False

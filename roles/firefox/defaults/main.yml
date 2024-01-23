@@ -1,6 +1,6 @@
 ---
 # defaults file for firefox
-autonomy_packages:
+autonomy_firefox_packages:
   - "{{ firefox }}"
   - libgssapi-krb5-2
   - p11-kit-modules
@@ -16,6 +16,8 @@ firefox_certificate_path: "{{ mozilla_lib_path }}/certificates"
 
 firefox_certificates:
   - "{{ autonomy_org_name }}-root-ca.crt"
+
+autonomy_firefox_snap: false
 
 # ==================================================================================================
 #

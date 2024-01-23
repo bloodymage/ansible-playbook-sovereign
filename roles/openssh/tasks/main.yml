@@ -2,40 +2,33 @@
 # ======================================================================
 #
 # Tasks:
-#  
+#
 #
 # ======================================================================
-- name: "Pre-tasks"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
-      tags:
-        - openssh
-        - openssh_debug
-        - openssh-debug
-        - install-packages
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - openssh
+    - openssh_debug
+    - openssh-debug
+    - install-packages
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-      tags:
-        - openssh
-        - openssh_debug
-        - openssh-debug
-        - install-packages
+- name: "Install packages"
+  ansible.builtin.package:
+    name: "{{ autonomy_packages }}"
+    state: present
+  become: yes
 
 # ==================================================================================================
 #
 # Tasks:
-#  
+#
 #
 # ==================================================================================================
 - name: Create Required Directories for Cert authorization.
@@ -49,10 +42,6 @@
   loop:
     - "{{ sshca_cert_directory }}"
     - "{{ sshca_authorized_principals_dir }}"
-  tags:
-    - openssh
-    - openssh_debug
-    - openssh-debug
 
 - name: Install Host CA Certificate on Hosts
   ansible.builtin.copy:
@@ -63,10 +52,6 @@
     mode: '0644'
   become: yes
   notify: restart ssh
-  tags:
-    - openssh
-    - openssh_debug
-    - openssh-debug
 
 - name: Install User CA Certificate on Hosts
   ansible.builtin.copy:
@@ -77,10 +62,6 @@
     mode: '0644'
   become: yes
   notify: restart ssh
-  tags:
-    - openssh
-    - openssh_debug
-    - openssh-debug
 
 # ==================================================================================================
 #
@@ -93,10 +74,6 @@
   delegate_to: localhost
   run_once: yes
   become: no
-  tags:
-    - openssh
-    - openssh_debug
-    - openssh-debug
 
 - name: "Install Configuration files"
   ansible.builtin.template:
@@ -110,7 +87,3 @@
   become: yes
   loop: "{{ openssh_config_files }}"
   notify: restart ssh
-  tags:
-    - openssh
-    - openssh_debug
-    - openssh-debug

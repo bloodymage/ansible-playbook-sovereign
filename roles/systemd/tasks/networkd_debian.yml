@@ -1,0 +1,31 @@
+---
+# ==================================================================================================
+#
+# Debian Family Tasks
+#
+# ==================================================================================================
+- name: "Remove Non-Systemd networking packages."
+  ansible.builtin.apt:
+    name: "{{ autonomy_systemd_networkd_packages_remove }}"
+    state: "absent"
+    purge: true
+    autoremove: true
+  become: true
+
+# ==================================================================================================
+#
+# We loop here because dpkg_selections only allows a single package.
+#
+# This fails when it can't find the package.  Therefore we define failure in all other failed cases.
+#
+# ==================================================================================================
+- name: "Place a hold on Non-Systemd networking packages."
+  ansible.builtin.dpkg_selections:
+    name: "{{ item }}"
+    selection: hold
+  loop: "{{ autonomy_systemd_networkd_packages_remove }}"
+  become: true
+  register: results
+  failed_when:
+    - results["results"][item]["failed"] is true
+    - '"Failed to find package" not in results["results"][item]["msg"]'

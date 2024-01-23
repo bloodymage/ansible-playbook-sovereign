@@ -1,7 +1,14 @@
 ---
-- name: "Upgrade nextcloud."
+- name: "Upgrade nextcloud (php updater/updater.phar)."
   ansible.builtin.command:
     cmd: "php updater/updater.phar --no-interaction"
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data
+
+- name: "Upgrade nextcloud (php occ upgrade)."
+  ansible.builtin.command:
+    cmd: "php occ upgrade"
     chdir: "/srv/www/{{ inventory_hostname }}"
   become: yes
   become_user: www-data

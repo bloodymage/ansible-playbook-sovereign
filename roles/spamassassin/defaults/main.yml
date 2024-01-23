@@ -1,13 +1,10 @@
 ---
 # defaults file for spamassassin
-autonomy_packages:
+autonomy_spamassassin_packages:
   - spamassassin
   - spamass-milter
 
-spamassassin_spamass_milter_user: "spamass-milter"
-spamassassin_spamd_user: "debian-spamd"
-
-spamassassin_directories:
+autonomy_spamassassin_directories:
   - name: "{{ mail_spamassassin_sock_dir }}"
     owner: "{{ spamassassin_spamass_milter_user }}"
     group: root
@@ -17,6 +14,55 @@ spamassassin_directories:
     group: "{{ spamassassin_spamd_user }}"
     mode: "0700"
 
-spamassassin_default_files:
+autonomy_spamassassin_default_files:
   - spamassassin
   - spamass-milter
+  - spamd
+
+autonomy_spamassassin_config_files:
+  - local.cf
+
+autonomy_spamassassin_deamon: "spamassassin"
+autonomy_spamassassin_syslog_dir: ""
+autonomy_spamassassin_syslog: ""
+autonomy_spamassassin_debug: false
+autonomy_spamassassin_max_children: 5
+
+autonomy_spamassassin_user_home: "/var/lib/spamassassin"
+autonomy_spamassassin_user_shell: "/bin/sh"
+autonomy_spamass_milter_user_home: "/var/lib/spamass-milter"
+autonomy_spamass_milter_user_shell: "/usr/sbin/nologin"
+
+autonomy_spamassassin_users:
+  - name: "{{ spamassassin_spamd_user }}"
+    home: "{{ autonomy_spamassassin_user_home }}"
+    shell: "{{ autonomy_spamassassin_user_shell }}"
+  - name: "{{ spamassassin_spamass_milter_user }}"
+    home: "{{ autonomy_spamass_milter_user_home }}"
+    shell: "{{ autonomy_spamass_milter_user_shell }}"
+    groups: "{{ spamassassin_spamd_user }}"
+    append: true
+
+autonomy_spamassassin_siteconfigpath: ""
+
+# ==================================================================================================
+#
+# Spamassassin local.cf
+#
+# https://spamassassin.apache.org/full/3.1.x/doc/Mail_SpamAssassin_Conf.html
+#
+# If you wish to have this be global, set:
+# autonomy_spamassassin_bayes_path: "/var/lib/spamassassin/.spamassassin/bayes"
+#
+# ==================================================================================================
+autonomy_spamassassin_bayes_path: ""
+autonomy_spamassassin_bayes_file_mod: "0700"
+autonomy_spamassassin_ok_locales: "{{ __autonomy_spamassassin_ok_languages }}"
+
+# ==================================================================================================
+#
+# Spamassassin Internal defaults
+#
+# ==================================================================================================
+__autonomy_spamassassin_bayes_path: "~/.spamassassin/"
+__autonomy_spamassassin_ok_locales: "all"

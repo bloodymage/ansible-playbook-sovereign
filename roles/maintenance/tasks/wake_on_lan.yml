@@ -1,0 +1,9 @@
+---
+- name: "Send Wake-on-LAN Packet."
+  community.general.wakeonlan:
+    mac: "{{ autonomy__mac_address }}"
+    broadcast: "{{ autonomy__wol_broadcast }}"
+    port: "{{ autonomy__wol_port }}"
+  delegate_to: localhost
+  when:
+    - autonomy__mac_address is truthy

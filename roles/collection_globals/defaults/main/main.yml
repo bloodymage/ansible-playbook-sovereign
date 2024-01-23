@@ -1,0 +1,207 @@
+---
+# defaults file for config_defaults
+# ==================================================================================================
+#
+# Decisions
+#
+# TODO: Make 'autonomy_realm_identity_management_system' definition based on defined inventory
+#       groups.
+#
+# Goals:
+#   - Ideally, these would be the only variables that anyone would need to define in their inventoy.
+#
+# ==================================================================================================
+# Ansible User Definitions
+autonomy_user: "ansible_autonomy"
+autonomy_group: "{{ autonomy_user }}"
+autonomy_default_sysadmin_user: "admin"
+autonomy_default_sysadmin_email_address: "{{ autonomy_default_sysadmin_user }}@{{ autonomy_root_domain }}"
+autonomy_sysadmin_email_userid: "{{ autonomy_default_sysadmin_email_userid }}"
+autonomy_sysadmin_email_address: "{{ autonomy_default_sysadmin_email_address }}"
+autonomy_home_dir: "/home"
+autonomy_user_home_dir: "{{ autonomy_home_dir }}/{{ autonomy_user }}"
+
+# Zone Definitions
+autonomy_tld: "com"
+
+autonomy_root_zone_name: "example"
+autonomy_root_domain: "{{ autonomy_root_zone_name }}.{{ autonomy_tld }}"
+
+autonomy_internal_zone_name: "internal"
+autonomy_internal_zone_domain: "{{ autonomy_internal_zone_name }}.{{ autonomy_root_domain }}"
+
+autonomy_dmz_zone_name: "dmz"
+autonomy_dmz_zone_domain: "{{ autonomy_dmz_zone_name }}.{{ autonomy_root_domain }}"
+
+autonomy_zone_name: "{{ autonomy_internal_zone_name }}"
+autonomy_zone_type: "internal"
+
+autonomy_domain: "{{ autonomy_zone_name }}.{{ autonomy_root_domain }}"
+autonomy_realm: "{{ autonomy_zone_name | upper }}"
+
+autonomy_zones:
+  - name: "{{ autonomy_internal_zone_name }}"
+    type: internal
+    domain: "{{ autonomy_internal_zone_domain }}"
+  - name: "{{ autonomy_dmz_zone_name }}"
+    type: dmz
+    domain: "{{ autonomy_dmz_zone_domain }}"
+  - name: "{{ autonomy_root_zone_name }}"
+    type: public
+    domain: "{{ autonomy_root_domain }}"
+
+autonomy_virtual_domain: false
+
+# Host Definitions
+autonomy_hostname: "{{ inventory_hostname_short }}"
+autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
+autonomy_ipv4_address: "{{ ansible_host }}"
+autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default(None) }}"
+autonomy_virtual_host: false
+
+# Realm User Management / Password Requirements
+autonomy_realm_identity_management_system: ""
+autonomy_realm_min_id_number: 10000
+autonomy_min_domain_id_number: "{{ autonomy_realm_min_id_number }}" # Keep until transition complete
+autonomy_smart_card_login: false
+autonomy_overwrite_password: false
+autonomy_password_length: "42"
+autonomy_dodca_install: false
+autonomy_passdb: "ansible"
+
+# Organization Info
+autonomy_org_name: "{{ autonomy_root_zone_name }}"
+autonomy_org_unit_name: "{{ autonomy_zone_name }}"
+autonomy_country: ""
+autonomy_region: ""
+autonomy_state: "{{ autonomy_region }}"
+autonomy_city: ""
+
+# LDAP Definitions
+autonomy_base_dn: "DC={{ autonomy_org_unit_name | upper }},DC={{ autonomy_org_name | upper }},DC={{ autonomy_tld | upper }}"
+autonomy_base_dn_lower: "DC={{ autonomy_org_unit_name | lower }},DC={{ autonomy_org_name | lower }},DC={{ autonomy_tld | lower }}"
+autonomy_user_dn: "CN=Users,{{ autonomy_base_dn_lower }}"
+autonomy_group_dn: "CN=Users,{{ autonomy_base_dn_lower }}"
+autonomy_config_dn: "CN=Configuration,{{ autonomy_base_dn }}"
+autonomy_schema_dn: "CN=Schema,{{ autonomy_config_dn }}"
+
+# Linux Repo Settings
+autonomy_use_source_code_repos: false
+autonomy_raspberrypi_distribution_release: "{{ ansible_distribution_release }}"
+
+# PKI
+autonomy_default_key_type: "ed25519"
+autonomy_default_key_size: 4096
+autonomy_user_pki_dir: "{{ autonomy_user_home_dir }}/.pki"
+
+# ==================================================================================================
+#
+# Files, Directories, and URLs
+#
+# ==================================================================================================
+# Directories
+autonomy_sysconf_dir: "/etc"
+sysconf_dir: "{{ autonomy_sysconf_dir }}"
+
+# Users
+user_mythtv_id_number: 500
+user_minidlna_id_number: 501
+user_git_id_number: 502
+user_homeassistant_id_number: 503
+user_vmail_id_number:  504
+user_odoo_id_number: 505
+
+
+# ==================================================================================================
+#
+# Samba
+#
+# ==================================================================================================
+# Samba
+samba_password_legnth: "{{ autonomy_password_length }}"
+samba_domain: no
+
+domain_users: []
+
+# Samba LDAP lookups
+samba_user_class: "(objectClass=person)"
+samba_group_class: "(objectClass=group)"
+samba_search: "(|(userPrincipalName=%uid)(sAMAccountName=%uid)(mail=%uid))"
+samba_enabled_users: "(! (userAccountControl:1.2.840.113556.1.4.803:=2))"
+samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
+
+# ==================================================================================================
+#
+# Github
+#
+# ==================================================================================================
+autonomy_github_user: ""
+autonomy_github_oauth_token: ""
+autonomy_github_users: []
+
+# ==================================================================================================
+#
+# GPG Sync
+#
+# ==================================================================================================
+autonomy_gpgsync_keylist: "{{ ownca_crl_distribution_point }}/pgp/keylist.json"
+autonomy_gpgsync_gpg_fingerprint: ""
+
+# ==================================================================================================
+#
+# Do not modify
+#
+# The following variables fall into two categories:
+# 1. They are defaults that can be modified via tags (eg, the 'regenerate-private-key' will change
+#    '__acmeca_regenerate_private_key' to 'yes')
+# 2. They are constants that define playbook behavior and modifications will cause the playbooks to
+#    fail.
+#
+# ==================================================================================================
+__debug_mode: false
+__free_strategy: "free"
+__linear_strategy: "linear"
+__collection_overwrite_passwords: false
+
+# Samba
+__samba_recreate_realm: false
+__samba_schema_master: "{{ groups['samba_domain_controllers'][0] }}"
+
+__autonomy_zones:
+  - name: "{{ autonomy_internal_zone_name }}"
+    zone: internal
+  - name: "{{ autonomy_dmz_zone_name }}"
+    zone: dmz
+
+__autonomy_ddns_key_algorithm: "hmac-sha256"
+
+__domain_system_users: []
+
+# ==================================================================================================
+#
+# Collection Defaults
+#
+# These variables affect the operations of the collection, and do not have any bearing on system
+# configuration.
+#
+# ==================================================================================================
+__distribution: "{{ ansible_distribution | default(none) }}"
+__distribution_short: "{{ __distribution.split(' ')[0] }}"
+__distribution_release: "{{ ansible_distribution_release | default(none) }}"
+__major_version: "{{ ansible_distribution_major_version | default(none) }}"
+__lsb_id: "{{ ansible_lsb.id | default(none) }}"
+__network_os: "{{ ansible_network_os | default(none) }}"
+__os_family: "{{ ansible_os_family | default(none) }}"
+__system: "{{ ansible_system | default(none) }}"
+
+__os_variables_files:
+  - "{{ __network_os }}.yml"
+  - "{{ __lsb_id | lower }}_{{ __major_version }}.yml"
+  - "{{ __lsb_id | lower }}.yml"
+  - "{{ __distribution | lower }}_{{ __major_version}}.yml"
+  - "{{ __distribution | lower }}.yml"
+  - "{{ __distribution_short | lower }}_{{ __major_version}}.yml"
+  - "{{ __distribution_short | lower }}.yml"
+  - "{{ __os_family | lower }}_family.yml"
+  - "{{ __system | lower }}.yml"
+  - main.yml

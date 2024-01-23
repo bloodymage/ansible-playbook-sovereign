@@ -52,7 +52,7 @@
   ansible.builtin.set_fact:
     nextcloud_db_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/{{ nextcloud_database }}/{{ autonomy_zone_name }}_nextcloud"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/{{ nextcloud_database }}/{{ autonomy_zone_name }}_nextcloud"
     __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
@@ -62,7 +62,7 @@
   ansible.builtin.set_fact:
     nextcloud_admin_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/nextcloud/nextcloud_admin_password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/nextcloud/nextcloud_admin_password"
     __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
@@ -72,7 +72,7 @@
   ansible.builtin.set_fact:
     nextcloud_passwordsalt: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/services/nextcloud/passwordsalt"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/services/nextcloud/passwordsalt"
     __password_lookup: "{{ __password_store_id }}"
   delegate_to: localhost
   when:
@@ -87,12 +87,13 @@
   include_tasks: "nextcloud_upgrade.yml"
   when:
     - install_status.stat.exists
+    - autonomy_nextcloud_upgrade
 
 - name: "Ensure we have a password for the nextcloud ldap lookup user."
   ansible.builtin.set_fact:
     nextcloud_ldap_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ nextcloud_domain }}/domain_users/nextcloud/password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ nextcloud_domain }}/domain_users/nextcloud/password"
     __password_length: "length={{ nextcloud_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
@@ -102,6 +103,14 @@
   when:
     - virtual_hosts is defined
     - nextcloud_ldap_password == "password"
+
+- name: "Ensure we have a clean nextcloud state before we do anything else."
+  ansible.builtin.command:
+    cmd: >
+      php occ upgrade
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data
 
 - name: "Update nextcloud config."
   ansible.builtin.template:

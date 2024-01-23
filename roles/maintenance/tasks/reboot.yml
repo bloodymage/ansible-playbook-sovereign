@@ -1,0 +1,6 @@
+---
+- name: "Reboot Hosts."
+  ansible.builtin.reboot:
+    #reboot_timeout: 600
+    test_command: "whoami"
+  become: true

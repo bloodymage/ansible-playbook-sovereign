@@ -1,3 +1,20 @@
+---
+- name: "Add APT Repository for 'deb' package."
+  community.general.apt_repo:
+    repo: "ppa:mozillateam/ppa"
+    state: present
+    update: true
+  when:
+    - ansible_distribution == "Ubuntu"
+    - autonomy_firefox_snap is false
+
+- name: "Install packages"
+  ansible.builtin.package:
+    pkg: "{{ autonomy_firefox_packages }}"
+    state: present
+  become: yes
+  register: result
+
 # ==================================================================================================
 #
 # This configures firefox to provide kerberos logon information to the server.
@@ -14,6 +31,8 @@
   loop:
     - kerberos
     - privacy
+  when:
+    - inventory_hostname in groups['workstations'] | default([])
 
 # ==================================================================================================
 #
@@ -35,6 +54,8 @@
     group: root
     mode: "0755"
   become: yes
+  when:
+    - inventory_hostname in groups['workstations'] | default([])
 
 - name: "Create list of certs to copy into the firefox directory."
   ansible.builtin.set_fact:
@@ -45,6 +66,7 @@
   become: no
   when:
     - item[0]['type'] != "public"
+    - inventory_hostname in groups['workstations'] | default([])
 
 # ==================================================================================================
 #
@@ -60,6 +82,8 @@
     mode: "0644"
   loop: "{{ firefox_certificates }}"
   become: yes
+  when:
+    - inventory_hostname in groups['workstations'] | default([])
 
 # ==================================================================================================
 #
@@ -70,6 +94,8 @@
   ansible.builtin.stat:
     path: "{{ firefox_lib_path }}/libnssckbi.so"
   register: result
+  when:
+    - inventory_hostname in groups['workstations'] | default([])
 
 - name: "Create a symbolic link 'libnssckbi.so' -> 'p11-kit-trust.so'"
   ansible.builtin.file:
@@ -80,4 +106,6 @@
     state: link
   become: yes
   when:
+    - inventory_hostname in groups['workstations'] | default([])
+    - result.stat is defined
     - (result.stat.islnk is defined and result.stat.islnk) or (not result.stat.exists)

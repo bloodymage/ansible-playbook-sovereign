@@ -13,6 +13,15 @@ workgroup = {{ autonomy_org_unit_name | upper }}
 server role = active directory domain controller
 server services = s3fs, rpc, nbt, wrepl, ldap, cldap, kdc, drepl, winbindd, ntp_signd, kcc, dnsupdate
 idmap_ldb:use rfc2307 = yes
+{% if autonomy_samba_dns_zone_transfer_clients_allow is truthy -%}
+  dns zone transfer clients allow =
+  {%- for item in autonomy_samba_dns_zone_transfer_clients_allow -%}
+    {{ " " }}{{ item }}
+  {%- endfor -%}
+{% endif %}
+{% if autonomy_samba_kdc_enable_fast is truthy %}
+kdc enable fast = {{ autonomy_samba_kdc_enable_fast }}
+{% endif %}
 {% else -%}
   security = {{ samba_security }}
 {% endif %}
@@ -21,12 +30,14 @@ idmap_ldb:use rfc2307 = yes
 max log size = 1000
 log file = /var/log/samba/log.%m
 log level = {{ samba_log_level }}
+{% if inventory_hostname not in groups['samba_domain_controllers'] %}
 {# ============================================================================================== #}
 {#                                                                                                #}
 {# User Settings                                                                                  #}
 {#                                                                                                #}
 {# ============================================================================================== #}
 username map = /etc/samba/user.map
+{% endif %}
 
 {% if inventory_hostname in groups['samba_domain_controllers'] -%}
 {# ============================================================================================== #}
@@ -35,9 +46,9 @@ username map = /etc/samba/user.map
 {#                                                                                                #}
 {# ============================================================================================== #}
 tls enabled  = yes
-tls certfile = {{ ownca_etc }}/certs/{{ autonomy_fqdn }}-chain.pem
+tls certfile = {{ ownca_etc }}/certs/{{ autonomy_fqdn }}.pem
 tls keyfile  = {{ ownca_etc }}/private/{{ autonomy_fqdn }}.key
-#tls cafile = {{ ownca_etc }}/certs/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component.pem
+tls cafile = {{ ownca_etc }}/certs/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component-ca.pem
 #tls crlfile  = {{ ownca_etc }}/crls/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component.crl
 tls dhparams file = {{ ownca_etc }}/dhparams/{{ autonomy_fqdn }}.pem
 {% else %}
@@ -57,6 +68,7 @@ winbind enum users = {{ winbind_enum_users }}
 winbind enum groups = {{ winbind_enum_groups }}
 winbind refresh tickets = {{ winbind_refresh_tickets }}
 
+{% if autonomy_smart_card_login is false %}
 # ==================================================================================================
 #
 # Misc
@@ -65,6 +77,7 @@ winbind refresh tickets = {{ winbind_refresh_tickets }}
 # Used for SSH Single Sign On
 dedicated keytab file = /etc/krb5.keytab
 kerberos method = secrets and keytab
+{% endif %}
 {% endif %}
 
 {% if inventory_hostname in groups['samba_domain_controllers'] -%}

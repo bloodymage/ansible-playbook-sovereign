@@ -1,0 +1,3 @@
+---
+# Collection Default Variables for Bind
+autonomy_ddns_key_algorithm: "hmac-sha512"

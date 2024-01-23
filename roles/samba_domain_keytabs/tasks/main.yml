@@ -1,10 +1,10 @@
 ---
 # tasks file for samba_domain_keytabs
-- name: "Generate user SPNs"
+- name: "Generate user SPNs."
   include_tasks: generate_spns.yml
   loop: "{{ __domain_system_users }}"
   loop_control:
     loop_var: user
-  when:
-    - user.spns is defined
-    - user.spns is truthy
+  # when:
+  #   - user.spns is defined
+  #   - user.spns is truthy

@@ -1,75 +1,77 @@
 ---
 # handlers file for mail-server
-- name: restart postfix
-  service:
-    name: postfix
-    state: restarted
-  become: yes
-
 - name: update aliases
-  command: newaliases
-  become: yes
+  ansible.builtin.command:
+    cmd: "/usr/bin/newaliases"
+  become: true
   notify: restart postfix
 
 - name: map canonical
-  command: postmap canonical
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap canonical"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix
 
 - name: map client_access
-  command: postmap client_access
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap client_access"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix
 
 - name: map helo_access
-  command: postmap helo_access
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap helo_access"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix
 
 - name: map sasl_passwd
-  command: postmap sasl_passwd
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap sasl_passwd"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix
 
 - name: map sender_relay
-  command: postmap sender_relay
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap sender_relay"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix
 
 - name: map transport
-  command: postmap transport
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap transport"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
+  notify: restart postfix
+
+- name: map tls_server_sni_maps
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap -F {{ autonomy_postfix_tls_server_sni_maps_file }}"
+    chdir: "/etc/postfix"
+  become: true
   notify: restart postfix
 
 - name: map virtual-mailbox-user-aliases
-  command: postmap virtual-mailbox-user-aliases
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap virtual-mailbox-user-aliases"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix
 
 - name: map virtual-mailbox-domains
-  command: postmap virtual-mailbox-domains
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap virtual-mailbox-domains"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix
 
 - name: map virtual-mailbox-users
-  command: postmap virtual-mailbox-users
-  args:
+  ansible.builtin.command:
+    cmd: "/usr/sbin/postmap virtual-mailbox-users"
     chdir: "/etc/postfix"
-  become: yes
+  become: true
   notify: restart postfix

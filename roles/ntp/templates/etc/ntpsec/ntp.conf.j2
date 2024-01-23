@@ -1,0 +1,82 @@
+# {{ ansible_managed }}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# /etc/ntpsec/ntp.conf, configuration for ntpd; see ntp.conf(5) for help                         #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+# Files and directories
+driftfile /var/lib/ntpsec/ntp.drift
+leapfile /usr/share/zoneinfo/leap-seconds.list
+{% if autonomy_ntp_enable_logging -%}
+  logfile {{ autonomy_ntp_logfile }}
+{% endif %}
+
+{# To enable Network Time Security support as a server, obtain a certificate #}
+{# (e.g. with Let's Encrypt), configure the paths below, and uncomment:      #}
+# nts cert CERT_FILE
+# nts key KEY_FILE
+# nts enable
+{% if inventory_hostname in groups['samba_domain_controllers'] %}
+ntpsigndsocket  {{ autonomy_ntp_samba_socket_directory }}
+{% endif %}
+
+{% if autonomy_ntp_enable_statistics %}
+#statsdir {{ autonomy_ntp_statistics_dir }}
+#statistics loopstats peerstats clockstats
+#filegen loopstats file loopstats type day enable
+#filegen peerstats file peerstats type day enable
+#filegen clockstats file clockstats type day enable
+{% endif %}
+
+{# This should be maxclock 7, but the pool entries count towards maxclock. #}
+tos maxclock 11
+
+{# Comment this out if you have a refclock and want it to be able to discipline #}
+{# the clock by itself (e.g. if the system is not connected to the network). #}
+tos minclock {{ autonomy_ntp_tos_minclock }} minsane {{ autonomy_ntp_tos_minsane }}
+
+{# ============================================================================================== #}
+{#                                                                                                #}
+{# pool.ntp.org maps to about 1000 low-stratum NTP servers.  Your server will pick a different    #}
+{# set every time it starts up.                                                                   #}
+{#                                                                                                #}
+{# Please consider joining the pool: <https://www.pool.ntp.org/join.html>                         #}
+{#                                                                                                #}
+{# ============================================================================================== #}
+{% if autonomy_ntp_server_addresses is string %}
+server {{ autonomy_ntp_server_addresses }}
+{%- for option in autonomy_ntp_association_options -%}
+  {{ " " }}{{ option }}
+{%- endfor %}
+{% elif autonomy_ntp_server_addresses is iterable %}
+{% if autonomy_ntp_server_addresses | length > 1 %}
+{% for server in autonomy_ntp_server_addresses %}
+pool {{ server }}
+{%- for option in autonomy_ntp_association_options -%}
+  {{ " " }}{{ option }}
+{%- endfor %}
+
+{% endfor %}
+{% else %}
+server {{ autonomy_ntp_server_addresses[0] }}
+{%- for option in autonomy_ntp_server_options -%}
+  {{ " " }}{{ option }}
+{%- endfor %}
+{% endif %}
+{% endif %}
+
+# Access control configuration; see /usr/share/doc/ntpsec-doc/html/accopt.html
+# for details.
+#
+# Note that "restrict" applies to both servers and clients, so a configuration
+# that might be intended to block requests from certain clients could also end
+# up blocking replies from your own upstream servers.
+
+# By default, exchange time with everybody, but don't allow configuration.
+restrict default kod nomodify nopeer noquery limited
+
+# Local users may interrogate the ntp server more closely.
+{% for address in autonomy_ntp_restrict_ip_addresses -%}
+restrict {{ address }}
+{% endfor %}

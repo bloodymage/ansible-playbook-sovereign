@@ -1,7 +1,7 @@
 # ==================================================================================================
 #
 # 
-- name: Add SPN for Samba Users
+- name: "Add SPN for Samba Users."
   ansible.builtin.shell: >
     samba-tool spn add "{{ item.spn }}/{{ item.host }}" "{{ user.username }}"
   become: yes
@@ -14,7 +14,7 @@
     - item.spn is defined
     - item.host is defined
 
-- name: "Create Keytab for Samba Users"
+- name: "Create Keytab for Samba Users."
   ansible.builtin.shell: >
     samba-tool domain exportkeytab
     --principal "{{ item.spn }}/{{ item.host }}"
@@ -28,7 +28,7 @@
   delegate_to: "{{ __samba_schema_master }}"
   run_once: yes
 
-- name: "Fetch keytab"
+- name: "Fetch keytab."
   ansible.builtin.fetch:
     src: "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"
     dest: "/tmp/{{ user.username }}-{{ item.spn }}-{{ item.host }}.keytab"

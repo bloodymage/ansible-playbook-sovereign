@@ -26,10 +26,9 @@ Any pre-requisites that may not be covered by Ansible itself or the role should 
 
 ### Dependencies
 ```
+- role: bloodymage.autonomy.config_defaults
 - role: bloodymage.autonomy.collection_handlers
 ```
-
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
 
 Usage
 -----
@@ -44,7 +43,7 @@ Including an example of how to use your role (for instance, with variables passe
 
     - hosts: servers
       roles:
-        - { role: bloodymage.autonomy.dovecot, x: 42 }
+        - role: bloodymage.autonomy.dovecot
 
 Features and Advantages
 -----------------------
@@ -68,6 +67,7 @@ References
 - [Dovecot Mailing List](https://dovecot.org/list/dovecot/2010-February/046763.html)
 - [Authenticating Dovecot against Active Directory](https://wiki.samba.org/index.php/Authenticating_Dovecot_against_Active_Directory)
 - [Serverfault: Samba4 Active Directory Dovecot Postfix LDAP Auth lookups](https://serverfault.com/questions/771252/samba4-active-directory-dovecot-postfix-ldap-auth-lookups)
+- [Replacing antispam plugin with IMAPSieve](https://doc.dovecot.org/configuration_manual/howto/antispam_with_sieve/)
 
 Contributing
 ------------

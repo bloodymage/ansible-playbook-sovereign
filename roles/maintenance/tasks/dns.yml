@@ -1,0 +1,15 @@
+---
+- name: "Update DNS records using nsupdate protocol."
+  include_tasks: "dns_nsupdate.yml"
+  tags:
+    - dns
+    - dns-nsupdate
+
+- name: "Update DNS records using CloudFlare DNS."
+  include_tasks: "dns_cloudflare.yml"
+  when:
+    - autonomy_dns_protocol == "cloudflare"
+    - autonomy_zone_type == "public"
+  tags:
+    - dns
+    - dns-cloudflare

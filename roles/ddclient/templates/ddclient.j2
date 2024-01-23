@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-{% for site in ddclient_sites -%}
+{% for site in autonomy_ddclient_sites -%}
   {% if site.daemon is defined -%}
     daemon={{ site.daemon }}
   {% endif -%}
@@ -21,10 +21,11 @@
     protocol={{ site.protocol }}
   {% endif -%}
 
+use=no
   {% if site.usev6 is defined -%}
     usev6={{ site.usev6 }}
   {% endif -%}
-
+if=
   {% if site.if_skip is defined -%}
     if-skip={{ site.if_skip }}
   {% endif -%}

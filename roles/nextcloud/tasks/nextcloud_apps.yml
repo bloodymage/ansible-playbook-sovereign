@@ -74,6 +74,14 @@
     __disabled_apps: "{{ __currently_selected_apps | difference(__nextcloud_mandatory_apps) }}"
     __removed_apps: "{{ __disabled_apps | difference(__nextcloud_default_apps) }}"
 
+- name: "Ensure we have a clean nextcloud state before we do anything else."
+  ansible.builtin.command:
+    cmd: >
+      php occ upgrade
+    chdir: "/srv/www/{{ inventory_hostname }}"
+  become: yes
+  become_user: www-data
+
 - name: "Upgrade Nextcloud Apps."
   ansible.builtin.command:
     cmd: "php occ app:update --all"

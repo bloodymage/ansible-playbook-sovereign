@@ -1,6 +1,9 @@
 ---
 # defaults file for polkit
-autonomy_packages:
+autonomy_polkit_packages:
+#  - polkitd
+#  - policykit-1
+#  - pkexec
   - libpolkit-agent-1-0
   - libpolkit-gobject-1-0
 
@@ -8,3 +11,9 @@ polkit_sudo_groups:
   - "sudo"
   - "wheel"
 
+autonomy_polkit_user_name: polkitd
+autonomy_polkit_user_comment: "PolicyKit Daemon Owner"
+autonomy_polkit_user_create_home: true
+autonomy_polkit_user_group: polkitd
+autonomy_polkit_user_home: "/var/lib/polkit-1"
+autonomy_polkit_user_system: true

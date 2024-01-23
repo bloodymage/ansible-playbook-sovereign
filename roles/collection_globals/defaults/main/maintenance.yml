@@ -1,0 +1,3 @@
+---
+autonomy_dns_ipv4_reverse_zone: "{{ autonomy_bind_ipv4_address.split('.')[0] }}.{{ autonomy_bind_ipv4_address.split('.')[1] }}"
+autonomy_dns_ipv4_reverse_zone_formatted: "{{ autonomy_dns_ipv4_reverse_zone.split('.')[1] }}.{{ autonomy_dns_ipv4_reverse_zone.split('.')[0] }}"

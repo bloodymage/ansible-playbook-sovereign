@@ -21,14 +21,43 @@
 # 9. Configure workstations
 #
 # ==================================================================================================
-- import_playbook: control.yml
-- import_playbook: sshca.yml
-- import_playbook: ownca.yml
-- import_playbook: all.yml
-- import_playbook: dnsservers.yml
-- import_playbook: realm.yml
-- import_playbook: fileservers.yml
-- import_playbook: dbservers.yml
-- import_playbook: webservers.yml
-- import_playbook: mailservers.yml
-- import_playbook: workstations.yml
+- name: "Configure the Ansible control node."
+  hosts: localhost
+  roles:
+    - role: bloodymage.autonomy.ansible
+      tags:
+        - never
+        - ansible
+
+- name: "Configure the Ansible Control node."
+  import_playbook: control.yml
+
+- name: "Configure SshCA."
+  import_playbook: sshca.yml
+
+- name: "Configure OwnCA."
+  import_playbook: ownca.yml
+
+- name: "Basic Configuration for all hosts."
+  import_playbook: all.yml
+
+- name: "Configure DNS Servers."
+  import_playbook: dnsservers.yml
+
+- name: "Configure Realm Identity Management."
+  import_playbook: realm.yml
+
+- name: "Configure File Servers."
+  import_playbook: fileservers.yml
+
+- name: "Configure Database Servers."
+  import_playbook: dbservers.yml
+
+- name: "Configure Web Servers."
+  import_playbook: webservers.yml
+
+- name: "Configure Mail Servers."
+  import_playbook: mailservers.yml
+
+- name: "Configure Workstations."
+  import_playbook: workstations.yml

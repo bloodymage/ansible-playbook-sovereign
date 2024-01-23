@@ -1,0 +1,8 @@
+---
+- hosts: all
+  roles:
+    - role: bloodymage.autonomy.config_environment
+      tags:
+        - always
+      when:
+        - ansible_date_time.day == "01"

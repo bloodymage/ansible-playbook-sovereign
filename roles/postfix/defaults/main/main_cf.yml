@@ -15,106 +15,75 @@
 #   default value: "+"
 #
 # ==================================================================================================
-# Variables which our default is different from postfix's default.
-
-# Input Services
-postfix_smtpd_banner: "$myhostname ESMTP"
-
-postfix_smtpd_milters:
-  - "{{ mail_spamassassin_unix_socket }}"
-
-postfix_smtpd_tls_chain_files:
-  - "/etc/ssl/private/{{ autonomy_fqdn }}.key"
-  - "/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem"
-
-postfix_smtpd_helo_required: "yes"
-
-postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
-
-postfix_smtpd_use_tls: "yes"
-
-# Processing Services
-
-# Output Services
-
-# Helpers
-
-# Recipient/Sender Verification
-
-# TLS Cache Manager
-
-# Anvil
-
-# Needed by Mailq command
-
-# Needed by postqueue -f
-
-# Proxymap
-
-# Other
-
-postfix_non_smtpd_milters: "$smtpd_milters"
-
 postfix_alias_maps:
   - "hash:/etc/aliases"
-
 postfix_biff: "no"
 postfix_canonical_maps:
   - "hash:/etc/postfix/canonical"
-
-postfix_compatibility_level: "2"
-
+postfix_compatibility_level: "3.6"
+#postfix_compatibility_level: "{{ ansible_facts['packages']['postfix'][0]['version'].split('-')[0] }}"
 postfix_disable_vrfy_command: "yes"
-
 postfix_home_mailbox: "Maildir/"
+postfix_line_length_limit: 6144
 
-postfix_line_length_limit: "6144"
-
-postfix_mailbox_size_limit: "0"
-
-# Set this to 50MB
-postfix_message_size_limit: "52428800"
-
+autonomy_postfix_lmtp_tls_mandatory_protocols: ">=TLSv1.2"
+autonomy_postfix_lmtp_tls_protocols: ">=TLSv1.2"
+postfix_mailbox_size_limit: 0
+postfix_message_size_limit: 52428800 # Set this to 50MB
+postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
+postfix_milter_default_action: "accept"
 postfix_mydestination:
   - "$myhostname"
   - "localhost.{{ autonomy_domain }}"
   - "localhost"
-
 postfix_myhostname: "{{ autonomy_fqdn }}"
-
+postfix_non_smtpd_milters: "$smtpd_milters"
 postfix_postscreen_dnsbl_action: "enforce"
-
 postfix_postscreen_dnsbl_sites:
   - "zen.spamhaus.org"
   - "b.barracudacentral.org"
   - "bl.spamcop.net"
-
 postfix_postscreen_greet_action: "enforce"
-
 postfix_smtp_header_checks:
   - name: "Received"
     status: "IGNORE"
   - name: "User-Agent"
     status: "IGNORE"
 
+# tools.ietf.org/pdf/draft-ietf-tls-oldversions-deprecate-09.pdf
+autonomy_postfix_smtp_tls_mandatory_protocols: ">=TLSv1.2"
+autonomy_postfix_smtp_tls_protocols: ">=TLSv1.2"
 postfix_smtp_tls_session_cache_database: "btree:${data_directory}/smtp_cache"
+
+
+postfix_smtpd_banner: "$myhostname ESMTP"
+autonomy_postfix_smtpd_data_restrictions:
+  - "reject_unauth_pipelining"
+autonomy_postfix_smtpd_discard_ehlo_keywords:
+  - "chunking"
+  - "silent-discard"
+autonomy_postfix_smtpd_forbid_unauth_pipelining: "yes"
+postfix_smtpd_milters:
+  - "{{ mail_spamassassin_unix_socket }}"
+postfix_smtpd_tls_chain_files:
+  - "/etc/ssl/private/{{ autonomy_fqdn }}.key"
+  - "/etc/ssl/certs/{{ autonomy_fqdn }}-chain.pem"
+postfix_smtpd_helo_required: "yes"
+autonomy_postfix_smtpd_tls_mandatory_protocols: ">=TLSv1.2"
+autonomy_postfix_smtpd_tls_protocols: ">=TLSv1.2"
+postfix_smtpd_tls_session_cache_database: "btree:${data_directory}/smtpd_cache"
+postfix_smtpd_use_tls: "yes"
 postfix_smtpd_relay_restrictions:
-  - "permit_sasl_authenticated"
   - "permit_mynetworks"
   - "permit_auth_destination"
+  - "permit_sasl_authenticated"
   - "reject_unauth_destination"
   - "reject"
-
-
-
+autonomy_postfix_tls_server_sni_maps: false
 postfix_virtual_alias_maps:
   - "hash:/etc/postfix/virtual-mailbox-user-aliases"
-
 postfix_virtual_mailbox_maps:
   - "hash:/etc/postfix/virtual-mailbox-users"
-
-postfix_milter_connect_macros: "j {daemon_name} v {if_name} _"
-postfix_milter_default_action: "accept"
 
 # Variables which have the same default as postfix
 postfix_alias_database: "{{ __postfix_alias_database }}"
@@ -125,6 +94,9 @@ postfix_inet_interfaces: "{{ __postfix_inet_interfaces }}"
 postfix_inet_protocols: "{{ __postfix_inet_interfaces }}"
 postfix_local_recipient_maps: "{{ __postfix_local_recipient_maps }}"
 postfix_mailbox_transport: "{{ __postfix_mailbox_transport }}"
+postfix_maillog_file: "{{ __postfix_maillog_file }}"
+autonomy_postfix_maillog_file_permissions: ""
+postfix_mydomain: "{{ __postfix_mydomain }}"
 postfix_mynetworks: "{{ __postfix_mynetworks }}"
 postfix_mynetworks_style: "{{ __postfix_mynetworks_style }}"
 postfix_myorigin: "{{ __postfix_myorigin }}"
@@ -174,134 +146,3 @@ postfix_virtual_transport: "{{ __postfix_virtual_transport }}"
 
 # Variables which aren't documented except in 'how-to' guides, need further research
 postfix_dovecot_destination_recipient_limit: 1
-
-# ==================================================================================================
-#
-# Postfix main.cf Internal Defaults
-#
-# These are the hard coded defaults from postfix.  DO NOT EDIT!
-#
-# ==================================================================================================
-__postfix_2bounce_notice_recipient: "postmaster"
-__postfix_access_map_defer_code: "450"
-__postfix_access_map_reject_code: "450"
-__postfix_address_verify_cache_cleanup_interval: "12h"
-__postfix_address_verify_default_transport: "$default_transport"
-__postfix_address_verify_local_transport: "$local_trasport"
-__postfix_alias_database: "hash:/etc/aliases"
-__postfix_alias_maps:
-  - "hash:/etc/aliases"
-  - "nis:mail.aliases"
-__postfix_append_dot_mydomain: "no"
-__postfix_biff: "yes"
-__postfix_bounce_queue_lifetime: "5d"
-__postfix_bounce_service_name: "bounce"
-__postfix_bounce_size_limit: "50000"
-__postfix_bounce_template_file: ""
-__postfix_broken_sasl_auth_clients: "no"
-__postfix_canonical_classes:
-  - envelope_sender
-  - envelope_recipient
-  - header_sender
-  - header_recipient
-__postfix_canonical_maps: []
-__postfix_compatibility_level: "0"
-__postfix_default_destination_concurrency_limit: "20"
-__postfix_delay_warning_time: "0h"
-__postfix_disable_vrfy_command: "no"
-__postfix_home_mailbox: ""
-__postfix_inet_interfaces: "all"
-__postfix_inet_protocols: "all"
-__postfix_line_length_limit: "2048"
-__postfix_local_recipient_maps:
-  - "proxy:unix:passwd.byname $alias_maps"
-__postfix_mailbox_size_limit: 0
-__postfix_mailbox_transport: ""
-__postfix_message_size_limit: "10240000"
-__postfix_milter_connect_macros: "j {daemon_name} {daemon_addr} v"
-__postfix_milter_default_action: "tempfail"
-__postfix_multi_recipient_bounce_reject_code: "550"
-__postfix_mydestination:
-  - "$myhostname"
-  - "localhost.$mydomain"
-  - "localhost"
-__postfix_mydomain: "localdomain"
-__postfix_myhostname: "{{ inventory_hostname_short }}.localdomain"
-__postfix_mynetworks:
-  - "127.0.0.0/8"
-__postfix_mynetworks_style: "hosts"
-__postfix_myorigin: "$myhostname"
-__postfix_non_smtpd_milters: []
-__postfix_notify_classes:
-  - resource
-  - software
-__postfix_nullmx_code: "556"
-__postfix_openssl_path: "openssl"
-__postfix_postscreen_access_list: "permit_mynetworks"
-__postfix_postscreen_dnsbl_action: "ignore"
-__postfix_postscreen_dnsbl_sites: []
-__postfix_postscreen_greet_action: "ignore"
-__postfix_readme_directory: "/usr/share/doc/postfix"
-__postfix_recipient_delimiter: ""
-__postfix_relay_destination_concurrency_limit: "$default_destination_concurrency_limit"
-__postfix_relay_domains: []
-__postfix_relay_host: ""
-__postfix_sender_dependent_relayhost_maps: []
-__postfix_smtp_header_checks: ""
-__postfix_smtp_helo_name: "$myhostname"
-__postfix_smtp_sasl_auth_enable: "no"
-__postfix_smtp_sasl_password_maps: []
-__postfix_smtp_sasl_security_options:
-  - "noplaintext"
-  - "noanonymous"
-__postfix_smtp_sasl_tls_security_options: "$smtp_sasl_security_options"
-__postfix_smtp_sender_dependent_authentication: "no"
-__postfix_smtp_tls_note_starttls_offer: "no"
-__postfix_smtp_tls_security_level: ""
-__postfix_smtp_tls_session_cache_database: []
-__postfix_smtp_tls_wrappermode: "no"
-__postfix_smtpd_banner: "$myhostname ESMTP $mail_name"
-__postfix_smtpd_client_restrictions: []
-__postfix_smtpd_helo_restrictions: []
-__postfix_smtpd_helo_required: "no"
-__postfix_smtpd_milters: []
-__postfix_smtpd_recipient_restrictions: []
-__postfix_smtpd_relay_restrictions:
-  - "permit_mynetworks"
-  - "permit_sasl_authenticated"
-  - "defer_unauth_destination"
-__postfix_smtpd_sasl_auth_enable: "no"
-__postfix_smtpd_sasl_authenticated_header: "no"
-__postfix_smtpd_sasl_local_domain: []
-__postfix_smtpd_sasl_path: "smtpd"
-__postfix_smtpd_sasl_security_options:
-  - "noanonymous"
-__postfix_smtpd_sasl_tls_security_options: "$smtpd_sasl_security_options"
-__postfix_smtpd_sasl_type: "cyrus"
-__postfix_smtpd_sender_login_maps: []
-__postfix_smtpd_sender_restrictions: []
-__postfix_smtpd_tls_CAfile: ""
-__postfix_smtpd_tls_ask_ccert: "no"
-__postfix_smtpd_tls_auth_only: "no"
-__postfix_smtpd_tls_cert_file:  ""
-__postfix_smtpd_tls_chain_files: []
-__postfix_smtpd_tls_ciphers: "medium"
-__postfix_smtpd_tls_key_file:  ""
-__postfix_smtpd_tls_loglevel: 0
-__postfix_smtpd_tls_received_header: "no"
-__postfix_smtpd_tls_session_cache_database: []
-__postfix_smtpd_tls_session_cache_timeout: "3600s"
-__postfix_smtpd_use_tls: "no"
-__postfix_tls_random_source: "dev:/dev/urandom"
-__postfix_transport_maps: []
-__postfix_unknown_address_reject_code: "450"
-__postfix_unknown_client_reject_code: "450"
-__postfix_unknown_hostname_reject_code: "450"
-__postfix_unknown_local_recipient_reject_code: "550"
-__postfix_unknown_relay_recipient_reject_code: "550"
-__postfix_virtual_alias_maps:
-  - "$virtual_maps"
-__postfix_virtual_mailbox_domains: "$virtual_mailbox_maps"
-__postfix_virtual_mailbox_maps: []
-__postfix_virtual_maps: []
-__postfix_virtual_transport: "virtual"

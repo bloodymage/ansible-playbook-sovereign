@@ -29,7 +29,7 @@
 #   become: yes
 #   vars:
 #     __samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-#     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/administrator/password"
+#     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/administrator/password"
 #     __password_lookup: "{{ __password_store_id }}"
 #   when:
 #     - groups['samba_domain_controllers'] is defined

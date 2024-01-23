@@ -2,4 +2,4 @@
 
 # {{ ansible_managed }}
 
-exec "/usr/bin/spamc -u ${1} -L {{ item.type }} -C report"
+exec /usr/bin/spamc -u ${1} -L {{ item.type }}

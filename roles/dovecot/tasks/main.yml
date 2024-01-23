@@ -5,23 +5,30 @@
 # Task: Install apps
 #
 # ==================================================================================================
-- name: "Pretasks"
-  block:
-    - name: "Include OS-specific variables."
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
- 
-    - name: "Install packages."
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
- 
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+
+- name: "Check if we need ldap related packages."
+  ansible.builtin.set_fact:
+    autonomy_dovecot_packages: "{{ autonomy_dovecot_packages + [item] }}"
+  loop:
+    - "dovecot-ldap"
+    - "dovecot-gssapi"
+  when:
+    - autonomy_realm_identity_management_system is truthy
+
+- name: "Install packages."
+  ansible.builtin.package:
+    name: "{{ autonomy_dovecot_packages }}"
+    state: present
+  become: yes
+
 - name: "Update password and auth mechanims."
   ansible.builtin.set_fact:
     dovecot_password_databases: "{{ dovecot_password_databases + ['ldap'] }}"
@@ -57,7 +64,7 @@
     __mail_user: "{{ mail_user }}"
     __mail_user_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/{{ mail_user }}/password"
     __password_lookup: "{{ __password_store_id }}"
   #no_log: yes
   become: no
@@ -80,7 +87,7 @@
     - dovecot.conf
     #- "{{ dovecot_password_file }}"
   become: yes
-  notify: restart dovecot
+  notify: "restart dovecot"
 
 - name: "Install auth config files to /etc/dovecot."
   ansible.builtin.template:
@@ -91,7 +98,7 @@
     mode: "0644"
   loop: "{{ dovecot_auth_conf }}"
   become: yes
-  notify: restart dovecot
+  notify: "restart dovecot"
   when:
     - item.name != "system"
     - item.name != "deny"
@@ -127,7 +134,7 @@
     - auth-master.conf.ext
     - auth-static.conf.ext
     - auth-vpopmail.conf.ext
-  notify: restart dovecot
+  notify: "restart dovecot"
 
 - name: "Install authorization configuration files to /etc/dovecot/conf.d."
   ansible.builtin.template:
@@ -138,7 +145,7 @@
     mode: "0644"
   become: yes
   loop: "{{ dovecot_auth_conf }}"
-  notify: restart dovecot
+  notify: "restart dovecot"
 
 # ==================================================================================================
 #
@@ -208,7 +215,7 @@
 # ==================================================================================================
 - name: "Ensure Dovecot Sieve Directories exists."
   ansible.builtin.file:
-    path: "{{ dovecot_etc }}/sieve/{{ item }}"
+    path: "{{ dovecot_sieve_dir }}/{{ item }}"
     owner: "{{ mail_user }}"
     group: "{{ mail_user }}"
     mode: "0755"
@@ -223,23 +230,25 @@
   ansible.builtin.template:
     src: "etc/dovecot/sieve/report-sieve.j2"
     dest: "{{ dovecot_etc }}/sieve/global/report-{{ item.type }}.sieve"
-    owner: root
-    group: root
+    owner: "{{ mail_user }}"
+    group: "{{ mail_user }}"
     mode: "0644"
   become: yes
   loop: "{{ dovecot_imapsieve_mailboxes }}"
+  notify: "restart dovecot"
   tags:
     - sieve-filters
 
 - name: "Install Sieve rules."
   ansible.builtin.template:
     src: "etc/dovecot/sieve/{{ item.name }}.sieve.j2"
-    dest: "{{ dovecot_etc }}/sieve/{{ item.type }}/{{ item.priority }}-{{ item.name }}.sieve"
+    dest: "{{ dovecot_sieve_dir }}/{{ item.type }}/{{ item.priority }}-{{ item.name }}.sieve"
     owner: "{{ mail_user }}"
     group: "{{ mail_user }}"
     mode: "0644"
   become: yes
   loop: "{{ dovecot_sieve_files }}"
+  notify: "recompile sieve"
   vars:
     __main_folder: "Inbox"
   when:
@@ -266,7 +275,7 @@
 
 - name: "Ensure Sieve Pipe Bin Dir exists."
   ansible.builtin.file:
-    path: "{{ dovecot_sieve_pipe_bin_dir }}"
+    path: "{{ autonomy_dovecot_sieve_pipe_bin_dir }}"
     owner: "{{ mail_user }}"
     group: "{{ mail_user }}"
     mode: "0755"
@@ -276,12 +285,29 @@
 - name: "Install IMAPSieve Spam Update Filters."
   ansible.builtin.template:
     src: "usr/lib/dovecot/sieve/sa-learn.j2"
-    dest: "{{ dovecot_sieve_pipe_bin_dir }}/sa-learn-{{ item.type }}.sh"
+    dest: "{{ autonomy_dovecot_sieve_pipe_bin_dir }}/sa-learn-{{ item.type }}.sh"
     owner: "root"
     group: "root"
     mode: "0755"
   become: yes
   loop: "{{ dovecot_imapsieve_mailboxes }}"
+
+# ==================================================================================================
+#
+# Logging Configuration
+#
+# ==================================================================================================
+- name: "Create logging directories."
+  ansible.builtin.file:
+    path: "{{ autonomy_dovecot_log_dir }}"
+    owner: "root"
+    group: "root"
+    mode: "0755"
+    state: directory
+  become: yes
+  when:
+    - autonomy_dovecot_log_dir is truthy
+    - (autonomy_dovecot_info_log_path is truthy or autonomy_dovecot_debug_log_path is truthy)
 
 # ==================================================================================================
 #
@@ -306,7 +332,7 @@
 #   become: yes
 #   loop: "{{ dovecot_migration_users }}"
 #   vars:
-#     __password_store_id: "{{ autonomy_passdb }}{{ autonomy_domain }}/external_services/{{ dovecot_migration_users }}/{{ item.account }}"
+#     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/external_services/{{ dovecot_migration_users }}/{{ item.account }}"
 #     __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
 #     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
 #     __password_create: "create=true"

@@ -1,0 +1,10 @@
+---
+# defaults file for kerberos
+autonomy_kerberos_packages:
+  - krb5-pkinit
+  - krb5-user
+  - krb5-config
+  #-libpam-krb5
+
+autonomy_kerberos_logging: no
+autonomy_kerberos_domain_realm: yes

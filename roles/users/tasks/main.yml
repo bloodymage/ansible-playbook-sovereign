@@ -7,18 +7,23 @@
       paths:
         - "vars"
   become: no
-  tags:
-    - users
-    - users_debug
-    - users-debug
-    - install-packages
 
-- name: "Include Family Tasks."
-  include_tasks: "{{ ansible_os_family | lower }}.yml"
+- name: "Configure System Users."
+  include_tasks: "users.yml"
   when:
-    - ansible_network_os is not defined
+    - __user_tasks == "sysusers"
 
-- name: "Include NetworkOS tasks."
-  include_tasks: "{{ ansible_network_os.split('.')[2] | lower }}.yml"
+- name: "Configure User Password Store."
+  include_tasks: "password_store.yml"
   when:
-    - ansible_network_os is defined
+    - __user_tasks == "passwordstore"
+
+- name: "Configure User Dotfiles."
+  include_tasks: "dotfiles.yml"
+  when:
+    - __user_tasks == "dotfiles"
+
+- name: "Configure Realm Users."
+  include_tasks: "realm_users.yml"
+  when:
+    - __user_tasks == "realm_users"

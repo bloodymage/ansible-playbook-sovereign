@@ -1,0 +1,1244 @@
+---
+# ==================================================================================================
+#
+# Postfix main.cf Internal Defaults
+#
+# These are the hard coded defaults from postfix.  DO NOT EDIT!
+#
+# ==================================================================================================
+__postfix_2bounce_notice_recipient: "postmaster"
+__postfix_access_map_defer_code: "450"
+__postfix_access_map_reject_code: "554"
+__postfix_address_verify_cache_cleanup_interval: "12h"
+__postfix_address_verify_default_transport: "$default_transport"
+__postfix_address_verify_local_transport: "$local_trasport"
+__postfix_address_verify_map: "btree:$data_directory/verify_cache"
+__postfix_address_verify_negative_cache: "yes"
+__postfix_address_verify_negative_expire_time: "3d"
+__postfix_address_verify_negative_refresh_time: "3h"
+__postfix_address_verify_pending_request_limit: "5000"
+__postfix_address_verify_poll_count: "${stress?{1}:{3}}"
+__postfix_address_verify_poll_delay: "3s"
+__postfix_address_verify_positive_expire_time: "31d"
+__postfix_address_verify_positive_refresh_time: "7d"
+__postfix_address_verify_relay_transport: "$relay_transport"
+__postfix_address_verify_relayhost: "$relayhost"
+__postfix_address_verify_sender: "$double_bounce_sender"
+__postfix_address_verify_sender_dependent_default_transport_maps: "$sender_dependent_default_transport_maps"
+__postfix_address_verify_sender_dependent_relayhost_maps: "$sender_dependent_relayhost_maps"
+__postfix_address_verify_sender_ttl: "0s"
+__postfix_address_verify_service_name: "verify"
+__postfix_address_verify_transport_maps: "$transport_maps"
+__postfix_address_verify_virtual_transport: "$virtual_transport"
+__postfix_alias_database: "hash:/etc/aliases"
+__postfix_alias_maps:
+  - "hash:/etc/aliases"
+  - "nis:mail.aliases"
+__postfix_allow_mail_to_commands:
+  - "alias"
+  - "forward"
+__postfix_allow_mail_to_files:
+  - "alias"
+  - "forward"
+__postfix_allow_min_user: "no"
+__postfix_allow_percent_hack: "yes"
+__postfix_allow_untrusted_routing: "no"
+__postfix_alternate_config_directories: []
+__postfix_always_add_missing_headers: "no"
+__postfix_always_bcc: ""
+__postfix_anvil_rate_time_unit: "60s"
+__postfix_anvil_status_update_time: "600s"
+__postfix_append_at_myorigin: "yes"
+#__postfix_append_dot_mydomain: "${{$compatibility_level} <level {1} ? {yes} : {no}}"
+__postfix_append_dot_mydomain: "no"
+__postfix_application_event_drain_time: "100s"
+__postfix_authorized_flush_users: "static:anyone"
+__postfix_authorized_mailq_users: "static:anyone"
+__postfix_authorized_submit_users: "static:anyone"
+__postfix_backwards_bounce_logfile_compatibility: "yes"
+__postfix_berkeley_db_create_buffer_size: 16777216
+__postfix_berkeley_db_read_buffer_size: 131072
+__postfix_best_mx_transport: []
+__postfix_biff: "yes"
+__postfix_body_checks: []
+__postfix_body_checks_size_limit: 51200
+__postfix_bounce_notice_recipient: "postmaster"
+__postfix_bounce_queue_lifetime: "5d"
+__postfix_bounce_service_name: "bounce"
+__postfix_bounce_size_limit: 50000
+__postfix_bounce_template_file: ""
+__postfix_broken_sasl_auth_clients: "no"
+__postfix_bsmtp_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_bsmtp_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_bsmtp_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_bsmtp_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_bsmtp_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_bsmtp_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_bsmtp_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_bsmtp_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_bsmtp_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_bsmtp_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_bsmtp_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_bsmtp_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_bsmtp_recipient_limit: "$default_recipient_limit"
+__postfix_bsmtp_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_bsmtp_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_bsmtp_time_limit: "$command_time_limit"
+__postfix_bsmtp_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_canonical_classes:
+  - "envelope_sender"
+  - "envelope_recipient"
+  - "header_sender"
+  - "header_recipient"
+__postfix_canonical_maps: []
+__postfix_cleanup_service_name: "cleanup"
+__postfix_command_directory: "/usr/sbin"
+__postfix_command_execution_directory: ""
+__postfix_command_expansion_filter: "1234567890!@%-_=+:,./abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+__postfix_command_time_limit: "1000s"
+__postfix_compatibility_level: 0
+__postfix_config_directory: "/etc/postfix"
+__postfix_confirm_delay_cleared: "no"
+__postfix_connection_cache_protocol_timeout: "5s"
+__postfix_connection_cache_service_name: "scache"
+__postfix_connection_cache_status_update_time: "600s"
+__postfix_connection_cache_ttl_limit: "2s"
+__postfix_content_filter: []
+__postfix_cyrus_sasl_config_path: ""
+__postfix_daemon_directory: "/usr/lib/postfix/sbin"
+__postfix_daemon_table_open_error_is_fatal: "no"
+__postfix_daemon_timeout: "18000s"
+__postfix_data_directory: "/var/lib/postfix"
+__postfix_debug_peer_level: 2
+__postfix_debug_peer_list: []
+__postfix_debugger_command: []
+__postfix_default_database_type: "hash"
+__postfix_default_delivery_slot_cost: 5
+__postfix_default_delivery_slot_discount: 50
+__postfix_default_delivery_slot_loan: 3
+__postfix_default_delivery_status_filter: []
+__postfix_default_destination_concurrency_failed_cohort_limit: 1
+__postfix_default_destination_concurrency_limit: 20
+__postfix_default_destination_concurrency_negative_feedback: 1
+__postfix_default_destination_rate_delay: "0s"
+__postfix_default_destination_recipient_limit: 50
+__postfix_default_extra_recipient_limit: 1000
+__postfix_default_filter_nexthop: []
+__postfix_default_minimum_delivery_slots: 3
+__postfix_default_privs: "nobody"
+__postfix_default_process_limit: 100
+__postfix_default_rbl_reply: "$rbl_code Service unavailable; $rbl_class [$rbl_what] blocked using $rbl_domain${rbl_reason?; $rbl_reason}"
+__postfix_default_recipient_limit: 20000
+__postfix_default_recipient_refill_delay: "5s"
+__postfix_default_recipient_refill_limit: 100
+__postfix_default_transport: "smtp"
+__postfix_default_transport_rate_delay: "0s"
+__postfix_default_verp_delimiters: "+="
+__postfix_defer_code: 450
+__postfix_defer_service_name: "defer"
+__postfix_defer_transports: []
+__postfix_delay_logging_resolution_limit: 2
+__postfix_delay_notice_recipient: "postmaster"
+__postfix_delay_warning_time: "0h"
+__postfix_deliver_lock_attempts: 20
+__postfix_deliver_lock_delay: "1s"
+__postfix_destination_concurrency_feedback_debug: "no"
+__postfix_detect_8bit_encoding_header: "yes"
+__postfix_disable_dns_lookups: "no"
+__postfix_disable_mime_input_processing: "no"
+__postfix_disable_mime_output_conversion: "no"
+__postfix_disable_verp_bounces: "no"
+__postfix_disable_vrfy_command: "no"
+__postfix_dns_ncache_ttl_fix_enable: "no"
+__postfix_dnsblog_reply_delay: "0s"
+__postfix_dnsblog_service_name: "dnsblog"
+__postfix_dnssec_probe: "ns:."
+__postfix_dont_remove: 0
+__postfix_double_bounce_sender: "double-bounce"
+__postfix_dovecot_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_dovecot_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_dovecot_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_dovecot_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_dovecot_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_dovecot_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_dovecot_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_dovecot_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_dovecot_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_dovecot_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_dovecot_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_dovecot_recipient_limit: "$default_recipient_limit"
+__postfix_dovecot_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_dovecot_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_dovecot_time_limit: "$command_time_limit"
+__postfix_dovecot_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_duplicate_filter_limit: 1000
+__postfix_empty_address_default_transport_maps_lookup_key: "<>"
+__postfix_empty_address_local_login_sender_maps_lookup_key: "<>"
+__postfix_empty_address_recipient: "MAILER-DAEMON"
+__postfix_empty_address_relayhost_maps_lookup_key: "<>"
+__postfix_enable_idna2003_compatibility: "no"
+__postfix_enable_long_queue_ids: "no"
+__postfix_enable_original_recipient: "yes"
+__postfix_enable_threaded_bounces: "no"
+__postfix_error_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_error_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_error_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_error_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_error_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_error_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_error_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_error_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_error_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_error_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_error_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_error_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_error_notice_recipient: "postmaster"
+__postfix_error_recipient_limit: "$default_recipient_limit"
+__postfix_error_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_error_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_error_service_name: "error"
+__postfix_error_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_execution_directory_expansion_filter: "1234567890!@%-_=+:,./abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+__postfix_expand_owner_alias: "no"
+__postfix_export_environment: "TZ MAIL_CONFIG LANG"
+__postfix_fallback_transport: ""
+__postfix_fallback_transport_maps: []
+__postfix_fast_flush_domains: "$relay_domains"
+__postfix_fast_flush_purge_time: "7d"
+__postfix_fast_flush_refresh_time: "12h"
+__postfix_fault_injection_code: 0
+__postfix_flush_service_name: "flush"
+__postfix_fork_attempts: 5
+__postfix_fork_delay: "1s"
+__postfix_forward_expansion_filter: "1234567890!@%-_=+:,./abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+__postfix_forward_path: "$home/.forward${recipient_delimiter}${extension}, $home/.forward"
+__postfix_frozen_delivered_to: "yes"
+__postfix_hash_queue_depth: 1
+__postfix_hash_queue_names:
+  - "deferred"
+  - "defer"
+__postfix_header_address_token_limit: 10240
+__postfix_header_checks: []
+__postfix_header_from_format: "standard"
+__postfix_header_size_limit: 102400
+__postfix_helpful_warnings: "yes"
+__postfix_home_mailbox: ""
+__postfix_hopcount_limit: 50
+__postfix_html_directory: "/usr/share/doc/postfix/html"
+__postfix_ifmail_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_ifmail_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_ifmail_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_ifmail_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_ifmail_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_ifmail_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_ifmail_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_ifmail_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_ifmail_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_ifmail_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_ifmail_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_ifmail_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_ifmail_recipient_limit: "$default_recipient_limit"
+__postfix_ifmail_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_ifmail_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_ifmail_time_limit: "$command_time_limit"
+__postfix_ifmail_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_ignore_mx_lookup_error: "no"
+
+# Why are 'DISPLAY' and 'XAUTHORITY' part of the import environment for postfix?
+__postfix_import_environment:
+  - "MAIL_CONFIG"
+  - "MAIL_DEBUG"
+  - "MAIL_LOGTAG"
+  - "TZ"
+  - "XAUTHORITY"
+  - "DISPLAY"
+  - "LANG=C"
+  - "POSTLOG_SERVICE"
+  - "POSTLOG_HOSTNAME"
+__postfix_in_flow_delay: "1s"
+__postfix_inet_interfaces: "all"
+__postfix_inet_protocols: "all"
+__postfix_info_log_address_format: "external"
+__postfix_initial_destination_concurrency: 5
+__postfix_internal_mail_filter_classes: []
+__postfix_invalid_hostname_reject_code: 501
+__postfix_ipc_idle: "5s"
+__postfix_ipc_timeout: "3600s"
+__postfix_ipc_ttl: "1000s"
+__postfix_known_tcp_ports:
+  - "lmtp=24"
+  - "smtp=25"
+  - "smtps=submissions=465"
+  - "submission=587"
+__postfix_line_length_limit: 2048
+__postfix_lmdb_map_size: 16777216
+__postfix_lmtp_address_preference: "any"
+__postfix_lmtp_address_verify_target: "rcpt"
+__postfix_lmtp_assume_final: "no"
+__postfix_lmtp_balance_inet_protocols: "yes"
+__postfix_lmtp_bind_address6: ""
+__postfix_lmtp_bind_address: ""
+__postfix_lmtp_bind_address_enforce: "no"
+__postfix_lmtp_body_checks: []
+__postfix_lmtp_cname_overrides_servername: "no"
+__postfix_lmtp_connect_timeout: "0s"
+__postfix_lmtp_connection_cache_destinations: []
+__postfix_lmtp_connection_cache_on_demand: "yes"
+__postfix_lmtp_connection_cache_time_limit: "2s"
+__postfix_lmtp_connection_reuse_count_limit: 0
+__postfix_lmtp_connection_reuse_time_limit: "300s"
+__postfix_lmtp_data_done_timeout: "600s"
+__postfix_lmtp_data_init_timeout: "120s"
+__postfix_lmtp_data_xfer_timeout: "180s"
+__postfix_lmtp_defer_if_no_mx_address_found: "no"
+__postfix_lmtp_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_lmtp_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_lmtp_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_lmtp_delivery_status_filter: "$default_delivery_status_filter"
+__postfix_lmtp_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_lmtp_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_lmtp_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_lmtp_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_lmtp_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_lmtp_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_lmtp_discard_lhlo_keyword_address_maps: []
+__postfix_lmtp_discard_lhlo_keywords: []
+__postfix_lmtp_dns_reply_filter: []
+__postfix_lmtp_dns_resolver_options: []
+__postfix_lmtp_dns_support_level: ""
+__postfix_lmtp_enforce_tls: "no"
+__postfix_lmtp_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_lmtp_fallback_relay: ""
+__postfix_lmtp_generic_maps: []
+__postfix_lmtp_header_checks: []
+__postfix_lmtp_host_lookup: "dns"
+__postfix_lmtp_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_lmtp_lhlo_name: "$myhostname"
+__postfix_lmtp_lhlo_timeout: "300s"
+__postfix_lmtp_line_length_limit: 998
+__postfix_lmtp_mail_timeout: "300s"
+__postfix_lmtp_mime_header_checks: []
+__postfix_lmtp_min_data_rate: 500
+__postfix_lmtp_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_lmtp_mx_address_limit: 5
+__postfix_lmtp_mx_session_limit: 2
+__postfix_lmtp_nested_header_checks: []
+__postfix_lmtp_per_request_deadline: "${lmtp_per_record_deadline?{$lmtp_per_record_deadline}:{no}}
+__postfix_lmtp_pix_workaround_delay_time: 10s"
+__postfix_lmtp_pix_workaround_maps: []
+__postfix_lmtp_pix_workaround_threshold_time: "500s"
+__postfix_lmtp_pix_workarounds:
+  - "disable_esmtp"
+  - "delay_dotcrlf"
+__postfix_lmtp_quit_timeout: "300s"
+__postfix_lmtp_quote_rfc821_envelope: "yes"
+__postfix_lmtp_randomize_addresses: "yes"
+__postfix_lmtp_rcpt_timeout: "300s"
+__postfix_lmtp_recipient_limit: "$default_recipient_limit"
+__postfix_lmtp_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_lmtp_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_lmtp_reply_filter: []
+__postfix_lmtp_rset_timeout: "20s"
+__postfix_lmtp_sasl_auth_cache_name: ""
+__postfix_lmtp_sasl_auth_cache_time: "90d"
+__postfix_lmtp_sasl_auth_enable: "no"
+__postfix_lmtp_sasl_auth_soft_bounce: "yes"
+__postfix_lmtp_sasl_mechanism_filter: []
+__postfix_lmtp_sasl_password_maps: []
+__postfix_lmtp_sasl_path: ""
+__postfix_lmtp_sasl_security_options:
+  - "noplaintext"
+  - "noanonymous"
+__postfix_lmtp_sasl_tls_security_options: "$lmtp_sasl_security_options"
+__postfix_lmtp_sasl_tls_verified_security_options: "$lmtp_sasl_tls_security_options"
+__postfix_lmtp_sasl_type: "cyrus"
+__postfix_lmtp_send_dummy_mail_auth: "no"
+__postfix_lmtp_send_xforward_command: "no"
+__postfix_lmtp_sender_dependent_authentication: "no"
+__postfix_lmtp_skip_5xx_greeting: "yes"
+__postfix_lmtp_skip_quit_response: "no"
+__postfix_lmtp_starttls_timeout: "300s"
+__postfix_lmtp_tcp_port: 24
+__postfix_lmtp_tls_CAfile: ""
+__postfix_lmtp_tls_CApath: ""
+__postfix_lmtp_tls_block_early_mail_reply: "no"
+__postfix_lmtp_tls_cert_file: ""
+__postfix_lmtp_tls_chain_files: []
+__postfix_lmtp_tls_ciphers: "medium"
+__postfix_lmtp_tls_connection_reuse: "no"
+__postfix_lmtp_tls_dcert_file: ""
+__postfix_lmtp_tls_dkey_file: "$lmtp_tls_dcert_file"
+__postfix_lmtp_tls_eccert_file: ""
+__postfix_lmtp_tls_eckey_file: "$lmtp_tls_eccert_file"
+__postfix_lmtp_tls_enforce_peername: "yes"
+__postfix_lmtp_tls_exclude_ciphers: []
+__postfix_lmtp_tls_fingerprint_cert_match: ""
+__postfix_lmtp_tls_fingerprint_digest: "${{$compatibility_level} <level {3.6} ? {md5} : {sha256}}"
+__postfix_lmtp_tls_force_insecure_host_tlsa_lookup: "no"
+__postfix_lmtp_tls_key_file: "$lmtp_tls_cert_file"
+__postfix_lmtp_tls_loglevel: 0
+__postfix_lmtp_tls_mandatory_ciphers: "medium"
+__postfix_lmtp_tls_mandatory_exclude_ciphers: []
+__postfix_lmtp_tls_mandatory_protocols: ">=TLSv1"
+__postfix_lmtp_tls_note_starttls_offer: "no"
+__postfix_lmtp_tls_per_site: []
+__postfix_lmtp_tls_policy_maps: []
+__postfix_lmtp_tls_protocols: ">=TLSv1"
+__postfix_lmtp_tls_scert_verifydepth: 9
+__postfix_lmtp_tls_secure_cert_match: "nexthop"
+__postfix_lmtp_tls_security_level: ""
+__postfix_lmtp_tls_servername: ""
+__postfix_lmtp_tls_session_cache_database: ""
+__postfix_lmtp_tls_session_cache_timeout: "3600s"
+__postfix_lmtp_tls_trust_anchor_file: ""
+__postfix_lmtp_tls_verify_cert_match: "hostname"
+__postfix_lmtp_tls_wrappermode: "no"
+__postfix_lmtp_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_lmtp_use_tls: "no"
+__postfix_lmtp_xforward_timeout: "300s"
+__postfix_local_command_shell: ""
+__postfix_local_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_local_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_local_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_local_delivery_status_filter: "$default_delivery_status_filter"
+__postfix_local_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_local_destination_concurrency_limit: 2
+__postfix_local_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_local_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_local_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_local_destination_recipient_limit: 1
+__postfix_local_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_local_header_rewrite_clients: "permit_inet_interfaces"
+__postfix_local_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_local_login_sender_maps: "static:*"
+__postfix_local_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_local_recipient_limit: "$default_recipient_limit"
+__postfix_local_recipient_maps:
+  - "proxy:unix:passwd.byname $alias_maps"
+__postfix_local_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_local_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_local_transport: "local:$myhostname"
+__postfix_local_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_luser_relay: ""
+__postfix_mail_name: "Postfix"
+__postfix_mail_owner: "postfix"
+__postfix_mail_release_date: 20230605
+__postfix_mail_spool_directory: "/var/mail"
+__postfix_mail_version: "3.7.6"
+__postfix_mailbox_command: ""
+__postfix_mailbox_command_maps: []
+__postfix_mailbox_delivery_lock:
+  - "fcntl"
+  - "dotlock"
+__postfix_mailbox_size_limit: 51200000
+__postfix_mailbox_transport: ""
+__postfix_mailbox_transport_maps: []
+__postfix_maildrop_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_maildrop_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_maildrop_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_maildrop_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_maildrop_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_maildrop_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_maildrop_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_maildrop_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_maildrop_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_maildrop_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_maildrop_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_maildrop_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_maildrop_recipient_limit: "$default_recipient_limit"
+__postfix_maildrop_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_maildrop_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_maildrop_time_limit: "$command_time_limit"
+__postfix_maildrop_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_maillog_file: ""
+__postfix_maillog_file_compressor: "gzip"
+__postfix_maillog_file_prefixes:
+  - "/var"
+  - "/dev/stdout"
+__postfix_maillog_file_rotate_suffix: "%Y%m%d-%H%M%S"
+__postfix_mailman_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_mailman_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_mailman_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_mailman_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_mailman_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_mailman_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_mailman_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_mailman_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_mailman_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_mailman_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_mailman_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_mailman_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_mailman_recipient_limit: "$default_recipient_limit"
+__postfix_mailman_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_mailman_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_mailman_time_limit: "$command_time_limit"
+__postfix_mailman_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_mailq_path: "/usr/bin/mailq"
+__postfix_manpage_directory: "/usr/share/man"
+__postfix_maps_rbl_domains: []
+__postfix_maps_rbl_reject_code: 554
+__postfix_masquerade_classes:
+  - "envelope_sender"
+  - "header_sender"
+  - "header_recipient"
+__postfix_masquerade_domains: []
+__postfix_masquerade_exceptions: []
+__postfix_master_service_disable: ""
+__postfix_max_idle: "100s"
+__postfix_max_use: 100
+__postfix_maximal_backoff_time: "4000s"
+__postfix_maximal_queue_lifetime: "5d"
+__postfix_message_drop_headers:
+  - "bcc"
+  - "content-length"
+  - "resent-bcc"
+  - "return-path"
+__postfix_message_reject_characters: []
+__postfix_message_size_limit: "10240000"
+__postfix_message_strip_characters: []
+__postfix_meta_directory: "/etc/postfix"
+__postfix_milter_command_timeout: "30s"
+__postfix_milter_connect_macros: "j {daemon_name} {daemon_addr} v"
+__postfix_milter_connect_timeout: "30s"
+__postfix_milter_data_macros: "i"
+__postfix_milter_default_action: "tempfail"
+__postfix_milter_end_of_data_macros: "i"
+__postfix_milter_end_of_header_macros: "i"
+__postfix_milter_header_checks: []
+__postfix_milter_helo_macros: "{tls_version} {cipher} {cipher_bits} {cert_subject} {cert_issuer}"
+__postfix_milter_macro_daemon_name: "$myhostname"
+__postfix_milter_macro_defaults: []
+__postfix_milter_macro_v: "$mail_name $mail_version"
+__postfix_milter_mail_macros: "i {auth_type} {auth_authen} {auth_author} {mail_addr} {mail_host} {mail_mailer}"
+__postfix_milter_protocol: 6
+__postfix_milter_rcpt_macros: "i {rcpt_addr} {rcpt_host} {rcpt_mailer}"
+__postfix_milter_unknown_command_macros: []
+__postfix_mime_boundary_length_limit: 2048
+__postfix_mime_header_checks: "$header_checks"
+__postfix_mime_nesting_limit: 100
+__postfix_minimal_backoff_time: "300s"
+__postfix_multi_instance_directories: []
+__postfix_multi_instance_enable: "no"
+__postfix_multi_instance_group: ""
+__postfix_multi_instance_name: ""
+__postfix_multi_instance_wrapper: ""
+__postfix_multi_recipient_bounce_reject_code: "550"
+__postfix_mydestination:
+  - "$myhostname"
+  - "localhost.$mydomain"
+  - "localhost"
+__postfix_mydomain: "localdomain"
+__postfix_myhostname: "{{ inventory_hostname_short }}.localdomain"
+__postfix_mynetworks:
+  - "127.0.0.0/8"
+  - "{{ ansible_default_ipv4['network'] }}/{{ ansible_default_ipv4['prefix'] }}"
+  - "[::1]/128"
+  - "[fe80::]/64"
+#__postfix_mynetworks_style: "${{$compatibility_level} <level {2} ? {subnet} : {host}}"
+__postfix_mynetworks_style: "subnet"
+__postfix_myorigin: "$myhostname"
+__postfix_nested_header_checks: "$header_checks"
+__postfix_newaliases_path: "/usr/bin/newaliases"
+__postfix_non_fqdn_reject_code: 504
+__postfix_non_smtpd_milters: []
+__postfix_notify_classes:
+  - "resource"
+  - "software"
+__postfix_nullmx_code: 556
+__postfix_openssl_path: "openssl"
+__postfix_owner_request_special: "yes"
+__postfix_parent_domain_matches_subdomains:
+  - "debug_peer_list"
+  - "fast_flush_domains"
+  - "mynetworks"
+  - "permit_mx_backup_networks"
+  - "qmqpd_authorized_clients"
+  - "relay_domains"
+  - "smtpd_access_maps"
+__postfix_permit_mx_backup_networks: []
+__postfix_pickup_service_name: "pickup"
+__postfix_pipe_delivery_status_filter: "$default_delivery_status_filter"
+__postfix_plaintext_reject_code: 450
+__postfix_postlog_service_name: "postlog"
+__postfix_postlogd_watchdog_timeout: "10s"
+__postfix_postmulti_control_commands: "reload flush"
+__postfix_postmulti_start_commands: "start"
+__postfix_postmulti_stop_commands:
+  - "stop"
+  - "abort"
+  - "drain"
+  - "quick-stop"
+__postfix_postscreen_access_list:
+  - "permit_mynetworks"
+__postfix_postscreen_allowlist_interfaces: "${postscreen_whitelist_interfaces?{$postscreen_whitelist_interfaces}:{static:all}}"
+__postfix_postscreen_bare_newline_action: "ignore"
+__postfix_postscreen_bare_newline_enable: "no"
+__postfix_postscreen_bare_newline_ttl: "30d"
+__postfix_postscreen_cache_cleanup_interval: "12h"
+__postfix_postscreen_cache_map: "btree:$data_directory/postscreen_cache"
+__postfix_postscreen_cache_retention_time: "7d"
+__postfix_postscreen_client_connection_count_limit: "$smtpd_client_connection_count_limit"
+__postfix_postscreen_command_count_limit: 20
+__postfix_postscreen_command_filter: ""
+__postfix_postscreen_command_time_limit: "${stress?{10}:{300}}s"
+__postfix_postscreen_denylist_action: "${postscreen_blacklist_action?{$postscreen_blacklist_action}:{ignore}}"
+__postfix_postscreen_disable_vrfy_command: "$disable_vrfy_command"
+__postfix_postscreen_discard_ehlo_keyword_address_maps: "$smtpd_discard_ehlo_keyword_address_maps"
+__postfix_postscreen_discard_ehlo_keywords: "$smtpd_discard_ehlo_keywords"
+__postfix_postscreen_dnsbl_action: "ignore"
+__postfix_postscreen_dnsbl_allowlist_threshold: "${postscreen_dnsbl_whitelist_threshold?{$postscreen_dnsbl_whitelist_threshold}:{0}}"
+__postfix_postscreen_dnsbl_max_ttl: "${postscreen_dnsbl_ttl?{$postscreen_dnsbl_ttl}:{1}}h"
+__postfix_postscreen_dnsbl_min_ttl: "60s"
+__postfix_postscreen_dnsbl_reply_map: ""
+__postfix_postscreen_dnsbl_sites: []
+__postfix_postscreen_dnsbl_threshold: 1
+__postfix_postscreen_dnsbl_timeout: "10s"
+__postfix_postscreen_enforce_tls: "$smtpd_enforce_tls"
+__postfix_postscreen_expansion_filter: "$smtpd_expansion_filter"
+__postfix_postscreen_forbidden_commands: "$smtpd_forbidden_commands"
+__postfix_postscreen_greet_action: "ignore"
+__postfix_postscreen_greet_banner: "$smtpd_banner"
+__postfix_postscreen_greet_ttl: 1d"
+__postfix_postscreen_greet_wait: "${stress?{2}:{6}}s"
+__postfix_postscreen_helo_required: "$smtpd_helo_required"
+__postfix_postscreen_non_smtp_command_action: drop
+__postfix_postscreen_non_smtp_command_enable: "no"
+__postfix_postscreen_non_smtp_command_ttl: "30d"
+__postfix_postscreen_pipelining_action: enforce"
+__postfix_postscreen_pipelining_enable: "no"
+__postfix_postscreen_pipelining_ttl: "30d"
+__postfix_postscreen_post_queue_limit: "$default_process_limit"
+__postfix_postscreen_pre_queue_limit: "$default_process_limit"
+__postfix_postscreen_reject_footer: "$smtpd_reject_footer"
+__postfix_postscreen_reject_footer_maps: "$smtpd_reject_footer_maps"
+__postfix_postscreen_tls_security_level: "$smtpd_tls_security_level"
+__postfix_postscreen_upstream_proxy_protocol: ""
+__postfix_postscreen_upstream_proxy_timeout: "5s"
+__postfix_postscreen_use_tls: "$smtpd_use_tls"
+__postfix_postscreen_watchdog_timeout: "10s"
+__postfix_prepend_delivered_header: command, file, forward"
+__postfix_process_id: 374010
+__postfix_process_id_directory: "pid"
+__postfix_process_name: "postconf"
+__postfix_propagate_unmatched_extensions:
+  - "canonical"
+  - "virtual"
+__postfix_proxy_interfaces: []
+__postfix_proxy_read_maps:
+  - "$local_recipient_maps"
+  - "$mydestination"
+  - "virtual_alias_maps"
+  - "virtual_alias_domains"
+  - "virtual_mailbox_maps"
+  - "virtual_mailbox_domains"
+  - "relay_recipient_maps"
+  - "relay_domains"
+  - "canonical_maps"
+  - "sender_canonical_maps"
+  - "recipient_canonical_maps"
+  - "relocated_maps"
+  - "transport_maps"
+  - "mynetworks"
+  - "smtpd_sender_login_maps"
+  - "sender_bcc_maps"
+  - "recipient_bcc_maps"
+  - "smtp_generic_maps"
+  - "lmtp_generic_maps"
+  - "alias_maps"
+  - "smtpd_client_restrictions"
+  - "smtpd_helo_restrictions"
+  - "smtpd_sender_restrictions"
+  - "smtpd_relay_restrictions"
+  - "smtpd_recipient_restrictions"
+  - "address_verify_sender_dependent_default_transport_maps"
+  - "address_verify_sender_dependent_relayhost_maps"
+  - "address_verify_transport_maps"
+  - "fallback_transport_maps"
+  - "lmtp_discard_lhlo_keyword_address_maps"
+  - "lmtp_pix_workaround_maps"
+  - "lmtp_sasl_password_maps"
+  - "lmtp_tls_policy_maps"
+  - "mailbox_command_maps"
+  - "mailbox_transport_maps"
+  - "postscreen_discard_ehlo_keyword_address_maps"
+  - "rbl_reply_maps"
+  - "sender_dependent_default_transport_maps"
+  - "sender_dependent_relayhost_maps"
+  - "smtp_discard_ehlo_keyword_address_maps"
+  - "smtp_pix_workaround_maps"
+  - "smtp_sasl_password_maps"
+  - "smtp_tls_policy_maps"
+  - "smtpd_discard_ehlo_keyword_address_maps"
+  - "smtpd_milter_maps"
+  - "virtual_gid_maps"
+  - "virt al_uid_maps"
+  - "local_login_sender_maps"
+  - "postscreen_reject_footer_maps"
+  - "smtpd_reject_footer_maps"
+  - "tls_server_sni_maps"
+  - "tlsproxy_client_policy_maps"
+  - "default_delivery_status_filter"
+  - "lmtp_delivery_status_filter"
+  - "lmtp_dns_reply_filter"
+  - "lmtp_reply_filter"
+  - "local_delivery_status_filter"
+  - "pipe_delivery_status_filter"
+  - "postscreen_command_filter"
+  - "smtp_delivery_status_filter"
+  - "smtp_dns_reply_filter"
+  - "smtp_reply_filter"
+  - "smtpd_command_filter"
+  - "smtpd_dns_reply_filter"
+  - "virtual_delivery_status_filter"
+  - "body_checks"
+  - "header_checks"
+  - "lmtp_body_checks"
+  - "lmtp_header_checks"
+  - "lmtp_mime_header_checks"
+  - "lmtp_nested_header_checks"
+  - "milter_header_checks"
+  - "mime_header_checks"
+  - "nested_header_checks"
+  - "smtp_body_checks"
+  - "smtp_header_checks"
+  - "smtp_mime_header_checks"
+  - "smtp_nested_header_checks"
+__postfix_proxy_write_maps:
+  - "smtp_sasl_auth_cache_name"
+  - "lmtp_sasl_auth_cache_name"
+  - "address_verify_map"
+  - "postscreen_cache_map"
+__postfix_proxymap_service_name: "proxymap"
+__postfix_proxywrite_service_name: "proxywrite"
+__postfix_qmgr_clog_warn_time: "300s"
+__postfix_qmgr_daemon_timeout: "1000s"
+__postfix_qmgr_fudge_factor: 100
+__postfix_qmgr_ipc_timeout: "60s"
+__postfix_qmgr_message_active_limit: 20000
+__postfix_qmgr_message_recipient_limit: 20000
+__postfix_qmgr_message_recipient_minimum: 10
+__postfix_qmqpd_authorized_clients: []
+__postfix_qmqpd_client_port_logging: "no"
+__postfix_qmqpd_error_delay: "1s"
+__postfix_qmqpd_timeout: "300s"
+__postfix_queue_directory: "/var/spool/postfix"
+__postfix_queue_file_attribute_count_limit: 100
+__postfix_queue_minfree: 0
+__postfix_queue_run_delay: "300s"
+__postfix_queue_service_name: "qmgr"
+__postfix_rbl_reply_maps: []
+__postfix_readme_directory: "/usr/share/doc/postfix"
+__postfix_receive_override_options: []
+__postfix_recipient_bcc_maps: []
+__postfix_recipient_canonical_classes:
+  - "envelope_recipient"
+  - "header_recipient"
+__postfix_recipient_canonical_maps: []
+__postfix_recipient_delimiter: ""
+__postfix_reject_code: 554
+__postfix_reject_tempfail_action: "defer_if_permit"
+__postfix_relay_clientcerts: []
+__postfix_relay_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_relay_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_relay_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_relay_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_relay_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_relay_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_relay_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_relay_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_relay_destination_recipient_limit: "$default_destination_recipient_limit"
+# __postfix_relay_domains: "${{$compatibility_level} <level {2} ? {$mydestination} : {}}"
+__postfix_relay_domains: []
+__postfix_relay_domains_reject_code: 554
+__postfix_relay_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_relay_host: ""
+__postfix_relay_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_relay_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_relay_recipient_limit: "$default_recipient_limit"
+__postfix_relay_recipient_maps: []
+__postfix_relay_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_relay_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_relay_transport: "relay"
+__postfix_relay_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_relayhost: ""
+__postfix_relocated_maps: []
+__postfix_remote_header_rewrite_domain: ""
+__postfix_require_home_directory: "no"
+__postfix_reset_owner_alias: "no"
+__postfix_resolve_dequoted_address: "yes"
+__postfix_resolve_null_domain: "no"
+__postfix_resolve_numeric_domain: "no"
+__postfix_respectful_logging: "${{$compatibility_level} <level {3.6} ? {no} : {yes}}"
+__postfix_retry_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_retry_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_retry_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_retry_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_retry_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_retry_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_retry_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_retry_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_retry_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_retry_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_retry_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_retry_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_retry_recipient_limit: "$default_recipient_limit"
+__postfix_retry_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_retry_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_retry_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_rewrite_service_name: "rewrite"
+__postfix_sample_directory: "/etc/postfix"
+__postfix_scalemail_backend_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_scalemail_backend_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_scalemail_backend_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_scalemail_backend_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_scalemail_backend_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_scalemail_backend_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_scalemail_backend_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_scalemail_backend_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_scalemail_backend_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_scalemail_backend_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_scalemail_backend_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_scalemail_backend_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_scalemail_backend_recipient_limit: "$default_recipient_limit"
+__postfix_scalemail_backend_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_scalemail_backend_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_scalemail_backend_time_limit: "$command_time_limit"
+__postfix_scalemail_backend_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_send_cyrus_sasl_authzid: "no"
+__postfix_sender_bcc_maps: []
+__postfix_sender_canonical_classes:
+  - "envelope_sender"
+  - "header_sender"
+__postfix_sender_canonical_maps: []
+__postfix_sender_dependent_default_transport_maps: []
+__postfix_sender_dependent_relayhost_maps: []
+__postfix_sendmail_fix_line_endings: "always"
+__postfix_sendmail_path: "/usr/sbin/sendmail"
+__postfix_service_name: ""
+__postfix_service_throttle_time: "60s"
+__postfix_setgid_group: "postdrop"
+__postfix_shlib_directory: "/usr/lib/postfix"
+__postfix_show_user_unknown_table_name: "yes"
+__postfix_showq_service_name: "showq"
+__postfix_smtp_address_preference: "any"
+__postfix_smtp_address_verify_target: "rcpt"
+__postfix_smtp_always_send_ehlo: "yes"
+__postfix_smtp_balance_inet_protocols: "yes"
+__postfix_smtp_bind_address6: ""
+__postfix_smtp_bind_address: ""
+__postfix_smtp_bind_address_enforce: "no"
+__postfix_smtp_body_checks: []
+__postfix_smtp_cname_overrides_servername: "no"
+__postfix_smtp_connect_timeout: 30s"
+__postfix_smtp_connection_cache_destinations: []
+__postfix_smtp_connection_cache_on_demand: "yes"
+__postfix_smtp_connection_cache_time_limit: "2s"
+__postfix_smtp_connection_reuse_count_limit: 0
+__postfix_smtp_connection_reuse_time_limit: "300s"
+__postfix_smtp_data_done_timeout: "600s"
+__postfix_smtp_data_init_timeout: "120s"
+__postfix_smtp_data_xfer_timeout: "180s"
+__postfix_smtp_defer_if_no_mx_address_found: "no"
+__postfix_smtp_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_smtp_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_smtp_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_smtp_delivery_status_filter: "$default_delivery_status_filter"
+__postfix_smtp_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_smtp_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_smtp_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_smtp_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_smtp_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_smtp_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_smtp_discard_ehlo_keyword_address_maps: []
+__postfix_smtp_discard_ehlo_keywords: []
+__postfix_smtp_dns_reply_filter: ""
+__postfix_smtp_dns_resolver_options: []
+__postfix_smtp_dns_support_level: ""
+__postfix_smtp_enforce_tls: "no"
+__postfix_smtp_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_smtp_fallback_relay: "$fallback_relay"
+__postfix_smtp_generic_maps: []
+__postfix_smtp_header_checks: ""
+__postfix_smtp_helo_name: "$myhostname"
+__postfix_smtp_helo_timeout: "300s"
+__postfix_smtp_host_lookup: "dns"
+__postfix_smtp_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_smtp_line_length_limit: 998
+__postfix_smtp_mail_timeout: "300s"
+__postfix_smtp_mime_header_checks: []
+__postfix_smtp_min_data_rate: 500
+__postfix_smtp_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_smtp_mx_address_limit: 5
+__postfix_smtp_mx_session_limit: 2
+__postfix_smtp_nested_header_checks: []
+__postfix_smtp_never_send_ehlo: "no"
+__postfix_smtp_per_request_deadline: "${smtp_per_record_deadline?{$smtp_per_record_deadline}:{no}}"
+__postfix_smtp_pix_workaround_delay_time: "10s"
+__postfix_smtp_pix_workaround_maps: []
+__postfix_smtp_pix_workaround_threshold_time: "500s"
+__postfix_smtp_pix_workarounds:
+  - "disable_esmtp"
+  - "delay_dotcrlf"
+__postfix_smtp_quit_timeout: "300s"
+__postfix_smtp_quote_rfc821_envelope: "yes"
+__postfix_smtp_randomize_addresses: "yes"
+__postfix_smtp_rcpt_timeout: "300s"
+__postfix_smtp_recipient_limit: "$default_recipient_limit"
+__postfix_smtp_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_smtp_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_smtp_reply_filter: ""
+__postfix_smtp_rset_timeout: "20s"
+__postfix_smtp_sasl_auth_cache_name: ""
+__postfix_smtp_sasl_auth_cache_time: "90d"
+__postfix_smtp_sasl_auth_enable: "no"
+__postfix_smtp_sasl_auth_soft_bounce: "yes"
+__postfix_smtp_sasl_mechanism_filter: ""
+__postfix_smtp_sasl_password_maps: []
+__postfix_smtp_sasl_path: ""
+__postfix_smtp_sasl_security_options:
+  - "noplaintext"
+  - "noanonymous"
+__postfix_smtp_sasl_tls_security_options: "$smtp_sasl_security_options"
+__postfix_smtp_sasl_tls_verified_security_options: "$smtp_sasl_tls_security_options"
+__postfix_smtp_sasl_type: "cyrus"
+__postfix_smtp_send_dummy_mail_auth: "no"
+__postfix_smtp_send_xforward_command: "no"
+__postfix_smtp_sender_dependent_authentication: "no"
+__postfix_smtp_skip_5xx_greeting: "yes"
+__postfix_smtp_skip_quit_response: "yes"
+__postfix_smtp_starttls_timeout: "300s"
+__postfix_smtp_tcp_port: "smtp"
+__postfix_smtp_tls_CAfile: ""
+__postfix_smtp_tls_CApath : ""
+__postfix_smtp_tls_block_early_mail_reply: "no"
+__postfix_smtp_tls_cert_file : ""
+__postfix_smtp_tls_chain_files: []
+__postfix_smtp_tls_ciphers: "medium"
+__postfix_smtp_tls_connection_reuse: "no"
+__postfix_smtp_tls_dane_insecure_mx_policy: "${{$smtp_tls_security_level} == {dane} ? {dane} : {may}}"
+__postfix_smtp_tls_dcert_file : ""
+__postfix_smtp_tls_dkey_file: "$smtp_tls_dcert_file"
+__postfix_smtp_tls_eccert_file : ""
+__postfix_smtp_tls_eckey_file: "$smtp_tls_eccert_file"
+__postfix_smtp_tls_enforce_peername: "yes"
+__postfix_smtp_tls_exclude_ciphers: []
+__postfix_smtp_tls_fingerprint_cert_match : ""
+__postfix_smtp_tls_fingerprint_digest: "${{$compatibility_level} <level {3.6} ? {md5} : {sha256}}"
+__postfix_smtp_tls_force_insecure_host_tlsa_lookup: "no"
+__postfix_smtp_tls_key_file: "$smtp_tls_cert_file"
+__postfix_smtp_tls_loglevel: 0
+__postfix_smtp_tls_mandatory_ciphers: "medium"
+__postfix_smtp_tls_mandatory_exclude_ciphers: []
+__postfix_smtp_tls_mandatory_protocols: ">=TLSv1"
+__postfix_smtp_tls_note_starttls_offer: "no"
+__postfix_smtp_tls_per_site : ""
+__postfix_smtp_tls_policy_maps: []
+__postfix_smtp_tls_protocols: ">=TLSv1"
+__postfix_smtp_tls_scert_verifydepth: 9
+__postfix_smtp_tls_secure_cert_match:
+  - "nexthop"
+  - "dot-nexthop"
+__postfix_smtp_tls_security_level : ""
+__postfix_smtp_tls_servername : ""
+__postfix_smtp_tls_session_cache_database : ""
+__postfix_smtp_tls_session_cache_timeout: "3600s"
+__postfix_smtp_tls_trust_anchor_file : ""
+__postfix_smtp_tls_verify_cert_match: "hostname"
+__postfix_smtp_tls_wrappermode: "no"
+__postfix_smtp_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_smtp_use_tls: "no"
+__postfix_smtp_xforward_timeout: "300s"
+__postfix_smtpd_authorized_verp_clients: "$authorized_verp_clients"
+__postfix_smtpd_authorized_xclient_hosts: []
+__postfix_smtpd_authorized_xforward_hosts: []
+__postfix_smtpd_banner: "$myhostname ESMTP $mail_name"
+__postfix_smtpd_client_auth_rate_limit: 0
+__postfix_smtpd_client_connection_count_limit: 50
+__postfix_smtpd_client_connection_rate_limit: 0
+__postfix_smtpd_client_event_limit_exceptions: "${smtpd_client_connection_limit_exceptions:$mynetworks}"
+__postfix_smtpd_client_message_rate_limit: 0
+__postfix_smtpd_client_new_tls_session_rate_limit: 0
+__postfix_smtpd_client_port_logging: "no"
+__postfix_smtpd_client_recipient_rate_limit: 0
+__postfix_smtpd_client_restrictions: []
+__postfix_smtpd_command_filter : ""
+__postfix_smtpd_data_restrictions: []
+__postfix_smtpd_delay_open_until_valid_rcpt: "yes"
+__postfix_smtpd_delay_reject: "yes"
+__postfix_smtpd_discard_ehlo_keyword_address_maps: []
+__postfix_smtpd_discard_ehlo_keywords: []
+__postfix_smtpd_dns_reply_filter : ""
+__postfix_smtpd_end_of_data_restrictions: []
+__postfix_smtpd_enforce_tls: "no"
+__postfix_smtpd_error_sleep_time: "1s"
+__postfix_smtpd_etrn_restrictions: []
+
+# Currently Disabled until I can figure out how to get this string to be acceptable.
+#__postfix_smtpd_expansion_filter: \t\40!"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~
+__postfix_smtpd_forbid_unauth_pipelining: "no"
+__postfix_smtpd_forbidden_commands: "CONNECT GET POST regexp:{{/^[^A-Z]/ Bogus}}"
+__postfix_smtpd_hard_error_limit: "${stress?{1}:{20}}"
+__postfix_smtpd_helo_required: "no"
+__postfix_smtpd_helo_restrictions: []
+__postfix_smtpd_history_flush_threshold: 100
+__postfix_smtpd_junk_command_limit: "${stress?{1}:{100}}"
+__postfix_smtpd_log_access_permit_actions: []
+__postfix_smtpd_milter_maps: []
+__postfix_smtpd_milters: []
+__postfix_smtpd_min_data_rate: 500
+__postfix_smtpd_noop_commands: []
+__postfix_smtpd_null_access_lookup_key: "<>"
+__postfix_smtpd_peername_lookup: "yes"
+__postfix_smtpd_per_request_deadline: "${smtpd_per_record_deadline?{$smtpd_per_record_deadline}:{${stress?{yes}:{no}}}}"
+__postfix_smtpd_policy_service_default_action: "451 4.3.5 Server configuration problem"
+__postfix_smtpd_policy_service_max_idle: "300s"
+__postfix_smtpd_policy_service_max_ttl: "1000s"
+__postfix_smtpd_policy_service_policy_context: ""
+__postfix_smtpd_policy_service_request_limit: 0
+__postfix_smtpd_policy_service_retry_delay: "1s"
+__postfix_smtpd_policy_service_timeout: "100s"
+__postfix_smtpd_policy_service_try_limit: 2
+__postfix_smtpd_proxy_ehlo: "$myhostname"
+__postfix_smtpd_proxy_filter: []
+__postfix_smtpd_proxy_options: []
+__postfix_smtpd_proxy_timeout: "100s"
+__postfix_smtpd_recipient_limit: 1000
+__postfix_smtpd_recipient_overshoot_limit: 1000
+__postfix_smtpd_recipient_restrictions: []
+__postfix_smtpd_reject_footer: ""
+__postfix_smtpd_reject_footer_maps: []
+__postfix_smtpd_reject_unlisted_recipient: "yes"
+__postfix_smtpd_reject_unlisted_sender: "no"
+__postfix_smtpd_relay_before_recipient_restrictions: "${{$compatibility_level} <level {3.6} ? {no} : {yes}}"
+__postfix_smtpd_relay_restrictions:
+  - "permit_mynetworks"
+  - "permit_sasl_authenticated"
+  - "defer_unauth_destination"
+__postfix_smtpd_restriction_classes: []
+__postfix_smtpd_sasl_auth_enable: "no"
+__postfix_smtpd_sasl_authenticated_header: "no"
+__postfix_smtpd_sasl_exceptions_networks:
+__postfix_smtpd_sasl_local_domain: []
+__postfix_smtpd_sasl_mechanism_filter: "!external, static:rest"
+__postfix_smtpd_sasl_path: "smtpd"
+__postfix_smtpd_sasl_response_limit: 12288
+__postfix_smtpd_sasl_security_options:
+  - "noanonymous"
+__postfix_smtpd_sasl_service: "smtp"
+__postfix_smtpd_sasl_tls_security_options:
+  - "$smtpd_sasl_security_options"
+__postfix_smtpd_sasl_type: "cyrus"
+__postfix_smtpd_sender_login_maps: []
+__postfix_smtpd_sender_restrictions: []
+__postfix_smtpd_service_name: "smtpd"
+__postfix_smtpd_soft_error_limit: 10
+__postfix_smtpd_starttls_timeout: "${stress?{10}:{300}}s"
+__postfix_smtpd_timeout: "${stress?{10}:{300}}s"
+__postfix_smtpd_tls_CAfile: ""
+__postfix_smtpd_tls_CApath: ""
+__postfix_smtpd_tls_always_issue_session_ids: "yes"
+__postfix_smtpd_tls_ask_ccert: "no"
+__postfix_smtpd_tls_auth_only: "no"
+__postfix_smtpd_tls_ccert_verifydepth: 9
+__postfix_smtpd_tls_cert_file: ""
+__postfix_smtpd_tls_chain_files: []
+__postfix_smtpd_tls_ciphers: "medium"
+__postfix_smtpd_tls_dcert_file: ""
+__postfix_smtpd_tls_dh1024_param_file: ""
+__postfix_smtpd_tls_dh512_param_file: ""
+__postfix_smtpd_tls_dkey_file: "$smtpd_tls_dcert_file"
+__postfix_smtpd_tls_eccert_file: ""
+__postfix_smtpd_tls_eckey_file: "$smtpd_tls_eccert_file"
+__postfix_smtpd_tls_eecdh_grade: "auto"
+__postfix_smtpd_tls_exclude_ciphers: []
+__postfix_smtpd_tls_fingerprint_digest: "${{$compatibility_level} <level {3.6} ? {md5} : {sha256}}"
+__postfix_smtpd_tls_key_file: "$smtpd_tls_cert_file"
+__postfix_smtpd_tls_loglevel: 0
+__postfix_smtpd_tls_mandatory_ciphers: "medium"
+__postfix_smtpd_tls_mandatory_exclude_ciphers:
+__postfix_smtpd_tls_mandatory_protocols: ">=TLSv1"
+__postfix_smtpd_tls_protocols: ">=TLSv1"
+__postfix_smtpd_tls_received_header: "no"
+__postfix_smtpd_tls_req_ccert: "no"
+__postfix_smtpd_tls_security_level: ""
+__postfix_smtpd_tls_session_cache_database: ""
+__postfix_smtpd_tls_session_cache_timeout: "3600s"
+__postfix_smtpd_tls_wrappermode: "no"
+__postfix_smtpd_upstream_proxy_protocol:
+__postfix_smtpd_upstream_proxy_timeout: "5s"
+__postfix_smtpd_use_tls: "no"
+__postfix_smtputf8_autodetect_classes:
+  - "sendmail"
+  - "verify"
+__postfix_smtputf8_enable: "${{$compatibility_level} <level {1} ? {no} : {yes}}"
+__postfix_soft_bounce: "no"
+__postfix_stale_lock_time: "500s"
+__postfix_stress: []
+__postfix_strict_7bit_headers: "no"
+__postfix_strict_8bitmime: "no"
+__postfix_strict_8bitmime_body: "no"
+__postfix_strict_mailbox_ownership: "yes"
+__postfix_strict_mime_encoding_domain: "no"
+__postfix_strict_rfc821_envelopes: "no"
+__postfix_strict_smtputf8: "no"
+__postfix_sun_mailtool_compatibility: "no"
+__postfix_swap_bangpath: "yes"
+__postfix_syslog_facility: "mail"
+__postfix_syslog_name: "${multi_instance_name?{$multi_instance_name}:{postfix}}"
+__postfix_tcp_windowsize: 0
+__postfix_tls_append_default_CA: "no"
+__postfix_tls_config_file: "default"
+__postfix_tls_config_name:
+__postfix_tls_daemon_random_bytes: 32
+__postfix_tls_dane_digests:
+  - "sha512"
+  - "sha256"
+__postfix_tls_disable_workarounds: []
+__postfix_tls_eecdh_auto_curves:
+  - "X25519"
+  - "X448"
+  - "prime256v1"
+  - "secp521r1"
+  - "secp384r1"
+__postfix_tls_eecdh_strong_curve: "prime256v1"
+__postfix_tls_eecdh_ultra_curve: "secp384r1"
+__postfix_tls_export_cipherlist: "aNULL:-aNULL:HIGH:MEDIUM:LOW:EXPORT:+RC4:@STRENGTH"
+__postfix_tls_fast_shutdown_enable: "yes"
+__postfix_tls_high_cipherlist: "aNULL:-aNULL:HIGH:@STRENGTH"
+__postfix_tls_legacy_public_key_fingerprints: "no"
+__postfix_tls_low_cipherlist: "aNULL:-aNULL:HIGH:MEDIUM:LOW:+RC4:@STRENGTH"
+__postfix_tls_medium_cipherlist: "aNULL:-aNULL:HIGH:MEDIUM:+RC4:@STRENGTH"
+__postfix_tls_null_cipherlist: "eNULL:!aNULL"
+__postfix_tls_preempt_cipherlist: "no"
+__postfix_tls_random_bytes: 32
+__postfix_tls_random_exchange_name: "${data_directory}/prng_exch"
+__postfix_tls_random_prng_update_period: "3600s"
+__postfix_tls_random_reseed_period: "3600s"
+__postfix_tls_random_source: "dev:/dev/urandom"
+__postfix_tls_server_sni_maps: []
+__postfix_tls_session_ticket_cipher: "aes-256-cbc"
+__postfix_tls_ssl_options: []
+__postfix_tls_wildcard_matches_multiple_labels: "yes"
+__postfix_tlsmgr_service_name: "tlsmgr"
+__postfix_tlsproxy_client_CAfile: "$smtp_tls_CAfile"
+__postfix_tlsproxy_client_CApath: "$smtp_tls_CApath"
+__postfix_tlsproxy_client_cert_file: "$smtp_tls_cert_file"
+__postfix_tlsproxy_client_chain_files: "$smtp_tls_chain_files"
+__postfix_tlsproxy_client_dcert_file: "$smtp_tls_dcert_file"
+__postfix_tlsproxy_client_dkey_file: "$smtp_tls_dkey_file"
+__postfix_tlsproxy_client_eccert_file: "$smtp_tls_eccert_file"
+__postfix_tlsproxy_client_eckey_file: "$smtp_tls_eckey_file"
+__postfix_tlsproxy_client_enforce_tls: "$smtp_enforce_tls"
+__postfix_tlsproxy_client_fingerprint_digest: "$smtp_tls_fingerprint_digest"
+__postfix_tlsproxy_client_key_file: "$smtp_tls_key_file"
+__postfix_tlsproxy_client_loglevel: "$smtp_tls_loglevel"
+__postfix_tlsproxy_client_loglevel_parameter: "smtp_tls_loglevel"
+__postfix_tlsproxy_client_per_site: "$smtp_tls_per_site"
+__postfix_tlsproxy_client_policy_maps: "${tlsproxy_client_policy:$smtp_tls_policy_maps}"
+__postfix_tlsproxy_client_scert_verifydepth: "$smtp_tls_scert_verifydepth"
+__postfix_tlsproxy_client_security_level: "${tlsproxy_client_level:$smtp_tls_security_level}"
+__postfix_tlsproxy_client_use_tls: "$smtp_use_tls"
+__postfix_tlsproxy_enforce_tls: "$smtpd_enforce_tls"
+__postfix_tlsproxy_service_name: "tlsproxy"
+__postfix_tlsproxy_tls_CAfile: "$smtpd_tls_CAfile"
+__postfix_tlsproxy_tls_CApath: "$smtpd_tls_CApath"
+__postfix_tlsproxy_tls_always_issue_session_ids: "$smtpd_tls_always_issue_session_ids"
+__postfix_tlsproxy_tls_ask_ccert: "$smtpd_tls_ask_ccert"
+__postfix_tlsproxy_tls_ccert_verifydepth: "$smtpd_tls_ccert_verifydepth"
+__postfix_tlsproxy_tls_cert_file: "$smtpd_tls_cert_file"
+__postfix_tlsproxy_tls_chain_files: "$smtpd_tls_chain_files"
+__postfix_tlsproxy_tls_ciphers: "$smtpd_tls_ciphers"
+__postfix_tlsproxy_tls_dcert_file: "$smtpd_tls_dcert_file"
+__postfix_tlsproxy_tls_dh1024_param_file: "$smtpd_tls_dh1024_param_file"
+__postfix_tlsproxy_tls_dh512_param_file: "$smtpd_tls_dh512_param_file"
+__postfix_tlsproxy_tls_dkey_file: "$smtpd_tls_dkey_file"
+__postfix_tlsproxy_tls_eccert_file: "$smtpd_tls_eccert_file"
+__postfix_tlsproxy_tls_eckey_file: "$smtpd_tls_eckey_file"
+__postfix_tlsproxy_tls_eecdh_grade: "$smtpd_tls_eecdh_grade"
+__postfix_tlsproxy_tls_exclude_ciphers: "$smtpd_tls_exclude_ciphers"
+__postfix_tlsproxy_tls_fingerprint_digest: "$smtpd_tls_fingerprint_digest"
+__postfix_tlsproxy_tls_key_file: "$smtpd_tls_key_file"
+__postfix_tlsproxy_tls_loglevel: "$smtpd_tls_loglevel"
+__postfix_tlsproxy_tls_mandatory_ciphers: "$smtpd_tls_mandatory_ciphers"
+__postfix_tlsproxy_tls_mandatory_exclude_ciphers: "$smtpd_tls_mandatory_exclude_ciphers"
+__postfix_tlsproxy_tls_mandatory_protocols: "$smtpd_tls_mandatory_protocols"
+__postfix_tlsproxy_tls_protocols: "$smtpd_tls_protocols"
+__postfix_tlsproxy_tls_req_ccert: "$smtpd_tls_req_ccert"
+__postfix_tlsproxy_tls_security_level: "$smtpd_tls_security_level"
+__postfix_tlsproxy_use_tls: "$smtpd_use_tls"
+__postfix_tlsproxy_watchdog_timeout: "10s"
+__postfix_trace_service_name: "trace"
+__postfix_transport_maps: []
+__postfix_transport_retry_time: "60s"
+__postfix_trigger_timeout: "10s"
+__postfix_undisclosed_recipients_header: ""
+__postfix_unknown_address_reject_code: "450"
+__postfix_unknown_address_tempfail_action: "$reject_tempfail_action"
+__postfix_unknown_client_reject_code: "450"
+__postfix_unknown_helo_hostname_tempfail_action: "$reject_tempfail_action"
+__postfix_unknown_hostname_reject_code: "450"
+__postfix_unknown_local_recipient_reject_code: "550"
+__postfix_unknown_relay_recipient_reject_code: "550"
+__postfix_unknown_virtual_alias_reject_code: 550
+__postfix_unknown_virtual_mailbox_reject_code: 550
+__postfix_unverified_recipient_defer_code: 450
+__postfix_unverified_recipient_reject_code: 450
+__postfix_unverified_recipient_reject_reason: ""
+__postfix_unverified_recipient_tempfail_action: "$reject_tempfail_action"
+__postfix_unverified_sender_defer_code: 450
+__postfix_unverified_sender_reject_code: 450
+__postfix_unverified_sender_reject_reason: ""
+__postfix_unverified_sender_tempfail_action: "$reject_tempfail_action"
+__postfix_uucp_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_uucp_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_uucp_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_uucp_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_uucp_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_uucp_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_uucp_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_uucp_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_uucp_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_uucp_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_uucp_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_uucp_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_uucp_recipient_limit: "$default_recipient_limit"
+__postfix_uucp_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_uucp_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_uucp_time_limit: "$command_time_limit"
+__postfix_uucp_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_verp_delimiter_filter: "-=+"
+__postfix_virtual_alias_address_length_limit: 1000
+__postfix_virtual_alias_domains: "$virtual_alias_maps"
+__postfix_virtual_alias_expansion_limit: 1000
+__postfix_virtual_alias_maps:
+  - "$virtual_maps"
+__postfix_virtual_alias_recursion_limit: 1000
+__postfix_virtual_delivery_slot_cost: "$default_delivery_slot_cost"
+__postfix_virtual_delivery_slot_discount: "$default_delivery_slot_discount"
+__postfix_virtual_delivery_slot_loan: "$default_delivery_slot_loan"
+__postfix_virtual_delivery_status_filter: "$default_delivery_status_filter"
+__postfix_virtual_destination_concurrency_failed_cohort_limit: "$default_destination_concurrency_failed_cohort_limit"
+__postfix_virtual_destination_concurrency_limit: "$default_destination_concurrency_limit"
+__postfix_virtual_destination_concurrency_negative_feedback: "$default_destination_concurrency_negative_feedback"
+__postfix_virtual_destination_concurrency_positive_feedback: "$default_destination_concurrency_positive_feedback"
+__postfix_virtual_destination_rate_delay: "$default_destination_rate_delay"
+__postfix_virtual_destination_recipient_limit: "$default_destination_recipient_limit"
+__postfix_virtual_extra_recipient_limit: "$default_extra_recipient_limit"
+__postfix_virtual_gid_maps: []
+__postfix_virtual_initial_destination_concurrency: "$initial_destination_concurrency"
+__postfix_virtual_mailbox_base: ""
+__postfix_virtual_mailbox_domains: "$virtual_mailbox_maps"
+__postfix_virtual_mailbox_limit: 51200000
+__postfix_virtual_mailbox_lock:
+  - "fcntl"
+  - "dotlock"
+__postfix_virtual_mailbox_maps: []
+__postfix_virtual_maps: []
+__postfix_virtual_minimum_delivery_slots: "$default_minimum_delivery_slots"
+__postfix_virtual_minimum_uid: 100
+__postfix_virtual_recipient_limit: "$default_recipient_limit"
+__postfix_virtual_recipient_refill_delay: "$default_recipient_refill_delay"
+__postfix_virtual_recipient_refill_limit: "$default_recipient_refill_limit"
+__postfix_virtual_transport: "virtual"
+__postfix_virtual_transport_rate_delay: "$default_transport_rate_delay"
+__postfix_virtual_uid_maps: []

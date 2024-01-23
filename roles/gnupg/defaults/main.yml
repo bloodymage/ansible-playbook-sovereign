@@ -1,6 +1,11 @@
 ---
 # defaults file for gnupg
-autonomy_packages:
+autonomy_gnupg_packages:
   - gnupg
   - parcimonie
+  - hopenpgp-tools
+
+autonomy_gnupg_config_files:
+  - gpg
   - dirmngr
+

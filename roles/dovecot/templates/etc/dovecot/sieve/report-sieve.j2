@@ -10,6 +10,7 @@ if environment :matches "imap.mailbox" "*" {
 if string "${mailbox}" "Trash" {
   stop;
 }
+
 {% endif %}
 if environment :matches "imap.user" "*" {
   set "username" "${1}";

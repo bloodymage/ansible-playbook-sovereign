@@ -1,6 +1,6 @@
-# {{ansible_managed|comment}}
+# {{ ansible_managed }}
 
-deb https://archive.raspberrypi.org/debian/ {{ autonomy_raspberrypi_distribution_release }} main ui
+deb https://archive.raspberrypi.org/debian/ {{ autonomy_raspberrypi_distribution_release }} main
 {% if autonomy_use_source_code_repos %}
-deb-src https://archive.raspberrypi.org/debian/ {{ autonomy_raspberrypi_distribution_release }} main ui
+deb-src https://archive.raspberrypi.org/debian/ {{ autonomy_raspberrypi_distribution_release }} main
 {% endif %}

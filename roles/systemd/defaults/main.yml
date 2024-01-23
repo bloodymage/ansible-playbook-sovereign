@@ -1,0 +1,28 @@
+---
+# defaults file for systemd
+autonomy_systemd_networkd_packages:
+  - libnss-resolve
+  - systemd-resolved
+
+autonomy_systemd_networkd_packages_remove:
+  - libnss-mdns
+  - avahi-daemon
+  - ifupdown
+  - dhcpcd
+  - network-manager
+  - isc-dhcp-client
+  - isc-dhcp-common
+  - openresolv
+
+autonomy_systemd_old_networking_services:
+  - NetworkManager
+  - ModemManager
+  - avahi-daemon
+  - networking
+  - dhcpcd
+
+autonomy_systemd_timesyncd_packages:
+  - systemd-timesyncd
+
+autonomy_systemd_timesyncd_conflicts:
+  - ntpsec

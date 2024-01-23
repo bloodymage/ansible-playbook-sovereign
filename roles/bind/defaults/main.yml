@@ -2,10 +2,13 @@
 # roles/bind/defaults/main.yml
 autonomy_packages:
   - python3-netaddr
+  - python3-dnspython
   - bind9
   - bind9utils
 
 bind_service: bind9
+
+autonomy_bind_zone_samba_controlled: false
 
 # Directory with run-time stuff
 bind_dir: "/var/lib/bind"
@@ -17,13 +20,23 @@ bind_auth_file: "{{ bind_conf_dir }}/{{ auth_file }}"
 bind_zone_dir: "{{ bind_dir }}"
 bind_cache_dir: "/var/cache/bind"
 bind_zone_dir_mode: "0775"
+autonomy_bind_log_dir: "/var/log/bind"
+bind_log_dir_mode: "0770"
 
 # Main config file
-bind_config: "{{ bind_conf_dir }}/named.conf"
+bind_config_file: "{{ bind_conf_dir }}/named.conf"
 bind_default_zone_file: "{{ bind_conf_dir }}/named.conf.default-zones"
 bind_options_file: "{{ bind_conf_dir }}/named.conf.options"
 bind_local_file: "{{ bind_conf_dir }}/named.conf.local"
 bind_rpz_file: "{{ bind_conf_dir }}/named.conf.rpz"
+autonomy_bind_logging_file: "{{ bind_conf_dir }}/named.conf.log"
+
+bind_config_files:
+  - named.conf
+  - named.conf.default-zones
+  - named.conf.options
+  - named.conf.local
+  - named.conf.log
 
 bind_owner: root
 bind_group: bind
@@ -47,7 +60,8 @@ bind_root_zones:
     ipv4: 199.9.14.201
     ipv6: 2001:500:200::b
   - name: c.root-servers.net
-    ipv4: 2001:500:2::c
+    ipv4: 192.33.4.12
+    ipv6: 2001:500:2::c
   - name: d.root-servers.net
     ipv4: 199.7.91.13
     ipv6: 2001:500:2d::d
@@ -67,10 +81,11 @@ bind_root_zones:
     ipv4: 192.36.148.17
     ipv6: 2001:7fe::53
   - name: j.root-servers.net
-    ipv4: 2001:503:c27::2:30
+    ipv4: 192.58.128.30
+    ipv6: 2001:503:c27::2:30
   - name: k.root-servers.net
     ipv4: 193.0.14.129
-    ipv6: 2001:7::1
+    ipv6: 2001:7fd::1
   - name: l.root-servers.net
     ipv4: 199.7.83.42
     ipv6: 2001:500:9f::42
@@ -99,8 +114,8 @@ bind_zone_retry: "86400"
 bind_zone_expire: "2419200"
 bind_zone_negative_cache_ttl: "604800"
 bind_zone_soa: "{{ groups[autonomy_zone_name + '_dns_servers'][0] }}"
-bind_zone_admin: "{{ autonomy_sysadmin_email_userid }}.{{ autonomy_domain }}"
-bind_zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}01"
+bind_zone_admin: "{{ autonomy_default_sysadmin_user }}.{{ autonomy_domain }}"
+bind_zone_serial_number: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}00"
 bind_reverse_zone_serial_number: "{{ bind_zone_serial_number }}"
 bind_log: "data/named.run"
 
@@ -135,8 +150,7 @@ bind_allow_query:
 # Determines whether recursion should be allowed. Typically, an authoritative
 # name server should have recursion turned OFF.
 bind_recursion: false
-bind_allow_recursion:
-  - "any"
+bind_allow_recursion: "any"
 
 # Allows BIND to be set up as a caching name server
 bind_forward_only: false
@@ -180,7 +194,69 @@ bind9_myipv4_acl:
     - "{{ ansible_host }}"
 
 bind9_myipv6_acl:
-  name: myipv6
+  name: "myipv6"
+
+autonomy_bind_allow_query: "trusted"
+autonomy_bind_allow_transfer: "trusteddns"
+
+autonomy_bind_logging_channel_default_syslog:
+  name: "default_syslog"
+  target: "syslog daemon"
+  severity: "info"
+
+autonomy_bind_logging_channel_default_logfile:
+  name: "default_logfile"
+  file: "{{ autonomy_bind_log_dir }}/bind.log"
+  versions: 7
+  size: 300k
+  print_category: "yes"
+  print_severity: "yes"
+  print_time: "yes"
+  severity: info
+
+autonomy_bind_logging_channel_update_debug:
+  name: "update_debug"
+  file: "{{ autonomy_bind_log_dir }}/update_debug.log"
+  versions: 7
+  size: 100k
+  severity: "debug 3"
+  print_severity: "yes"
+  print_category: "yes"
+  print_time: "yes"
+
+autonomy_bind_logging_channel_default_stderr:
+  name: "default_stderr"
+  target: "stderr"
+  serverity: "info"
+
+autonomy_bind_logging_channel_security_log:
+  name: "security_log"
+  file: "{{ autonomy_bind_log_dir }}/security.log"
+  versions: 7
+  size: "100k"
+  print_severity: "yes"
+  print_time: "yes"
+  severity: "info"
+
+autonomy_bind_logging_channel_null:
+  name: "null"
+  target: "null"
+
+autonomy_bind_logging_channels:
+  - "{{ autonomy_bind_logging_channel_default_syslog }}"
+  - "{{ autonomy_bind_logging_channel_default_logfile }}"
+  - "{{ autonomy_bind_logging_channel_default_stderr }}"
+  - "{{ autonomy_bind_logging_channel_security_log }}"
+  - "{{ autonomy_bind_logging_channel_null }}"
+
+autonomy_bind_logging_categories:
+  - name: "default"
+    channels:
+      - "default_syslog"
+      - "default_logfile"
+
+autonomy_bind_prefetch_trigger: 2
+autonomy_bind_prefetch_eligibility: 9
 
 # ==================================================================================================
 #
@@ -197,3 +273,9 @@ __autonomy_bind_zone_directories:
     mode: "{{ bind_zone_dir_mode }}"
   - name: "{{ bind_cache_dir }}"
     mode: "{{ bind_zone_dir_mode }}"
+  - name: "{{ autonomy_bind_log_dir }}"
+    mode: "{{ bind_log_dir_mode }}"
+
+__bind_bin_dir: "/usr/bin"
+__bind_named_checkconf: "{{ __bind_bin_dir }}/named-checkconf"
+__bind_named_checkzone: "{{ __bind_bin_dir }}/named-checkzone"

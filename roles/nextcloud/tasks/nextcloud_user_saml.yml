@@ -25,7 +25,7 @@
   ansible.builtin.shell:
     cmd: >-
       set -o pipefail &&
-      cat {{ nextcloud_identity_provider }}.crt |
+      cat "{{ nextcloud_identity_provider }}.crt" |
       grep -v "END" |
       grep -v "BEGIN"
     chdir: "{{ ownca_directory }}/hosts/certs/"
@@ -39,7 +39,11 @@
 
 - name: "Get current nextcloud host private key."
   ansible.builtin.shell:
-    cmd: "set -o pipefail && cat privkey.pem | grep -v 'END' | grep -v 'BEGIN'"
+    cmd: >-
+      set -o pipefail &&
+      cat privkey.pem |
+      grep -v "END" |
+      grep -v "BEGIN"
     chdir: "/etc/letsencrypt/archive/{{ inventory_hostname }}/"
   args:
     executable: "/bin/bash"

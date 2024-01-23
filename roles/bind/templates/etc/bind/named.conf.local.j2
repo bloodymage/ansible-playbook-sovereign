@@ -1,76 +1,105 @@
 # {{ ansible_managed }}
 
-{% for localzone in autonomy_zones -%}
-{% if localzone.samba_domain is not defined or localzone.samba_domain is false -%}
-{% if localzone.type == autonomy_zone_type -%}
-  include "{{ bind_key_dir }}/{{ localzone.name }}.key";
-{% elif localzone.type == "public" and autonomy_zone_type == "dmz" -%}
-  include "{{ bind_key_dir }}/{{ localzone.name }}.key";
+{% if inventory_hostname not in groups['samba_domain_controllers'] %}
+# Include key files
+{% for localzone in autonomy_bind_forwardzones -%}
+{% if localzone['type'] == "primary" -%}
+  include "{{ bind_key_dir }}/{{ localzone['name'] }}.key";
 {% endif %}
+{% if localzone['samba_controlled'] is defined and localzone['samba_controlled'] -%}
+  include "{{ bind_key_dir }}/{{ localzone['name'] }}.key";
 {% endif %}
 {% endfor %}
-include "/etc/bind/ansible.key";
 include "/etc/bind/rndc.key";
+{% endif %}
 
-{% for localzone in autonomy_zones -%}
-{% if localzone.samba_domain is not defined or localzone.samba_domain is false -%}
-{% if localzone.type == autonomy_zone_type -%}
-  zone "{{ localzone.domain }}" {
+{% if inventory_hostname not in groups['samba_domain_controllers'] %}
+{% if autonomy_bind_forwardzones is defined %}
+# ==================================================================================================
+#
+# Primary Zone Definitions
+#
+# ==================================================================================================
+{% for localzone in autonomy_bind_forwardzones -%}
+{% if localzone['type'] == "primary" -%}
+  zone "{{ localzone['domain'] }}" {
   type primary;
   notify no;
-  allow-query { any; };
-  allow-transfer { any; };
-{% if localzone.file is defined %}
-  file "{{ localzone.file }}";
+  allow-query { trusted; };
+  allow-transfer { trusteddns; };
+{% if localzone['file'] is defined %}
+  file "{{ localzone['file'] }}";
 {% else %}
-  allow-update { key {{ localzone.name }}; };
-  file "{{ bind_zone_dir }}/db.{{ localzone.domain }}";
+  allow-update { key {{ localzone['name'] }}; };
+  file "{{ bind_zone_dir }}/db.{{ localzone['domain'] }}";
 {% endif %}
 };
+{% endif %}
 
-{% elif localzone.type == "public" and autonomy_zone_type == "dmz" -%}
-  zone "{{ localzone.domain }}" {
-  type primary;
-  notify no;
-  allow-query { any; };
-  allow-transfer { any; };
-{% if localzone.file is defined %}
-  file "{{ localzone.file }}";
-{% else %}
-  allow-update { key {{ localzone.name }}; };
-  file "{{ bind_zone_dir }}/db.{{ localzone.domain }}";
-{% endif %}
-};
-
-{% endif %}
-{% endif %}
 {% endfor %}
+{% endif %}
 
-{% for localzone in bind_reverse_zones -%}
-zone "{{ localzone.name.split('.')[1] }}.{{ localzone.name.split('.')[0] }}.in-addr.arpa" {
+{% if autonomy_bind_reversezones is defined %}
+# ==================================================================================================
+#
+# Reverse Zone Definitions
+#
+# ==================================================================================================
+{% for localzone in autonomy_bind_reversezones -%}
+{% if localzone['type'] == "primary" %}
+zone "{{ localzone['name'].split('.')[1] }}.{{ localzone['name'].split('.')[0] }}.in-addr.arpa" {
   type {{ bind_primary_zone }};
   notify no;
-  allow-query { any; };
-  allow-transfer { any; };
-  allow-update { key {{ autonomy_zone_name }}; };
-  file "{{ bind_zone_dir }}/db.{{ localzone.name }}"; # zone file path
-};
+  allow-query { trusted; };
+  allow-transfer { trusteddns; };
+  allow-update { key {{ localzone['update_key'] }}; };
+  file "{{ bind_zone_dir }}/db.{{ localzone['name'] }}"; # zone file path
+  };
+{% endif %}
 
 {% endfor %}
+{% endif %}
 
-{% for localzone in autonomy_zones -%}
-{% if localzone['type'] != "internal" and autonomy_zone_type == "internal" -%}
+# ==================================================================================================
+#
+# Secondary Zone Definitions
+#
+# ==================================================================================================
+{% if autonomy_bind_forwardzones is defined %}
+{% for localzone in autonomy_bind_forwardzones -%}
+{% if localzone['type'] == "secondary" %}
 zone "{{ localzone['domain'] }}" {
   type secondary;
   notify no;
-  allow-query { any; };
+  allow-query { trusted; };
   primaries {
-  {% for ns in groups[localzone.type + '_dns_servers'] -%}
-    {{ hostvars[ns]['ansible_host'] }};
+  {% for ns in localzone['nameservers'] %}
+    {{ ns }};
   {% endfor %}
-  };
-  file "{{ bind_cache_dir }}/db.{{ localzone.name }}"; # zone file path
+};
+  file "{{ bind_cache_dir }}/db.{{ localzone.domain }}"; # zone file path
 };
 {% endif %}
-{% endfor %}
 
+{% endfor %}
+{% endif %}
+
+{% if autonomy_bind_reversezones is defined %}
+{% for localzone in autonomy_bind_reversezones -%}
+{% if localzone['type'] == "secondary" -%}
+  zone "{{ localzone['name'].split('.')[1] }}.{{ localzone['name'].split('.')[0] }}.in-addr.arpa" {
+  type secondary;
+  notify no;
+  allow-query { trusted; };
+  primaries {
+  {% for ns in localzone['nameservers'] %}
+    {{ ns }};
+  {% endfor %}
+};
+  file "{{ bind_cache_dir }}/db.{{ localzone['name'] }}"; # zone file path
+};
+{% endif %}
+
+{% endfor %}
+{% endif %}
+{% endif %}

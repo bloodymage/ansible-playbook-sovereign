@@ -1,56 +1,29 @@
 ---
-- name: "Pre-tasks"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
-      tags:
-        - hostname
-        - hostname_debug
-        - hostname-debug
-        - install-packages
+- name: Include OS-specific variables.
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
+  tags:
+    - hostname
+    - hostname_debug
+    - hostname-debug
+    - install-packages
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
-      tags:
-        - hostname
-        - hostname_debug
-        - hostname-debug
-        - install-packages
-
-# ==================================================================================================
-#
-# Task: "Set Hostname"
-#
-# Allows changing a hostname simply by updating the hosts IP address
-#
-# ==================================================================================================
-- name: "Set Hostname"
-  ansible.builtin.hostname:
-    name: "{{ autonomy_hostname }}"
-  become: yes
+- name: "Include OS Family Tasks."
+  include_tasks: "{{ ansible_system | lower }}.yml"
   when:
-    - inventory_hostname != "localhost"
-    - ansible_os_family != "Windows"
     - ansible_network_os is not defined
   tags:
     - hostname
 
-- name: "RouterOS: Set Hostname"
-  community.routeros.command:
-    commands:
-      - /system identity print
-  become: no
+- name: "Include NetworkOS Tasks."
+  include_tasks: "{{ ansible_network_os.split('.')[2] | lower }}.yml"
   when:
     - ansible_network_os is defined
-    - ansible_network_os == 'routeros'
   tags:
     - hostname
+

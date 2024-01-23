@@ -1,0 +1,11 @@
+- name: "Upload Files to webserver"
+  ansible.builtin.copy:
+    src: "~/{{ item }}"
+    dest: "/srv/www/pki.drbr.org/pgp/{{ item }}"
+    owner: www-data
+    group: www-data
+    mode: 0644
+  become: yes
+  loop:
+    - keylist.json
+    - keylist.json.asc
