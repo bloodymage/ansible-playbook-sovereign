@@ -1,7 +1,7 @@
 ---
 # defaults file for keycloak
-autonomy_packages:
-  - openjdk-11-jre
+autonomy_keycloak_packages:
+  - openjdk-17-jre
   - python3-openssl
 
 # Names
@@ -9,7 +9,7 @@ keycloak_keystore_alias: "{{ keycloak_name | lower }}"
 keycloak_service_description: "{{ keycloak_name | title }}"
 
 # Keycloak ...
-keycloak_version: "16.1.1"
+keycloak_version: "23.0.4"
 keycloak_host: 127.0.0.1
 keycloak_mode: "standalone"
 keycloak_keystore_type: "pkcs12"
@@ -46,9 +46,9 @@ keycloak_url: "https://github.com/keycloak/keycloak/releases/download"
 keycloak_source_url:
   - source: "{{ keycloak_url }}/{{ keycloak_version }}/keycloak-{{ keycloak_version }}.tar.gz"
     file: "keycloak-{{ keycloak_version }}.tar.gz"
-    checksum: "4acc5d20bc3d26e25aa3bcffbc50ac9b76135c93"
+    checksum: "2143f8e817c1a989c57666a57c3e5e6f54a70e35"
     checksum_type: "sha1"
-  
+
 keycloak_samba_federation:
   - name: "{{ autonomy_org_unit_name }} Active Directory"
     edit_mode: "READONLY"
