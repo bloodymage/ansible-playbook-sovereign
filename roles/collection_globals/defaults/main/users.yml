@@ -1,4 +1,9 @@
 ---
+# ==================================================================================================
+#
+# MythTV
+#
+# ==================================================================================================
 user_mythtv_access_cert:
   - mythtv
 
@@ -21,12 +26,16 @@ user_mythtv:
   gpg_name: "{{ user_mythtv_gpg_name }}"
   gpg_email: "{{ user_mythtv_gpg_email }}"
 
+# ==================================================================================================
+#
+# MiniDLNA
+#
+# ==================================================================================================
 user_minidlna:
   username: minidlna
   name: MiniDLNA Server
   groups: []
   id_number: "{{ user_minidlna_id_number }}"
-  #unix_home: /srv/minidlna
   unix_home: /var/lib/minidlna
   shell: /usr/sbin/nologin
 
@@ -43,7 +52,6 @@ user_homeassistant:
   id_number: "{{ user_homeassistant_id_number }}"
   unix_home: /home/homeassistant
   ssh_access_cert:
-    - root-everywhere
     - homeassistant
   ssh_cert:
     - None
@@ -63,9 +71,7 @@ user_odoo:
   id_number: "{{ user_odoo_id_number }}"
   unix_home: /home/odoo
   ssh_access_cert:
-    - root-everywhere
-
-user_root: "{{ __user_root }}"
+    - odoo
 
 user_mythtv_group:
   name: mythtv

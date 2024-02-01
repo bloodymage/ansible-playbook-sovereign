@@ -38,14 +38,26 @@ autonomy_users:
       - ansible
     ssh_cert:
       - None
+  - username: ansible_user_3
+    groups:
+      - users
+      - wheel
+    id_number: 1003
+    unix_home: /home/ansible_user_3
+    password: "!"
+    ssh_key_password: "password"
+    ssh_access_cert:
+      - ansible
+    ssh_cert:
+      - None
 
 autonomy_user_groups:
   - name: ssl-cert
     system: yes
 
 autonomy_user_group_ansible_managed: "ansiblemanaged"
-autonomy_user_password_min_id: 1000
-autonomy_user_password_max_id: 1001
+autonomy_user_managed_min_id: 1000
+autonomy_user_managed_max_id: 10000
 
 users_sudoers_options:
   - application: "screen"
@@ -134,12 +146,6 @@ __user_groups:
     system: yes
 
 __users: "{{ autonomy_users }}"
-
-__user_root:
-  username: root
-  unix_home: /root
-  ssh_access_cert:
-    - root-everywhere
 
 __default_mikrotik_device_user: "admin"
 

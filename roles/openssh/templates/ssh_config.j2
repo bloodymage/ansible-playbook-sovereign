@@ -19,6 +19,13 @@
 {# ssh_config(5) man page.                                                                        #}
 {#                                                                                                #}
 {# ============================================================================================== #}
+Host *.{{ autonomy_domain }}
+{% if inventory_hostname in groups['workstations'] %}
+{% if autonomy_smart_card_login %}
+  CertificateFile ~/.ssh/%u-cert.pub
+{% endif %}
+{% endif %}
+
 Host *.{{ autonomy_root_domain }}
 {% if inventory_hostname in groups['workstations'] %}
 {% if autonomy_smart_card_login %}
@@ -27,18 +34,23 @@ Host *.{{ autonomy_root_domain }}
   GSSAPIDelegateCredentials yes
 {% endif %}
 {% endif %}
-  CertificateFile ~/.ssh/%u-cert.pub
+  IdentityFile ~/.ssh/%u.pub
 
 {% if inventory_hostname in groups['workstations'] %}
 {% if autonomy_smart_card_login -%}
 {% if openssh_github -%}
   Host github.com
+{% if autonomy_smart_card_login %}
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+{% endif %}
   IdentityFile ~/.ssh/%u.pub
 {% endif %}
+
 {% if openssh_github -%}
   Host gitlab.com
+{% if autonomy_smart_card_login %}
   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
+{% endif %}
   IdentityFile ~/.ssh/%u.pub
 {% endif %}
 {% endif %}

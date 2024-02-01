@@ -73,10 +73,10 @@
 # defined in the user definitions, then remove the user from the local system.
 #
 # ==================================================================================================
-- name: "Create login users (Password Enabled)."
+- name: "Create users belonging to the 'ansiblemanaged' group."
   ansible.builtin.user:
     name: "{{ item['username'] }}"
-    password: "{{ __password_hash }}"
+    password: "{{ __user_password }}"
     groups: "{{ item['groups'] + [autonomy_user_group_ansible_managed] | default([autonomy_user_group_ansible_managed]) }}"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
@@ -85,7 +85,7 @@
     comment: "{{ item['name'] | default(omit) }}"
     home: "{{ item['unix_home'] | default('/nonexistent') }}"
     uid:  "{{ item['id_number'] | default(omit) }}"
-    update_password: always
+    update_password: "always"
     move_home: yes
   loop: "{{ __users }}"
   vars:
@@ -95,26 +95,35 @@
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __password1: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __password: "{% if item.password is defined %}{{ item.password }}{% else %}{{ __password1 }}{% endif %}"
     __password_hash: "{{ __password | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string ) }}"
+    __user_password: "{% if item.password is defined and item.password in ['!','*'] %}{{ item.password }}{% else %}{{ __password_hash }}{% endif %}"
   loop_control:
     index_var: index
   become: yes
   when:
     - __users is defined
     - item.id_number is defined
-    - item.id_number >= autonomy_user_password_min_id
-    - item.id_number <= autonomy_user_password_max_id
+    - item.id_number >= autonomy_user_managed_min_id
+    - item.id_number <= autonomy_user_managed_max_id
 
-- name: "Create login users (Password Disabled)."
+# ==================================================================================================
+#
+# These are generally application users.  For example 'mythtv', 'vmail', 'git', etc.  So we do not
+# want people to login as those users.
+#
+# ==================================================================================================
+- name: "Create non 'ansiblemanaged' users."
   ansible.builtin.user:
     name: "{{ item['username'] }}"
-    groups: "{{ item['groups'] + [autonomy_user_group_ansible_managed] | default([autonomy_user_group_ansible_managed]) }}"
+    groups: "{{ item['groups'] | default(omit) }}"
+    password: "!"
     state: present
     shell: "{{ item['shell'] | default('/bin/bash') }}"
     system: "{{ item['system'] | default('no') }}"
     create_home: true
-    comment: "{{ item['name'] | default(none) }}"
+    comment: "{{ item['name'] | default(omit) }}"
     home: "{{ item['unix_home'] | default('/nonexistent') }}"
     move_home: yes
     uid:  "{{ item['id_number'] | default(omit) }}"
@@ -124,8 +133,9 @@
   become: yes
   when:
     - __users is defined
-    - user_password_list.results[index].ansible_facts.password is not defined
-    - item.create_user is not defined or item.create_user is true
+    - ((item.id_number is not defined) or
+       (item.id_number < autonomy_user_managed_min_id) or
+       (item.id_number > autonomy_user_managed_max_id))
 
 # ==================================================================================================
 #
@@ -137,11 +147,11 @@
     name: "{{ item['username'] }}"
     generate_ssh_key: yes
     ssh_key_type: "{{ item['ssh_keytype'] | default('ed25519') }}"
-    ssh_key_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    ssh_key_passphrase: "{{ item.ssh_key_password | default(lookup('community.general.passwordstore', __password_lookup)) }}"
   loop: "{{ __users }}"
   loop_control:
     index_var: index
-  become: yes
+  become: true
   vars:
     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item['username'] }}/ssh_key_password"
     __password_length: "length={{ item['password_legnth'] | default(autonomy_password_length) }}"
@@ -160,7 +170,7 @@
     group: root
     mode: "0755"
     state: directory
-  become: yes
+  become: true
 
 - name: "Create SSH Principals file for users."
   ansible.builtin.template:
@@ -170,7 +180,7 @@
     group: root
     mode: '0644'
   loop: "{{ __users }}"
-  become: yes
+  become: true
   when:
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
 
