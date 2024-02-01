@@ -1,0 +1,13 @@
+---
+# ==================================================================================================
+#
+# We need to set 'changed_when' to 'true' to trigger the handlers.
+#
+# ==================================================================================================
+- name: "Restart all services."
+  ansible.builtin.debug:
+    msg:
+      - "Restarting All Services..."
+  changed_when: true
+  notify:
+    - "restart all"
