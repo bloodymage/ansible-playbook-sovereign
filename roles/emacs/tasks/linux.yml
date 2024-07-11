@@ -12,16 +12,18 @@
     owner: root
     group: root
     mode: "0644"
-  become: yes
+  become: true
   notify: "daemon reload"
 
-- name: "Enable service emacs and ensure it is not masked."
+- name: "Enable emacs daemon service for all users and ensure it is not masked."
   ansible.builtin.systemd:
     name: emacs
-    enabled: no
-    masked: no
+    enabled: "{{ autonomy_emacs_daemon_enabled }}"
+    force: false
+    masked: false
+    no_block: false
     scope: global
-  become: yes
+  become: true
 
 # ==================================================================================================
 #

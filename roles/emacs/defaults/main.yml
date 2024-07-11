@@ -3,3 +3,6 @@
 autonomy_emacs_packages:
   - emacs-nox
   - global
+
+autonomy_emacs_daemon_enabled: false
+autonomy_emacs_daemon_graphical: false

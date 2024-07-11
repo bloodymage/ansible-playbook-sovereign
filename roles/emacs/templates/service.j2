@@ -1,10 +1,13 @@
 [Unit]
 Description=Emacs text editor
 Documentation=info:emacs man:emacs(1) https://gnu.org/software/emacs/
+{% if autonomy_emacs_daemon_graphical -%}
+  After=graphical-session.target
+{% endif %}
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/emacs --daemon
+ExecStart=/usr/bin/emacs --fg-daemon
 ExecStop=/usr/bin/emacsclient --eval "(kill-emacs)"
 Environment=SSH_AUTH_SOCK=%t/keyring/ssh
 Restart=on-failure
