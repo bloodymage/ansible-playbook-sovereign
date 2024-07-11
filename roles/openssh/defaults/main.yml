@@ -22,7 +22,7 @@ openssh_config_files:
 # SSHD_Config options
 openssh_addrfamily: "any"
 
-openssh_host_key: "{{ ssh_config_dir }}/ssh_host_{{ sshca_host_key_type }}_key"
+openssh_host_key: "{{ ssh_config_dir }}/ssh_host_{{ sshca_host_key_type | lower }}_key"
 openssh_host_pubkey: "{{ openssh_host_key }}.pub"
 
 # SSH_Config options

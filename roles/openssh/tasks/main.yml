@@ -78,7 +78,7 @@
 - name: "Install Configuration files"
   ansible.builtin.template:
     src: "{{ item.name }}.j2"
-    dest: "{{ ssh_config_dir }}/{{ item.name }}"
+    dest: "{{ ssh_config_dir }}/{{ item.name | lower }}"
     owner: root
     group: root
     mode: "{{ item.mode | default('0644') }}"
