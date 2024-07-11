@@ -1,3 +1,5 @@
 ---
-keycloak_name: "keycloak"
-keycloak_home: "/opt/{{ keycloak_name }}"
+autonomy_keycloak_name: "keycloak"
+autonomy_keycloak_home: "/opt/{{ autonomy_keycloak_name }}"
+
+autonomy_keycloak_dbserver_group: "{{ autonomy_zone_name }}_{{ autonomy_keycloak_database }}_servers"
