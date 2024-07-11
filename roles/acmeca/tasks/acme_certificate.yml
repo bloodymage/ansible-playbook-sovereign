@@ -22,8 +22,8 @@
 
 - name: "Generate Let's Encrypt Certificate private key."
   community.crypto.openssl_privatekey:
-    path: '{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/privkey.pem'
-    type: '{{ __type }}'
+    path: "{{ autonomy_acmeca_certificate_key_path }}"
+    type: "{{ __type }}"
     size: "{{ autonomy_acmeca_certificate_key_size }}"
     owner: "{{ autonomy_acmeca_certificate_key_owner }}"
     group: "{{ autonomy_acmeca_certificate_key_group }}"
@@ -34,7 +34,7 @@
     backup: true
   become: true
   vars:
-    __tmp_type: "{{ autonomy_acmeca_account_key_type }}"
+    __tmp_type: "{{ autonomy_acmeca_certificate_key_type }}"
     __type: "{% if __tmp_type.lower() in ['ed25519','ed448'] %}{{ __tmp_type | capitalize }}{% else %}{{ __tmp_type | upper }}{% endif %}"
   when:
     - autonomy_zone_type == "public"

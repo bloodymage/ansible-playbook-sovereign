@@ -47,6 +47,9 @@ autonomy_acmeca_pki_cert_dir: "{{ autonomy_user_pki_dir }}/acmeca/certs"
 autonomy_acmeca_account_key: "{{ autonomy_default_sysadmin_user }}_at_{{ autonomy_root_zone_name }}_{{ autonomy_tld }}_{{ autonomy_acmeca_account_key_type | lower }}.key"
 autonomy_acmeca_account_key_path: "{{ autonomy_acmeca_pki_account_dir }}/{{ autonomy_acmeca_account_key }}"
 
+autonomy_acmeca_certificate_key: "{{ autonomy_default_sysadmin_user }}_at_{{ autonomy_root_zone_name }}_{{ autonomy_tld }}_{{ autonomy_acmeca_certificate_key_type | lower }}.key"
+autonomy_acmeca_certificate_key_path: "{{ autonomy_acmeca_archive_dir }}/{{ inventory_hostname }}/privkey_{{ autonomy_acmeca_certificate_key_type | lower }}.pem"
+
 # URLs
 autonomy_acmeca_directory_url: "{{ __letsencrypt_production_url }}"
 
