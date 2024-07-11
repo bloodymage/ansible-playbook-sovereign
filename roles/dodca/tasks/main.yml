@@ -17,7 +17,7 @@
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
-    - not ownca_generate_locally
+    - not autonomy_ownca_generate_locally
 
 - name: "Cleanup downloaded files."
   ansible.builtin.file:
