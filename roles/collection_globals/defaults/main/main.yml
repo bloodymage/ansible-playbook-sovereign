@@ -103,13 +103,6 @@ autonomy_user_pki_dir: "{{ autonomy_user_home_dir }}/.pki"
 autonomy_sysconf_dir: "/etc"
 sysconf_dir: "{{ autonomy_sysconf_dir }}"
 
-# Users
-user_mythtv_id_number: 500
-user_minidlna_id_number: 501
-user_git_id_number: 502
-user_homeassistant_id_number: 503
-user_vmail_id_number:  504
-user_odoo_id_number: 505
 
 
 # ==================================================================================================
