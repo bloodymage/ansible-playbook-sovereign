@@ -2,7 +2,7 @@
 
 mail_location = {{ mail_location }}
 
-{% for namespace in dovecot_namespaces -%}
+{% for namespace in autonomy_dovecot_namespaces -%}
   namespace {{ namespace.name }} {
   inbox = {{ namespace.inbox | default('no') }}
   {% if namespace.type is defined -%}
@@ -60,7 +60,7 @@ mail_privileged_group = {{ mail_privileged_group }}
 #mail_chroot = 
 #auth_socket_path = /var/run/dovecot/auth-userdb
 #mail_plugin_dir = /usr/lib/dovecot/modules
-mail_plugins = {{ dovecot_mail_plugins }}
+mail_plugins = {{ autonomy_dovecot_mail_plugins }}
 #mailbox_list_index = yes
 #mailbox_list_index_very_dirty_syncs = yes
 #mailbox_list_index_include_inbox = no
@@ -71,7 +71,7 @@ mail_plugins = {{ dovecot_mail_plugins }}
 #mail_temp_scan_interval = 1w
 #mail_sort_max_read_count = 0
 
-{% for protocol in dovecot_mail_protocols %}
+{% for protocol in autonomy_dovecot_mail_protocols %}
   protocol {{ protocol.name }} {
   {% if mail_vsize_bg_after_count is defined %}
     mail_vsize_bg_after_count = {{ mail_vsize_bg_after_count }}

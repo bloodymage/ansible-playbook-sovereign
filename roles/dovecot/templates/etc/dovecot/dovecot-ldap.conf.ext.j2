@@ -16,5 +16,5 @@ user_filter = (&(userPrincipalName=%u)(objectClass=person)(!(userAccountControl:
 pass_filter = (&(userPrincipalName=%u)(objectClass=person)(!(userAccountControl:1.2.840.113556.1.4.803:=2)))
 pass_attrs = userPassword=password
 default_pass_scheme = CRYPT
-user_attrs = =uid={{ user_vmail_id_number }},=gid={{ user_vmail_id_number }},=home=/var/vmail/mail/%Ld/%Ln/Maildir/,=mail=maildir:/var/mail/vmail/%Ld/%Ln/Maildir/
+user_attrs = =uid={{ user_vmail_id_number }},=gid={{ user_vmail_id_number }},=home={{ autonomy_vmail_dir }}/%Ld/%Ln/Maildir/,=mail=maildir:{{ autonomy_vmail_dir }}/%Ld/%Ln/Maildir/
 tls=yes
