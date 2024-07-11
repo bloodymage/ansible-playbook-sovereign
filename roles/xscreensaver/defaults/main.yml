@@ -8,6 +8,8 @@ autonomy_packages:
   - xscreensaver-screensaver-dizzy
   - xscreensaver-screensaver-webcollage
   - rss-glx
+  - xdaliclock
+  - xfishtank
 
 xscreensaver_service_sleep_time: "15"
 
