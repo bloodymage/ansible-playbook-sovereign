@@ -20,15 +20,19 @@
   name = "{{ item.username }}"
   email = "{{ item.username }}@{{ autonomy_fqdn }}"
 {% endif %}
-  useConfigOnly = {{ item.use_config_only | default(autonomy_user_gitconfig_use_config_only) }}
+{% if item.use_config_only is truthy and item.use_config_only != autonomy_gitconfig_user_use_config_only %}
+  useConfigOnly = {{ item.use_config_only }}
+{% elif autonomy_user_gitconfig_user_use_config_only != autonomy_gitconfig_user_use_config_only %}
+  useConfigOnly = {{ autonomy_user_gitconfig_user_use_config_only }}
+{% endif %}
 
 {# Not sure this is still necessary #}
 {#  [add "interactive"] #}
 {# useBuiltin = false # required for git 2.37.0 #}
 
-[branch "{{ autonomy_user_gitconfig_default_branch }}"]
+[branch "{{ autonomy_user_gitconfig_init_default_branch }}"]
   remote = origin
-  merge = refs/heads/{{ autonomy_user_gitconfig_default_branch }}
+  merge = refs/heads/{{ autonomy_user_gitconfig_init_default_branch }}
 
 [color]
   branch = always
@@ -67,8 +71,12 @@
 {%- endif %}
 
 [core]
-  editor = {{ autonomy_user_gitconfig_editor }}
-  pager = delta
+{% if autonomy_user_gitconfig_core_editor is truthy and autonomy_user_gitconfig_core_editor != autonomy_gitconfig_core_editor %}
+  editor = {{ autonomy_user_gitconfig_core_editor }}
+{% endif %}
+{% if autonomy_user_gitconfig_core_pager is truthy and autonomy_user_gitconfig_core_pager != autonomy_gitconfig_core_pager %}
+  pager = {{ autonomy_user_gitconfig_core_pager }}
+{% endif %}
   whitespace = fix,-indent-with-non-tab,trailing-space,cr-at-eol
   excludesfile = ~/.gitignore # Creates a global git ignore
 
@@ -93,8 +101,15 @@
   oauth-token = {{ autonomy_github_oauth_token }}
 {% endif %}
 
+{% if autonomy_user_gitconfig_init_default_branch is truthy or autonomy_user_gitconfig_init_template_dir is truthy %}
 [init]
-  defaultBranch = {{ autonomy_user_gitconfig_default_branch }}
+{% if autonomy_user_gitconfig_default_branch is truthy %}
+  defaultBranch = {{ autonomy_user_gitconfig_init_default_branch }}
+{% endif %}
+{% if autonomy_user_gitconfig_template_dir is truthy %}
+  templateDir = {{ autonomy_user_gitconfig_init_template_dir %}
+{% endif %}
+{% endif %}
 
 [interactive]
   diffFilter = delta --color-only
@@ -144,7 +159,7 @@ co0 = checkout HEAD --
 cob = checkout -b
 cod = checkout develop
 coh = checkout hotfix
-com = checkout {{ autonomy_user_gitconfig_default_branch }}
+com = checkout {{ autonomy_user_gitconfig_init_default_branch }}
 cor = checkout release
 
 # Clone Aliases
@@ -279,7 +294,7 @@ lp   = log --patch
 
 # merge
 m   = merge
-mom = merge origin/{{ autonomy_user_gitconfig_default_branch }}
+mom = merge origin/{{ autonomy_user_gitconfig_init_default_branch }}
 
 # push
 o = !git push origin --all && git push --prune
@@ -293,7 +308,7 @@ ra  = rebase --abort
 rc  = rebase --continue
 ri  = rebase --interactive
 rs  = rebase --skip
-rom = rebase origin/{{ autonomy_user_gitconfig_default_branch }}
+rom = rebase origin/{{ autonomy_user_gitconfig_init_default_branch }}
 
 # Remote Aliases
 re  = remote
