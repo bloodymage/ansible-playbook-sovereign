@@ -16,7 +16,7 @@
 
 - name: "Update DNS Records."
   hosts: all:!localhost
-  ignore_unreachable: yes
+  ignore_unreachable: true
   roles:
     - role: bloodymage.autonomy.maintenance
       vars:

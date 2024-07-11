@@ -1,6 +1,7 @@
+---
 - name: "Prepare playbook environment."
   hosts: all:!wifi_access_points:!routers:!switches:!printers
-  ignore_unreachable: yes
+  ignore_unreachable: true
   roles:
     - role: bloodymage.autonomy.config_environment
       tags:
