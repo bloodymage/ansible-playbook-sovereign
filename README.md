@@ -124,11 +124,13 @@ autonomy_realm_identity_management_system: ""
 
 Options:
  - "" (Not set)
- - samba
+ - ad (Active Directory)
  - openldap (planned for the future)
  - freeipa (planned for the future)
 
-So far, this collection has really only been tested with this variable set to ```samba```.  You must set it yourself.  Things can, and most likely will go wrong if it's not set to ```samba```.
+So far, this collection has only been tested with this variable set to ```ad``` while using Samba as the Domain Controller.  You must set it yourself.  Things can, and most likely will go wrong if it's not set to ```ad```.
+
+This will likely never support AzureAD.
 
 ##### Network structure
 ```
@@ -177,7 +179,7 @@ autonomy_domain: "{{ autonomy_root_domain }}"
 
 ##### Users
 ```
-users:
+aunosowy_users:
   - username: bob          (mandatory)
     id_number: 1000        (mandatory)
 
@@ -185,7 +187,7 @@ users:
 ##### Domain Users
 
 ```
-domain_users:
+autonomy_domain_users:
   - given_name: Bob        (Mandatory)
     id_number: 10000       (Mandatory)
     username: bob          (optional)
@@ -209,14 +211,14 @@ To view the passwords in the password store type:
 "pass ..."
 
 If you wish to manually generate your passwords, the following passwords can be defined in your vault:
-- keycloak_admin_password
-- keycloak_keystore_password
-- ownca_root_password
-- ownca_intermediate_password
-- ownca_component_password
-- ownca_identity_password
-- ownca_codesign_password
-- samba_administrator_password
+- autonomy_keycloak_admin_password
+- autonomy_keycloak_keystore_password
+- autonomy_ownca_root_password
+- autonomy_ownca_intermediate_password
+- autonomy_ownca_component_password
+- autonomy_ownca_identity_password
+- autonomy_ownca_codesign_password
+- autonomy_samba_administrator_password
 
 For more information see: [Password Storage](#password-storage)
 

@@ -6,7 +6,8 @@
 # ==================================================================================================
 - name: "Configure the environment for basic host configuration."
   hosts: all:!localhost
-  ignore_unreachable: yes
+  ignore_unreachable: true
+  gather_facts: true
   roles:
     - role: bloodymage.autonomy.config_environment
       tags:
@@ -24,7 +25,8 @@
       tags:
         - upgrade
 
-- import_playbook: "all_linux_init.yml"
+- name: "Initialize All Linux Hosts."
+  import_playbook: "all_linux_init.yml"
 
 # ==================================================================================================
 #
@@ -43,9 +45,8 @@
         - hostname
     - role: bloodymage.autonomy.users
       vars:
-        autonomy_user_dotfiles_users:
-          - "{{ autonomy_users }}"
-        autonomy_user_dotfiles_home: "/home"
+        autonomy_users_dotfiles_users: "{{ autonomy_users }}"
+        autonomy_users_dotfiles_home: "/home"
         __user_tasks: "sysusers"
       when:
         - autonomy_users is defined
@@ -91,4 +92,5 @@
     #   tags:
     #     - dodca
 
-- import_playbook: "all_linux.yml"
+- name: "Linux Host Configuration."
+  import_playbook: "all_linux.yml"
