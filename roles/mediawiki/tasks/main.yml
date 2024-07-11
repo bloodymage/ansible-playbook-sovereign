@@ -39,7 +39,7 @@
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
   become: no
   when:
-    - autonomy_realm_identity_management_system == "samba"
+    - autonomy_realm_identity_management_system == "ad"
     - mediawiki_ldap_password == "password"
   tags:
     - mediawiki
