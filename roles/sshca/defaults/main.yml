@@ -27,9 +27,6 @@ sshca_user_signer_id: "{{ sshca_domain }}"
 sshca_user_signer_key: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
 sshca_home_dir: "/home/{{ autonomy_org_unit_name | upper }}"
 
-ownca_user_pki_dir: ".pki"
-ownca_user_private_dir: "{{ ownca_user_pki_dir }}/private"
-
 sshca_user_pki_dirs:
   - name: "ssh"
     mode: "0755"

@@ -13,7 +13,7 @@
 
 - name: "Create persistant host certificate directory."
   ansible.builtin.file:
-    path: "{{ ownca_directory }}/hosts/ssh/{{ inventory_hostname }}"
+    path: "{{ autonomy_ownca_directory }}/hosts/ssh/{{ inventory_hostname }}"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "0755"
@@ -26,8 +26,8 @@
 
 - name: "Fetch public keys."
   ansible.builtin.fetch:
-    src: "{{ ssh_config_dir }}/ssh_host_{{ item }}_key.pub"
-    dest: "{{ ownca_directory }}/hosts/ssh/{{ inventory_hostname }}/ssh_host_{{ item }}_key.pub"
+    src: "{{ ssh_config_dir }}/ssh_host_{{ item | lower }}_key.pub"
+    dest: "{{ autonomy_ownca_directory }}/hosts/ssh/{{ inventory_hostname }}/ssh_host_{{ item | lower }}_key.pub"
     flat: true
   loop: "{{ autonomy_sshca_host_key_types }}"
   changed_when: false
@@ -49,8 +49,8 @@
 - name: "Sign SSH Public Keys."
   community.crypto.openssh_cert:
     signing_key: "{{ sshca_host_signer_key }}"
-    public_key: "{{ ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item }}_key.pub"
-    path: "{{ ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item }}_key-cert.pub"
+    public_key: "{{ autonomy_ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item | lower }}_key.pub"
+    path: "{{ autonomy_ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item | lower }}_key-cert.pub"
     identifier: "{{ sshca_host_signer_id }}"
     type: "host"
     principals: "{{ sshca_host_signer_hostnames }}"
@@ -76,7 +76,7 @@
 
 - name: "Copy certificates to server."
   ansible.builtin.copy:
-    src: "{{ ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item }}_key-cert.pub"
+    src: "{{ autonomy_ownca_directory }}/hosts/ssh/{{ autonomy_fqdn }}/ssh_host_{{ item | lower }}_key-cert.pub"
     dest: "{{ ssh_config_dir }}/ssh_host_{{ item }}_key-cert.pub"
     owner: "root"
     group: "root"

@@ -14,7 +14,7 @@
 
 - name: "Create user pki directories."
   ansible.builtin.file:
-    path: "{{ ownca_directory }}/users/{{ item.name }}"
+    path: "{{ autonomy_ownca_directory }}/users/{{ item.name }}"
     state: directory
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
@@ -26,8 +26,8 @@
 
 - name: "Create user SSH public keys."
   community.crypto.openssl_publickey:
-    path: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
-    privatekey_path: "{{ __user_private_dir }}/{{ item.username }}.key"
+    path: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.pub"
+    privatekey_path: "{{ __user_private_dir }}/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.key"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     format: "OpenSSH"
     owner: "{{ item.id_number }}"
@@ -49,8 +49,8 @@
 
 - name: "Fetch user SSH public keys."
   ansible.builtin.fetch:
-    src: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}.pub"
-    dest: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
+    src: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.pub"
+    dest: "{{ autonomy_ownca_directory }}/users/ssh/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.pub"
     flat: true
   loop: "{{ __realm_users }}"
   changed_when: false
@@ -60,8 +60,8 @@
 - name: "Sign SSH Public Keys."
   community.crypto.openssh_cert:
     signing_key: "{{ sshca_user_signer_key }}"
-    public_key: "{{ ownca_directory }}/users/ssh/{{ item.username }}.pub"
-    path: "{{ ownca_directory }}/users/ssh/{{ item.username }}-cert.pub"
+    public_key: "{{ ownca_directory }}/users/ssh/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.pub"
+    path: "{{ autonomy_ownca_directory }}/users/ssh/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type }}-cert.pub"
     identifier: "{{ sshca_user_signer_id }}"
     type: "user"
     principals: "{{ __ssh_principals }}"
@@ -87,8 +87,8 @@
 
 - name: "Install SSH Certificate."
   ansible.builtin.copy:
-    src: "{{ ownca_directory }}/users/ssh/{{ item.username }}-cert.pub"
-    dest: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}-cert.pub"
+    src: "{{ autonomy_ownca_directory }}/users/ssh/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type }}-cert.pub"
+    dest: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}/.ssh/{{ item.username }}_{{ autonomy_ownca_user_privatekey_type }}-cert.pub"
     owner: "{{ item.id_number }}"
     group: "{{ item.id_number }}"
     mode: "0600"

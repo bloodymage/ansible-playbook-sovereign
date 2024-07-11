@@ -89,7 +89,7 @@
 - name: "Generate Host CA keys."
   community.crypto.openssh_keypair:
     path: "{{ sshca_key_directory }}/{{ sshca_host_keyfile }}"
-    type: "{{ sshca_host_key_type }}"
+    type: "{{ sshca_host_key_type | lower }}"
     comment: "{{ sshca_host_key_comment }}"
     passphrase: "{{ sshca_host_key_password }}"
     owner: "{{ autonomy_sshca_user }}"
@@ -103,7 +103,7 @@
 - name: "Generate User CA keys."
   community.crypto.openssh_keypair:
     path: "{{ sshca_key_directory }}/{{ sshca_user_keyfile }}"
-    type: "{{ sshca_user_key_type }}"
+    type: "{{ sshca_user_key_type | lower }}"
     comment: "{{ sshca_user_key_comment }}"
     passphrase: "{{ sshca_user_key_password }}"
     owner: "{{ autonomy_sshca_user }}"
