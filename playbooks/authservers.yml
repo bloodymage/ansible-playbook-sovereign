@@ -1,0 +1,15 @@
+---
+- name: "Prepare playbook environment."
+  hosts: all:!wifi_access_points:!routers:!switches:!printers
+  ignore_unreachable: true
+  roles:
+    - role: bloodymage.autonomy.config_environment
+      tags:
+        - always
+
+- name: "Configure Keycloak."
+  hosts: keycloak_servers:!public_zone:!localhost
+  roles:
+    - role: bloodymage.autonomy.keycloak
+      tags:
+        - keycloak
