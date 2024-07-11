@@ -1,7 +1,12 @@
 ---
+# ==================================================================================================
+#
+#
+#
+# ==================================================================================================
 - name: "Install packages."
   ansible.builtin.apt:
-    name: "{{ autonomy_ownca_packages }}"
+    name: "{{ autonomy_ownca_host_packages }}"
     state: present
   become: yes
   when:
@@ -15,10 +20,10 @@
 # ==================================================================================================
 - name: "Check if host is in 'apache' or 'openldap' group."
   ansible.builtin.set_fact:
-    ownca_private_key_group: "ssl-cert"
-    ownca_private_key_mode: "0640"
-    __ownca_private_key_dir_mode: "0750"
-    __ownca_private_key_dir_group: "ssl-cert"
+    autonomy_ownca_private_key_group: "ssl-cert"
+    autonomy_ownca_private_key_mode: "0640"
+    __autonomy_ownca_private_key_dir_mode: "0750"
+    __autonomy_ownca_private_key_dir_group: "ssl-cert"
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
     - inventory_hostname in groups['openldap_servers'] | default([])
@@ -35,41 +40,41 @@
 # ==================================================================================================
 - name: "Create SSL Directories."
   ansible.builtin.file:
-    path: "{{ ownca_etc }}/{{ item.name }}"
+    path: "{{ autonomy_ownca_etc }}/{{ item.name }}"
     state: directory
-    owner: "{{ item.owner | default(ownca_etc_owner) }}"
-    group: "{{ item.group | default(ownca_etc_group) }}"
+    owner: "{{ item.owner | default(autonomy_ownca_etc_owner) }}"
+    group: "{{ item.group | default(autonomy_ownca_etc_group) }}"
     mode: "{{ item.mode }}"
   become: yes
-  loop: "{{ ownca_host_certs_directories }}"
+  loop: "{{ autonomy_ownca_host_certs_directories }}"
 
 - name: "Generate Host Private Key."
   community.crypto.openssl_privatekey:
-    path: '{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key'
-    type: '{{ ownca_privatekey_type }}'
-    size: 4096
-    owner: "{{ ownca_etc_owner }}"
-    group: "{{ ownca_private_key_group }}"
-    mode: "{{ ownca_private_key_mode }}"
+    path: "{{ autonomy_ownca_etc_privatekey_path }}"
+    type: "{{ autonomy_ownca_privatekey_type }}"
+    size: "{{ autonomy_ownca_privatekey_size }}"
+    owner: "{{ autonomy_ownca_etc_owner }}"
+    group: "{{ autonomy_ownca_private_key_group }}"
+    mode: "{{ autonomy_ownca_private_key_mode }}"
     force: no
   become: yes
 
 - name: "Generate Host CSR."
   community.crypto.openssl_csr:
-    country_name: "{{ ownca_country_code | default(none) }}"
+    country_name: "{{ autonomy_ownca_country_code | default(none) }}"
     state_or_province_name: "{{ autonomy_region | default(none) }}"
-    locality_name: "{{ loc_city | default(none) }}"
+    locality_name: "{{ autonomy_loc_city | default(none) }}"
     organization_name: "{{ autonomy_org_name | title }}"
     organizational_unit_name: "{{ autonomy_org_unit_name | title }}"
     common_name: "{{ autonomy_fqdn }}"
-    key_usage: "{{ ownca_host_certs_key_usage }}"
+    key_usage: "{{ autonomy_ownca_host_certs_key_usage }}"
     key_usage_critical: yes
-    extended_key_usage: "{{ ownca_host_certs_extended_key_usage }}"
+    extended_key_usage: "{{ autonomy_ownca_host_certs_extended_key_usage }}"
     extended_key_usage_critical: yes
-    privatekey_path: "{{ ownca_etc }}/private/{{ autonomy_fqdn }}.key"
-    subject_alt_name: "{{ ownca_host_certs_subject_alt_name }}"
+    privatekey_path: "{{ autonomy_ownca_etc_privatekey_path }}"
+    subject_alt_name: "{{ autonomy_ownca_host_certs_subject_alt_name }}"
     crl_distribution_points:
-      - full_name: "URI:{{ ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
+      - full_name: "URI:{{ autonomy_ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
         reasons:
           - key_compromise
           - ca_compromise
@@ -79,12 +84,12 @@
           - certificate_hold
           - privilege_withdrawn
           - aa_compromise
-    path: "{{ ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
+    path: "{{ autonomy_ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
     mode: "0644"
-    owner: "{{ ownca_etc_owner }}"
-    group: "{{ ownca_etc_group }}"
+    owner: "{{ autonomy_ownca_etc_owner }}"
+    group: "{{ autonomy_ownca_etc_group }}"
     backup: yes
-    force: "{{ __ownca_regenerate_csr }}"
+    force: "{{ __autonomy_ownca_regenerate_csr }}"
   become: yes
 
 # ==================================================================================================
@@ -93,9 +98,9 @@
 #
 #
 # ==================================================================================================
-- name: Fetch CSRs.
+- name: "Fetch CSRs."
   ansible.builtin.fetch:
-    src: "{{ ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
-    dest: "{{ ownca_hosts_directory }}/csr/"
+    src: "{{ autonomy_ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
+    dest: "{{ autonomy_ownca_hosts_directory }}/csr/"
     flat: yes
   become: yes

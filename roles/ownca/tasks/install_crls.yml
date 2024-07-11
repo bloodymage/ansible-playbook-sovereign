@@ -1,6 +1,7 @@
+---
 - name: "Create list of cert authorities."
   ansible.builtin.set_fact:
-    ownca_crl_distribution_points: "{{ ownca_crl_distribution_points + [__additional_cert_auth] }}"
+    autonomy_ownca_crl_distribution_points: "{{ autonomy_ownca_crl_distribution_points + [__additional_cert_auth] }}"
   loop: "{{ autonomy_zones | product(__ownca_certificate_authorities_id) }}"
   vars:
     __additional_cert_auth: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}"
@@ -12,12 +13,12 @@
 
 - name: "Copy CRLs to server."
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/crl/{{ item }}.crl"
-    dest: "/srv/www/{{ vhost.name }}/{{ item }}.crl"
+    src: "{{ autonomy_ownca_ca_directory }}/crl/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crl"
+    dest: "/srv/www/{{ vhost.name }}/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crl"
     owner: root
     group: root
     mode: "0644"
-  loop: "{{ ownca_crl_distribution_points }}"
+  loop: "{{ autonomy_ownca_crl_distribution_points }}"
   become: yes
   tags:
     - ownca-crl-distribution-points

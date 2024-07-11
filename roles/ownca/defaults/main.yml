@@ -5,17 +5,21 @@ autonomy_ownca_packages:
   - rng-tools
   - ca-certificates
 
-ownca_intermediate_ca: "{{ autonomy_org_unit_name | lower }}"
+autonomy_ownca_host_packages: "{{ autonomy_ownca_packages }}"
 
-ownca_user_pki_dir: ".pki"
-ownca_user_cert_dir: "{{ ownca_user_pki_dir }}/certs"
-ownca_user_csr_dir: "{{ ownca_user_pki_dir }}/csr"
-ownca_user_private_dir: "{{ ownca_user_pki_dir }}/private"
-ownca_user_pkcs12_dir: "{{ ownca_user_pki_dir }}/pkcs12"
-ownca_home_dir: "/home/{{ autonomy_org_unit_name | upper }}"
-ownca_hosts_directory: "{{ ownca_directory }}/hosts"
+autonomy_ownca_intermediate_ca: "{{ autonomy_org_unit_name | lower }}"
 
-ownca_host_certs_directories:
+autonomy_ownca_user_pki_dir: "{{ autonomy_user_pki_dir }}"
+autonomy_ownca_user_cert_dir: "{{ autonomy_ownca_user_pki_dir }}/certs"
+autonomy_ownca_user_csr_dir: "{{ autonomy_ownca_user_pki_dir }}/csr"
+autonomy_ownca_user_private_dir: "{{ autonomy_ownca_user_pki_dir }}/private"
+autonomy_ownca_user_pkcs12_dir: "{{ autonomy_ownca_user_pki_dir }}/pkcs12"
+autonomy_ownca_home_dir: "/home/{{ autonomy_org_unit_name | upper }}"
+
+autonomy_ownca_etc_privatekey_path: "{{ autonomy_ownca_etc }}/private/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.key"
+autonomy_ownca_host_privatekey_path: "{{ autonomy_ownca_hosts_directory }}/private/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.key"
+
+autonomy_ownca_host_certs_directories:
   - name: private
     mode: "{{ __ownca_private_key_dir_mode }}"
     group: "{{ __ownca_private_key_dir_group }}"
@@ -30,7 +34,7 @@ ownca_host_certs_directories:
   - name: dhparams
     mode: "0755"
 
-ownca_user_pki_dirs:
+autonomy_ownca_user_pki_dirs:
   - name: private
     mode: "0755"
   - name: csr
@@ -42,34 +46,36 @@ ownca_user_pki_dirs:
   - name: "ssh"
     mode: "0755"
 
-ownca_user_directories:
+autonomy_ownca_user_directories:
   - name: "csr"
     mode: "0755"
   - name: "certs"
     mode: "0755"
 
-ownca_private_key_group: "root"
-ownca_private_key_mode: "0600"
+autonomy_ownca_private_key_group: "root"
+autonomy_ownca_private_key_mode: "0600"
 
-ownca_generate_locally: no
+autonomy_ownca_generate_locally: no
 
-ownca_host_certs_pkcs12_password: "password"
-ownca_host_certs_subject_alt_name:
+autonomy_ownca_host_certs_pkcs12_password: "password"
+autonomy_ownca_host_certs_subject_alt_name:
   - "DNS:{{ autonomy_fqdn }}"
   - "IP:{{ ansible_host }}"
 
-ownca_host_certs_extended_key_usage:
+autonomy_ownca_host_certs_extended_key_usage:
   - serverAuth
   - clientAuth
 
-ownca_host_certs_key_usage:
+autonomy_ownca_host_certs_key_usage:
   - digitalSignature
   - keyEncipherment
 
-ownca_objectguid: ""
+autonomy_ownca_objectguid: ""
 
-ownca_revoked_certificates: []
+autonomy_ownca_revoked_certificates: []
 
+autonomy_ownca_crl_distribution_points:
+  - "{{ autonomy_org_name }}-root-ca"
 
 # ==================================================================================================
 #
@@ -83,3 +89,7 @@ __ownca_private_key_dir_group: "root"
 __host_cert_force_regeneration: no
 __ownca_force_regeneration: no
 __user_cert_force_regeneration: no
+__ownca_certificate_authorities_id:
+  - "ca"
+  - "component-ca"
+  - "identity-ca"

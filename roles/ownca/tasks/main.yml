@@ -12,18 +12,30 @@
       files: "{{ __os_variables_files }}"
       paths:
         - "vars"
-  become: no
+  become: false
   delegate_to: localhost
-  run_once: yes
+  run_once: true
 
 - name: "Install packages."
   ansible.builtin.package:
     pkg: "{{ autonomy_ownca_packages }}"
     state: present
-  become: yes
+  become: true
   register: result
   delegate_to: localhost
-  run_once: yes
+  run_once: true
+
+- name: "Prepare Certificate Authorities."
+  include_tasks: "prepare_certificate_authorities.yml"
+  when:
+    - __ownca_tasks == "ownca"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
+    - ownca-user-certs
 
 - name: "Create OwnCA: Root CA."
   include_tasks: "rootca.yml"
@@ -33,12 +45,66 @@
     - ownca
     - ownca-root
 
-# - name: "Create OwnCA: Intermediate CAs."
-#   include_tasks: "intermediateca.yml"
-#   when:
-#     - __ownca_tasks == "ownca"
-#   tags:
-#     - ownca
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - ownca
+    - ownca-root
+
+- name: "Create OwnCA: Intermediate CAs."
+  include_tasks: "intermediateca.yml"
+  when:
+    - __ownca_tasks == "ownca"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+
+- name: "Create OwnCA: Issuing CAs."
+  include_tasks: "issuingca.yml"
+  when:
+    - __ownca_tasks == "ownca"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+
+- name: "Create CA Certificate Chains."
+  include_tasks: "ca_chains.yml"
+  when:
+    - __ownca_tasks == "ownca"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+
+- name: "Convert PEM file to DER format."
+  include_tasks: "der_format.yml"
+  when:
+    - __ownca_tasks == "ownca"
+    - autonomy_realm_identity_management_system == "ad"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Create Host Certificates."
   include_tasks: "host_certs.yml"
@@ -46,8 +112,10 @@
     - __ownca_tasks == "hostcerts"
   tags:
     - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
     - ownca-host-certs
-
 
 - name: "Create User Certificates."
   include_tasks: "user_certs.yml"
@@ -55,6 +123,9 @@
     - __ownca_tasks == "usercerts"
   tags:
     - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
     - ownca-user-certs
 
 - name: "Create OwnCA: CRLs."
@@ -63,6 +134,22 @@
     - __ownca_tasks == "crls"
   tags:
     - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
+    - ownca-crls
+
+- name: "Configure OwnCA CRL Distribution points."
+  include_tasks: "crl_distribution_points.yml"
+  when:
+    - __ownca_tasks == "crl_distribution_points"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
     - ownca-crls
 
 - name: "Create Host Diffie-Hellman Parameters."

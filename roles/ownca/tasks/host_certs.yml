@@ -7,21 +7,27 @@
         - "vars"
   become: no
 
+- name: "Set ownca host directory for local generation."
+  ansible.builtin.set_fact:
+    autonomy_ownca_hosts_directory: "{{ autonomy_ownca_directory }}/hosts"
+  when:
+    - autonomy_ownca_generate_locally
+
 - name: "Create SSL Directories."
   ansible.builtin.file:
-    path: "{{ ownca_hosts_directory }}/{{ item.name }}"
+    path: "{{ autonomy_ownca_hosts_directory }}/{{ item.name }}"
     state: directory
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "{{ item.mode }}"
-  loop: "{{ ownca_host_certs_directories }}"
+  loop: "{{ autonomy_ownca_host_certs_directories }}"
   become: no
   delegate_to: localhost
   run_once: yes
 
 - name: "Add subject alt names based on ipv6."
   ansible.builtin.set_fact:
-    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + [__alt_name] }}"
+    autonomy_ownca_host_certs_subject_alt_name: "{{ autonomy_ownca_host_certs_subject_alt_name + [__alt_name] }}"
   vars:
     __alt_name: "IP:{{ autonomy_ipv6_address }}"
   when:
@@ -79,52 +85,33 @@
 #   when:
 #     - inventory_hostname in groups[item.name] | default([])
 
-# - name: "Add hardware based subject alt names."
-#   ansible.builtin.set_fact:
-#     ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
-#   become: no
-#   loop:
-#     - name: "routers"
-#       alt_name: "router"
-#     - name: "printers"
-#       alt_name: "printer"
-#   vars:
-#     __group_id: "{{ autonomy_zone_name }}_{{ item.name }}"
-#     __host_index: "{{ groups[__group_id].index(inventory_hostname) + 1 }}"
-#     __group_size: "{{ groups[__group_id] | length }}"
-#     __padded_index: "{% if __group_size != 1%}{{ '%02d' % __host_index | int }}{% else %}{% endif %}"
-#     __alt_name:
-#       - "DNS:{{ item.alt_name }}{{ __padded_index }}.{{ autonomy_domain }}"
-#   when:
-#     - inventory_hostname in groups[item.name] | default([])
-
 - name: "Add additional subject alt names for samba domain controllers."
   ansible.builtin.set_fact:
-    ownca_host_certs_subject_alt_name: "{{ ownca_host_certs_subject_alt_name + __alt_name }}"
+    autonomy_ownca_host_certs_subject_alt_name: "{{ autonomy_ownca_host_certs_subject_alt_name + __alt_name }}"
   vars:
     __alt_name:
       - "DNS:{{ autonomy_domain }}"
-      - "otherName:{{ ownca_msadguid_oid }};UTF8:{{ ownca_objectguid }}"
+      - "otherName:{{ autonomy_ownca_msadguid_oid }};UTF8:{{ autonomy_ownca_objectguid }}"
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
 
 - name: "Set extended key usage based on role."
   ansible.builtin.set_fact:
-    ownca_host_certs_extended_key_usage: "{{ ownca_host_certs_extended_key_usage + [item.extended_key_uasge] }}"
+    autonomy_ownca_host_certs_extended_key_usage: "{{ autonomy_ownca_host_certs_extended_key_usage + [item.extended_key_uasge] }}"
   become: no
   loop:
     - name: "samba_domain_controllers"
-      extended_key_uasge: "{{ ownca_mskdc_oid }}"
+      extended_key_uasge: "{{ autonomy_ownca_mskdc_oid }}"
   when:
     - inventory_hostname in groups[item.name] | default([])
 
 - name: "Add intermediate Certificate Authorities."
   ansible.builtin.set_fact:
-    ownca_certificate_authorities: "{{ ownca_certificate_authorities + [__certificate_authority] }}"
+    autonomy_ownca_certificate_authorities: "{{ autonomy_ownca_certificate_authorities + [__certificate_authority] }}"
   loop: "{{ autonomy_zones }}"
   become: no
   vars:
-    ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    autonomy_ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_intermediate_ca_privatekey_type | lower }}.key"
     __certificate_authority:
       name: "{{ item.name }}"
       common_name: "{{ autonomy_org_name | title }} {{ item.name | title }} CA"
@@ -138,17 +125,17 @@
       keyusage_critical: yes
       basic_constraints:
         - 'CA:TRUE'
-      private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_intermediate_ca_key_file }}"
+      private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_intermediate_ca_key_file }}"
       org_unit_name: "{{ item.name }}"
   when:
     - item.type != "public"
 
 - name: "Add issuing Certificate Authorities."
   ansible.builtin.set_fact:
-    ownca_certificate_authorities: "{{ ownca_certificate_authorities + [__certificate_authority] }}"
-  loop: "{{ autonomy_zones | product(ownca_issuing_authorities) }}"
+    autonomy_ownca_certificate_authorities: "{{ autonomy_ownca_certificate_authorities + [__certificate_authority] }}"
+  loop: "{{ autonomy_zones | product(autonomy_ownca_issuing_authorities) }}"
   vars:
-    ownca_issuing_ca_key_file: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}-ca.key"
+    autonomy_ownca_issuing_ca_key_file: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}-ca_{{ autonomy_ownca_issuing_ca_privatekey_type | lower }}.key"
     __certificate_authority:
       name: "{{ item[0].name }}-{{ item[1] }}"
       common_name: "{{ autonomy_org_name | title }} {{ item[0].name | title }} {{ item[1] | title}} CA"
@@ -162,7 +149,7 @@
       keyusage_critical: yes
       basic_constraints:
         - 'CA:TRUE'
-      private_key_path: "{{ ownca_ca_private_key_directory }}/{{ ownca_issuing_ca_key_file }}"
+      private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_issuing_ca_key_file }}"
       org_unit_name: "{{ item[0].name }}"
   when:
     - item[0].type != "public"
@@ -172,16 +159,16 @@
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
-    - not ownca_generate_locally
+    - not autonomy_ownca_generate_locally
 
 - name: "Include Localhost Preparation Tasks."
   include_tasks: "localhost_prep.yml"
   when:
-    - ansible_network_os is defined or ownca_generate_locally
+    - ansible_network_os is defined or autonomy_ownca_generate_locally
 
 - name: "Ensure we have a password for the Component Issuing CA."
   ansible.builtin.set_fact:
-    ownca_component_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    autonomy_ownca_component_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/ownca/ownca_component_password"
     __password_lookup: "{{ __password_store_id }}"
@@ -196,14 +183,14 @@
 # ==================================================================================================
 - name: "Get component CA certificate information."
   community.crypto.x509_certificate_info:
-    path: "{{ ownca_component_ca_cert_path }}"
+    path: "{{ autonomy_ownca_component_ca_cert_path }}"
   become: no
   register: component_cert
   delegate_to: localhost
 
 - name: "Check if host cert exists."
   ansible.builtin.stat:
-    path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
+    path: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
   delegate_to: localhost
   become: no
   register: cert_file
@@ -245,11 +232,11 @@
 
 - name: "Generate Host Certificate."
   community.crypto.x509_certificate:
-    path: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
-    csr_path: "{{ ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
-    ownca_path: "{{ ownca_component_ca_cert_path }}"
-    ownca_privatekey_path: "{{ ownca_component_ca_key_path }}"
-    ownca_privatekey_passphrase: "{{ ownca_component_password }}"
+    path: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    csr_path: "{{ autonomy_ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
+    ownca_path: "{{ autonomy_ownca_component_ca_cert_path }}"
+    ownca_privatekey_path: "{{ autonomy_ownca_component_ca_key_path }}"
+    ownca_privatekey_passphrase: "{{ autonomy_ownca_component_password }}"
     provider: ownca
     backup: yes
     force: "{{ __host_cert_force_regeneration }}"
@@ -258,12 +245,14 @@
 
 - name: "Identify Certificate Complete Chain."
   community.crypto.certificate_complete_chain:
-    input_chain: "{{ lookup('file', ownca_hosts_directory + '/certs/' + autonomy_fqdn + '.crt') }}"
+    input_chain: "{{ lookup('file', __lookup_file) }}"
     intermediate_certificates:
-      - "{{ ownca_component_ca_cert_path }}"
-      - "{{ ownca_intermediate_ca_cert_path }}"
+      - "{{ autonomy_ownca_component_ca_cert_path | lower }}"
+      - "{{ autonomy_ownca_intermediate_ca_cert_path | lower }}"
     root_certificates:
-      - "{{ ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
+      - "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+  vars:
+    __lookup_file: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}_{{ autonomy_ownca_host_privatekey_type | lower }}.crt"
   register: parent_cert_authorities
   become: no
   delegate_to: localhost
@@ -275,7 +264,7 @@
 # ==================================================================================================
 - name: "Write complete chain to disk."
   ansible.builtin.copy:
-    dest: "{{ ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
+    dest: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
@@ -290,18 +279,18 @@
   when:
     - ansible_network_os is not defined
     - ansible_os_family is defined
-    - not ownca_generate_locally
+    - not autonomy_ownca_generate_locally
 
 - name: "Include NetworkOS Tasks."
   include_tasks: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
   when:
     - ansible_network_os is defined
-    - not ownca_generate_locally
+    - not autonomy_ownca_generate_locally
 
 - name: "Include Local tasks."
   include_tasks: "localhost_final.yml"
   when:
-    - ownca_generate_locally
+    - autonomy_ownca_generate_locally
 
 - name: "Copy to Samba File Server."
   include_tasks: "copy_to_samba.yml"

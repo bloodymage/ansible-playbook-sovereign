@@ -164,7 +164,7 @@
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
-    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    __private_key_path: "{{ ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
   run_once: true
   delegate_to: localhost
 

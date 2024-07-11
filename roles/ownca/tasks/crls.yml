@@ -60,17 +60,17 @@
 # Create CRLs
 #
 # ==================================================================================================
-- name: Generate a CRL
+- name: "Generate a CRL."
   community.crypto.x509_crl:
-    path: "{{ ownca_directory }}/certificate_authorities/crl/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
-    privatekey_path: "{{ ownca_directory }}/certificate_authorities/private/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    path: "{{ autonomy_ownca_directory }}/certificate_authorities/crl/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crl"
+    privatekey_path: "{{ autonomy_ownca_directory }}/certificate_authorities/private/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     issuer:
       CN: "{{ item.common_name }}"
     last_update: "+0s"
     next_update: "+7d"
-    revoked_certificates: "{{ item.revoked_certificates | default(ownca_revoked_certificates) }}"
-  loop: "{{ ownca_certificate_authorities }}"
+    revoked_certificates: "{{ item.revoked_certificates | default(autonomy_ownca_revoked_certificates) }}"
+  loop: "{{ autonomy_ownca_certificate_authorities }}"
   vars:
     __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
     __password_lookup: "{{ __password_store_id }}"
@@ -82,5 +82,3 @@
     - ownca-crl
     - ownca_crl_debug
     - ownca-crl-debug
-
-

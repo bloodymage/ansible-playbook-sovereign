@@ -18,10 +18,10 @@
     group: "root"
     mode: "0644"
     backup: yes
-    #force: "{{ __ownca_regenerate_csr }}"
+    #force: "{{ __autonomy_ownca_regenerate_csr }}"
   become: yes
   notify:
     - restart tls
   when:
-    - ownca_privatekey_type in ['DSA','RSA']
+    - autonomy_ownca_privatekey_type in ['DSA','RSA']
     - ansible_connection != "local"

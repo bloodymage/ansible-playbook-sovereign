@@ -1,0 +1,98 @@
+---
+- name: "Generate Intermediate Certificate Authority Certificate Signing Requests (CSR)."
+  community.crypto.openssl_csr:
+    path: "{{ autonomy_ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
+    privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    common_name: "{{ item.common_name }}"
+    country_name: "{{ item.country_name | default(omit) }}"
+    email_address: "{{ item.email_address | default(omit) }}"
+    organization_name: "{{ item.organization_name | default(autonomy_org_name | title ) }}"
+    organizational_unit_name: "{{ item.org_unit_name | default(omit) | title }}"
+    state_or_province_name: "{{ item.region_name | default(omit) }}"
+    key_usage: "{{ item.keyusage }}"
+    key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
+    basic_constraints: "{{ item.basic_constraints }}"
+    basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
+    create_subject_key_identifier: yes
+    authority_cert_issuer: "{{ root_cert_info.subject_alt_name }}"
+    authority_cert_serial_number: "{{ root_cert_info.serial_number }}"
+    authority_key_identifier: "{{ root_cert_info.subject_key_identifier }}"
+    crl_distribution_points:
+      - full_name: "URI:{{ autonomy_ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+        reasons:
+          - key_compromise
+          - ca_compromise
+          - affiliation_changed
+          - superseded
+          - cessation_of_operation
+          - certificate_hold
+          - privilege_withdrawn
+          - aa_compromise
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    backup: yes
+    state: present
+  loop: "{{ autonomy_ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_lookup: "{{ __password_store_id }}"
+    __private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+  when:
+    - item.provider == "ownca"
+    - item.ownca == "root"
+
+- name: "Generate Intermediate CA Signed Certificate."
+  community.crypto.x509_certificate:
+    path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    csr_path: "{{ autonomy_ownca_ca_csr_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    ownca_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    ownca_privatekey_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+    ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    ownca_not_after: "{{ autonomy_ownca_intermediate_not_after }}"
+    ownca_create_authority_key_identifier: yes
+    ownca_create_subject_key_identifier: create_if_not_provided
+    provider: "{{ item.provider }}"
+    backup: yes
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0644"
+    force: "{{ __autonomy_ownca_force_regenerate_intermediate_ca }}"
+    state: present
+  loop: "{{ autonomy_ownca_certificate_authorities }}"
+  become: no
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/ownca/ownca_root_password"
+    __password_lookup: "{{ __password_store_id }}"
+  notify:
+    - "regenerate issuing ca certificates"
+  when:
+    - item.provider == "ownca"
+    - item.ownca == "root"
+
+- name: "Get Intermediate CA Cert information."
+  community.crypto.x509_certificate_info:
+    path: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+  loop: "{{ autonomy_ownca_certificate_authorities }}"
+  register: intermediate_cert_info
+  when:
+    - item.provider == "ownca"
+    - item.ownca == "root"
+
+# - name: "Print intermediate cert info"
+#   ansible.builtin.debug:
+#     msg:
+#       - "{{ item[1].item.org_unit_name }}"
+#       - "{{ item[1].serial_number }}"
+#       - "{{ item[1].subject_alt_name }}"
+#       - "{{ item[1].subject_key_identifier }}"
+#       - "{{ item[0].name }}"
+#       - "{{ item[0].common_name }}"
+#       - "{{ item[0].org_unit_name }}"
+#   loop: "{{ autonomy_ownca_certificate_authorities | product(intermediate_cert_info.results) }}"
+#   when:
+#     - item[1].serial_number is defined
+#     - item[0].org_unit_name is defined

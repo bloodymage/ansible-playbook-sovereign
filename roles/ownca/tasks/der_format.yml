@@ -1,0 +1,36 @@
+---
+# ==================================================================================================
+#
+# Convert these certificate from PEM to DER format.
+#
+# This is done because Windows frequently needs DER format.
+#
+# Currently split into two tasks.  The 'root' ca does not have a chain file.  Need a way to make
+# this idempotent.
+#
+# ==================================================================================================
+- name: "Convert CA Certificates to DER format."
+  ansible.builtin.command:
+    cmd: >
+      openssl x509
+      -in {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt -inform PEM
+      -out {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.der -outform DER
+    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca.der"
+  become: no
+  loop: "{{ autonomy_ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+
+- name: "Convert CA Certificates to DER format."
+  ansible.builtin.command:
+    cmd: >
+      openssl x509
+      -in {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt -inform PEM
+      -out {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.der -outform DER
+    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
+  become: no
+  loop: "{{ autonomy_ownca_certificate_authorities }}"
+  delegate_to: localhost
+  run_once: yes
+  when:
+    - item.name != "root"
