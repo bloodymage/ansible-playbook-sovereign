@@ -1,0 +1,4 @@
+---
+autonomy_keycloak_samba_federation:
+  - name: "{{ autonomy_org_unit_name }} Active Directory"
+    edit_mode: "READONLY"

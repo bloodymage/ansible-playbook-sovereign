@@ -20,10 +20,10 @@ phpmyadmin_db_name: phpmyadmin
 phpmyadmin_db_user: phpmyadmin
 phpmyadmin_db_host: "%.{{ autonomy_domain }}"
 
-mythtv_db_server: "db.{{ autonomy_domain }}"
-mythtv_db_name: "{{ autonomy_zone_name | lower }}_mythtv"
-mythtv_db_user: "{{ autonomy_zone_name | lower }}_mythtv"
-mythtv_db_host: "%.{{ autonomy_domain }}"
+autonomy_mythtv_db_server: "db.{{ autonomy_domain }}"
+autonomy_mythtv_db_name: "{{ autonomy_zone_name | lower }}_mythtv"
+autonomy_mythtv_db_user: "{{ autonomy_zone_name | lower }}_mythtv"
+autonomy_mythtv_db_host: "%.{{ autonomy_domain }}"
 
 homeassistant_db_server: "db.{{ autonomy_domain }}"
 homeassistant_db_name: "{{ autonomy_zone_name | lower }}_homeassistant"
@@ -34,3 +34,9 @@ drupal_db_server: "db.{{ autonomy_domain }}"
 drupal_db_name: "{{ autonomy_zone_name | lower }}_drupal"
 drupal_db_user: "{{ autonomy_zone_name | lower }}_drupal"
 drupal_db_host: "%.{{ autonomy_domain }}"
+
+autonomy_keycloak_db_server: "db.{{ autonomy_domain }}"
+autonomy_keycloak_db_name: "{{ autonomy_zone_name | lower }}_keycloak"
+autonomy_keycloak_db_user: "{{ autonomy_zone_name | lower }}_keycloak"
+autonomy_keycloak_db_password: "password"
+autonomy_keycloak_db_host: "%.{{ autonomy_domain }}"

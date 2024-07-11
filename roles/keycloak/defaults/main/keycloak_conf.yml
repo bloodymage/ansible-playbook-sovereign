@@ -1,0 +1,16 @@
+---
+# Database
+autonomy_keycloak_database: "mariadb"
+
+# Host
+autonomy_keycloak_hostname: ""
+autonomy_keycloak_hostname_port: -1
+autonomy_keycloak_hostname_admin: ""
+autonomy_keycloak_hostname_admin_port: ""
+
+autonomy_keycloak_transaction_xa_enabled: "true"
+
+autonomy_keycloak_https_keystore_password: "password"
+autonomy_keycloak_password_length: "{{ autonomy_password_length }}"
+autonomy_keycloak_loglevel: "INFO"
+autonomy_keycloak_hostname_verification_policy: "ANY" #Default to "WILDCARD"

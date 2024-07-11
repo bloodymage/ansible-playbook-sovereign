@@ -1,0 +1,56 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description={{ autonomy_keycloak_service_description }}
+After=syslog.target
+After=network-online.target
+Wants=network-online.target systemd-networkd-wait-online.service
+
+[Service]
+#User={{ autonomy_user_keycloak_username }}
+#Group={{ autonomy_user_keycloak_groupname }}
+ExecStart={{ autonomy_keycloak_binary }} {{ autonomy_keycloak_service_switches }}
+WorkingDirectory={{ autonomy_keycloak_home }}
+Restart={{ autonomy_keycloak_service_restart }}
+
+{# RestartSec=2s #}
+{# # Disable timeout logic and wait until process is stopped #}
+{# TimeoutStopSec=0 #}
+{# # SIGTERM signal is used to stop the Java process #}
+{# KillSignal=SIGTERM #}
+{# # Send the signal only to the JVM rather than its control group #}
+{# KillMode=process #}
+{# # Java process is never killed #}
+{# SendSIGKILL=no #}
+{# # When a JVM receives a SIGTERM signal it exits with code 143 #}
+{# SuccessExitStatus=143 #}
+{# LimitMEMLOCK=infinity #}
+{# LimitNOFILE=65535 #}
+
+{# # Database #}
+{# Environment=KC_DB={{ kc_db_type |default('mariadb') }} #}
+{# Environment=KC_DB_URL_DATABASE={{ kc_db_name |default('keycloak')}} #}
+{# Environment=KC_DB_PASSWORD={{ kc_db_pass}} #}
+{# Environment=KC_DB_USERNAME={{ kc_db_user }} #}
+{# Environment=KC_DB_URL_HOST={{ kc_db_host}} #}
+{# # Proxy #}
+{# Environment=KC_PROXY={{ kc_proxy_mode |default('reencrypt') }} #}
+{# Environment=KC_HOSTNAME_STRICT={{ kc_strict_hostname |default('false') }} #}
+{# # HTTPS #}
+{# Environment=KC_HTTPS_PORT={{ kc_port }} #}
+{# # Debian default ssl-cert snakeoil cert #}
+{# Environment=KC_HTTPS_CERTIFICATE_FILE={{ kc_cert |default('/etc/ssl/certs/ssl-cert-snakeoil.pem') }} #}
+{# Environment=KC_HTTPS_CERTIFICATE_KEY_FILE={{ kc_cert_key |default('/etc/ssl/private/ssl-cert-snakeoil.key') }} #}
+{# {% if kc_admin is defined and kc_admin_pass is defined %} #}
+{# # Default user #}
+{# Environment=KEYCLOAK_ADMIN={{ kc_admin }} #}
+{# Environment=KEYCLOAK_ADMIN_PASSWORD={{ kc_admin_pass }} #}
+{# {% endif %} #}
+{# {% if kc_port |int <= 1024 %} #}
+{# # Allow ports below 1024. #}
+{# CapabilityBoundingSet=CAP_NET_BIND_SERVICE #}
+{# AmbientCapabilities=CAP_NET_BIND_SERVICE #}
+{# {% endif %} #}
+
+[Install]
+WantedBy=multi-user.target

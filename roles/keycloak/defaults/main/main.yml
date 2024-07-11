@@ -1,0 +1,57 @@
+---
+# defaults file for keycloak
+autonomy_keycloak_packages:
+  - python3-openssl
+  - python3-pymysql
+
+autonomy_keycloak_install_type: "openjdk"
+autonomy_keycloak_openjdk_version: 17
+
+autonomy_keycloak_keystore_alias: "{{ autonomy_keycloak_name | lower }}"
+
+# Keycloak Download Config
+autonomy_keycloak_version: "23.0.6"
+autonomy_keycloak_url: "https://github.com/keycloak/keycloak/releases/download"
+autonomy_keycloak_source_file: "keycloak-{{ autonomy_keycloak_version }}.tar.gz"
+autonomy_keycloak_source_url: "{{ autonomy_keycloak_url }}/{{ autonomy_keycloak_version }}/{{ autonomy_keycloak_source_file }}"
+autonomy_keycloak_source_checksum: "4374bd137a2c0548ee5acc2133b92a53e51acde7"
+autonomy_keycloak_source_checksum_type: "sha1"
+
+autonomy_keycloak_sources:
+  - url: "{{ autonomy_keycloak_source_url }}"
+    file: "{{ autonomy_keycloak_source_file }}"
+    checksum: "{{ autonomy_keycloak_source_checksum }}"
+    checksum_type: "{{ autonomy_keycloak_source_checksum_type }}"
+
+# Service
+autonomy_keycloak_service_description: "{{ autonomy_keycloak_name | title }}"
+autonomy_keycloak_service_switches: "start --optimized"
+autonomy_keycloak_service_restart: "on-failure"
+
+# Directories
+autonomy_keycloak_alt_home: "/opt/keycloak-{{ autonomy_keycloak_version }}"
+autonomy_keycloak_config_dir: "{{ autonomy_keycloak_alt_home }}/conf"
+autonomy_keycloak_binary_dir: "{{ autonomy_keycloak_alt_home }}/bin"
+autonomy_keycloak_license_file: "LICENSE.txt"
+
+# Files
+autonomy_keycloak_binary: "{{ autonomy_keycloak_binary_dir }}/kc.sh"
+autonomy_keycloak_keystore_file: "{{ autonomy_keycloak_name | lower }}.{{ autonomy_keycloak_keystore_type }}"
+autonomy_keycloak_config_file: "keycloak.conf"
+
+# Paths
+autonomy_keycloak_license_path: "{{ autonomy_keycloak_alt_home }}/{{ autonomy_keycloak_license_file }}"
+autonomy_keycloak_config_path: "{{ autonomy_keycloak_config_dir }}/{{ autonomy_keycloak_config_file }}"
+
+# Admin User
+autonomy_keycloak_admin_user: "admin"
+autonomy_keycloak_admin_password: "password"
+
+# ==================================================================================================
+#
+# Do NOT use the following variables.
+#
+# ==================================================================================================
+__keycloak_certificate_authorities_id:
+  - "ca"
+  - "component-ca"

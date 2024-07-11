@@ -19,53 +19,77 @@
 {# ssh_config(5) man page.                                                                        #}
 {#                                                                                                #}
 {# ============================================================================================== #}
-Host *.{{ autonomy_domain }}
-{% if inventory_hostname in groups['workstations'] %}
-{% if autonomy_smart_card_login %}
-  CertificateFile ~/.ssh/%u-cert.pub
-{% endif %}
-{% endif %}
+{# {% if inventory_hostname in groups['workstations'] and autonomy_smart_card_login %} #}
+{# Host *.{{ autonomy_root_domain }} #}
+{#   CertificateFile ~/.ssh/%u_{{ autonomy_ownca_privatekey_type | lower }}-cert.pub #}
 
-Host *.{{ autonomy_root_domain }}
-{% if inventory_hostname in groups['workstations'] %}
-{% if autonomy_smart_card_login %}
-  PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
-{% else %}
-  GSSAPIDelegateCredentials yes
-{% endif %}
-{% endif %}
-  IdentityFile ~/.ssh/%u.pub
+{# Host * #}
+{#   CanonicalizeHostname yes #}
+{#   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so #}
+{#   IdentityFile ~/.ssh/%u_{{ autonomy_ownca_privatekey_type | lower }}.pub #}
 
-{% if inventory_hostname in groups['workstations'] %}
-{% if autonomy_smart_card_login -%}
-{% if openssh_github -%}
-  Host github.com
-{% if autonomy_smart_card_login %}
-  PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
-{% endif %}
-  IdentityFile ~/.ssh/%u.pub
-{% endif %}
+{# {% elif inventory_hostname in groups['workstations'] and autonomy_smart_card_login is falsy %} #}
+{# Host *.{{ autonomy_root_domain }} #}
+{#   GSSAPIDelegateCredentials yes #}
 
-{% if openssh_github -%}
-  Host gitlab.com
-{% if autonomy_smart_card_login %}
-  PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so
-{% endif %}
-  IdentityFile ~/.ssh/%u.pub
-{% endif %}
-{% endif %}
-{% endif %}
+{# Host * #}
+{#   CanonicalizeHostname yes #}
+{#   IdentityFile ~/.ssh/id_{{ autonomy_sshca_user_privatekey_type | lower }}.pub #}
 
-{% if ssh_hosts is defined -%}
-  {% for host in ssh_hosts -%}
-  Host {{ host.name }}
-  {% for option in host.options -%}
-    {{ option }}
-  {% endfor %}
-  {% endfor %}
-{% endif %}
+{# {% elif inventory_hostname not in groups['workstations'] and autonomy_smart_card_login %} #}
+{# Host * #}
+{#   CanonicalizeHostname yes #}
+{#   IdentityFile ~/.ssh/%u_{{ autonomy_sshca_user_privatekey_type | lower }}.pub #}
 
+{# {% else %} #}
+{# Host * #}
+{#   CanonicalizeHostname yes #}
+{#   IdentityFile ~/.ssh/id_{{ autonomy_sshca_user_privatekey_type | lower }}.pub #}
+
+
+{# {% endif %} #}
 Host *
   CanonicalizeHostname yes
-{#  CanonicalDomains {{ autonomy_root_domain }} #}
-{#   CanonicalizeMaxDots 2 #}
+
+
+
+{# {% if openssh_github -%} #}
+{#   Host github.com #}
+
+{# {% endif %} #}
+{# {% endif %} #}
+
+
+{# {% endif %} #}
+
+
+
+{# {% if openssh_github -%} #}
+{#   Host github.com #}
+{# {% if autonomy_smart_card_login %} #}
+{#   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so #}
+{# {% endif %} #}
+
+{# {% endif %} #}
+
+{# {% if openssh_github -%} #}
+{#   Host gitlab.com #}
+{# {% if autonomy_smart_card_login %} #}
+{#   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so #}
+{# {% endif %} #}
+{#   IdentityFile ~/.ssh/%u_{{ autonomy_ownca_privatekey_type }}.pub #}
+{# {% endif %} #}
+{# {% endif %} #}
+{# {% endif %} #}
+
+{# {% if ssh_hosts is defined -%} #}
+{#   {% for host in ssh_hosts -%} #}
+{#   Host {{ host.name }} #}
+{#   {% for option in host.options -%} #}
+{#     {{ option }} #}
+{#   {% endfor %} #}
+{#   {% endfor %} #}
+{# {% endif %} #}
+
+
+{# {% endif %} #}

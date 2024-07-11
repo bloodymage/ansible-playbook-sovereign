@@ -1,0 +1,116 @@
+# {{ ansible_managed }}
+
+# Cache
+#cache=
+#cache-config-file=
+#cache-stack=
+
+# Config
+#config-keystore=
+#config-keystore-password=
+#config-keystore-type=
+
+# Database
+db={{ autonomy_keycloak_database }}
+db-username={{ autonomy_keycloak_db_user }}
+db-password={{ autonomy_keycloak_db_password }}
+db-url-host={{ autonomy_keycloak_db_server }}
+db-url-database={{ autonomy_keycloak_db_name }}
+#db-driver=""
+#db-pool-initial-size=""
+#db-pool-max-size=""
+#db-pool-min-size=""
+#db-schema=""
+#db-url="jdbc:{{ autonomy_keycloak_database }}://{{ autonomy_keycloak_db_server }}/{{ autonomy_keycloak_db_name }}"
+#db-url-port=""
+#db-url-properties=""
+
+# Export
+#dir=
+#realm=
+#users=
+#users-per-file=
+
+# Feature
+#features=""
+#features-disabled=""
+
+# Health
+#health-enabled=true
+
+# Hostname
+hostname={{ autonomy_keycloak_hostname }}
+hostname-admin={{ autonomy_keycloak_hostname_admin }}
+#hostname-admin-url=
+#hostname-debug=
+#hostname-path=
+#hostname-port=
+#hostname-strict=
+#hostname-strict-backchannel=
+#hostname-url=
+
+# HTTP/TLS
+#http-enabled=false
+#http-host=0.0.0.0
+#http-max-queued_requests=
+#http-port=
+#http-relative-path=
+https-certificate-file=/etc/ssl/certs/{{ inventory_hostname }}.pem
+https-certificate-key-file=/etc/ssl/private/{{ inventory_hostname }}.key
+#https-cipher-suites=
+#https-client-auth=
+#https-key-store-file=
+#https-key-store-password=
+#https-key-store-type=
+#https-port=
+#https-protocols="TLSv1.3,TLSv1.2"
+#https-trust-store-file=
+#https-trust-store-password=
+#https-trust-store-type=
+
+# Import
+#file=
+#override=
+
+# Logging
+#log=
+#log-console-color=
+#log-console-format=
+#log-console-output=
+#log-file=
+#log-file-format=
+#log-file-output=
+#log-gelf-facility=
+#log-gelf-host=
+#log-gelf-include-location=
+#log-gelf-include-message-parameters=
+#log-gelf-include-stack-trace=
+#log-gelf-level=
+#log-gelf-max-message-size=
+#log-gelf-port=
+#log-gelf-timestamp-format=
+#log-level=
+
+# Metrics
+#metrics-enabled=true
+
+# Proxy
+#proxy=reencrypt
+
+# Security
+#fips-mode=
+
+# Transaction
+transaction-xa-enabled={{ autonomy_keycloak_transaction_xa_enabled }}
+
+# Vault
+#vault=
+#vault-dir=
+#vault-file=
+#vault-pass=
+#vault-type=
+
+# WTF
+# This option is not in the documentation!
+# Do not attach route to cookies and rely on the session affinity capabilities from reverse proxy
+#spi-sticky-session-encoder-infinispan-should-attach-route=false

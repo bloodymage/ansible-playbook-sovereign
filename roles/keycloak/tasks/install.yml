@@ -1,1 +1,5 @@
 ---
+- name: "Keycloak OpenJDK install."
+  include_tasks: "install_openjdk.yml"
+  when:
+    - autonomy_keycloak_install_type == "openjdk"

@@ -1,0 +1,16 @@
+---
+- name: "Initial Keycloak Run."
+  ansible.builtin.shell:
+    cmd: >-
+      KEYCLOAK_ADMIN={{ autonomy_keycloak_admin_user }}
+      KEYCLOAK_ADMIN_PASSWORD={{ __password }}
+      {{ autonomy_keycloak_binary }} start &
+      KCPID=$! &&
+      sleep 300 &&
+      kill ${KCPID}
+  vars:
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/keycloak_admin_password"
+    __password_lookup: "{{ __password_store_id }}"
+    __password: "{% if autonomy_keycloak_admin_password == 'password' %}{{ lookup('community.general.passwordstore', __password_lookup) }}{% else %}{{ autonomy_keycloak_db_password }}{% endif %}"
+
+
