@@ -84,8 +84,8 @@
     - role: bloodymage.autonomy.users
       vars:
         __user_tasks: "dotfiles"
-        autonomy_user_dotfiles_users: "{{ __realm_users }}"
-        autonomy_user_dotfiles_home: "/home/{{ autonomy_org_unit_name | upper }}"
+        autonomy_users_dotfiles_users: "{{ __realm_users }}"
+        autonomy_users_dotfiles_home: "/home/{{ autonomy_org_unit_name | upper }}"
       tags:
         - dotfiles
         - user-dotfiles
@@ -137,13 +137,6 @@
       tags:
         - samba-domain-keytabs
         - recreate-realm
-
-- name: "Configure Keycloak."
-  hosts: keycloak_servers:!public_zone:!localhost
-  roles:
-    - role: bloodymage.autonomy.keycloak
-      tags:
-        - keycloak
 
 - name: "Configure FreeRadius."
   hosts: freeradius_servers:!localhost
