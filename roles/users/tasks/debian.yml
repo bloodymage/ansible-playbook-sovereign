@@ -1,7 +1,7 @@
 ---
 - name: "Install packages."
   ansible.builtin.package:
-    name: "{{ autonomy_packages }}"
+    name: "{{ autonomy_user_packages }}"
     state: present
   become: true
 
@@ -28,6 +28,8 @@
       group: "{{ user_homeassistant_group }}"
     - name: "mail_servers"
       group: "{{ user_vmail_group }}"
+    - name: "keycloak"
+      group: "{{ autonomy_user_keycloak_group }}"
   when:
     - inventory_hostname in groups [item.name] | default([])
   become: no
@@ -50,6 +52,8 @@
       user: "{{ user_homeassistant }}"
     - name: "mail_servers"
       user: "{{ user_vmail }}"
+    - name: "keycloak"
+      user: "{{ autonomy_user_keycloak }}"
   when:
     - inventory_hostname in groups[item.name] | default([])
   become: no
