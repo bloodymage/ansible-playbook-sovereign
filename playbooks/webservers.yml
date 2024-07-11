@@ -38,7 +38,7 @@
 # depends on an ACME CA working, the next group may depend on an ACME CA working.
 #
 # ==================================================================================================
-- name: "Configure ACME CA."
+- name: "Configure Certificate Authorities."
   hosts: web_servers:&public_zone
   roles:
     - role: bloodymage.autonomy.acmeca
@@ -47,7 +47,9 @@
     - role: bloodymage.autonomy.acmeca
       vars:
         __acmeca_tasks: "certs"
-    - role: bloodymage.autonomy.ownca_crl_distribution_points
+    - role: bloodymage.autonomy.ownca
+      vars:
+        __ownca_tasks: "crl_distribution_points"
       tags:
         - ownca-crl-distribution-points
         - ownca_crl_distribution_points
