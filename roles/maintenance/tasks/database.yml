@@ -1,0 +1,5 @@
+---
+- name: "Include MySQL Compatable Database Tasks."
+  include_tasks: database_mysql.yml
+  when:
+    - inventory_hostname in groups['mysql_compatible_servers']

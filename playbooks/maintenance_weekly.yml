@@ -16,3 +16,13 @@
     - role: bloodymage.autonomy.acmeca
       vars:
         __acmeca_tasks: "certs"
+
+- name: "Configure Databases."
+  hosts: mariadb_servers:postgresql_servers:mysql_servers
+  roles:
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "database"
+      tags:
+        - databases
+        - database
