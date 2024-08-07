@@ -7,8 +7,8 @@
 # ==================================================================================================
 - name: "Copy Host Certificate back to server."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_hosts_directory }}/certs/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    dest: "/usr/local/share/ca-certificates/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    src: "{{ autonomy_ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/{{ item }}.crt"
     owner: "root"
     group: "root"
     mode: "0644"
@@ -20,8 +20,8 @@
 
 - name: "Copy domain controllers' certificate to server."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_hosts_directory }}/certs/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    dest: "/usr/local/share/ca-certificates/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    src: "{{ autonomy_ownca_hosts_directory }}/certs/{{ item }}.crt"
+    dest: "/usr/local/share/ca-certificates/{{ item }}.crt"
     owner: root
     group: root
     mode: "0644"
@@ -33,8 +33,8 @@
 
 - name: "Copy domain controllers' certificate chain to server."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_hosts_directory }}/certs/{{ item }}-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    dest: "/usr/local/share/ca-certificates/{{ item }}-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    src: "{{ autonomy_ownca_hosts_directory }}/certs/{{ item }}-chain.crt"
+    dest: "/usr/local/share/ca-certificates/{{ item }}-chain.crt"
     owner: root
     group: root
     mode: "0644"
@@ -46,8 +46,8 @@
 
 - name: "Copy CA Certificates to server."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    src: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     owner: root
     group: root
     mode: "0644"
@@ -57,8 +57,8 @@
 
 - name: "Copy CA Chains Certificates to server."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    src: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
+    dest: "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     owner: root
     group: root
     mode: "0644"
@@ -70,15 +70,15 @@
 
 - name: "Copy CRLs to server."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_ca_directory }}/crl/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crl"
-    dest: "{{ autonomy_ownca_etc }}/crls/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crl"
+    src: "{{ autonomy_ownca_ca_directory }}/crl/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+    dest: "{{ autonomy_ownca_etc }}/crls/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
     owner: root
     group: root
     mode: "0644"
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   become: true
 
-- name: "Ensure we have a PKCS12 password for the Host"
+- name: "Ensure we have a PKCS12 password for the Host."
   ansible.builtin.set_fact:
     autonomy_ownca_host_certs_pkcs12_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
@@ -96,15 +96,15 @@
   community.crypto.openssl_pkcs12:
     action: export
     backup: true
-    path:  "{{ autonomy_ownca_etc }}/pkcs12/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12"
+    path:  "{{ autonomy_ownca_etc }}/pkcs12/{{ autonomy_fqdn }}.pkcs12"
     friendly_name: "{{ autonomy_fqdn }}"
     passphrase: "{{ autonomy_ownca_host_certs_pkcs12_password }}"
-    privatekey_path: "{{ autonomy_ownca_host_privatekey_path }}"
-    certificate_path: "/usr/local/share/ca-certificates/{{ autonomy_fqdn }}-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    privatekey_path: "{{ autonomy_ownca_etc_privatekey_path }}"
+    certificate_path: "/usr/local/share/ca-certificates/{{ autonomy_fqdn }}-chain.crt"
     other_certificates:
-      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-root-ca.crt"
     state: present
     iter_size: 0
     maciter_size: 0

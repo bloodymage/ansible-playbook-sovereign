@@ -1,8 +1,8 @@
 ---
 - name: "Copy CA Certificates Samba File Server."
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     owner: root
     group: root
     mode: "0660"
@@ -10,11 +10,17 @@
   become: yes
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Copy CA Certificate Chains Samba File Server."
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
     owner: root
     group: root
     mode: "0660"
@@ -23,11 +29,17 @@
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
     - item.name != "root"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Copy CA Certificates Samba File Server."
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.der"
-    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.cer"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.der"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca.cer"
     owner: root
     group: root
     mode: "0660"
@@ -35,11 +47,17 @@
   become: yes
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Copy CA Certificate Chains Samba File Server."
   ansible.builtin.copy:
-    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.der"
-    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.cer"
+    src: "{{ ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
+    dest: "/srv/samba/pki/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.cer"
     owner: root
     group: root
     mode: "0660"
@@ -48,3 +66,9 @@
   when:
     - inventory_hostname == groups['samba_file_servers'][0] | default([])
     - item.name != "root"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs

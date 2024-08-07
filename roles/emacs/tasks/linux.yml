@@ -1,7 +1,7 @@
 ---
 - name: "Install packages"
   ansible.builtin.package:
-    name: "{{ autonomy_emacs_packages }}"
+    name: "{{ autonomy_emacs_base_packages + autonomy_emacs_packages }}"
     state: present
   become: yes
 

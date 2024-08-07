@@ -73,6 +73,22 @@
         - realm-users
         - recreate-realm
 
+- name: "Configure sssd."
+  hosts: sssd:!localhost
+  roles:
+    - role: bloodymage.autonomy.sssd
+      tags:
+        - sssd
+        - recreate-realm
+
+- name: "Install krb5 keytabs."
+  hosts: keytabs:!localhost
+  roles:
+    - role: bloodymage.autonomy.samba_domain_keytabs
+      tags:
+        - samba-domain-keytabs
+        - recreate-realm
+
 # ==================================================================================================
 #
 # TODO: Explicitly specify file server(s) with user home directories.
@@ -97,11 +113,8 @@
     - role: bloodymage.autonomy.ownca
       vars:
         __ownca_tasks: "usercerts"
-      tags:
-        - ownca
-        - ownca-user-certs
-        - user-certs
-        - recreate-realm
+      when:
+        - autonomy_smart_card_login
 
 - name: "Create realm users ssh certificates."
   hosts: samba_ownca_user_hosts:workstations:&linux:!mythfrontend:!localhost
@@ -109,33 +122,11 @@
     - role: bloodymage.autonomy.sshca
       vars:
         __sshca_tasks: "usercerts"
-      tags:
-        - sshca-user-certs
-        - user-certs
-        - sshca
-        - recreate-realm
-
 - hosts: samba_schema_master
   roles:
     - role: bloodymage.autonomy.samba_domain_user_certs
       tags:
         - samba-domain-user-certs
-        - recreate-realm
-
-- name: "Configure sssd."
-  hosts: sssd:!localhost
-  roles:
-    - role: bloodymage.autonomy.sssd
-      tags:
-        - sssd
-        - recreate-realm
-
-- name: "Install krb5 keytabs."
-  hosts: keytabs:!localhost
-  roles:
-    - role: bloodymage.autonomy.samba_domain_keytabs
-      tags:
-        - samba-domain-keytabs
         - recreate-realm
 
 - name: "Configure FreeRadius."

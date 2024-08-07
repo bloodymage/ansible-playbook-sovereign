@@ -1,6 +1,6 @@
 # $Id: screenrc,v 1.15 2003/10/08 11:39:03 zal Exp $
 #
-# {{ansible_managed|comment}}
+# {{ ansible_managed }}
 #
 # /etc/screenrc
 #
@@ -26,19 +26,21 @@
 # ==============================================================================
 # VARIABLES - Boolean values (on/off)
 # ==============================================================================
-  autodetach            on              # default: on
-  crlf                  off             # default: off
-  deflogin              off             # default: on
-# defsilence            off             # default: off
-  hardcopy_append       on              # default: off
-  nethack               on              # default: off
-  startup_message       off             # default: on   # Display the copyright page
-  vbell                 off             # default: ???
+  autodetach            {{ autonomy_screen_autodetach }}
+  crlf                  {{ autonomy_screen_crlf }}
+  deflogin              {{ autonomy_screen_deflogin }}
+  defnonblock           {{ autonomy_screen_defnonblock }}
+  defsilence            {{ autonomy_screen_defsilence }}
+  defutf8               {{ autonomy_screen_defutf8 }}
+  hardcopy_append       {{ autonomy_screen_hardcopy_append }}
+  nethack               {{ autonomy_screen_nethack }}
+  startup_message       {{ autonomy_screen_startup_message }}
+  vbell                 {{ autonomy_screen_vbell }}
 
 # ===============================================================
 # ESCAPE - the COMMAND CHARACTER
 # ===============================================================
-escape ^^^^  # suggested binding for emacs users
+escape {{ autonomy_screen_escape }}
 
 termcapinfo xterm-255color|xterm-color|screen-256color ti@:te@
 termcapinfo xterm*|rxvt*|kterm*|Eterm* hs:ts=\E]0;:fs=\007:ds=\E]0;\007
@@ -89,16 +91,46 @@ hardstatus string "%{= kG}[ %{G}%H %{g}][%= %{= w}%?%-Lw%?%{= R}%n*%f %t%?%{= R}
 bind c screen 1
 bind ^c screen 1
 bind 0 select 10
+
 # Remove some stupid / dangerous key bindings
 bind ^k
 #bind L
 bind ^\
+
 # Make them better
 bind \\ quit
 bind K kill
 bind I login on
 bind O login off
 bind } history
+
+ Use the function keys to switch among windows.
+{# bindkey -k k1 select 1 #}
+{# bindkey -k k2 select 2 #}
+{# bindkey -k k3 select 3 #}
+{# bindkey -k k4 select 4 #}
+{# bindkey -k k5 select 5 #}
+{# bindkey -k k6 select 6 #}
+{# bindkey -k k7 select 7 #}
+{# bindkey -k k8 select 8 #}
+{# bindkey -k k9 select 9 #}
+{# bindkey -k k; select 10 #}
+bindkey -k F1 select 11
+bindkey -k F2 select 12
+# windows 13-24 are Shift-Fn.  May not work in all terminals.
+bindkey -k F3 select 13
+bindkey -k F4 select 14
+bindkey -k F5 select 15
+bindkey -k F6 select 16
+bindkey -k F7 select 17
+bindkey -k F8 select 18
+bindkey -k F9 select 19
+bindkey -k FA select 20
+# screen only seems to understand up to FA.
+#bindkey -k FB select 21
+#bindkey -k FC select 22
+#bindkey -k FD select 23
+#bindkey -k FE select 24
 
 # ===============================================================
 # STARTUP of programs in an extra window:

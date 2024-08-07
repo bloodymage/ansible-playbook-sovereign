@@ -1,7 +1,7 @@
 ---
 # ==================================================================================================
 #
-# This playbook contains common plays that will be run on all nodes.
+# These tasks are run on the localhost for the ansible user.
 #
 # References:
 # - https://tools.ietf.org/html/draft-moskowitz-eddsa-pki-00
@@ -24,52 +24,66 @@
 # ==================================================================================================
 - name: "Create SSL Directories."
   ansible.builtin.file:
-    path: "{{ autonomy_ownca_directory }}/users/{{ item.name }}"
+    path: "{{ autonomy_ownca_users_dir }}/{{ item[0]['name'] }}/{{ item[1]['username'] }}"
     state: directory
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
-    mode: "{{ item.mode }}"
-  loop: "{{ autonomy_ownca_user_directories }}"
-  become: no
+    mode: "{{ item[0]['mode'] }}"
+  loop: "{{ autonomy_ownca_user_dirs  | product(__realm_users) | list }}"
+  become: false
   delegate_to: localhost
-  run_once: yes
+  run_once: true
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
+    - recreate-realm
 
-# ==================================================================================================
-#
-# Create SSL Private Key and CRS Directories
-#
-# Creates the following Directories:
-#   - ~/.pki/private
-#   - ~/.pki/csr
-#   - ~/.pki/certs
-#   - ~/.pki/pkcs12
-#   - ~/.pki/ssh
-#
-# Since this is on the file server, we need to determine how not to reset the ACLs when ensuring
-# the folders exist.
-#
-# Need to modify to also create ~./pki and use ~/.ssh instead of ~/.pki/ssh
-#
-# ==================================================================================================
-- name: "Create user pki directories."
-  ansible.builtin.file:
-    path: "{{ __user_pki_dir }}/{{ item[1].name }}"
-    state: directory
-    owner: "{{ item[0].username }}"
-    group: "{{ item[0].username }}_g"
-    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    #mode: "{{ item[1].mode }}"
-    mode: "0750"
-  become: yes
-  loop: "{{ __realm_users | product(ownca_user_pki_dirs) | list }}"
-  vars:
-    __username: "{{ item[0].username }}"
-    __user_home_dir: "{{ autonomy_ownca_home_dir }}/{{ __username }}"
-    __user_pki_dir: "{{ __user_home_dir }}/{{ autonomy_ownca_user_pki_dir }}"
-    __id_number: "{{ item[0].id_number }}"
-  when:
-    - item[0].id_number is defined
-    - item[0].spns is not defined
+# # ==================================================================================================
+# #
+# # Create SSL Private Key and CRS Directories
+# #
+# # Creates the following Directories:
+# #   - ~/.pki/private
+# #   - ~/.pki/csr
+# #   - ~/.pki/certs
+# #   - ~/.pki/pkcs12
+# #   - ~/.pki/ssh
+# #
+# # Since this is on the file server, we need to determine how not to reset the ACLs when ensuring
+# # the folders exist.
+# #
+# # Need to modify to also create ~./pki and use ~/.ssh instead of ~/.pki/ssh
+# #
+# # ==================================================================================================
+# - name: "Create user pki directories."
+#   ansible.builtin.file:
+#     path: "{{ __user_pki_dir }}/{{ item[1].name }}"
+#     state: directory
+#     owner: "{{ item[0].username }}"
+#     group: "{{ item[0].username }}_g"
+#     #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+#     #mode: "{{ item[1].mode }}"
+#     mode: "0750"
+#   become: yes
+#   loop: "{{ __realm_users | product(ownca_user_pki_dirs) | list }}"
+#   vars:
+#     __username: "{{ item[0].username }}"
+#     __user_home_dir: "{{ autonomy_ownca_home_dir }}/{{ __username }}"
+#     __user_pki_dir: "{{ __user_home_dir }}/.pki/private"
+#     __id_number: "{{ item[0].id_number }}"
+#   when:
+#     - item[0].id_number is defined
+#     - item[0].spns is not defined
+#   tags:
+#     - ownca
+#     - ownca-root
+#     - ownca-intermediate
+#     - ownca-issuing
+#     - ownca-user-certs
+#     - recreate-realm
 
 # ==================================================================================================
 #
@@ -78,38 +92,57 @@
 # ==================================================================================================
 - name: "Generate user private key."
   community.crypto.openssl_privatekey:
-    path: "{{ __user_private_dir }}/{{ __username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.key"
-    type: "{{ autonomy_ownca_user_privatekey_type }}"
-    size: "{{ __size }}"
+    path: "{{ autonomy_ownca_users_private_dir }}/{{ __username }}/{{ __username }}.key"
+    type: "{{ __privatekey_type | trim }}"
+    size: "{{ __size | int }}"
     cipher: auto
-    passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
-    owner: "{{ item.username }}"
-    group: "{{ item.username }}_g"
-    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0640"
+    curve: "{{ __curve }}"
+    passphrase: "{{ __password }}"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0600"
     state: present
-    force: no
-    backup: yes
-  become: yes
+    force: "{{ __user_privatekey_force_regeneration }}"
+    backup: true
+  become: false
+  delegate_to: localhost
   loop: "{{ __realm_users }}"
   vars:
-    __size: "{% if autonomy_ownca_privatekey_type == 'RSA' and autonomy_ownca_privatekey_size > autonomy_ownca_max_user_privatekey_size %}{{ autonomy_ownca_max_user_privatekey_size }}{% else %}{{ autonomy_ownca_privatekey_size }}{% endif %}"
-    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/{{ item.username }}/password"
-    __username: "{{ item.username }}"
-    __user_home_dir: "{{ autonomy_ownca_home_dir }}/{{ item.username }}"
-    __user_private_dir: "{{ __user_home_dir }}/{{ autonomy_ownca_user_private_dir }}"
-    __id_number: "{{ item.id_number }}"
+    __password_store_dir: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users"
+    __password_store_id: "{{ __password_store_dir }}/{{ item['username'] }}/piv_password"
+    __password_length: "length={{ autonomy_ownca_user_password_length }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_create: "create=true"
+    __password_symbols: "nosymbols=true"
+    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
+    __username: "{{ item['username'] }}"
+    __privatekey_tmp_type: >-
+      {% if autonomy_ownca_user_privatekey_type.lower() in ['ed25519','ed448'] %}
+      {{ autonomy_ownca_user_privatekey_type | capitalize }}
+      {% else %}
+      {{ autonomy_ownca_user_privatekey_type | upper }}
+      {% endif %}
+    __privatekey_type: "{{ __privatekey_tmp_type | trim }}"
+    __size: >-
+      {% if __privatekey_type == 'RSA' and
+            autonomy_ownca_privatekey_size > autonomy_ownca_max_user_privatekey_size %}
+      {{ autonomy_ownca_max_user_privatekey_size }}
+      {% else %}
+      {{ autonomy_ownca_privatekey_size }}
+      {% endif %}
+    __curve: "{{ autonomy_ownca_ecc_curve if __privatekey_type == 'ECC' else omit }}"
   when:
     - item.id_number is defined
     - item.spns is not defined
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
+    - recreate-realm
 
-# ==================================================================================================
-#
-# Create Network CA Certificate
-#
-# mode is '0770' to key the samba file server happy with 'ADS' authentication.
-#
-# ==================================================================================================
 - name: "Generate User CSRs."
   community.crypto.openssl_csr:
     country_name: "{{ autonomy_country | default(omit) }}"
@@ -119,10 +152,10 @@
     organizational_unit_name: "{{ autonomy_org_unit_name }}"
     common_name: "{{ item[0]['display_name'] }}"
     email_address: "{{ __email }}"
-    key_usage: "{{ item[1].key_usage }}"
-    key_usage_critical: yes
-    extended_key_usage: "{{ item[1].extended_key_usage }}"
-    privatekey_path: "{{ __user_private_dir }}/{{ __username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.key"
+    key_usage: "{{ item[1]['key_usage'] }}"
+    key_usage_critical: true
+    extended_key_usage: "{{ item[1]['extended_key_usage'] }}"
+    privatekey_path: "{{ autonomy_ownca_users_private_dir }}/{{ __username }}/{{ __username }}.key"
     privatekey_passphrase: "{{ __password }}"
     subject_alt_name: "{{ __san }}"
     crl_distribution_points:
@@ -136,89 +169,108 @@
           - certificate_hold
           - privilege_withdrawn
           - aa_compromise
-    path: "{{ __user_csr_dir }}/{{ __username }}_{{ item[1].name }}.csr"
-    owner: "{{ item[0].username }}"
-    group: "{{ item[0].username }}_g"
-    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0640"
+    path: "{{ autonomy_ownca_users_csr_dir }}/{{ __username }}_{{ item[1]['name'] }}.csr"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
+    mode: "0600"
     state: present
-    backup: yes
-    force: "{{ __user_cert_force_regeneration }}"
-  become: yes
+    backup: false
+    force: "{{ __user_csr_force_regeneration }}"
+  become: false
+  delegate_to: localhost
   loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
+    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/{{ item[0].username }}/piv_password"
     __password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
     __username: "{{ item[0].username }}"
     __public_email: "{{ item[0].username }}@{{ autonomy_root_domain }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"
     __surname: "{% if item[0].surname is defined %} {{ item[0].surname }}{% else %}{% endif %}"
-    __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
-    __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
-    __user_csr_dir: "{{ __user_home_dir }}/{{ ownca_user_csr_dir }}"
+    __user_home_dir: "{{ autonomy_ownca_home_dir }}/{{ __username }}"
+    __user_private_dir: "{{ __user_home_dir }}//.pki/private"
+    __user_csr_dir: "{{ __user_home_dir }}/.pki/csr"
     __id_number: "{{ item[0].id_number }}"
     __user_principal_name: "{{ item[0].username }}@{{ autonomy_domain }}"
     __email: "{{ __public_email }}"
-    __san_auth: "otherName:{{ ownca_msupn_oid }};UTF8:{{ __user_principal_name }}"
+    __san_auth: "otherName:{{ autonomy_ownca_msupn_oid }};UTF8:{{ __user_principal_name }}"
     __san_other_mail: "{% if item[0].email_aliases is defined %}{{ item[0].email_aliases | map('regex_replace', '^', 'email:') | list }}{% else %}[]{% endif %}"
     __san_mail: "email:{{ __email }}"
     __san_email: "{{ [__san_mail] + __san_other_mail }}"
     __san: "{% if item[1].name == 'authentication' %}{{ __san_mail }},{{ __san_auth }}{% else %}{{ __san_email }}{%endif %}"
-    __crl_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity_{{ autonomy_ownca_user_privatekey_type | lower }}.crl"
+    __crl_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity.crl"
   when:
     - item[0].id_number is defined
     - item[0].spns is not defined
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
+    - recreate-realm
 
 # ==================================================================================================
 #
 # Create User Certificates
 #
 # ==================================================================================================
-- name: "Fetch CSRs."
-  ansible.builtin.fetch:
-    src: "{{ autonomy_ownca_home_dir }}/{{ __username }}/.pki/csr/{{ __username }}_{{ item[1].name }}.csr"
-    dest: "{{ autonomy_ownca_directory }}/users/csr/{{ __username }}_{{ item[1].name }}.csr"
-    flat: yes
-  become: yes
-  loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
-  vars:
-    __username: "{{ item[0].username }}"
-  when:
-    - item[0].id_number is defined
-    - item[0].spns is not defined
+# - name: "Fetch CSRs."
+#   ansible.builtin.fetch:
+#     src: "{{ autonomy_ownca_home_dir }}/{{ __username }}/.pki/csr/{{ __username }}_{{ item[1].name }}.csr"
+#     dest: "{{ autonomy_ownca_directory }}/users/csr/{{ __username }}_{{ item[1].name }}.csr"
+#     flat: true
+#   become: true
+#   loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
+#   vars:
+#     __username: "{{ item[0].username }}"
+#   when:
+#     - item[0].id_number is defined
+#     - item[0].spns is not defined
+#   tags:
+#     - ownca
+#     - ownca-root
+#     - ownca-intermediate
+#     - ownca-issuing
+#     - ownca-user-certs
+#     - recreate-realm
 
-- name: "Get identity certificate information."
-  community.crypto.x509_certificate_info:
-    path: "{{ autonomy_ownca_identity_ca_cert_path }}"
-  become: no
-  register: identity_cert
-  delegate_to: localhost
+# - name: "Get identity certificate information."
+#   community.crypto.x509_certificate_info:
+#     path: "{{ autonomy_ownca_identity_ca_cert_path }}"
+#   become: false
+#   register: identity_cert
+#   delegate_to: localhost
+#   tags:
+#     - ownca
+#     - ownca-root
+#     - ownca-intermediate
+#     - ownca-issuing
+#     - ownca-user-certs
+#     - recreate-realm
 
-- name: "Check if user cert exists."
-  ansible.builtin.stat:
-    path: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
-  loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
-  delegate_to: localhost
-  become: no
-  register: cert_file
-  vars:
-    __username: "{{ item[0].username }}"
-  when:
-    - item[0].id_number is defined
-    - item[0].spns is not defined
-
-- name: "Check if we are regenerating user certs."
-  ansible.builtin.set_fact:
-    __user_cert_force_regeneration: yes
-  become: no
-  changed_when: __user_cert_force_regeneration
-  tags:
-    - never
-    - regenerate-user-certs
+# - name: "Check if user cert exists."
+#   ansible.builtin.stat:
+#     path: "{{ autonomy_ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
+#   loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
+#   delegate_to: localhost
+#   become: false
+#   register: cert_file
+#   vars:
+#     __username: "{{ item[0].username }}"
+#   when:
+#     - item[0].id_number is defined
+#     - item[0].spns is not defined
+#   tags:
+#     - ownca
+#     - ownca-root
+#     - ownca-intermediate
+#     - ownca-issuing
+#     - ownca-user-certs
+#     - recreate-realm
 
 - name: "Generate User Certificates."
   community.crypto.x509_certificate:
-    path: "{{ autonomy_ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
+    path: "{{ autonomy_ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
     csr_path: "{{ autonomy_ownca_directory }}/users/csr/{{ __username }}_{{ item[1].name }}.csr"
     ownca_path: "{{ autonomy_ownca_identity_ca_cert_path }}"
     ownca_privatekey_path: "{{ autonomy_ownca_identity_ca_key_path }}"
@@ -230,8 +282,8 @@
     mode: "0644"
     state: present
     force: "{{ __user_cert_force_regeneration }}"
-  become: no
   loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
+  become: false
   delegate_to: localhost
   register: result
   vars:
@@ -241,6 +293,13 @@
   when:
     - item[0].id_number is defined
     - item[0].spns is not defined
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
+    - recreate-realm
 
 # - name: "Get old certificate information"
 #   community.crypto.x509_certificate_info:
@@ -253,7 +312,7 @@
 
 # - name: Add serial number to crl database
 #   ansible.builtin.blockinfile:
-#     dest: "{{ ownca_ca_directory }}/db/{{ autonomy_org_name }}-{{ rebeldrream_org_unit_name }}-identity-ca.crl.srl"
+#     dest: "{{ autonomy_ownca_ca_directory }}/db/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crl.srl"
 #     block: |
 #       - serial_number: {{ item.serial_number }}
 #         revocation_date: "{{ lookup('pipe','date --utc +%Y%m%d%H%M%S') }}Z"
@@ -268,81 +327,98 @@
 #     - cert.results is defined
 #     - item.serial_number is defined
 
-- name: Copy User Certificates to workstation.
-  ansible.builtin.copy:
-    src: "{{ ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
-    dest: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
-    owner: "{{ item[0].username }}"
-    group: "{{ item[0].username }}_g"
-    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
-    mode: "0640"
-  become: yes
-  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
-  vars:
-    __username: "{{ item[0].username }}"
-    __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
-    __user_cert_dir: "{{ __user_home_dir }}/{{ ownca_user_cert_dir }}"
-    __id_number: "{{ item[0].id_number }}"
-  when:
-    - item[0].id_number is defined
-    - item[0].spns is not defined
+# - name: "Copy User Certificates to workstation."
+#   ansible.builtin.copy:
+#     src: "{{ autonomy_ownca_directory }}/users/certs/{{ __username }}_{{ item[1].name }}.crt"
+#     dest: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
+#     owner: "{{ item[0].username }}"
+#     group: "{{ item[0].username }}_g"
+#     #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+#     mode: "0640"
+#   become: true
+#   loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
+#   vars:
+#     __username: "{{ item[0].username }}"
+#     __user_home_dir: "{{ autonomy_ownca_home_dir }}/{{ __username }}"
+#     __user_cert_dir: "{{ __user_home_dir }}/.pki/certs"
+#     __id_number: "{{ item[0].id_number }}"
+#   when:
+#     - item[0].id_number is defined
+#     - item[0].spns is not defined
+#   tags:
+#     - ownca
+#     - ownca-root
+#     - ownca-intermediate
+#     - ownca-issuing
+#     - ownca-user-certs
+#     - recreate-realm
 
-- name: Generate PKCS#12 files
+- name: "Generate PKCS#12 files."
   community.crypto.openssl_pkcs12:
     action: export
     friendly_name: "{{ __given_name }}{{ __surname }} ({{ item[1].name | title }})"
-    path: "{{ __pki_pkcs12_file }}"
-    privatekey_path: "{{ __pki_privatekey_file }}"
+    path: "{{ __pki_pkcs12_path }}"
+    privatekey_path: "{{ __pki_privatekey_path }}"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
-    certificate_path: "{{ __pki_cert_file }}"
+    certificate_path: "{{ __pki_cert_path }}"
     other_certificates:
-      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
-      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
-      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+      - "/usr/local/share/ca-certificates/{{ autonomy_org_name }}-root-ca.crt"
     state: present
-    owner: "{{ item[0].username }}"
-    group: "{{ item[0].username }}_g"
-    #group: "{{ autonomy_org_unit_name | upper }}\\unixadmins"
+    owner: "{{ autonomy_user }}"
+    group: "{{ autonomy_group }}"
     mode: "0640"
-    backup: yes
-    force: no
-  become: yes
-  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
+    backup: true
+    force: "{{ __user_cert_force_regeneration }}"
+  become: false
+  delegate_to: localhost
+  loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/{{ item[0].username }}/password"
     __username: "{{ item[0].username }}"
-    __id_number: "{{ item[0].id_number }}"
     __given_name: "{{ item[0].given_name | default(item[0].username) | title }}"
     __surname: "{% if item[0].surname is defined %} {{ item[0].surname }}{% else %}{% endif %}"
-    __user_home_dir: "{{ ownca_home_dir }}/{{ __username }}"
-    __user_cert_dir: "{{ __user_home_dir }}/{{ ownca_user_cert_dir }}"
-    __pki_cert_file: "{{ __user_cert_dir }}/{{ __username }}_{{ item[1].name }}.crt"
-    __user_private_dir: "{{ __user_home_dir }}/{{ ownca_user_private_dir }}"
-    __pki_privatekey_file: "{{ __user_private_dir }}/{{ __username }}_{{ autonomy_ownca_user_privatekey_type | lower }}.key"
-    __user_pkcs12_dir: "{{ __user_home_dir }}/{{ ownca_user_pkcs12_dir }}"
-    __pki_pkcs12_file: "{{ __user_pkcs12_dir }}/{{ __username }}_{{ item[1].name }}.p12"
+    __password: "{{ lookup('community.general.passwordstore', __password_store_id) }}"
+    __password_store_dir: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users"
+    __password_store_id: "{{ __password_store_dir }}/{{ item[0]['username'] }}/piv_password"
+    __pki_cert_dir: "{{ autonomy_ownca_users_cert_dir }}/{{ __username }}"
+    __pki_cert_file: "{{ __username }}_{{ item[1].name }}.crt"
+    __pki_cert_path: "{{ __pki_cert_dir }}/{{ __pki_cert_file }}"
+    __pki_pkcs12_dir: "{{ autonomy_ownca_users_pkcs12_dir }}/{{ __username }}"
+    __pki_pkcs12_file: "{{ __username }}_{{ item[1].name }}.p12"
+    __pki_pkcs12_path: "{{ __pki_pkcs12_dir }}/{{ __pki_pkcs12_file }}"
+    __pki_privatekey_dir: "{{ autonomy_ownca_users_private_dir }}/{{ __username }}"
+    __pki_privatekey_file: "{{ __username }}.key"
+    __pki_privatekey_path: "{{ __pki_privatekey_dir }}/{{ __pki_privatekey_file }}"
   when:
     - item[0].id_number is defined
     - item[0].spns is not defined
   tags:
-    - user-pkcs11
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
+    - recreate-realm
 
-- name: "Convert User Certificates to DER"
-  ansible.builtin.command:
-    cmd: >
-      openssl x509 -in "{{ item[0].username }}_{{ __cert_purpose }}_{{ autonomy_ownca_user_privatekey_type | lower }}.crt"
-      -inform PEM
-      -out "{{ item[0].username }}_{{ __cert_purpose }}_{{ autonomy_ownca_user_privatekey_type | lower }}.der"
-      -outform DER
-    chdir: "{{ __pki_cert_dir }}"
-    #creates: "{{ item[0].username }}_{{ __cert_purpose }}.der"
-  loop: "{{ __realm_users | product(ownca_user_cert_purposes) | list }}"
+- name: "Convert User Certificates to DER."
+  community.crypto.x509_certificate_convert:
+    src_path: "{{ __pki_cert_dir }}/{{ item[0].username }}_{{ __cert_purpose }}.crt"
+    dest_path: "{{ __pki_cert_dir }}/{{ item[0].username }}_{{ __cert_purpose }}.der"
+    format: "der"
+  loop: "{{ __realm_users | product(autonomy_ownca_user_cert_purposes) | list }}"
   vars:
-    __pki_cert_dir: "{{ ownca_directory }}/users/certs"
+    __pki_cert_dir: "{{ autonomy_ownca_directory }}/users/certs"
     __cert_purpose: "{{ item[1].name }}"
   delegate_to: localhost
   when:
     - item[0].id_number is defined
     - item[0].spns is not defined
   tags:
-    - der
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-user-certs
+    - recreate-realm
+

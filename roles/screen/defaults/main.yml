@@ -1,4 +1,17 @@
 ---
 # defaults file for screen
-autonomy_packages:
+autonomy_screen_packages:
   - screen
+
+autonomy_screen_autodetach: "on"        # default: on
+autonomy_screen_crlf: "off"             # default: off
+autonomy_screen_deflogin: "off"         # default: on
+autonomy_screen_defnonblock: "on"
+autonomy_screen_defsilence: "off"       # default: off
+autonomy_screen_defutf8: "on"
+autonomy_screen_hardcopy_append: "on"   # default: off
+autonomy_screen_nethack: "on"           # default: off
+autonomy_screen_startup_message: "off"  # default: on   # Display the copyright page
+autonomy_screen_vbell: "off"            # default: ???
+
+autonomy_screen_escape: "^^^^"          # suggested binding for emacs users

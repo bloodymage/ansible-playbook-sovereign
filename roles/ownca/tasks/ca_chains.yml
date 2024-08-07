@@ -10,11 +10,11 @@
     intermediate_certificates:
       - "{{ __intermediate_cert_path }}"
     root_certificates:
-      - "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+      - "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
   vars:
-    __intermediate_cert_file: "{{ autonomy_org_name }}-{{ item.name.split('-')[0] }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    __intermediate_cert_file: "{{ autonomy_org_name }}-{{ item.name.split('-')[0] }}-ca.crt"
     __intermediate_cert_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ __intermediate_cert_file }}"
-    __input_chain_file: "{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    __input_chain_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     __input_chain_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ __input_chain_file }}"
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   register: parent_cert_authorities
@@ -23,14 +23,19 @@
   when:
     - item.ca_id != "root"
     - item.ca_id != "intermediate"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Find root certificate for intermediate CA chain."
   community.crypto.certificate_complete_chain:
     input_chain: "{{ lookup('file', __input_chain_path) }}"
     root_certificates:
-      - "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+      - "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
   vars:
-    __input_chain_file: "{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    __input_chain_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     __input_chain_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ __input_chain_file }}"
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   register: root_cert_authorities
@@ -38,10 +43,15 @@
   become: no
   when:
     - item.ca_id == "intermediate"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Write complete chain to disk."
   ansible.builtin.copy:
-    dest: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    dest: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.item.name }}-ca-chain.crt"
     content: "{{ ''.join(item.complete_chain) }}"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
@@ -51,10 +61,15 @@
   become: no
   when:
     - item.complete_chain is defined
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Write root chain (intermediates and root) to disk."
   ansible.builtin.copy:
-    dest: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    dest: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.item.name }}-ca-chain.crt"
     content: "{{ ''.join(item.complete_chain) }}"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
@@ -64,3 +79,8 @@
   become: no
   when:
     - item.complete_chain is defined
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing

@@ -30,8 +30,12 @@ users_sudoers_options:
 autonomy_user_gitconfig_user_use_config_only: "{{ autonomy_gitconfig_user_use_config_only }}"
 autonomy_user_gitconfig_core_editor: "{{ autonomy_gitconfig_core_editor }}"
 autonomy_user_gitconfig_core_pager: "{{ autonomy_gitconfig_core_pager }}"
+autonomy_user_gitconfig_core_excludes_file: ""
 autonomy_user_gitconfig_init_default_branch: "{{ autonomy_gitconfig_init_default_branch }}"
 autonomy_user_gitconfig_init_template_dir: "{{ autonomy_gitconfig_init_template_dir }}"
+
+# .gitignore
+autonomy_users_gitignore: []
 
 # .gnupg/gpg.conf
 autonomy_user_dotfiles_gpg_pinentry_mode: "{{ autonomy_gnupg_pinentry_mode }}"

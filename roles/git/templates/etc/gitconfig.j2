@@ -143,6 +143,8 @@ c         = commit -
 ca        = !git add --all && git commit --all -v
 cm        = !git add --all && git commit --all -v --message
 camend    = commit --amend --reuse-message HEAD
+
+# All essentially Work in Progress Messages
 cdate     = !git add --all && git commit --message \"Commit for $(date -I)\"
 cdatetime = !git add --all && git commit --message \"Commit for $(date -Iseconds)\"
 cyolo     = !git add --all && git commit --message \"$(fortune -n 72 -s)\" && git push --force
@@ -151,8 +153,8 @@ cyolo3    = !git add --all && git commit --message \"$(curl -s https://whattheco
 cyolo4    = !git add --all && git commit --message \"$(curl -s https://whatthecommit.com/index.txt)\"
 cidk      = !git add --all && git commit --message '¯\\_(ツ)_/¯' && git push --force
 cidk2     = !git add --all && git commit --message '¯\\(°_o)/¯'
-save      = !git add --all && git commit --message "SAVEPOINT"
-wip       = !git add --update && git commit --message "WIP"
+save      = !git add --all && git commit --message 'SAVEPOINT'
+wip       = !git add --update && git commit --message 'WIP'
 wipe      = !git add --all && git commit -qm 'WIPE SAVEPOINT' && git reset --hard HEAD~1
 
 cundo = reset HEAD~
@@ -261,9 +263,9 @@ llbsptf = log --pretty=format:"%C(bold\\ yellow)Commit:\\ %C(yellow)%H%C(red)%d%
 # Log Patch Formats
 lp   = log --patch
 
-#llf  = fsck --lost-found
-#ll   = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
-#lh   = shortlog --summary --numbered
+{# #llf  = fsck --lost-found #}
+{# #ll   = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat #}
+{# #lh   = shortlog --summary --numbered #}
 
 # merge
 m   = merge
@@ -291,18 +293,17 @@ rem = remote rename
 res = remote set-url
 rex = remote rm
 
+{# # Misc Aliases #}
+{# # Recent Commit information #}
+{# #dl = "!git ll -1" #}
+{# #dlc = diff --cached HEAD^ #}
+{# #dr  = '!f() { git diff "$1"^.."$1"; }; f' #}
+{# #lc  = '!f() { git ll "$1"^.."$1"; }; f' #}
+{# #diffr  = '!f() { git diff "$1"^.."$1"; }; f' #}
 
-# Misc Aliases
-# Recent Commit information
-#dl = "!git ll -1"
-#dlc = diff --cached HEAD^
-#dr  = '!f() { git diff "$1"^.."$1"; }; f'
-#lc  = '!f() { git ll "$1"^.."$1"; }; f'
-#diffr  = '!f() { git diff "$1"^.."$1"; }; f'
-
-#
-#up = !git pull --rebase --prune $@ && git submodule update --init --recursive
+{# # #}
+{# #up = !git pull --rebase --prune $@ && git submodule update --init --recursive #}
 
 # Find files ...
 grep = "!git ls-files | grep --binary-files=without-match --ignore-case"
-#grep = "!git ls-files | grep --ignore-case"
+{# #grep = "!git ls-files | grep --ignore-case" #}

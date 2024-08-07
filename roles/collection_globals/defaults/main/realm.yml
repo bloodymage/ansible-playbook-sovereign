@@ -1,4 +1,27 @@
 ---
+# Realm User Management / Password Requirements
+autonomy_realm_identity_management_system: ""
+autonomy_realm_min_id_number: 10000
+autonomy_realm_max_id_number: 99999
+
+# ==================================================================================================
+#
+# Samba
+#
+# ==================================================================================================
+# Samba
+samba_password_legnth: "{{ autonomy_password_length }}"
+samba_domain: no
+
+domain_users: []
+
+# Samba LDAP lookups
+samba_user_class: "(objectClass=person)"
+samba_group_class: "(objectClass=group)"
+samba_search: "(|(userPrincipalName=%uid)(sAMAccountName=%uid)(mail=%uid))"
+samba_enabled_users: "(! (userAccountControl:1.2.840.113556.1.4.803:=2))"
+samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
+
 domain_user_vmail:
   username: "vmail"
   spns:

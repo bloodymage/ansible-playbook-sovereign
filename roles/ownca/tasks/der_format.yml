@@ -10,27 +10,33 @@
 #
 # ==================================================================================================
 - name: "Convert CA Certificates to DER format."
-  ansible.builtin.command:
-    cmd: >
-      openssl x509
-      -in {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt -inform PEM
-      -out {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.der -outform DER
-    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca.der"
+  community.crypto.x509_certificate_convert:
+    src_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
+    dest_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.der"
+    format: "der"
   become: no
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   delegate_to: localhost
   run_once: yes
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Convert CA Certificates to DER format."
-  ansible.builtin.command:
-    cmd: >
-      openssl x509
-      -in {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt -inform PEM
-      -out {{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain_{{ autonomy_ownca_privatekey_type | lower }}.der -outform DER
-    creates: "{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
+  community.crypto.x509_certifacate_convert:
+    src_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.crt"
+    dest_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca-chain.der"
+    format: "der"
   become: no
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   delegate_to: localhost
   run_once: yes
   when:
     - item.name != "root"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing

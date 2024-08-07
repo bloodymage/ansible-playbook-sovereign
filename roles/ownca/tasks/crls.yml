@@ -62,8 +62,8 @@
 # ==================================================================================================
 - name: "Generate a CRL."
   community.crypto.x509_crl:
-    path: "{{ autonomy_ownca_directory }}/certificate_authorities/crl/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crl"
-    privatekey_path: "{{ autonomy_ownca_directory }}/certificate_authorities/private/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+    path: "{{ autonomy_ownca_directory }}/certificate_authorities/crl/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+    privatekey_path: "{{ autonomy_ownca_directory }}/certificate_authorities/private/{{ autonomy_org_name }}-{{ item.name }}-ca.key"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     issuer:
       CN: "{{ item.common_name }}"

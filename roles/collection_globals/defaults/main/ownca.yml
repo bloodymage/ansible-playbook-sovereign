@@ -1,48 +1,70 @@
 ---
+# Key Types
+autonomy_ownca_privatekey_type: "{{ autonomy_default_key_type }}"
+autonomy_ownca_intermediate_ca_privatekey_type: "{{ autonomy_ownca_privatekey_type }}"
+autonomy_ownca_issuing_ca_privatekey_type: "{{ autonomy_ownca_intermediate_ca_privatekey_type }}"
+autonomy_ownca_component_ca_privatekey_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
+autonomy_ownca_identity_ca_privatekey_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
+autonomy_ownca_codesign_ca_privatekey_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
+autonomy_ownca_user_privatekey_type: "{{ autonomy_ownca_identity_ca_privatekey_type }}"
+autonomy_ownca_host_privatekey_type: "{{ autonomy_ownca_component_ca_privatekey_type }}"
+
+# Key Sizes
+autonomy_ownca_privatekey_size: "{{ autonomy_default_key_size }}"
+autonomy_ownca_max_user_privatekey_size: "{{ autonomy_ownca_privatekey_size }}"
+
+# ECC Curve
+autonomy_ownca_ecc_curve: "{{ autonomy_default_ecc_curve }}"
+
+# Names
+autonomy_ownca_org_name: "{{ autonomy_org_name | lower }}"
+autonomy_ownca_org_unit_name: "{{ autonomy_org_unit_name | lower }}"
+
 # ==================================================================================================
 #
 # Files and Directories
 #
 # ==================================================================================================
-# Currently RSA is needed for testing windows smart card authorization.
-autonomy_ownca_privatekey_type: "{{ autonomy_default_key_type }}"
-#autonomy_ownca_privatekey_type: "RSA"
-autonomy_ownca_privatekey_size: "{{ autonomy_default_key_size }}"
-
-# Currently testing smart cards, most documentation recommends 2048.  Until smart cards are fully
-# functional, we will use 2048.
-autonomy_ownca_max_user_privatekey_size: "2048"
-autonomy_ownca_file_extension: "crt"
-
+autonomy_ownca_crtfile_extension: "crt"
+autonomy_ownca_csrfile_extension: "csr"
+autonomy_ownca_keyfile_extension: "key"
+autonomy_ownca_etcfile_extension: "pem"
+autonomy_ownca_usrfile_extension: "{{ autonomy_ownca_crtfile_extension }}"
+autonomy_ownca_etc_format: "{{ autonomy_ownca_etc_format }}"
+autonomy_ownca_usr_format: "{{ autonomy_ownca_usrfile_extension }}"
 
 autonomy_ownca_directory: "~/.pki"
 autonomy_ownca_ca_directory: "{{ autonomy_ownca_directory }}/certificate_authorities"
-autonomy_ownca_ca_private_key_directory: "{{ autonomy_ownca_ca_directory }}/private"
+autonomy_ownca_ca_privatekey_directory: "{{ autonomy_ownca_ca_directory }}/private"
 autonomy_ownca_ca_certs_directory: "{{ autonomy_ownca_ca_directory }}/certs"
 autonomy_ownca_ca_crl_directory: "{{ autonomy_ownca_ca_directory }}/crl"
 autonomy_ownca_ca_csr_directory: "{{ autonomy_ownca_ca_directory }}/csr"
-
 
 # Ownca Files and Directories
 autonomy_ownca_etc_owner: "root"
 autonomy_ownca_etc_group: "root"
 autonomy_ownca_etc: "/etc/ssl"
-autonomy_ownca_etc_format: "pem"
+
+# Hosts
+autonomy_ownca_hosts_directory: "{{ autonomy_ownca_directory }}/hosts"
+#autonomy_ownca_hosts_privatekey_directory: "{{ autonomy_ownca_hosts_directory }}/private"
+autonomy_ownca_generate_locally: false
 
 # Usr File and directories
 autonomy_ownca_usr_directory: "/usr/local/share/ca-certificates"
-autonomy_ownca_usr_format: "{{ autonomy_ownca_file_extension }}"
+
+
 
 # Root CA
-autonomy_ownca_root_ca_key_file: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name | lower }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+autonomy_ownca_rootca_key_file: "{{ autonomy_org_name | lower }}-root-ca.key"
+autonomy_ownca_rootca_key_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ autonomy_ownca_rootca_key_file }}"
 
 # Intermediate CA
-autonomy_ownca_intermediate_ca_privatekey_type: "{{ autonomy_ownca_privatekey_type }}"
-autonomy_ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca_{{ autonomy_ownca_intermediate_ca_privatekey_type | lower}}.key"
-autonomy_ownca_intermediate_ca_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_intermediate_ca_key_file }}"
-autonomy_ownca_intermediate_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca_{{ autonomy_ownca_intermediate_ca_privatekey_type | lower }}"
+autonomy_ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.key"
+autonomy_ownca_intermediate_ca_key_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ autonomy_ownca_intermediate_ca_key_file }}"
+autonomy_ownca_intermediate_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca"
 autonomy_ownca_intermediate_ca_cert_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_ownca_intermediate_ca_cert_file }}.{{ autonomy_ownca_usr_format }}"
-autonomy_ownca_intermediate_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain_{{ autonomy_ownca_intermediate_ca_privatekey_type | lower }}"
+autonomy_ownca_intermediate_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca-chain"
 autonomy_ownca_intermediate_ca_chain_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_ownca_intermediate_ca_chain_file }}.{{ autonomy_ownca_usr_format }}"
 autonomy_ownca_intermediate_etc_cert_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_intermediate_ca_cert_file }}.pem"
 autonomy_ownca_intermediate_etc_chain_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_intermediate_ca_chain_file }}.pem"
@@ -52,16 +74,12 @@ autonomy_ownca_intermediate_crl_file: "{{ autonomy_org_name }}-{{ autonomy_org_u
 autonomy_ownca_intermediate_crl_path: "{{ autonomy_ownca_ca_crl_directory }}/{{ autonomy_ownca_intermediate_crl_file }}"
 autonomy_ownca_intermediate_crl_etc_path: "{{ autonomy_ownca_etc }}/crls/{{ autonomy_ownca_intermediate_crl_file }}"
 
-# Issuing CAs
-autonomy_ownca_issuing_ca_privatekey_type: "{{ autonomy_ownca_intermediate_ca_privatekey_type }}"
-
 # Component CA Files
-autonomy_ownca_component_ca_privatekey_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
-autonomy_ownca_component_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca_{{ autonomy_ownca_component_ca_privatekey_type | lower }}.key"
-autonomy_ownca_component_ca_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_component_ca_key_file }}"
-autonomy_ownca_component_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca_{{ autonomy_ownca_component_ca_privatekey_type | lower }}"
+autonomy_ownca_component_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.key"
+autonomy_ownca_component_ca_key_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ autonomy_ownca_component_ca_key_file }}"
+autonomy_ownca_component_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca"
 autonomy_ownca_component_ca_cert_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_ownca_component_ca_cert_file }}.{{ autonomy_ownca_usr_format }}"
-autonomy_ownca_component_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain_{{ autonomy_ownca_component_ca_privatekey_type | lower }}"
+autonomy_ownca_component_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca-chain"
 autonomy_ownca_component_ca_chain_file_path: "{{ autonomy_ownca_usr_directory }}/{{ autonomy_ownca_component_ca_chain_file }}.{{ autonomy_ownca_usr_format }}"
 autonomy_ownca_component_etc_cert_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_component_ca_cert_file }}.pem"
 autonomy_ownca_component_etc_chain_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_component_ca_chain_file }}.pem"
@@ -72,12 +90,11 @@ autonomy_ownca_component_crl_path: "{{ autonomy_ownca_ca_crl_directory }}/{{ aut
 autonomy_ownca_component_crl_etc_path: "{{ autonomy_ownca_etc }}/crls/{{ autonomy_ownca_component_crl_file }}"
 
 # Identity CA Files
-autonomy_ownca_identity_ca_privatekey_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
-autonomy_ownca_identity_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca_{{ autonomy_ownca_identity_ca_privatekey_type | lower }}.key"
-autonomy_ownca_identity_ca_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_identity_ca_key_file }}"
-autonomy_ownca_identity_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca_{{ autonomy_ownca_identity_ca_privatekey_type | lower }}"
+autonomy_ownca_identity_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca.key"
+autonomy_ownca_identity_ca_key_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ autonomy_ownca_identity_ca_key_file }}"
+autonomy_ownca_identity_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca"
 autonomy_ownca_identity_ca_cert_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_ownca_identity_ca_cert_file }}.{{ autonomy_ownca_usr_format }}"
-autonomy_ownca_identity_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain_{{ autonomy_ownca_identity_ca_privatekey_type | lower }}"
+autonomy_ownca_identity_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-identity-ca-chain"
 autonomy_ownca_identity_ca_chain_file_path: "{{ autonomy_ownca_usr_directory }}/{{ autonomy_ownca_identity_ca_chain_file }}.{{ autonomy_ownca_usr_format }}"
 autonomy_ownca_identity_etc_cert_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_identity_ca_cert_file }}.pem"
 autonomy_ownca_identity_etc_chain_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_identity_ca_chain_file }}.pem"
@@ -88,12 +105,11 @@ autonomy_ownca_identity_crl_path: "{{ autonomy_ownca_ca_crl_directory }}/{{ auto
 autonomy_ownca_identity_crl_etc_path: "{{ autonomy_ownca_etc }}/crls/{{ autonomy_ownca_identity_crl_file }}"
 
 # Codesign CA Files
-autonomy_ownca_codesign_ca_privatekey_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
-autonomy_ownca_codesign_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca_{{ autonomy_ownca_codesign_ca_privatekey_type | lower }}.key"
-autonomy_ownca_codesign_ca_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_codesign_ca_key_file }}"
-autonomy_ownca_codesign_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca_{{ autonomy_ownca_codesign_ca_privatekey_type | lower }}"
+autonomy_ownca_codesign_ca_key_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca.key"
+autonomy_ownca_codesign_ca_key_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ autonomy_ownca_codesign_ca_key_file }}"
+autonomy_ownca_codesign_ca_cert_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca"
 autonomy_ownca_codesign_ca_cert_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_ownca_codesign_ca_cert_file }}.{{ autonomy_ownca_usr_format }}"
-autonomy_ownca_codesign_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca-chain_{{ autonomy_ownca_codesign_ca_privatekey_type | lower }}"
+autonomy_ownca_codesign_ca_chain_file: "{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-codesign-ca-chain"
 autonomy_ownca_codesign_ca_chain_path: "{{ autonomy_ownca_usr_directory }}/{{ autonomy_ownca_codesign_ca_chain_file }}.{{ autonomy_ownca_usr_format }}"
 autonomy_ownca_codesign_etc_cert_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_codesign_ca_cert_file }}.pem"
 autonomy_ownca_codesign_etc_chain_path: "{{ autonomy_ownca_etc }}/certs/{{ autonomy_ownca_codesign_ca_chain_file }}.pem"
@@ -107,20 +123,6 @@ autonomy_ownca_codesign_crl_etc_path: "{{ autonomy_ownca_etc }}/crls/{{ autonomy
 autonomy_ownca_pki_url: "pki.{{ autonomy_root_domain }}"
 autonomy_ownca_ocsp_url: "ocsp.{{ autonomy_root_domain }}"
 autonomy_ownca_crl_distribution_point: "https://{{ autonomy_ownca_pki_url }}"
-
-
-# Users
-autonomy_ownca_users_directory: "{{ autonomy_ownca_directory }}/users"
-
-autonomy_ownca_user_pki_dir: "{{ autonomy_user_pki_directory }}"
-autonomy_ownca_user_private_dir: "{{ autonomy_ownca_user_pki_dir }}/private"
-autonomy_ownca_user_privatekey_type: "{{ autonomy_ownca_identity_ca_privatekey_type }}"
-
-# Hosts
-autonomy_ownca_hosts_directory: "{{ autonomy_ownca_directory }}/hosts"
-autonomy_ownca_host_privatekey_type: "{{ autonomy_ownca_component_ca_privatekey_type }}"
-
-autonomy_ownca_generate_locally: no
 
 # ==================================================================================================
 #
@@ -197,7 +199,7 @@ oid_ldap_public_key: "1.3.6.1.4.1.24552.500.1.1.2.0"
 # Do not modify
 #
 # The following variables are defaults that can be modified via tags (eg, the
-# 'regenerate-private-key' will change '__acmeca_regenerate_private_key' to 'yes') or they are
+# 'regenerate-private-key' will change '__acmeca_regenerate_privatekey' to 'yes') or they are
 # constants that if changed will  cause this playbook to fail.
 #
 # ==================================================================================================
@@ -216,15 +218,18 @@ __autonomy_ownca_root_ca:
   ownca: "root"
   ownca_privatekey_passphrase: "{{ autonomy_ownca_root_password }}"
   provider: "selfsigned"
-  private_key_type: "{{ autonomy_ownca_privatekey_type }}"
-  private_key_size: "{{ autonomy_ownca_privatekey_size }}"
-  private_key_path: "{{ autonomy_ownca_root_ca_key_file }}"
+  privatekey_type: "{{ autonomy_ownca_privatekey_type }}"
+  privatekey_size: "{{ autonomy_ownca_privatekey_size }}"
+  privatekey_path: "{{ autonomy_ownca_rootca_key_path }}"
   password_store_id_base: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}"
   ca_id: "root"
   zone_name: ""
   domain: "{{ autonomy_root_domain }}"
+  regenerate_privatekey: "{{ __ownca_rootca_privatekey_force_regeneration }}"
+  regenerate_csr: "{{ __ownca_rootca_csr_force_regeneration }}"
+  regenerate_cert: "{{ __ownca_rootca_cert_force_regeneration }}"
 
-__autonomy_ownca_regenerate: no
-__autonomy_ownca_regenerate_csr: no
-__autonomy_ownca_force_regenerate_intermediate_ca: no
-__autonomy_ownca_force_regenerate_issuing_ca: no
+# __autonomy_ownca_regenerate: no
+# __autonomy_ownca_regenerate_csr: no
+# __autonomy_ownca_force_regenerate_intermediate_ca: no
+# __autonomy_ownca_force_regenerate_issuing_ca: no

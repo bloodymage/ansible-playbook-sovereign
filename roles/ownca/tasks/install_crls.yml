@@ -13,8 +13,8 @@
 
 - name: "Copy CRLs to server."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_ca_directory }}/crl/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crl"
-    dest: "/srv/www/{{ vhost.name }}/{{ item }}_{{ autonomy_ownca_privatekey_type | lower }}.crl"
+    src: "{{ autonomy_ownca_ca_directory }}/crl/{{ item }}.crl"
+    dest: "/srv/www/{{ vhost.name }}/{{ item }}.crl"
     owner: root
     group: root
     mode: "0644"

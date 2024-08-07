@@ -1,3 +1,4 @@
+---
 autonomy_packages:
   - acl
   - attr
@@ -60,23 +61,12 @@ samba_schema_extensions:
   #   auxiliary_class:
   #     - "ldapPublicKey"
 
-#autonomy_packages:
-#  - winbind
-#  - libpam-winbind
-#  - libnss-winbind
-
 schema_update_allowed: no
-samba_log_level: 1
-winbind_enum_users: no
-winbind_enum_groups: no
-winbind_refresh_tickets: yes
-autonomy_samba_dns_zone_transfer_clients_allow: ""
-samba_security: user
 
 samba_services:
     - winbind
 
-autonomy_samba_kdc_enable_fast: ""
+
 
 # ==================================================================================================
 #

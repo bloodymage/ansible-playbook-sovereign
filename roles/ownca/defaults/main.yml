@@ -7,22 +7,27 @@ autonomy_ownca_packages:
 
 autonomy_ownca_host_packages: "{{ autonomy_ownca_packages }}"
 
+
+
+
 autonomy_ownca_intermediate_ca: "{{ autonomy_org_unit_name | lower }}"
 
-autonomy_ownca_user_pki_dir: "{{ autonomy_user_pki_dir }}"
-autonomy_ownca_user_cert_dir: "{{ autonomy_ownca_user_pki_dir }}/certs"
-autonomy_ownca_user_csr_dir: "{{ autonomy_ownca_user_pki_dir }}/csr"
-autonomy_ownca_user_private_dir: "{{ autonomy_ownca_user_pki_dir }}/private"
-autonomy_ownca_user_pkcs12_dir: "{{ autonomy_ownca_user_pki_dir }}/pkcs12"
-autonomy_ownca_home_dir: "/home/{{ autonomy_org_unit_name | upper }}"
+autonomy_ownca_users_dir: "{{ autonomy_ownca_directory }}/users"
+#autonomy_ownca_user_pki_dir: "{{ autonomy_user_pki_dir }}"
+autonomy_ownca_users_cert_dir: "{{ autonomy_ownca_users_dir }}/certs"
+autonomy_ownca_users_csr_dir: "{{ autonomy_ownca_users_dir }}/csr"
+autonomy_ownca_users_private_dir: "{{ autonomy_ownca_users_dir }}/private"
+autonomy_ownca_users_pkcs12_dir: "{{ autonomy_ownca_users_dir }}/pkcs12"
 
-autonomy_ownca_etc_privatekey_path: "{{ autonomy_ownca_etc }}/private/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.key"
-autonomy_ownca_host_privatekey_path: "{{ autonomy_ownca_hosts_directory }}/private/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.key"
+autonomy_ownca_home_dir: "/home"
+
+autonomy_ownca_etc_privatekey_path: "{{ autonomy_ownca_etc }}/private/{{ autonomy_fqdn }}.key"
+autonomy_ownca_host_privatekey_path: "{{ autonomy_ownca_hosts_directory }}/private/{{ autonomy_fqdn }}.key"
 
 autonomy_ownca_host_certs_directories:
   - name: private
-    mode: "{{ __ownca_private_key_dir_mode }}"
-    group: "{{ __ownca_private_key_dir_group }}"
+    mode: "{{ __ownca_privatekey_dir_mode }}"
+    group: "{{ __ownca_privatekey_dir_group }}"
   - name: csr
     mode: "0700"
   - name: pkcs12
@@ -34,9 +39,9 @@ autonomy_ownca_host_certs_directories:
   - name: dhparams
     mode: "0755"
 
-autonomy_ownca_user_pki_dirs:
+autonomy_ownca_user_dirs:
   - name: private
-    mode: "0755"
+    mode: "0700"
   - name: csr
     mode: "0755"
   - name: "certs"
@@ -52,8 +57,8 @@ autonomy_ownca_user_directories:
   - name: "certs"
     mode: "0755"
 
-autonomy_ownca_private_key_group: "root"
-autonomy_ownca_private_key_mode: "0600"
+autonomy_ownca_privatekey_group: "root"
+autonomy_ownca_privatekey_mode: "0600"
 
 autonomy_ownca_generate_locally: no
 
@@ -77,6 +82,10 @@ autonomy_ownca_revoked_certificates: []
 autonomy_ownca_crl_distribution_points:
   - "{{ autonomy_org_name }}-root-ca"
 
+# Passwords
+autonomy_ownca_password_length: "{{ autonomy_password_length }}"
+autonomy_ownca_user_password_length: "{{ autonomy_ownca_password_length }}"
+
 # ==================================================================================================
 #
 # The following variables are modified based on system information (host groups, OS Family, etc).
@@ -84,12 +93,66 @@ autonomy_ownca_crl_distribution_points:
 # These variables are not designed for user configuration.
 #
 # ==================================================================================================
-__ownca_private_key_dir_mode: "0700"
-__ownca_private_key_dir_group: "root"
-__host_cert_force_regeneration: no
-__ownca_force_regeneration: no
-__user_cert_force_regeneration: no
+__ownca_privatekey_dir_mode: "0700"
+__ownca_privatekey_dir_group: "root"
+
+__ownca_force_regeneration: false
+
+# Root CA Regeneration
+__ownca_rootca_privatekey_force_regeneration: "{{ __ownca_force_regeneration }}"
+__ownca_rootca_csr_force_regeneration: "{{ __ownca_rootca_privatekey_force_regeneration }}"
+__ownca_rootca_cert_force_regeneration: "{{ __ownca_rootca_csr_force_regeneration }}"
+
+# Intermediate CA Certificate Regeneration
+__ownca_intermediateca_privatekey_force_regeneration: "{{ __ownca_force_regeneration }}"
+__ownca_intermediateca_csr_force_regeneration: >-
+  {% if __ownca_intermediateca_privatekey_force_regeneration or
+        __ownca_rootca_cert_force_regeneration %}
+  true
+  {% else %}
+  false
+  {% endif %}
+__ownca_intermediateca_cert_force_regeneration: >-
+  {{ __ownca_intermediateca_csr_force_regeneration }}
+
+# Issuing CA Certificate Regeneration
+__ownca_issuingca_privatekey_force_regeneration: "{{ __ownca_force_regeneration }}"
+__ownca_issuingca_csr_force_regeneration: >-
+  {% if __ownca_issuingca_privatekey_force_regeneration or
+        __ownca_intermediateca_cert_force_regeneration %}
+  true
+  {% else %}
+  false
+  {% endif %}
+__ownca_issuingca_cert_force_regeneration: >-
+  {{ __ownca_issuingca_csr_force_regeneration }}
+
+# Host Certificate Regeneration
+__host_privatekey_force_regeneration: "{{ __ownca_force_regeneration }}"
+__host_csr_force_regeneration: >-
+  {% if __host_privatekey_force_regeneration or
+        __ownca_issuingca_cert_force_regeneration %}
+  true
+  {% else %}
+  false
+  {% endif %}
+__host_cert_force_regeneration: "{{ __host_csr_force_regeneration }}"
+__host_dhparams_force_regeneration: "{{ __ownca_force_regeneration }}"
+
+# User Certificate Regeneration
+__user_privatekey_force_regeneration: "{{ __ownca_force_regeneration }}"
+__user_csr_force_regeneration: >-
+  {% if __user_privatekey_force_regeneration or
+        __ownca_issuingca_cert_force_regeneration %}
+  true
+  {% else %}
+  false
+  {% endif %}
+__user_cert_force_regeneration: "{{ __user_csr_force_regeneration }}"
+
 __ownca_certificate_authorities_id:
   - "ca"
   - "component-ca"
   - "identity-ca"
+
+

@@ -21,12 +21,12 @@
 {# ============================================================================================== #}
 {# {% if inventory_hostname in groups['workstations'] and autonomy_smart_card_login %} #}
 {# Host *.{{ autonomy_root_domain }} #}
-{#   CertificateFile ~/.ssh/%u_{{ autonomy_ownca_privatekey_type | lower }}-cert.pub #}
+{#   CertificateFile ~/.ssh/%u_pkcs11-cert.pub #}
 
 {# Host * #}
 {#   CanonicalizeHostname yes #}
 {#   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so #}
-{#   IdentityFile ~/.ssh/%u_{{ autonomy_ownca_privatekey_type | lower }}.pub #}
+{#   IdentityFile ~/.ssh/%u_pkcs11.pub #}
 
 {# {% elif inventory_hostname in groups['workstations'] and autonomy_smart_card_login is falsy %} #}
 {# Host *.{{ autonomy_root_domain }} #}
@@ -39,7 +39,7 @@
 {# {% elif inventory_hostname not in groups['workstations'] and autonomy_smart_card_login %} #}
 {# Host * #}
 {#   CanonicalizeHostname yes #}
-{#   IdentityFile ~/.ssh/%u_{{ autonomy_sshca_user_privatekey_type | lower }}.pub #}
+{#   IdentityFile ~/.ssh/%u_pkcs11.pub #}
 
 {# {% else %} #}
 {# Host * #}
@@ -77,7 +77,7 @@ Host *
 {# {% if autonomy_smart_card_login %} #}
 {#   PKCS11Provider /usr/lib/x86_64-linux-gnu/opensc-pkcs11.so #}
 {# {% endif %} #}
-{#   IdentityFile ~/.ssh/%u_{{ autonomy_ownca_privatekey_type }}.pub #}
+{#   IdentityFile ~/.ssh/%u_pkcs11.pub #}
 {# {% endif %} #}
 {# {% endif %} #}
 {# {% endif %} #}

@@ -22,15 +22,15 @@
   community.crypto.openssl_pkcs12:
     action: export
     backup: yes
-    path:  "{{ autonomy_ownca_hosts_directory }}/pkcs12/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12"
+    path:  "{{ autonomy_ownca_hosts_directory }}/pkcs12/{{ autonomy_fqdn }}.pkcs12"
     friendly_name: "{{ autonomy_fqdn }}"
     passphrase: "{{ autonomy_ownca_host_cert_pkcs12_password }}"
     privatekey_path: "{{ autonomy_ownca_host_privatekey_path }}"
-    certificate_path: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain_{{ autonomy_ownca_privatekey_type | lower }}_{{ autonomy_ownca_privatekey_type | lower }}_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    certificate_path: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
     other_certificates:
-      - "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-      - "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-      - "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+      - "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component-ca.crt"
+      - "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-ca.crt"
+      - "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-root-ca.crt"
     state: present
     iter_size: 0
     maciter_size: 0
@@ -64,7 +64,7 @@
 # ==================================================================================================
 - name: "Copy host's PKCS12 file to host."
   ansible.builtin.copy:
-    src: "{{ autonomy_ownca_hosts_directory }}/pkcs12/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12"
+    src: "{{ autonomy_ownca_hosts_directory }}/pkcs12/{{ autonomy_fqdn }}.pkcs12"
     dest: "{{ autonomy_fqdn }}.pkcs12"
   become: no
   tags:
@@ -118,10 +118,10 @@
 - name: "Remove old certificates from routeros."
   community.routeros.command:
     commands:
-      - "/certificate remove {{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12_0"
-      - "/certificate remove {{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12_1"
-      - "/certificate remove {{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12_2"
-      - "/certificate remove {{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12_3"
+      - "/certificate remove {{ autonomy_fqdn }}.pkcs12_0"
+      - "/certificate remove {{ autonomy_fqdn }}.pkcs12_1"
+      - "/certificate remove {{ autonomy_fqdn }}.pkcs12_2"
+      - "/certificate remove {{ autonomy_fqdn }}.pkcs12_3"
   tags:
     - ownca_host_certs
     - ownca-host-certs
@@ -133,7 +133,7 @@
 - name: "Import certificate into routeros."
   community.routeros.command:
     commands:
-      - "/certificate import file-name={{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.pkcs12 passphrase={{ autonomy_ownca_host_cert_pkcs12_password }}"
+      - "/certificate import file-name={{ autonomy_fqdn }}.pkcs12 passphrase={{ autonomy_ownca_host_cert_pkcs12_password }}"
   tags:
     - ownca_host_certs
     - ownca-host-certs

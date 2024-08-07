@@ -2,7 +2,7 @@
 - name: "Generate Intermediate Certificate Authority Certificate Signing Requests (CSR)."
   community.crypto.openssl_csr:
     path: "{{ autonomy_ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
-    privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
+    privatekey_path: "{{ item.privatekey_path | default(__privatekey_path) }}"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     common_name: "{{ item.common_name }}"
     country_name: "{{ item.country_name | default(omit) }}"
@@ -14,7 +14,7 @@
     key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
     basic_constraints: "{{ item.basic_constraints }}"
     basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
-    create_subject_key_identifier: yes
+    create_subject_key_identifier: true
     authority_cert_issuer: "{{ root_cert_info.subject_alt_name }}"
     authority_cert_serial_number: "{{ root_cert_info.serial_number }}"
     authority_key_identifier: "{{ root_cert_info.subject_key_identifier }}"
@@ -31,26 +31,32 @@
           - aa_compromise
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
-    backup: yes
+    backup: true
     state: present
+    force: "{{ __ownca_intermediateca_csr_force_regeneration }}"
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   delegate_to: localhost
-  run_once: yes
-  become: no
+  run_once: true
+  become: false
   vars:
     __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
     __password_lookup: "{{ __password_store_id }}"
-    __private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+    __privatekey_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.key"
+    __privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ __privatekey_file }}"
   when:
     - item.provider == "ownca"
     - item.ownca == "root"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
 
 - name: "Generate Intermediate CA Signed Certificate."
   community.crypto.x509_certificate:
-    path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
     csr_path: "{{ autonomy_ownca_ca_csr_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
-    ownca_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    ownca_privatekey_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+    ownca_path: "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca.crt"
+    ownca_privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ autonomy_org_name }}-{{ item.ownca }}-ca.key"
     ownca_privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     ownca_not_after: "{{ autonomy_ownca_intermediate_not_after }}"
     ownca_create_authority_key_identifier: yes
@@ -60,7 +66,7 @@
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "0644"
-    force: "{{ __autonomy_ownca_force_regenerate_intermediate_ca }}"
+    force: "{{ __ownca_intermediateca_cert_force_regeneration }}"
     state: present
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   become: no
@@ -72,15 +78,23 @@
   when:
     - item.provider == "ownca"
     - item.ownca == "root"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
 
 - name: "Get Intermediate CA Cert information."
   community.crypto.x509_certificate_info:
-    path: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    path: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca.crt"
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   register: intermediate_cert_info
   when:
     - item.provider == "ownca"
     - item.ownca == "root"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
 
 # - name: "Print intermediate cert info"
 #   ansible.builtin.debug:
@@ -96,3 +110,16 @@
 #   when:
 #     - item[1].serial_number is defined
 #     - item[0].org_unit_name is defined
+
+# ==================================================================================================
+#
+# We run the handlers here, and not in the main.yml to be able to skip this step when it's not
+# needed.
+#
+# ==================================================================================================
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate

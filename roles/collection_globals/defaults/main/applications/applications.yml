@@ -1,0 +1,12 @@
+---
+autonomy_emacs_enabled: false
+autonomy_unzip_enabled: false
+
+
+autonomy_enable_emacs: "{{ autonomy_emacs_enable }}"
+autonomy_enable_etckeeper: no
+autonomy_enable_screen: no
+autonomy_enable_keychain: no
+autonomy_enable_uptimed: no
+autonomy_enable_trash_cli: no
+autonomy_enable_unzip: "{{ autonomy_unzip_enable }}"

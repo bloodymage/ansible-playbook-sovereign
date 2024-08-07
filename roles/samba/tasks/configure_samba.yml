@@ -1,7 +1,7 @@
 ---
 - name: "Configure smb.conf file."
   ansible.builtin.template:
-    src: "smb.conf.j2"
+    src: "etc/samba/smb.conf.j2"
     dest: "/etc/samba/smb.conf"
     owner: root
     group: root
@@ -12,7 +12,7 @@
 
 - name: "Configure user.map file."
   ansible.builtin.template:
-    src: "user_map.j2"
+    src: "etc/samba/user_map.j2"
     dest: /etc/samba/user.map
     owner: root
     group: root

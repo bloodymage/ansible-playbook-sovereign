@@ -12,13 +12,13 @@
       files: "{{ __os_variables_files }}"
       paths:
         - "vars"
-  become: no
+  become: false
 
 - name: "Install packages."
   ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present
-  become: yes
+  become: true
   notify:
     - "enable sssd"
     - "restart sssd"
@@ -26,13 +26,13 @@
 - name: "Ensure we have a password for the Samba Administrator account."
   ansible.builtin.set_fact:
     samba_administrator_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-  become: no
+  become: false
   vars:
     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/domain_users/administrator/password"
     __password_lookup: "{{ __password_store_id }}"
   when:
     - samba_administrator_password == "password"
-  no_log: yes
+  no_log: true
 
   # Check for existing AD
 - name: "Checking to see if system is already joined to AD."
@@ -43,13 +43,13 @@
   ansible.builtin.set_fact:
     sssd_ad_gpo_access_control: "permissive"
     #sssd_debug_level: 1
-    sssd_systemd: yes
+    sssd_systemd: true
     #sssd_pam_verbosity: 3
 
 - name: "Set SSSD Smart Card Configuration."
   ansible.builtin.set_fact:
     sssd_ldap_user_certificate: "userCertificate;binary"
-    sssd_pam_cert_auth: yes
+    sssd_pam_cert_auth: true
     #sssd_soft_crl: yes
     #sssd_soft_ocsp: yes
     sssd_certificate_verification: "{{ sssd_certificate_verification | default(__sssd_certificate_verification) }}"
@@ -65,7 +65,7 @@
   ansible.builtin.service:
     name: sssd
     state: stopped
-  become: yes
+  become: true
   when:
     - __samba_recreate_realm
     - realm_list_results.stdout is defined
@@ -74,7 +74,7 @@
 - name: "Leave Realm."
   ansible.builtin.command:
     cmd: "realm leave"
-  become: yes
+  become: true
   when:
     - __samba_recreate_realm
     - realm_list_results.stdout is defined
@@ -103,7 +103,7 @@
   loop:
     - db
     - mc
-  become: yes
+  become: true
   when:
     - __samba_recreate_realm
 
@@ -115,7 +115,7 @@
     group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop: "{{ autonomy_sssd_db_directories }}"
-  become: yes
+  become: true
 
 - name: "Test Kerberos Logon to Active Directory Domain Controller."
   expect:
@@ -131,8 +131,8 @@
     command: /bin/bash -c "/usr/sbin/realm join {{ autonomy_domain }} --user=Administrator"
     responses:
       (?i)Password: "{{ samba_administrator_password }}"
-  ignore_errors: yes
-  become: yes
+  ignore_errors: true
+  become: true
   when:
     - realm_list_results.stdout is defined
     - realm_list_results.stdout is falsy
@@ -144,7 +144,7 @@
     owner: root
     group: root
     mode: "0600"
-  become: yes
+  become: true
   notify: restart sssd
 
 - name: "Ensure pam_preauth_available file exists."
@@ -154,7 +154,7 @@
     group: "root"
     mode: "0600"
     state: touch
-  become: yes
+  become: true
   notify: restart sssd
   when:
     - autonomy_smart_card_login
@@ -163,7 +163,7 @@
   ansible.builtin.set_fact:
     sssd_pam_priority: "900"
     sssd_pam_auth_initial: "pam_sss.so allow_missing_name try_cert_auth forward_pass"
-  become: no
+  become: false
   when:
     - autonomy_smart_card_login
     - inventory_hostname in groups['workstations']
@@ -175,5 +175,5 @@
     owner: root
     group: root
     mode: "0644"
-  become: yes
+  become: true
   notify: update pam

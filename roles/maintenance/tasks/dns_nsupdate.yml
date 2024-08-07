@@ -6,7 +6,7 @@
       files: "{{ __os_variables_files }}"
       paths:
         - "vars"
-  become: no
+  become: false
 
 # ==================================================================================================
 #
@@ -102,7 +102,7 @@
     type: "A"
     state: present
   loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
-  become: no
+  become: false
   vars:
     __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
@@ -110,7 +110,7 @@
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
   delegate_to: localhost
-  ignore_unreachable: yes
+  ignore_unreachable: true
   when:
     - not samba_domain
     - groups[__dns_servers] is defined
@@ -156,7 +156,6 @@
     zone: "{{ autonomy_dns_ipv4_reverse_zone_formatted }}.in-addr.arpa"
     state: present
   loop: "{{ groups[__dns_servers] }}"
-  become: true
   vars:
     __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_reversezone_domain | default(autonomy_domain) }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
@@ -164,7 +163,8 @@
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
     __autonomy_dns_ipv4_reverse_zone: "{{ autonomy_bind_ipv4_address.split('.')[0] }}.{{ autonomy_bind_ipv4_address.split('.')[1] }}"
-  delegate_to: "{{ hostvars[item]['ansible_host'] }}"
+  delegate_to: localhost
+  become: false
   when:
     - groups[__dns_servers] is defined
     - not samba_domain
@@ -233,7 +233,7 @@
     type: "AAAA"
     state: absent
   loop: "{{ groups[autonomy_zone_name + '_dns_servers'] }}"
-  become: no
+  become: false
   vars:
     __nameserver: "{{ hostvars[item]['inventory_hostname_short'] }}"
     __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ __nameserver }}/bind_dyndns_secret"
@@ -241,7 +241,7 @@
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
   delegate_to: localhost
-  ignore_unreachable: yes
+  ignore_unreachable: true
   when:
     - autonomy_ipv6_address is falsy
     - not samba_domain
@@ -273,7 +273,7 @@
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
   delegate_to: localhost
-  ignore_unreachable: yes
+  ignore_unreachable: true
   when:
     - autonomy_dns_nsupdate_remove_a_records is truthy
     - not samba_domain
@@ -298,7 +298,7 @@
     __key_secret: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
     __dns_servers: "{{ autonomy_zone_name }}_dns_servers"
   delegate_to: localhost
-  ignore_unreachable: yes
+  ignore_unreachable: true
   when:
     - autonomy_dns_nsupdate_remove_aaaa_records is truthy
     - not samba_domain

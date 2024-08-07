@@ -56,17 +56,13 @@ autonomy_virtual_domain: false
 autonomy_hostname: "{{ inventory_hostname_short }}"
 autonomy_fqdn: "{{ autonomy_hostname }}.{{ autonomy_domain }}"
 autonomy_ipv4_address: "{{ ansible_host }}"
-autonomy_ipv6_address: "{{ ansible_default_ipv6.address | default(None) }}"
+autonomy_ipv6_address: "{{ ansible_default_ipv6['address'] | default(None) }}"
 autonomy_virtual_host: false
 
 # Realm User Management / Password Requirements
-autonomy_realm_identity_management_system: ""
-autonomy_realm_min_id_number: 10000
-autonomy_min_domain_id_number: "{{ autonomy_realm_min_id_number }}" # Keep until transition complete
 autonomy_smart_card_login: false
 autonomy_overwrite_password: false
 autonomy_password_length: "42"
-autonomy_dodca_install: false
 autonomy_passdb: "ansible"
 
 # Organization Info
@@ -90,8 +86,9 @@ autonomy_use_source_code_repos: false
 autonomy_raspberrypi_distribution_release: "{{ ansible_distribution_release }}"
 
 # PKI
-autonomy_default_key_type: "ed25519"
-autonomy_default_key_size: 4096
+autonomy_default_key_type: "ecc"
+autonomy_default_key_size: "4096"
+autonomy_default_ecc_curve:  "secp384r1"
 autonomy_user_pki_dir: "{{ autonomy_user_home_dir }}/.pki"
 
 # ==================================================================================================
@@ -103,25 +100,6 @@ autonomy_user_pki_dir: "{{ autonomy_user_home_dir }}/.pki"
 autonomy_sysconf_dir: "/etc"
 sysconf_dir: "{{ autonomy_sysconf_dir }}"
 
-
-
-# ==================================================================================================
-#
-# Samba
-#
-# ==================================================================================================
-# Samba
-samba_password_legnth: "{{ autonomy_password_length }}"
-samba_domain: no
-
-domain_users: []
-
-# Samba LDAP lookups
-samba_user_class: "(objectClass=person)"
-samba_group_class: "(objectClass=group)"
-samba_search: "(|(userPrincipalName=%uid)(sAMAccountName=%uid)(mail=%uid))"
-samba_enabled_users: "(! (userAccountControl:1.2.840.113556.1.4.803:=2))"
-samba_member_of: "memberOf:1.2.840.113556.1.4.1941:"
 
 # ==================================================================================================
 #
@@ -137,7 +115,7 @@ autonomy_github_users: []
 # GPG Sync
 #
 # ==================================================================================================
-autonomy_gpgsync_keylist: "{{ ownca_crl_distribution_point }}/pgp/keylist.json"
+autonomy_gpgsync_keylist: "{{ autonomy_ownca_crl_distribution_point }}/pgp/keylist.json"
 autonomy_gpgsync_gpg_fingerprint: ""
 
 # ==================================================================================================
@@ -182,7 +160,7 @@ __distribution: "{{ ansible_distribution | default(none) }}"
 __distribution_short: "{{ __distribution.split(' ')[0] }}"
 __distribution_release: "{{ ansible_distribution_release | default(none) }}"
 __major_version: "{{ ansible_distribution_major_version | default(none) }}"
-__lsb_id: "{{ ansible_lsb.id | default(none) }}"
+__lsb_id: "{{ ansible_lsb['id'] | default(none) }}"
 __network_os: "{{ ansible_network_os | default(none) }}"
 __os_family: "{{ ansible_os_family | default(none) }}"
 __system: "{{ ansible_system | default(none) }}"

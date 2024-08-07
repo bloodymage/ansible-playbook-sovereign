@@ -13,23 +13,23 @@ workgroup = {{ autonomy_org_unit_name | upper }}
 server role = active directory domain controller
 server services = s3fs, rpc, nbt, wrepl, ldap, cldap, kdc, drepl, winbindd, ntp_signd, kcc, dnsupdate
 idmap_ldb:use rfc2307 = yes
-{% if autonomy_samba_dns_zone_transfer_clients_allow is truthy -%}
+{% if autonomy_samba_config_dns_zone_transfer_clients_allow is truthy -%}
   dns zone transfer clients allow =
-  {%- for item in autonomy_samba_dns_zone_transfer_clients_allow -%}
+  {%- for item in autonomy_samba_config_dns_zone_transfer_clients_allow -%}
     {{ " " }}{{ item }}
   {%- endfor -%}
 {% endif %}
-{% if autonomy_samba_kdc_enable_fast is truthy %}
-kdc enable fast = {{ autonomy_samba_kdc_enable_fast }}
+{% if autonomy_samba_config_kdc_enable_fast is truthy %}
+kdc enable fast = {{ autonomy_samba_config_kdc_enable_fast }}
 {% endif %}
 {% else -%}
-  security = {{ samba_security }}
+  security = {{ autonomy_samba_config_security }}
 {% endif %}
 
 # Logging
 max log size = 1000
 log file = /var/log/samba/log.%m
-log level = {{ samba_log_level }}
+log level = {{ autonomy_samba_config_log_level }}
 {% if inventory_hostname not in groups['samba_domain_controllers'] %}
 {# ============================================================================================== #}
 {#                                                                                                #}
@@ -45,12 +45,14 @@ username map = /etc/samba/user.map
 {# TLS Settings                                                                                   #}
 {#                                                                                                #}
 {# ============================================================================================== #}
-tls enabled  = yes
-tls certfile = {{ ownca_etc }}/certs/{{ autonomy_fqdn }}.pem
-tls keyfile  = {{ ownca_etc }}/private/{{ autonomy_fqdn }}.key
-tls cafile = {{ ownca_etc }}/certs/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component-ca.pem
-#tls crlfile  = {{ ownca_etc }}/crls/{{ autonomy_org_name | lower }}-{{ autonomy_org_unit_name | lower }}-component.crl
-tls dhparams file = {{ ownca_etc }}/dhparams/{{ autonomy_fqdn }}.pem
+tls enabled  = {{ autonomy_samba_config_tls_enabled }}
+tls certfile = {{ autonomy_samba_config_tls_certfile }}
+tls keyfile  = {{ autonomy_samba_config_tls_keyfile }}
+tls cafile   = {{ autonomy_samba_config_tls_cafile }}
+{% if autonomy_samba_config_tls_crlfile is truthy -%}
+  tls crlfile  = {{ autonomy_samba_config_tls_crlfile }}
+{% endif %}
+tls dhparams file = {{ autonomy_samba_config_tls_dhparams_file }}
 {% else %}
 # Idmap Settings
 # idmap config for ...
@@ -59,14 +61,14 @@ idmap config * : range = 3000-7999
 # idmap config for {{ autonomy_org_unit_name | upper }} domain
 idmap config {{ autonomy_org_unit_name | upper }} : backend = ad
 idmap config {{ autonomy_org_unit_name | upper }} : schema_mode = rfc2307
-idmap config {{ autonomy_org_unit_name | upper }} : range = 100000-99999999
+idmap config {{ autonomy_org_unit_name | upper }} : range = {{ autonomy_samba_config_idmap_config_range }}
 idmap config {{ autonomy_org_unit_name | upper }} : unix_nss_info = yes
 idmap config {{ autonomy_org_unit_name | upper }} : unix_primary_group = yes
 
 # Winbind Settings
-winbind enum users = {{ winbind_enum_users }}
-winbind enum groups = {{ winbind_enum_groups }}
-winbind refresh tickets = {{ winbind_refresh_tickets }}
+winbind enum users = {{ autonomy_samba_config_winbind_enum_users }}
+winbind enum groups = {{ autonomy_samba_config_winbind_enum_groups }}
+winbind refresh tickets = {{ autonomy_samba_config_winbind_refresh_tickets }}
 
 {% if autonomy_smart_card_login is false %}
 # ==================================================================================================

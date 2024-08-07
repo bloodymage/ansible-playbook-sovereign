@@ -21,14 +21,6 @@
     - role: bloodymage.autonomy.ownca
       vars:
         __ownca_tasks: "ownca"
-      tags:
-        - ownca
-        - regenerate-ownca
     - role: bloodymage.autonomy.ownca
       vars:
         __ownca_tasks: "crls"
-      tags:
-        - ownca
-        - regenerate-ownca
-        - ownca_crl
-        - ownca-crl

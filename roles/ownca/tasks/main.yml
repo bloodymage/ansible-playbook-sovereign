@@ -15,6 +15,13 @@
   become: false
   delegate_to: localhost
   run_once: true
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
+    - ownca-user-certs
 
 - name: "Install packages."
   ansible.builtin.package:
@@ -24,6 +31,106 @@
   register: result
   delegate_to: localhost
   run_once: true
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
+    - ownca-user-certs
+
+- name: "Check if we are regenerating the entire CA."
+  ansible.builtin.set_fact:
+    __ownca_force_regeneration: true
+  become: false
+  changed_when: __ownca_force_regeneration
+  tags:
+    - never
+    - regenerate-ownca
+
+- name: "Check if we are regenerating the Root CA private key."
+  ansible.builtin.set_fact:
+    __ownca_rootca_privatekey_force_regeneration: true
+  become: false
+  changed_when: __ownca_rootca_privatekey_force_regeneration
+  tags:
+    - never
+    - regenerate-rootca-privatekey
+
+- name: "Check if we are regenerating the Root CA CSR."
+  ansible.builtin.set_fact:
+    __ownca_rootca_csr_force_regeneration: true
+  become: false
+  changed_when: __ownca_rootca_csr_force_regeneration
+  tags:
+    - never
+    - regenerate-rootca-csr
+
+- name: "Check if we are regenerating the Root CA Certificate."
+  ansible.builtin.set_fact:
+    __ownca_rootca_cert_force_regeneration: true
+  become: false
+  changed_when: __ownca_rootca_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-rootca-cert
+
+- name: "Check if we are regenerating the Intermediate CA private key."
+  ansible.builtin.set_fact:
+    __ownca_intermediateca_privatekey_force_regeneration: true
+  become: false
+  changed_when: __ownca_intermediateca_privatekey_force_regeneration
+  tags:
+    - never
+    - regenerate-intermediateca-privatekeys
+    - regenerate-intermediateca-privatekey
+
+- name: "Check if we are regenerating the Intermediate CA CSR."
+  ansible.builtin.set_fact:
+    __ownca_intermediateca_csr_force_regeneration: true
+  become: false
+  changed_when: __ownca_intermediateca_csr_force_regeneration
+  tags:
+    - never
+    - regenerate-intermediateca-csr
+
+- name: "Check if we are regenerating the Intermediate CA Certificate."
+  ansible.builtin.set_fact:
+    __ownca_intermediateca_cert_force_regeneration: true
+  become: false
+  changed_when: __ownca_intermediateca_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-intermediateca-cert
+
+- name: "Check if we are regenerating the Issuing CA private key."
+  ansible.builtin.set_fact:
+    __ownca_issuingca_privatekey_force_regeneration: true
+  become: false
+  changed_when: __ownca_issuingca_privatekey_force_regeneration
+  tags:
+    - never
+    - regenerate-issuingca-privatekeys
+    - regenerate-issuingca-privatekey
+
+- name: "Check if we are regenerating the Issuing CA CSR."
+  ansible.builtin.set_fact:
+    __ownca_issuingca_csr_force_regeneration: true
+  become: false
+  changed_when: __ownca_issuingca_csr_force_regeneration
+  tags:
+    - never
+    - regenerate-issuingca-csr
+
+- name: "Check if we are regenerating the Issuing CA Certificate."
+  ansible.builtin.set_fact:
+    __ownca_issuingca_cert_force_regeneration: true
+  become: false
+  changed_when: __ownca_issuingca_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-issuingca-cert
+
 
 - name: "Prepare Certificate Authorities."
   include_tasks: "prepare_certificate_authorities.yml"
@@ -34,19 +141,11 @@
     - ownca-root
     - ownca-intermediate
     - ownca-issuing
-    - ownca-host-certs
-    - ownca-user-certs
 
 - name: "Create OwnCA: Root CA."
   include_tasks: "rootca.yml"
   when:
     - __ownca_tasks == "ownca"
-  tags:
-    - ownca
-    - ownca-root
-
-- name: "Run handlers now."
-  ansible.builtin.meta: flush_handlers
   tags:
     - ownca
     - ownca-root
@@ -60,25 +159,10 @@
     - ownca-root
     - ownca-intermediate
 
-- name: "Run handlers now."
-  ansible.builtin.meta: flush_handlers
-  tags:
-    - ownca
-    - ownca-root
-    - ownca-intermediate
-
 - name: "Create OwnCA: Issuing CAs."
   include_tasks: "issuingca.yml"
   when:
     - __ownca_tasks == "ownca"
-  tags:
-    - ownca
-    - ownca-root
-    - ownca-intermediate
-    - ownca-issuing
-
-- name: "Run handlers now."
-  ansible.builtin.meta: flush_handlers
   tags:
     - ownca
     - ownca-root
@@ -106,6 +190,36 @@
     - ownca-intermediate
     - ownca-issuing
 
+- name: "Check if we are regenerating host private keys."
+  ansible.builtin.set_fact:
+    __host_privatekey_force_regeneration: true
+  become: false
+  changed_when: __host_privatekey_force_regeneration
+  tags:
+    - never
+    - regenerate-host-privatekey
+    - regenerate-host-privatekeys
+
+- name: "Check if we are regenerating host CSRs."
+  ansible.builtin.set_fact:
+    __host_csr_force_regeneration: true
+  become: false
+  changed_when: __host_csr_force_regeneration
+  tags:
+    - never
+    - regenerate-host-csr
+    - regenerate-host-csrs
+
+- name: "Check if we are regenerating host certs."
+  ansible.builtin.set_fact:
+    __host_cert_force_regeneration: true
+  become: false
+  changed_when: __host_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-host-cert
+    - regenerate-host-certs
+
 - name: "Create Host Certificates."
   include_tasks: "host_certs.yml"
   when:
@@ -116,6 +230,36 @@
     - ownca-intermediate
     - ownca-issuing
     - ownca-host-certs
+
+- name: "Check if we are regenerating user private keys."
+  ansible.builtin.set_fact:
+    __user_privatekey_force_regeneration: true
+  become: false
+  changed_when: __user_privatekey_force_regeneration
+  tags:
+    - never
+    - regenerate-user-privatekey
+    - regenerate-user-privatekeys
+
+- name: "Check if we are regenerating host CSRs."
+  ansible.builtin.set_fact:
+    __user_csr_force_regeneration: true
+  become: false
+  changed_when: __user_csr_force_regeneration
+  tags:
+    - never
+    - regenerate-user-csr
+    - regenerate-user-csrs
+
+- name: "Check if we are regenerating user certs."
+  ansible.builtin.set_fact:
+    __user_cert_force_regeneration: true
+  become: false
+  changed_when: __user_cert_force_regeneration
+  tags:
+    - never
+    - regenerate-user-cert
+    - regenerate-user-certs
 
 - name: "Create User Certificates."
   include_tasks: "user_certs.yml"
@@ -149,8 +293,19 @@
     - ownca-root
     - ownca-intermediate
     - ownca-issuing
+    - ownca-host-certs
     - ownca-user-certs
     - ownca-crls
+
+- name: "Check if we are regenerating Diffie-Hellman Parameters."
+  ansible.builtin.set_fact:
+    __host_dhparams_force_regeneration: true
+  become: false
+  changed_when: __host_dhparams_force_regeneration
+  tags:
+    - never
+    - regenerate-dhparams
+    - regenerate-host-dhparams
 
 - name: "Create Host Diffie-Hellman Parameters."
   include_tasks: "host_dhparams.yml"

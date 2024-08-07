@@ -6,12 +6,24 @@
       paths:
         - "vars"
   become: no
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Set ownca host directory for local generation."
   ansible.builtin.set_fact:
     autonomy_ownca_hosts_directory: "{{ autonomy_ownca_directory }}/hosts"
   when:
     - autonomy_ownca_generate_locally
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Create SSL Directories."
   ansible.builtin.file:
@@ -24,15 +36,28 @@
   become: no
   delegate_to: localhost
   run_once: yes
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Add subject alt names based on ipv6."
   ansible.builtin.set_fact:
-    autonomy_ownca_host_certs_subject_alt_name: "{{ autonomy_ownca_host_certs_subject_alt_name + [__alt_name] }}"
+    autonomy_ownca_host_certs_subject_alt_name: "{{ autonomy_ownca_host_certs_subject_alt_name + __alt_name }}"
   vars:
-    __alt_name: "IP:{{ autonomy_ipv6_address }}"
+    __alt_name:
+      - "IP:{{ autonomy_ipv6_address }}"
   when:
     - autonomy_ipv6_address is defined
     - autonomy_ipv6_address is truthy
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 # - name: "Add subject alt names based on role."
 #   ansible.builtin.set_fact:
@@ -94,48 +119,67 @@
       - "otherName:{{ autonomy_ownca_msadguid_oid }};UTF8:{{ autonomy_ownca_objectguid }}"
   when:
     - inventory_hostname in groups['samba_domain_controllers'] | default([])
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Set extended key usage based on role."
   ansible.builtin.set_fact:
-    autonomy_ownca_host_certs_extended_key_usage: "{{ autonomy_ownca_host_certs_extended_key_usage + [item.extended_key_uasge] }}"
+    autonomy_ownca_host_certs_extended_key_usage: "{{ autonomy_ownca_host_certs_extended_key_usage + item.extended_key_uasge }}"
   become: no
   loop:
     - name: "samba_domain_controllers"
-      extended_key_uasge: "{{ autonomy_ownca_mskdc_oid }}"
+      extended_key_uasge:
+        - "{{ autonomy_ownca_mskdc_oid }}"
   when:
     - inventory_hostname in groups[item.name] | default([])
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Add intermediate Certificate Authorities."
   ansible.builtin.set_fact:
-    autonomy_ownca_certificate_authorities: "{{ autonomy_ownca_certificate_authorities + [__certificate_authority] }}"
+    autonomy_ownca_certificate_authorities: "{{ autonomy_ownca_certificate_authorities + __certificate_authority }}"
   loop: "{{ autonomy_zones }}"
   become: no
   vars:
-    autonomy_ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_intermediate_ca_privatekey_type | lower }}.key"
+    autonomy_ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca.key"
     __certificate_authority:
-      name: "{{ item.name }}"
-      common_name: "{{ autonomy_org_name | title }} {{ item.name | title }} CA"
-      ownca: "root"
-      provider: "ownca"
-      ca_id: "intermediate"
-      zone_name: "{{ item.name }}."
-      keyusage:
-        - keyCertSign
-        - cRLSign
-      keyusage_critical: yes
-      basic_constraints:
-        - 'CA:TRUE'
-      private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_intermediate_ca_key_file }}"
-      org_unit_name: "{{ item.name }}"
+      - name: "{{ item.name }}"
+        common_name: "{{ autonomy_org_name | title }} {{ item.name | title }} CA"
+        ownca: "root"
+        provider: "ownca"
+        ca_id: "intermediate"
+        zone_name: "{{ item.name }}."
+        keyusage:
+          - keyCertSign
+          - cRLSign
+        keyusage_critical: yes
+        basic_constraints:
+          - 'CA:TRUE'
+        privatekey_path: "{{ autonomy_ownca_intermediate_ca_key_path }}"
+        org_unit_name: "{{ item.name }}"
   when:
     - item.type != "public"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Add issuing Certificate Authorities."
   ansible.builtin.set_fact:
     autonomy_ownca_certificate_authorities: "{{ autonomy_ownca_certificate_authorities + [__certificate_authority] }}"
   loop: "{{ autonomy_zones | product(autonomy_ownca_issuing_authorities) }}"
   vars:
-    autonomy_ownca_issuing_ca_key_file: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}-ca_{{ autonomy_ownca_issuing_ca_privatekey_type | lower }}.key"
+    autonomy_ownca_issuing_ca_key_file: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}-ca.key"
     __certificate_authority:
       name: "{{ item[0].name }}-{{ item[1] }}"
       common_name: "{{ autonomy_org_name | title }} {{ item[0].name | title }} {{ item[1] | title}} CA"
@@ -149,10 +193,16 @@
       keyusage_critical: yes
       basic_constraints:
         - 'CA:TRUE'
-      private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_issuing_ca_key_file }}"
+      privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ autonomy_ownca_issuing_ca_key_file }}"
       org_unit_name: "{{ item[0].name }}"
   when:
     - item[0].type != "public"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Include OS Family Preparation Tasks."
   include_tasks: "{{ ansible_os_family | lower }}_prep.yml"
@@ -160,11 +210,23 @@
     - ansible_network_os is not defined
     - ansible_os_family is defined
     - not autonomy_ownca_generate_locally
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Include Localhost Preparation Tasks."
   include_tasks: "localhost_prep.yml"
   when:
     - ansible_network_os is defined or autonomy_ownca_generate_locally
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Ensure we have a password for the Component Issuing CA."
   ansible.builtin.set_fact:
@@ -174,6 +236,12 @@
     __password_lookup: "{{ __password_store_id }}"
   become: no
   delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 # ==================================================================================================
 #
@@ -187,6 +255,12 @@
   become: no
   register: component_cert
   delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Check if host cert exists."
   ansible.builtin.stat:
@@ -194,6 +268,12 @@
   delegate_to: localhost
   become: no
   register: cert_file
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Get host certificate information."
   community.crypto.x509_certificate_info:
@@ -205,6 +285,12 @@
     - cert_file.stat is defined
     - cert_file.stat.exists is true
     - cert_file.stat.path is defined
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 # ==================================================================================================
 #
@@ -213,35 +299,32 @@
 # host's certificate has not.
 #
 # ==================================================================================================
-- name: "Check if we are regenerating host certs."
-  ansible.builtin.set_fact:
-    __host_cert_force_regeneration: yes
-  become: no
-  changed_when: __host_cert_force_regeneration
-  tags:
-    - never
-    - regenerate-host-certs
-
-- name: "Check if the host's cert authority_key_identifier matches the Component CA's subject_key_identifier."
-  ansible.builtin.set_fact:
-    __host_cert_force_regeneration: yes
-  become: no
-  when:
-    - host_cert.authority_key_identifier is defined
-    - host_cert.authority_key_identifier != component_cert.subject_key_identifier
+# - name: "Check if the host's cert authority_key_identifier matches the Component CA's subject_key_identifier."
+#   ansible.builtin.set_fact:
+#     __host_cert_force_regeneration: yes
+#   become: no
+#   when:
+#     - host_cert.authority_key_identifier is defined
+#     - host_cert.authority_key_identifier != component_cert.subject_key_identifier
 
 - name: "Generate Host Certificate."
   community.crypto.x509_certificate:
-    path: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    path: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
     csr_path: "{{ autonomy_ownca_hosts_directory }}/csr/{{ autonomy_fqdn }}.csr"
     ownca_path: "{{ autonomy_ownca_component_ca_cert_path }}"
     ownca_privatekey_path: "{{ autonomy_ownca_component_ca_key_path }}"
     ownca_privatekey_passphrase: "{{ autonomy_ownca_component_password }}"
     provider: ownca
-    backup: yes
+    backup: true
     force: "{{ __host_cert_force_regeneration }}"
   become: no
   delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Identify Certificate Complete Chain."
   community.crypto.certificate_complete_chain:
@@ -250,12 +333,18 @@
       - "{{ autonomy_ownca_component_ca_cert_path | lower }}"
       - "{{ autonomy_ownca_intermediate_ca_cert_path | lower }}"
     root_certificates:
-      - "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+      - "{{ autonomy_ownca_ca_certs_directory }}/{{ autonomy_org_name }}-root-ca.crt"
   vars:
-    __lookup_file: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}_{{ autonomy_ownca_host_privatekey_type | lower }}.crt"
+    __lookup_file: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}.crt"
   register: parent_cert_authorities
   become: no
   delegate_to: localhost
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 # ==================================================================================================
 #
@@ -264,7 +353,7 @@
 # ==================================================================================================
 - name: "Write complete chain to disk."
   ansible.builtin.copy:
-    dest: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    dest: "{{ autonomy_ownca_hosts_directory }}/certs/{{ autonomy_fqdn }}-chain.crt"
     content: "{{ ''.join(parent_cert_authorities.complete_chain) }}"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
@@ -273,6 +362,12 @@
   delegate_to: localhost
   when:
     - parent_cert_authorities.complete_chain is defined
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Include OS Family Tasks."
   include_tasks: "{{ ansible_os_family | lower }}_final.yml"
@@ -280,19 +375,43 @@
     - ansible_network_os is not defined
     - ansible_os_family is defined
     - not autonomy_ownca_generate_locally
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Include NetworkOS Tasks."
   include_tasks: "{{ ansible_network_os.split('.')[2] | lower }}_final.yml"
   when:
     - ansible_network_os is defined
     - not autonomy_ownca_generate_locally
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Include Local tasks."
   include_tasks: "localhost_final.yml"
   when:
     - autonomy_ownca_generate_locally
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs
 
 - name: "Copy to Samba File Server."
   include_tasks: "copy_to_samba.yml"
   when:
     - inventory_hostname == groups['samba_ownca_user_hosts'][0] | default([])
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
+    - ownca-host-certs

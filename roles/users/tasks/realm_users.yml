@@ -240,85 +240,85 @@
 # defined.
 #
 # ==================================================================================================
-- name: "Get displayNames for all users."
-  community.general.ldap_search:
-    dn: "{{ autonomy_user_dn }}"
-    scope: "onelevel"
-    bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
-    bind_pw: "{{ samba_administrator_password }}"
-    start_tls: yes
-    server_uri: "ldap://{{ autonomy_fqdn }}"
-    attrs:
-      - "dn"
-  register: ldap_users
-  run_once: yes
-  delegate_to: localhost
+# - name: "Get displayNames for all users."
+#   community.general.ldap_search:
+#     dn: "{{ autonomy_user_dn }}"
+#     scope: "onelevel"
+#     bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
+#     bind_pw: "{{ samba_administrator_password }}"
+#     start_tls: yes
+#     server_uri: "ldap://{{ autonomy_fqdn }}"
+#     attrs:
+#       - "dn"
+#   register: ldap_users
+#   run_once: yes
+#   delegate_to: localhost
 
-- name: "Cleanup dn's of all ldap users."
-  ansible.builtin.set_fact:
-    __realm_user_dn_list: "{{ __realm_user_dn_list + [item.dn] }}"
-  loop: "{{ ldap_users.results }}"
+# - name: "Cleanup dn's of all ldap users."
+#   ansible.builtin.set_fact:
+#     __realm_user_dn_list: "{{ __realm_user_dn_list + [item.dn] }}"
+#   loop: "{{ ldap_users.results }}"
 
-- name: "Insert User LDAP Attributes."
-  community.general.ldap_attrs:
-    dn: "{{ __dn }}"
-    attributes:
-      co: "{{ item.country | default(omit) }}"
-      # carLicense:
-      # homePhone:
-      # otherHomePhone:
-      # facsimileTelephoneNumber:
-      # otherFacsimile:
-      # ipPhone:
-      # otherIpPhone:
-      # info:
-      # employeeID:
-      # employeeType:
-      # employeeNumber:
-      division: "{{ item['division'] | default(omit) }}"
-      # roomNumber:
-      #cn: "{{ item['display_name'] }}"
-      company: "{{ item.company | default(omit) }}"
-      department: "{{ item['department'] | default(omit) }}"
-      # description:
-      displayName: "{{ item['display_name'] }}"
-      gidNumber: "{{ item['id_number'] | default(omit) }}"
-      givenName: "{{ item['given_name'] }}"
-      initials: "{{ item['initials'] | default(omit) }}"
-      l: "{{ item.city | default(omit) }}"
-      mail: "{{ item.mail }}"
-      mobile: "{{ item.mobile | default(omit) }}"
-      o: "{{ item.organization | default(omit) }}"
-      ou: "{{ item.organizational_unit | default(omit) }}"
-      otherMailbox: "{{ item.email_aliases | default(omit) }}"
-      #otherMobile:
-      #otherPager:
-      #otherTelephone:
-      #pager:
-      physicalDeliveryOfficeName: "{{ item.physical_delivery_office | default(omit) }}"
-      # postOfficeBox:
-      postalCode: "{{ item.zip_code | default(omit) }}"
-      # proxyAddresses:
-      sn: "{{ item.surname | default(omit) }}"
-      st: "{{ item.state | default(omit) }}"
-      # streetAddress:
-      # telephoneNumber:
-      title: "{{ item.job_title | default(omit) }}"
-      uidNumber: "{{ item.id_number | default(omit) }}"
-      unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}"
-      url: "{{ item.urls | default(omit) }}"
-      userCertificate: []
-      wWWHomePage: "{{ item.internet_address | default(omit) }}"
-    state: exact
-    bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
-    bind_pw: "{{ samba_administrator_password }}"
-    start_tls: yes
-    server_uri: "ldap://{{ autonomy_fqdn }}"
-  loop: "{{ __realm_users }}"
-  #ignore_errors: yes
-  delegate_to: localhost
-  vars:
-    __dn: "CN={{ item['username'] }},{{ autonomy_user_dn }}"
-  when:
-    - item['id_number'] is defined
-    - __dn in __realm_user_dn_list
+# - name: "Insert User LDAP Attributes."
+#   community.general.ldap_attrs:
+#     dn: "{{ __dn }}"
+#     attributes:
+#       co: "{{ item.country | default(omit) }}"
+#       # carLicense:
+#       # homePhone:
+#       # otherHomePhone:
+#       # facsimileTelephoneNumber:
+#       # otherFacsimile:
+#       # ipPhone:
+#       # otherIpPhone:
+#       # info:
+#       # employeeID:
+#       # employeeType:
+#       # employeeNumber:
+#       division: "{{ item['division'] | default(omit) }}"
+#       # roomNumber:
+#       #cn: "{{ item['display_name'] }}"
+#       company: "{{ item.company | default(omit) }}"
+#       department: "{{ item['department'] | default(omit) }}"
+#       # description:
+#       displayName: "{{ item['display_name'] }}"
+#       gidNumber: "{{ item['id_number'] | default(omit) }}"
+#       givenName: "{{ item['given_name'] }}"
+#       initials: "{{ item['initials'] | default(omit) }}"
+#       l: "{{ item.city | default(omit) }}"
+#       mail: "{{ item.mail }}"
+#       mobile: "{{ item.mobile | default(omit) }}"
+#       o: "{{ item.organization | default(omit) }}"
+#       ou: "{{ item.organizational_unit | default(omit) }}"
+#       otherMailbox: "{{ item.email_aliases | default(omit) }}"
+#       #otherMobile:
+#       #otherPager:
+#       #otherTelephone:
+#       #pager:
+#       physicalDeliveryOfficeName: "{{ item.physical_delivery_office | default(omit) }}"
+#       # postOfficeBox:
+#       postalCode: "{{ item.zip_code | default(omit) }}"
+#       # proxyAddresses:
+#       sn: "{{ item.surname | default(omit) }}"
+#       st: "{{ item.state | default(omit) }}"
+#       # streetAddress:
+#       # telephoneNumber:
+#       title: "{{ item.job_title | default(omit) }}"
+#       uidNumber: "{{ item.id_number | default(omit) }}"
+#       unixHomeDirectory: "/home/{{ autonomy_org_unit_name | upper }}/{{ item.username }}"
+#       url: "{{ item.urls | default(omit) }}"
+#       userCertificate: []
+#       wWWHomePage: "{{ item.internet_address | default(omit) }}"
+#     state: exact
+#     bind_dn: "cn=administrator,{{ autonomy_user_dn }}"
+#     bind_pw: "{{ samba_administrator_password }}"
+#     start_tls: yes
+#     server_uri: "ldap://{{ autonomy_fqdn }}"
+#   loop: "{{ __realm_users }}"
+#   #ignore_errors: yes
+#   delegate_to: localhost
+#   vars:
+#     __dn: "CN={{ item['username'] }},{{ autonomy_user_dn }}"
+#   when:
+#     - item['id_number'] is defined
+#     - __dn in __realm_user_dn_list

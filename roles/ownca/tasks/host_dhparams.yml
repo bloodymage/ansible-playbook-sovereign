@@ -3,12 +3,12 @@
 #
 # Creates dh params for individual hosts.
 #
-# This takes forever on a RPi.
+# This takes forever on a RPi.  What are the security implications for generating elsewhere and
+# transferring to the RPi server later?
 #
-# Are there security implications for generating elsewhere and transferring to the RPi server later?
-#
-# We only need to run this if the host's private key type is DSA or RSA.  It doesn't really apply
-# to elliptical curve cryptography.  Need to verify this.  I read it somewhere.
+# This currently only works if the privatekey type is 'DSA' or 'RSA'.  While it is possible to
+# use Diffie-Hellman parameters for Elliptical Curve Private keys, it is currently not possible
+# using the ansible modules.
 #
 # ==================================================================================================
 - name: "Generate Diffie-Hellman Parameters."
@@ -17,11 +17,15 @@
     owner: "root"
     group: "root"
     mode: "0644"
-    backup: yes
-    #force: "{{ __autonomy_ownca_regenerate_csr }}"
-  become: yes
+    backup: true
+    force: "{{ __host_dhparams_force_regeneration }}"
+  become: true
   notify:
     - restart tls
   when:
-    - autonomy_ownca_privatekey_type in ['DSA','RSA']
+    - autonomy_ownca_host_privatekey_type in ['DSA','RSA']
     - ansible_connection != "local"
+  tags:
+    - ownca
+    - ownca-dhparams
+    - ownca-host-dhparams

@@ -20,10 +20,10 @@
 # ==================================================================================================
 - name: "Check if host is in 'apache' or 'openldap' group."
   ansible.builtin.set_fact:
-    autonomy_ownca_private_key_group: "ssl-cert"
-    autonomy_ownca_private_key_mode: "0640"
-    __autonomy_ownca_private_key_dir_mode: "0750"
-    __autonomy_ownca_private_key_dir_group: "ssl-cert"
+    autonomy_ownca_privatekeygroup: "ssl-cert"
+    autonomy_ownca_privatekeymode: "0640"
+    __autonomy_ownca_privatekey_dir_mode: "0750"
+    __autonomy_ownca_privatekey_dir_group: "ssl-cert"
   when:
     - inventory_hostname in groups['apache_servers'] | default([])
     - inventory_hostname in groups['openldap_servers'] | default([])
@@ -51,13 +51,25 @@
 - name: "Generate Host Private Key."
   community.crypto.openssl_privatekey:
     path: "{{ autonomy_ownca_etc_privatekey_path }}"
-    type: "{{ autonomy_ownca_privatekey_type }}"
+    passphrase: "{{ autonomy_ownca_host_privatekey_passphrase | default(omit) }}"
+    type: "{{ __privatekey_type }}"
     size: "{{ autonomy_ownca_privatekey_size }}"
+    curve: "{{ __curve }}"
     owner: "{{ autonomy_ownca_etc_owner }}"
-    group: "{{ autonomy_ownca_private_key_group }}"
-    mode: "{{ autonomy_ownca_private_key_mode }}"
-    force: no
-  become: yes
+    group: "{{ autonomy_ownca_privatekey_group }}"
+    mode: "{{ autonomy_ownca_privatekey_mode }}"
+    force: "{{ __host_privatekey_force_regeneration }}"
+    backup: true
+  become: true
+  vars:
+    __privatekey_tmp_type: >-
+      {% if autonomy_ownca_host_privatekey_type.lower() in ['ed25519','ed448'] %}
+      {{ autonomy_ownca_host_privatekey_type | capitalize }}
+      {% else %}
+      {{ autonomy_ownca_host_privatekey_type | upper }}
+      {% endif %}
+    __privatekey_type: "{{ __privatekey_tmp_type | trim }}"
+    __curve: "{{ autonomy_ownca_ecc_curve if __privatekey_type == 'ECC' else omit }}"
 
 - name: "Generate Host CSR."
   community.crypto.openssl_csr:
@@ -68,13 +80,13 @@
     organizational_unit_name: "{{ autonomy_org_unit_name | title }}"
     common_name: "{{ autonomy_fqdn }}"
     key_usage: "{{ autonomy_ownca_host_certs_key_usage }}"
-    key_usage_critical: yes
+    key_usage_critical: true
     extended_key_usage: "{{ autonomy_ownca_host_certs_extended_key_usage }}"
-    extended_key_usage_critical: yes
+    extended_key_usage_critical: true
     privatekey_path: "{{ autonomy_ownca_etc_privatekey_path }}"
     subject_alt_name: "{{ autonomy_ownca_host_certs_subject_alt_name }}"
     crl_distribution_points:
-      - full_name: "URI:{{ autonomy_ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl"
+      - full_name: "{{ __uri }}"
         reasons:
           - key_compromise
           - ca_compromise
@@ -88,9 +100,13 @@
     mode: "0644"
     owner: "{{ autonomy_ownca_etc_owner }}"
     group: "{{ autonomy_ownca_etc_group }}"
-    backup: yes
-    force: "{{ __autonomy_ownca_regenerate_csr }}"
-  become: yes
+    backup: true
+    force: "{{ __host_csr_force_regeneration }}"
+  vars:
+    __uri: >-
+      URI:{{ autonomy_ownca_crl_distribution_point }}/
+      {{ autonomy_org_name }}-{{ autonomy_org_unit_name }}-component.crl
+  become: true
 
 # ==================================================================================================
 #
@@ -102,5 +118,5 @@
   ansible.builtin.fetch:
     src: "{{ autonomy_ownca_etc }}/csr/{{ autonomy_fqdn }}.csr"
     dest: "{{ autonomy_ownca_hosts_directory }}/csr/"
-    flat: yes
-  become: yes
+    flat: true
+  become: true

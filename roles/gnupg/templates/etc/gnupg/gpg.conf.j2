@@ -73,7 +73,7 @@
 {% if autonomy_gnupg_symkey_cache is false -%}
   no-symkey-cache
 {% endif %}
-{% if autonomy_gnupg_throw_keyids -%}
+{% if autonomy_gnupg_throw_keyids and autonomy_firefox_mailvelope_plugin is falsy -%}
   throw-keyids
 {% endif %}
 {% if autonomy_gnupg_with_keygrip -%}

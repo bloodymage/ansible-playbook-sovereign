@@ -54,14 +54,24 @@
 - name: "Generate Host Private Key."
   community.crypto.openssl_privatekey:
     path: "{{ autonomy_ownca_host_privatekey_path }}"
-    type: "{{ autonomy_ownca_privatekey_type }}"
+    type: "{{ __privatekey_type }}"
     size: "{{ autonomy_ownca_privatekey_size }}"
+    curve: "{{ __curve }}"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "0640"
     force: no
   become: no
   delegate_to: localhost
+  vars:
+    __privatekey_tmp_type: >-
+      {% if autonomy_ownca_host_privatekey_type.lower() in ['ed25519','ed448'] %}
+      {{ autonomy_ownca_host_privatekey_type | capitalize }}
+      {% else %}
+      {{ autonomy_ownca_host_privatekey_type | upper }}
+      {% endif %}
+    __privatekey_type: "{{ __privatekey_tmp_type | trim }}"
+    __curve: "{{ autonomy_ownca_ecc_curve if __privatekey_type == 'ECC' else omit }}"
   tags:
     - ownca_host_certs
     - ownca-host-certs

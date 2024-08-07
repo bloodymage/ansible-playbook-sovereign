@@ -45,5 +45,6 @@ autonomy_gitconfig_core_pager: ""
 autonomy_gitconfig_core_whitespace: ""
 
 autonomy_gitconfig_init_default_branch: "main"
+autonomy_gitconfig_init_template_dir: ""
 
 autonomy_gitconfig_user_use_config_only: "false"

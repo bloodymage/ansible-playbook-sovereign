@@ -7,21 +7,21 @@
 - name: "Generate Root Certificate Authority Certificate Signing Requests (CSR)."
   community.crypto.openssl_csr:
     path: "{{ autonomy_ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
-    privatekey_path: "{{ item.private_key_path | default(__private_key_path) }}"
+    privatekey_path: "{{ item['privatekey_path'] | default(__privatekey_path) }}"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    common_name: "{{ item.common_name }}"
-    country_name: "{{ item.country_name | default(omit) }}"
-    email_address: "{{ item.email_address | default(omit) }}"
-    organization_name: "{{ item.organization_name | default(autonomy_org_name | title ) }}"
-    organizational_unit_name: "{{ item.org_unit_name | default(omit) | title }}"
-    state_or_province_name: "{{ item.region_name | default(omit) }}"
-    key_usage: "{{ item.keyusage }}"
-    key_usage_critical: "{{ item.keyusage_critical | default('no') }}"
-    basic_constraints: "{{ item.basic_constraints }}"
-    basic_constraints_critical: "{{ item.basic_constraints_critical | default('no') }}"
-    create_subject_key_identifier: yes
+    common_name: "{{ item['common_name'] }}"
+    country_name: "{{ item['country_name'] | default(omit) }}"
+    email_address: "{{ item['email_address'] | default(omit) }}"
+    organization_name: "{{ item['organization_name'] | default(autonomy_org_name | title ) }}"
+    organizational_unit_name: "{{ item['org_unit_name'] | default(omit) | title }}"
+    state_or_province_name: "{{ item['region_name'] | default(omit) }}"
+    key_usage: "{{ item['keyusage'] }}"
+    key_usage_critical: "{{ item['keyusage_critical'] | default('no') }}"
+    basic_constraints: "{{ item['basic_constraints']}}"
+    basic_constraints_critical: "{{ item['basic_constraints_critical'] | default('no') }}"
+    create_subject_key_identifier: true
     crl_distribution_points:
-      - full_name: "URI:{{ autonomy_ownca_crl_distribution_point }}/{{ autonomy_org_name }}-{{ item.name }}-ca.crl"
+      - full_name: "{{ __uri }}"
         reasons:
           - key_compromise
           - ca_compromise
@@ -34,48 +34,83 @@
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "0400"
-    backup: yes
+    force: "{{ item['regenerate_csr'] }}"
+    backup: true
     state: present
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   delegate_to: localhost
   run_once: yes
   become: no
   vars:
-    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __password_store_dir: "{{ autonomy_passdb }}/{{ item['domain'] }}/ownca"
+    __password_store_id: "{{ __password_store_dir }}/ownca_{{ item['ca_id'] }}_password"
     __password_lookup: "{{ __password_store_id }}"
-    __private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+    __privatekey_file: "{{ autonomy_org_name }}-{{ item['name'] }}-ca.key"
+    __privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ __privatekey_file }}"
+    __uri: >-
+      URI:{{ autonomy_ownca_crl_distribution_point }}/
+      {{ autonomy_org_name }}-{{ item['name'] }}-ca.crl
   when:
     - item.name == "root"
+  tags:
+    - ownca
+    - ownca-root
 
 - name: "Generate Root Certificate Authority Selfsigned Certificate."
   community.crypto.x509_certificate:
-    path: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
-    privatekey_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+    path: "{{ __cert_path }}"
+    privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ __privatekey_file }}"
     privatekey_passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    csr_path: "{{ autonomy_ownca_ca_directory }}/csr/{{ autonomy_org_name }}-{{ item.name }}-ca.csr"
+    csr_path: "{{ __csr_path }}"
     ownca_not_after: "{{ autonomy_ownca_root_not_after }}"
-    provider: "{{ item.provider }}"
+    provider: "{{ item['provider'] }}"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "0644"
-    backup: yes
+    backup: true
     state: present
-    force: "{{ __autonomy_ownca_regenerate }}"
-    return_content: yes
+    force: "{{ item['regenerate_cert'] }}"
+    return_content: true
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   delegate_to: localhost
-  run_once: yes
-  become: no
+  run_once: true
+  become: false
   vars:
-    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/ownca/ownca_root_password"
+    __cert_dir: "{{ autonomy_ownca_ca_directory }}/certs"
+    __cert_file: "{{ autonomy_org_name }}-{{ item['name'] }}-ca.crt"
+    __cert_path: "{{ __cert_dir }}/{{ __cert_file }}"
+    __privatekey_file: "{{ autonomy_org_name }}-{{ item['name'] }}-ca.key"
+    __csr_dir: "{{ autonomy_ownca_ca_directory }}/csr"
+    __csr_file: "{{ autonomy_org_name }}-{{ item['name'] }}-ca.csr"
+    __csr_path: "{{ __csr_dir }}/{{ __csr_file }}"
+    __password_store_dir: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/ownca"
+    __password_store_id: "{{ __password_store_dir }}/ownca_root_password"
     __password_lookup: "{{ __password_store_id }}"
   notify:
     - "regenerate certificates"
   when:
     - item.provider == "selfsigned"
   register: __new_root
+  tags:
+    - ownca
+    - ownca-root
 
 - name: "Get Root CA Cert information."
   community.crypto.x509_certificate_info:
-    path: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-root-ca_{{ autonomy_ownca_privatekey_type | lower }}.crt"
+    path: "{{ autonomy_ownca_ca_directory }}/certs/{{ autonomy_org_name }}-root-ca.crt"
   register: root_cert_info
+  tags:
+    - ownca
+    - ownca-root
+
+# ==================================================================================================
+#
+# We run the handlers here, and not in the main.yml to be able to skip this step when it's not
+# needed.
+#
+# ==================================================================================================
+- name: "Run handlers now."
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - ownca
+    - ownca-root

@@ -6,8 +6,9 @@ autonomy_acmeca_packages:
 # Default ACME CA key settings
 autonomy_acmeca_method: "letsencrypt"
 autonomy_acmeca_challenge_type: "dns-01"
-autonomy_acmeca_key_type: "rsa"
+autonomy_acmeca_key_type: "{{ autonomy_default_privatekey_type }}"
 autonomy_acmeca_key_size: "{{ autonomy_default_key_size }}"
+autonomy_acmeca_ecc_curve: "{{ autonomy_default_ecc_curve }}"
 
 # Account Key Settings
 autonomy_acmeca_account_email: "{{ autonomy_default_sysadmin_user }}{{ autonomy_mail_recipient_delimiter }}{{ autonomy_acmeca_method }}@{{ autonomy_root_domain }}"

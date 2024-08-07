@@ -61,7 +61,7 @@
         - hosts
     - role: bloodymage.autonomy.emacs
       when:
-        - autonomy_enable_emacs
+        - autonomy_emacs_enabled
         - ansible_connection != "local"
         - ansible_network_os is not defined
       tags:
@@ -69,7 +69,7 @@
     - role: bloodymage.autonomy.unzip
       when:
         - ansible_connection != "local"
-        - (autonomy_dodca_install or autonomy_enable_unzip)
+        - (autonomy_dodca_enabled or autonomy_unzip_enabled)
         - ansible_network_os is not defined
       tags:
         - unzip
@@ -80,17 +80,12 @@
     - role: bloodymage.autonomy.ownca
       vars:
         __ownca_tasks: "hostcerts"
+    - role: bloodymage.autonomy.dodca
+      when:
+        - ansible_connection != "local"
+        - autonomy_dodca_enabled
       tags:
-        - regenerate-ownca
-        - ownca
-        - ownca-host-certs
-        - ownca-host-certificates
-    # - role: bloodymage.autonomy.dodca
-    #   when:
-    #     - ansible_connection != "local"
-    #     - autonomy_dodca_install
-    #   tags:
-    #     - dodca
+        - dodca
 
 - name: "Linux Host Configuration."
   import_playbook: "all_linux.yml"

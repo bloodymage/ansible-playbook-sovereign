@@ -16,10 +16,11 @@
   loop: "{{ autonomy_users_dotfiles_users }}"
   become: true
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_dir_mode| default(autonomy_user_dotfiles_mode) }}"
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
   when:
     - autonomy_users_dotfiles_users is defined
     - item.username is defined
@@ -36,10 +37,11 @@
   loop: "{{ autonomy_users_dotfiles_users }}"
   become: true
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
   when:
     - autonomy_users_dotfiles_users is defined
     - item.id_number is defined
@@ -58,12 +60,13 @@
     group: "{{ __dotfiles_group }}"
     mode: "0700"
   loop: "{{ autonomy_users_dotfiles_users }}"
-  become: yes
+  become: true
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_dir_mode | default(autonomy_user_dotfiles_mode) }}"
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
   when:
     - autonomy_users_dotfiles_users is defined
     - item.id_number is defined
@@ -77,12 +80,13 @@
     group: "{{ __dotfiles_group }}"
     mode: "0644"
   loop: "{{ autonomy_users_dotfiles_users }}"
-  become: yes
+  become: true
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
   when:
     - autonomy_users_dotfiles_users is defined
     - item.id_number is defined
@@ -97,11 +101,12 @@
     mode: "0644"
   loop: "{{ autonomy_users_dotfiles_users }}"
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
-  become: yes
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
+  become: true
   when:
     - autonomy_users_dotfiles_users is defined
     - item.id_number is defined
@@ -116,11 +121,12 @@
     mode: "0644"
   loop: "{{ autonomy_users_dotfiles_users }}"
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
-  become: yes
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
+  become: true
   when:
     - autonomy_users_dotfiles_users is defined
     - item.id_number is defined
@@ -136,11 +142,12 @@
     mode: "0644"
   loop: "{{ autonomy_users_dotfiles_users }}"
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
-  become: yes
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
+  become: true
   when:
     - autonomy_users_dotfiles_users is defined
     - autonomy_smart_card_login
@@ -161,18 +168,19 @@
     group: "{{ __dotfiles_group }}"
     mode: "{{ __mode }}"
   loop: "{{ autonomy_users_dotfiles_users }}"
-  become: yes
+  become: true
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_dir_mode | default(autonomy_user_dotfiles_mode) }}"
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
   when:
     - autonomy_users_dotfiles_users is defined
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - (item.id_number | int) >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_realm_min_id_number
 
 # ==================================================================================================
 #
@@ -187,18 +195,19 @@
     group: "{{ __dotfiles_group }}"
     mode: "{{ __mode }}"
   loop: "{{ autonomy_users_dotfiles_users }}"
-  become: yes
+  become: true
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_dir_mode | default(autonomy_user_dotfiles_mode) }}"
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
   when:
     - autonomy_users_dotfiles_users is defined
     - item.username is defined
     - item.id_number is defined
     - (item.login_shell is not defined) or (item.login_shell != "/usr/sbin/nologin")
-    - (item.id_number | int) >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_realm_min_id_number
 
 # ==================================================================================================
 #
@@ -213,19 +222,20 @@
     owner: "{{ __dotfiles_owner }}"
     group: "{{ __dotfiles_group }}"
     mode: "0644"
-    force: no
+    force: false
   loop: "{{ autonomy_users_dotfiles_users }}"
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
-  become: yes
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
+  become: true
   when:
     - autonomy_users_dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - (item.id_number | int) >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_realm_min_id_number
 
 # - name: "Install gpgsync.desktop"
 #   ansible.builtin.copy:
@@ -236,16 +246,16 @@
 #     mode: "0644"
 #   loop: "{{ autonomy_users_dotfiles_users }}"
 #   vars:
-#     __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+#     __dotfiles_home: "{{ item.unix_home | default(autonomy_users_dotfiles_home + '/' + item.username) }}"
 #     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
 #     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
 #     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
-#   become: yes
+#   become: true
 #   when:
 #     - autonomy_users_dotfiles_users is defined
 #     - item.id_number is defined
 #     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-#     - (item.id_number | int) >= autonomy_min_domain_id_number
+#     - (item.id_number | int) >= autonomy_realm_min_id_number
 
 # ==================================================================================================
 #
@@ -262,17 +272,18 @@
     group: "{{ __dotfiles_group }}"
     mode: "0644"
   loop: "{{ autonomy_users_dotfiles_users }}"
-  become: yes
+  become: true
   vars:
-    __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+    __dotfiles_home: "{{ item.unix_home | default(__dotfiles_default_home) }}"
     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
+    __dotfiles_default_home: "{{ autonomy_users_dotfiles_home + '/' + item.username }}"
   when:
     - autonomy_users_dotfiles_users is defined
     - item.id_number is defined
     - (item.shell is not defined) or (item.shell != "/usr/sbin/nologin")
-    - (item.id_number | int) >= autonomy_min_domain_id_number
+    - (item.id_number | int) >= autonomy_realm_min_id_number
 
 # ==================================================================================================
 #
@@ -287,9 +298,9 @@
 #     mode: "0755"
 #     state: "directory"
 #   loop: "{{ autonomy_users_dotfiles_users }}"
-#   become: yes
+#   become: true
 #   vars:
-#     __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+#     __dotfiles_home: "{{ item.unix_home | default(autonomy_users_dotfiles_home + '/' + item.username) }}"
 #     __dotfiles_owner: "{{ cifs_owner | default(item.id_number) }}"
 #     __dotfiles_group: "{{ cifs_group | default(item.id_number) }}"
 #     __mode: "{{ cifs_file_mode | default(autonomy_user_dotfiles_mode) }}"
@@ -306,7 +317,7 @@
 #   become: true
 #   become_user: "{{ __user }}"
 #   vars:
-#     __dotfiles_home: "{{ item.unix_home | default(autonomy_user_dotfiles_home + '/' + item.username) }}"
+#     __dotfiles_home: "{{ item.unix_home | default(autonomy_users_dotfiles_home + '/' + item.username) }}"
 #     __user: "{{ item.username }}"
 #     __repo: "{{ autonomy_user_dotfiles_emacsd_repo }}"
 #     __ssh_repo: "{{ autonomy_user_dotfiles_emacsd_ssh_repo }}"

@@ -3,35 +3,24 @@
 # ======================================================================
 #
 # Tasks:
-#  
+#
 #
 # ======================================================================
-- name: "Pre-tasks"
-  block:
-    - name: Include OS-specific variables.
-      include_vars: "{{ lookup('first_found', params) }}"
-      vars:
-        params:
-          files: "{{ __os_variables_files }}"
-          paths:
-            - "vars"
-      become: no
+- name: "Include OS-specific variables."
+  include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files: "{{ __os_variables_files }}"
+      paths:
+        - "vars"
+  become: no
 
-    - name: "Install packages"
-      ansible.builtin.package:
-        name: "{{ autonomy_packages }}"
-        state: present
-      become: yes
+- name: "Install and Configure Unattended Upgrades."
+  include_tasks: "install.yml"
+  when:
+    - autonomy_unattended_upgrades_enabled
 
-- name: "Install Configuration files"
-  ansible.builtin.template:
-    src: "{{ item.name }}.j2"
-    dest: "{{ unattended_upgrades_config_dir }}/{{ item.name }}"
-    owner: root
-    group: root
-    mode: "{{ item.mode | default('0644') }}"
-    validate: "{{ item.validate | default(none) }}"
-    backup: yes
-  become: yes
-  loop: "{{ unattended_upgrades_config_files }}"
-  notify: restart unattended-upgrades
+- name: "Remove Unattended Upgrades."
+  include_tasks: "remove_{{ ansible_os_family | lower }}.yml"
+  when:
+    - autonomy_unattended_upgrades_enabled is falsy

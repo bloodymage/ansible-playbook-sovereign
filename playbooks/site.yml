@@ -21,7 +21,8 @@
 # 9. Configure workstations
 #
 # ==================================================================================================
-- name: "Configure the Ansible control node."
+# TODO: This role is also being called by control.yml, do I really need it twice?
+- name: "Initialize the Ansible control node."
   hosts: localhost
   roles:
     - role: bloodymage.autonomy.ansible

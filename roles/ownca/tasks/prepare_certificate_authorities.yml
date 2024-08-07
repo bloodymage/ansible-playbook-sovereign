@@ -9,56 +9,74 @@
     autonomy_ownca_certificate_authorities: "{{ autonomy_ownca_certificate_authorities + [__certificate_authority] }}"
   loop: "{{ autonomy_zones }}"
   vars:
-    autonomy_ownca_intermediate_ca_key_file: "{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_intermediate_ca_privatekey_type | lower }}.key"
+    __privatekey_file: "{{ autonomy_org_name }}-{{ item['name'] }}-ca.key"
     __certificate_authority:
-      name: "{{ item.name }}"
-      common_name: "{{ autonomy_org_name | title }} {{ item.name | title }} CA"
+      name: "{{ item['name'] }}"
+      common_name: "{{ autonomy_org_name | title }} {{ item['name'] | title }} CA"
       ownca: "root"
       provider: "ownca"
       ca_id: "intermediate"
-      zone_name: "{{ item.name }}."
+      zone_name: "{{ item['name'] }}."
       keyusage:
         - keyCertSign
         - cRLSign
-      keyusage_critical: yes
+      keyusage_critical: true
       basic_constraints:
         - 'CA:TRUE'
-      private_key_type: "{{ autonomy_ownca_intermediate_ca_privatekey_type }}"
-      private_key_size: "{{ autonomy_ownca_privatekey_size }}"
-      private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_intermediate_ca_key_file }}"
-      org_unit_name: "{{ item.name }}"
-      domain: "{{ item.domain }}"
+      privatekey_type: "{{ autonomy_ownca_intermediate_ca_privatekey_type }}"
+      privatekey_size: "{{ autonomy_ownca_privatekey_size }}"
+      privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ __privatekey_file }}"
+      org_unit_name: "{{ item['name'] }}"
+      domain: "{{ item['domain'] }}"
+      regenerate_privatekey: "{{ __ownca_intermediateca_privatekey_force_regeneration }}"
+      regenerate_csr: "{{ __ownca_intermediateca_csr_force_regeneration }}"
+      regenerate_cert: "{{ __ownca_intermediateca_cert_force_regeneration }}"
   when:
     - item.type != "public"
     - item.type != "overlay"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Add issuing Certificate Authorities."
   ansible.builtin.set_fact:
     autonomy_ownca_certificate_authorities: "{{ autonomy_ownca_certificate_authorities + [__certificate_authority] }}"
   loop: "{{ autonomy_zones | product(autonomy_ownca_issuing_authorities) }}"
   vars:
-    autonomy_ownca_issuing_ca_key_file: "{{ autonomy_org_name }}-{{ item[0].name }}-{{ item[1] }}-ca_{{ autonomy_ownca_issuing_ca_privatekey_type | lower }}.key"
+    __name: "{{ item[0]['name'] | title }} {{ item[1] | title}}"
+    __name_alt: "{{ item[0]['name'] }}-{{ item[1] }}"
+    __privatekey_file: "{{ autonomy_org_name }}-{{ __name_alt }}-ca.key"
     __certificate_authority:
-      name: "{{ item[0].name }}-{{ item[1] }}"
-      common_name: "{{ autonomy_org_name | title }} {{ item[0].name | title }} {{ item[1] | title}} CA"
+      name: "{{ __name_alt }}"
+      common_name: "{{ autonomy_org_name | title }} {{ __name }} CA"
       ownca: "intermediate"
       provider: "ownca"
       ca_id: "{{ item[1] }}"
-      zone_name: "{{ item[0].name }}."
+      zone_name: "{{ item[0]['name'] }}."
       keyusage:
         - keyCertSign
         - cRLSign
       keyusage_critical: yes
       basic_constraints:
         - 'CA:TRUE'
-      private_key_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
-      private_key_size: "{{ autonomy_ownca_privatekey_size }}"
-      private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_ownca_issuing_ca_key_file }}"
-      org_unit_name: "{{ item[0].name }}"
-      domain: "{{ item[0].domain }}"
+      privatekey_type: "{{ autonomy_ownca_issuing_ca_privatekey_type }}"
+      privatekey_size: "{{ autonomy_ownca_privatekey_size }}"
+      privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ __privatekey_file }}"
+      org_unit_name: "{{ item[0]['name'] }}"
+      domain: "{{ item[0]['domain'] }}"
+      regenerate_privatekey: "{{ __ownca_intermediateca_privatekey_force_regeneration }}"
+      regenerate_csr: "{{ __ownca_intermediateca_csr_force_regeneration }}"
+      regenerate_cert: "{{ __ownca_intermediateca_cert_force_regeneration }}"
   when:
     - item[0].type != "public"
     - item[0].type != "overlay"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 # ==================================================================================================
 #
@@ -83,7 +101,12 @@
     - db
   delegate_to: localhost
   run_once: true
-  become: no
+  become: false
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Create crl serial file."
   ansible.builtin.template:
@@ -92,33 +115,53 @@
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "0600"
-    force: no
+    force: false
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   delegate_to: localhost
-  become: no
+  become: false
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing
 
 - name: "Generate CA Private Key."
   community.crypto.openssl_privatekey:
-    path: "{{ item.private_key_path | default(__private_key_path) }}"
+    path: "{{ item['privatekey_path'] | default(__privatekey_path) }}"
     passphrase: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    type: "{{ __private_key_type }}"
-    size: "{{ item.private_key_size }}"
+    type: "{{ __privatekey_type }}"
+    size: "{{ item['privatekey_size'] }}"
+    curve: "{{ __curve }}"
     cipher: "auto"
     owner: "{{ autonomy_user }}"
     group: "{{ autonomy_group }}"
     mode: "0400"
     backup: true
-    force: false
+    force: "{{ item['regenerate_privatekey'] }}"
   loop: "{{ autonomy_ownca_certificate_authorities }}"
   delegate_to: localhost
   become: false
   vars:
-    __private_key_type: "{% if item.private_key_type.lower() in ['ed25519','ed448'] %}{{ item.private_key_type | capitalize }}{% else %}{{ item.private_key_type | upper }}{% endif %}"
-    __password_store_id: "{{ autonomy_passdb }}/{{ item.domain }}/ownca/ownca_{{ item.ca_id }}_password"
+    __privatekey_tmp_type: >-
+      {% if item['privatekey_type'].lower() in ['ed25519','ed448'] %}
+      {{ item['privatekey_type'] | capitalize }}
+      {% else %}
+      {{ item['privatekey_type'] | upper }}
+      {% endif %}
+    __privatekey_type: "{{ __privatekey_tmp_type | trim }}"
+    __password_store_dir: "{{ autonomy_passdb }}/{{ item.domain }}/ownca"
+    __password_store_id: "{{ __password_store_dir }}/ownca_{{ item.ca_id }}_password"
     __password_length: "length={{ autonomy_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
     __password_create: "create=true"
     __password_symbols: "nosymbols=true"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
     __password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __private_key_path: "{{ autonomy_ownca_ca_private_key_directory }}/{{ autonomy_org_name }}-{{ item.name }}-ca_{{ autonomy_ownca_privatekey_type | lower }}.key"
+    __privatekey_file: "{{ autonomy_org_name }}-{{ item['name'] }}-ca.key"
+    __privatekey_path: "{{ autonomy_ownca_ca_privatekey_directory }}/{{ __privatekey_file }}"
+    __curve: "{{ autonomy_ownca_ecc_curve if __privatekey_type == 'ECC' else omit }}"
+  tags:
+    - ownca
+    - ownca-root
+    - ownca-intermediate
+    - ownca-issuing

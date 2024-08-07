@@ -20,6 +20,8 @@ unattended_upgrades_syslog_facility: "{{ __unattended_upgrades_syslog_facility }
 unattended_upgrades_mail_report: "{{ __unattended_upgrades_mail_report }}"
 unattended_upgrades_blacklist: []
 
+autonomy_unattended_upgrades_enabled: false
+
 # ==================================================================================================
 #
 # App default settings
