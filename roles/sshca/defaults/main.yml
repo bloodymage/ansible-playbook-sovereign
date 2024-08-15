@@ -31,3 +31,8 @@ sshca_user_pki_dirs:
   - name: "ssh"
     mode: "0755"
 
+autonomy_sshca_regenerate_passwords: false
+autonomy_sshca_regenerate_host_ca_password: "{{ autonomy_sshca_regenerate_passwords }}"
+autonomy_sshca_regenerate_user_ca_password: "{{ autonomy_sshca_regenerate_passwords }}"
+autonomy_sshca_password_length: "{{ autonomy_password_length }}"
+autonomy_sshca_password_no_symbols: "{{ autonomy_password_no_symbols }}"

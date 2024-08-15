@@ -7,7 +7,7 @@
 # SSH
 
 # Key types
-autonomy_sshca_user_privatekey_type: "{{ autonomy_ownca_user_privatekey_type }}"
+autonomy_sshca_user_privatekey_type: "{{ autonomy_default_key_type }}"
 
 ssh_config_dir: "{{ sysconf_dir }}/ssh"
 sshca_key_short_directory: ".ssh/ca"

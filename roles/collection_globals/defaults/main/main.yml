@@ -63,6 +63,7 @@ autonomy_virtual_host: false
 autonomy_smart_card_login: false
 autonomy_overwrite_password: false
 autonomy_password_length: "42"
+autonomy_password_no_symbols: false
 autonomy_passdb: "ansible"
 
 # Organization Info

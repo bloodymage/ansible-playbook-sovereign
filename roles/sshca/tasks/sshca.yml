@@ -33,6 +33,37 @@
     - sshca_debug
     - sshca-debug
 
+- name: "Check if we are regenerating passwords."
+  ansible.builtin.set_fact:
+    autonomy_sshca_regenerate_passwords: true
+  delegate_to: localhost
+  run_once: true
+  become: false
+  tags:
+    - never
+    - regenerate-passwords
+    - regenerate-sshca-passwords
+
+- name: "Check if we are regenerating Host CA password."
+  ansible.builtin.set_fact:
+    autonomy_sshca_regenerate_host_ca_password: true
+  delegate_to: localhost
+  run_once: true
+  become: false
+  tags:
+    - never
+    - regenerate-sshca-host-ca-password
+
+- name: "Check if we are regenerating Host CA password."
+  ansible.builtin.set_fact:
+    autonomy_sshca_regenerate_user_ca_password: true
+  delegate_to: localhost
+  run_once: true
+  become: false
+  tags:
+    - never
+    - regenerate-sshca-user-ca-password
+
 # ==================================================================================================
 #
 # Generate Passwords if they don't exist
@@ -42,15 +73,16 @@
   ansible.builtin.set_fact:
     sshca_host_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/sshca/sshca_host_key_password"
+    __password_store_dir: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/sshca"
+    __password_store_id: "{{ __password_store_dir }}/sshca_host_key_password"
     __password_length: "length={{ autonomy_password_length }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_overwrite: "overwrite={{ autonomy_sshca_regenerate_host_ca_password }} backup=yes"
     __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
+    __password_symbols: "nosymbols={{ autonomy_sshca_password_nosymbols }}"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
-  run_once: yes
-  become: no
+  run_once: true
+  become: false
   changed_when:
     - sshca_host_key_password != "password"
   when:
@@ -64,14 +96,15 @@
   ansible.builtin.set_fact:
     sshca_user_key_password: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/sshca/sshca_user_key_password"
+    __password_store_dir: "{{ autonomy_passdb }}/{{ autonomy_root_domain }}/sshca"
+    __password_store_id: "{{ __password_store_dir }}/sshca_user_key_password"
     __password_length: "length={{ autonomy_password_length }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
+    __password_overwrite: "overwrite={{ autonomy_sshca_regenerate_user_ca_password }} backup=true"
     __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
+    __password_symbols: "nosymbols={{ autonomy_sshca_password_no_symbols }}"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
-  become: no
+  become: false
   changed_when:
     - sshca_user_key_password != "password"
   when:
@@ -98,6 +131,8 @@
     state: "present"
     regenerate: "full_idempotence"
     force: false
+  delegate_to: localhost
+  run_once: true
   become: false
 
 - name: "Generate User CA keys."
@@ -112,4 +147,6 @@
     regenerate: "full_idempotence"
     mode: "0600"
     force: false
+  delegate_to: localhost
+  run_once: true
   become: false
