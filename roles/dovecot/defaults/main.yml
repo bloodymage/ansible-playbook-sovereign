@@ -12,36 +12,64 @@ autonomy_dovecot_packages:
 # Directories
 #
 # ==================================================================================================
-dovecot_etc: "/etc/dovecot"
-dovecot_confd: "{{ dovecot_etc }}/conf.d"
-dovecot_sieve_dir: "{{ dovecot_etc }}/sieve"
-dovecot_sieve_global_dir: "{{ dovecot_sieve_dir }}/global"
+autonomy_dovecot_etc: "/etc/dovecot"
+autonomy_dovecot_confd: "{{ autonomy_dovecot_etc }}/conf.d"
+autonomy_dovecot_sieve_dir: "{{ autonomy_dovecot_etc }}/sieve"
+autonomy_dovecot_sieve_global_dir: "{{ autonomy_dovecot_sieve_dir }}/global"
 autonomy_dovecot_sieve_pipe_bin_dir: "/usr/lib/dovecot/sieve"
-dovecot_use_inboxzero_namespace: no
+autonomy_dovecot_virtual_dir: "{{ autonomy_dovecot_etc }}/virtual"
+autonomy_vmail_dir: "/var/mail/vmail"
+autonomy_dovecot_use_inboxzero_namespace: no
+autonomy_dovecot_inboxzero_namespace_name: "inboxzero"
+autonomy_dovecot_inboxzero_dir: "{{ autonomy_dovecot_etc }}/{{ autonomy_dovecot_inboxzero_namespace_name }}"
 
 autonomy_dovecot_log_path: syslog
 autonomy_dovecot_log_dir: ""
 autonomy_dovecot_info_log_path: ""
 autonomy_dovecot_debug_log_path: ""
 
+autonomy_dovecot_conf_files:
+  - 10-auth.conf
+  - 10-director.conf
+  - 10-logging.conf
+  - 10-mail.conf
+  - 10-master.conf
+  - 10-ssl.conf
+  - 10-tcpwrapper.conf
+  - 15-lda.conf
+  - 15-mailboxes.conf
+  - 20-imap.conf
+  - 20-lmtp.conf
+  - 20-managesieve.conf
+  - 90-acl.conf
+  - 90-plugin.conf
+  - 90-quota.conf
+  - 90-sieve-extprograms.conf
+  - 90-sieve.conf
+  - auth-checkpassword.conf.ext
+  - auth-dict.conf.ext
+  - auth-master.conf.ext
+  - auth-static.conf.ext
+  - auth-vpopmail.conf.ext
+
 # ==================================================================================================
 #
 # Namespaces
 #
 # ==================================================================================================
-dovecot_junk_mail_folder: "Junk"
-dovecot_infected_mail_folder: "Infected"
-dovecot_bounce_folder_name: ""
-dovecot_advertisements_folder_name: ""
+autonomy_dovecot_junk_mail_folder: "Junk"
+autonomy_dovecot_infected_mail_folder: "Infected"
+autonomy_dovecot_bounce_folder_name: ""
+autonomy_dovecot_advertisements_folder_name: ""
 
-dovecot_private_namespace_mailboxes:
+autonomy_dovecot_private_namespace_mailboxes:
   - name: "Sent"
     auto: "subscribe"
     special_use: "\\Sent"
   - name: Drafts
     special_use: "\\Drafts"
-    auto: subscribe
-  - name: "{{ dovecot_junk_mail_folder }}"
+    auto: "subscribe"
+  - name: "{{ autonomy_dovecot_junk_mail_folder }}"
     special_use: "\\Junk"
     auto: "subscribe"
   - name: "Trash"
@@ -52,17 +80,17 @@ dovecot_private_namespace_mailboxes:
     special_use: "\\Archive"
     auto: "subscribe"
 
-dovecot_bounce_folder:
-  name: "{{ dovecot_bounce_folder_name }}"
+autonomy_dovecot_bounce_folder:
+  name: "{{ autonomy_dovecot_bounce_folder_name }}"
   auto: "subscribe"
   #autoexpunge: "30 days"
 
-dovecot_advertisements_folder:
-  name: "{{ dovecot_advertisements_folder_name }}"
+autonomy_dovecot_advertisements_folder:
+  name: "{{ autonomy_dovecot_advertisements_folder_name }}"
   auto: "subscribe"
   #autoexpunge: "30 days"
 
-dovecot_private_namespace:
+autonomy_dovecot_private_namespace:
   name: "private"
   inbox: "yes"
   type: private
@@ -72,16 +100,16 @@ dovecot_private_namespace:
   #hidden: "no"
   list: "yes"
   subscriptions: "yes"
-  mailboxes: "{{ dovecot_private_namespace_mailboxes }}"
+  mailboxes: "{{ autonomy_dovecot_private_namespace_mailboxes }}"
 
-dovecot_virtual_namespace:
+autonomy_dovecot_virtual_namespace:
   name: "virtual"
   prefix: "Virtual/"
   separator: "/"
   hidden: "no"
   list: "yes"
   subscriptions: "no"
-  location: "virtual:/etc/dovecot/virtual:INDEX=/var/mail/vmail/%d/%n/virtual"
+  location: "virtual:{{ autonomy_dovecot_virtual_dir }}:INDEX={{ autonomy_vmail_dir }}/%d/%n/virtual"
   mailboxes:
     - name: "All"
       special_use: "\\All"
@@ -113,31 +141,30 @@ dovecot_virtual_namespace:
       comment: "Work related messages"
       auto: "create"
 
-dovecot_inboxzero_namespace_name: "inboxzero"
-dovecot_inboxzero_inbox_name: "0-Inbox"
-dovecot_inboxzero_followup_name: "1-FollowUp"
-dovecot_inboxzero_hold_name: "2-Hold"
+autonomy_dovecot_inboxzero_inbox_name: "0-Inbox"
+autonomy_dovecot_inboxzero_followup_name: "1-FollowUp"
+autonomy_dovecot_inboxzero_hold_name: "2-Hold"
 
-dovecot_inboxzero_namespace:
-  name: "{{ dovecot_inboxzero_namespace_name }}"
-  prefix: "{{ dovecot_inboxzero_inbox_name }}/"
+autonomy_dovecot_inboxzero_namespace:
+  name: "{{ autonomy_dovecot_inboxzero_namespace_name }}"
+  prefix: "{{ autonomy_dovecot_inboxzero_inbox_name }}/"
   separator: "/"
   hidden: "no"
   list: "yes"
   subscriptions: "no"
-  location: "virtual:/etc/dovecot/{{ dovecot_inboxzero_namespace_name }}:INDEX=/var/mail/vmail/%d/%n/{{ dovecot_inboxzero_namespace_name }}"
+  location: "virtual:{{ autonomy_dovecot_inboxzero_dir }}:INDEX={{ autonomy_vmail_dir }}/%d/%n/{{ autonomy_dovecot_inboxzero_namespace_name }}"
   mailboxes:
-    - name: "{{ dovecot_inboxzero_inbox_name }}"
+    - name: "{{ autonomy_dovecot_inboxzero_inbox_name }}"
       comment: "All my unread messages."
       auto: "create"
-    - name: "{{ dovecot_inboxzero_followup_name }}"
+    - name: "{{ autonomy_dovecot_inboxzero_followup_name }}"
       comment: "Messages I need to follow up on."
       auto: "create"
-    - name: "{{ dovecot_inboxzero_hold_name }}"
+    - name: "{{ autonomy_dovecot_inboxzero_hold_name }}"
       comment: "Reference messages for upcoming tasks and events."
       auto: "create"
 
-dovecot_shared_namespace:
+autonomy_dovecot_shared_namespace:
   name: "shared"
   type: "shared"
   separator: "/"
@@ -146,7 +173,7 @@ dovecot_shared_namespace:
   #subscriptions: "no"
   #list: children
 
-dovecot_public_namespace:
+autonomy_dovecot_public_namespace:
   names: "public"
   type: "public"
   separator: "/"
@@ -155,25 +182,25 @@ dovecot_public_namespace:
   #subscriptions: "no"
   #list: children
 
-dovecot_namespaces:
-  - "{{ dovecot_private_namespace }}"
-  - "{{ dovecot_virtual_namespace }}"
+autonomy_dovecot_namespaces:
+  - "{{ autonomy_dovecot_private_namespace }}"
+  - "{{ autonomy_dovecot_virtual_namespace }}"
 
 # ==================================================================================================
 #
 # Sieve Settings
 #
 # ==================================================================================================
-dovecot_sieve: "file:~/sieve;active=~/.dovecot.sieve"
-dovecot_sieve_before:
-  - "{{ dovecot_etc }}/sieve/before/"
+autonomy_dovecot_sieve: "file:~/.sieve;active=~/.dovecot.sieve"
+autonomy_dovecot_sieve_before:
+  - "{{ autonomy_dovecot_etc }}/sieve/before/"
 
-dovecot_sieve_after:
-  - "{{ dovecot_etc }}/sieve/after/"
-dovecot_sieve_global: "{{ dovecot_sieve_global_dir }}/"
+autonomy_dovecot_sieve_after:
+  - "{{ autonomy_dovecot_etc }}/sieve/after/"
+autonomy_dovecot_sieve_global: "{{ autonomy_dovecot_sieve_global_dir }}/"
 autonomy_dovecot_sieve_global_extensions: "+vnd.dovecot.pipe +vnd.dovecot.execute +vnd.dovecot.filter"
 
-dovecot_sieve_files:
+autonomy_dovecot_sieve_files:
   - name: "spam"
     priority: "10"
     type: "before"
@@ -209,13 +236,13 @@ dovecot_sieve_files:
     type: "global"
     archive: yes
 
-dovecot_sieve_plugins: "sieve_imapsieve sieve_extprograms"
+autonomy_dovecot_sieve_plugins: "sieve_imapsieve sieve_extprograms"
 # ==================================================================================================
 #
 # Virtual Mailbox
 #
 # ==================================================================================================
-dovecot_virtual_mailboxes:
+autonomy_dovecot_virtual_mailboxes:
   - name: "All"
     folders:
       - "*"
@@ -223,8 +250,8 @@ dovecot_virtual_mailboxes:
       - "Trash/*"
       - "Sent"
       - "Sent/*"
-      - "Junk"
-      - "Junk/*"
+      - "-Junk"
+      - "-Junk/*"
       - "-Inbox/Trash"
       - "-Inbox/Trash/*"
       - "-Inbox/Junk"
@@ -322,7 +349,7 @@ dovecot_virtual_mailboxes:
     search:
       - "unseen"
 
-dovecot_inboxzero_mailboxes:
+autonomy_dovecot_inboxzero_mailboxes:
   - name: "0-Inbox"
     folders:
       - "*"
@@ -362,29 +389,26 @@ dovecot_inboxzero_mailboxes:
 # Misc Settings
 #
 # ==================================================================================================
-dovecot_migration_users:
+autonomy_dovecot_migration_users:
   - account: "bob@example.com"
     password: "password"
 
-dovecot_auth_mechanisms:
-  - plain
-  - login
 
-dovecot_password_databases: []
+autonomy_dovecot_password_databases: []
 
-dovecot_mail_plugins: "acl virtual"
-dovecot_imap_mail_plugins: "imap_sieve"
-dovecot_lmtp_mail_plugins: "sieve"
-dovecot_lda_mail_plugins: "sieve"
+autonomy_dovecot_mail_plugins: "acl virtual"
+autonomy_dovecot_imap_mail_plugins: "imap_sieve"
+autonomy_dovecot_lmtp_mail_plugins: "sieve"
+autonomy_dovecot_lda_mail_plugins: "sieve"
 
-dovecot_mail_protocols:
+autonomy_dovecot_mail_protocols:
   - name: "!indexer-worker"
 
-dovecot_imap_protocols:
+autonomy_dovecot_imap_protocols:
   - name: imap
     mail_plugins: "$mail_plugins imap_sieve"
 
-dovecot_imapsieve_mailboxes:
+autonomy_dovecot_imapsieve_mailboxes:
   - name: "Junk"
     causes: "COPY"
     timing: "before"
@@ -402,56 +426,60 @@ autonomy_dovecot_mail_debug: "no"
 # Dovecot Authorization Configuration
 #
 # ==================================================================================================
-dovecot_auth_conf_system:
+autonomy_dovecot_auth_mechanisms:
+  - plain
+  - login
+
+autonomy_dovecot_auth_conf_system:
   name: "system"
   passdb:
     - driver: "pam"
   userdb:
     - driver: "static"
-      args: "allow_all_users=yes uid={{ user_vmail_id_number }} gid={{ user_vmail_id_number }} home=/var/mail/vmail/%d/%n"
+      args: "allow_all_users=yes uid={{ user_vmail_id_number }} gid={{ user_vmail_id_number }} home={{ autonomy_vmail_dir }}/%d/%n"
 
-dovecot_auth_conf_sql:
+autonomy_dovecot_auth_conf_sql:
   name: "sql"
   passdb:
     - driver: "sql"
-      args: "/etc/dovecot/dovecot-sql.conf.ext"
+      args: "{{ autonomy_dovecot_etc }}/dovecot-sql.conf.ext"
   userdb:
     - driver: "sql"
-      args: "/etc/dovecot/dovecot-sql.conf.ext"
+      args: "{{ autonomy_dovecot_etc }}/dovecot-sql.conf.ext"
 
-dovecot_auth_conf_ldap:
+autonomy_dovecot_auth_conf_ldap:
   name: "ldap"
   passdb:
     - driver: "ldap"
-      args: "/etc/dovecot/dovecot-ldap.conf.ext"
+      args: "{{ autonomy_dovecot_etc }}/dovecot-ldap.conf.ext"
   userdb:
     - driver: "ldap"
-      args: "/etc/dovecot/dovecot-ldap.conf.ext"
+      args: "{{ autonomy_dovecot_etc }}/dovecot-ldap.conf.ext"
 
-dovecot_auth_conf_oauth2:
+autonomy_dovecot_auth_conf_oauth2:
   name: "oauth2"
   passdb:
     - driver: "oauth2"
       mechanisms: "xoauth2 oauthbearer"
-      args: "/etc/dovecot/dovecot-oauth2.conf.ext"
+      args: "{{ autonomy_dovecot_etc }}/dovecot-oauth2.conf.ext"
 
-dovecot_auth_conf:
-  - "{{ dovecot_auth_conf_system }}"
+autonomy_dovecot_auth_conf:
+  - "{{ autonomy_dovecot_auth_conf_system }}"
 
-dovecot_auth_deny:
+autonomy_dovecot_auth_deny:
   name: "deny"
   passdb:
     - driver: passwd-file
       deny: yes
-      args: "{{ dovecot_etc }}/deny-users"
+      args: "{{ autonomy_dovecot_etc }}/deny-users"
 
-dovecot_password_file: "/etc/dovecot/passwd.db"
+autonomy_dovecot_password_file: "{{ autonomy_dovecot_etc }}/passwd.db"
 
-dovecot_auth_conf_passwdfile:
+autonomy_dovecot_auth_conf_passwdfile:
   name: "passwdfile"
   passdb:
     - driver: "passwd-file"
-      args: "username_format=%u scheme=ssha512 {{ dovecot_password_file }}"
+      args: "username_format=%u scheme=ssha512 {{ autonomy_dovecot_password_file }}"
       deny: "no"
       master: "no"
       pass: "no"
@@ -461,13 +489,16 @@ dovecot_auth_conf_passwdfile:
       result_success: "return-ok"
   userdb:
     - driver: passwd-file
-      args: username_format=%u /etc/dovecot/users
+      args: "username_format=%u {{ autonomy_dovecot_etc }}/users"
 
-dovecot_sieve_mime_flags:
+autonomy_dovecot_sieve_mime_flags:
   - mime_type: "application/ics"
     flags: "invites"
   - mime_type: "text/x-vcard"
     flags: "contact"
+
+autonomy_dovecot_auth_use_winbind: ""
+autonomy_dovecot_auth_winbind_helper_path: ""
 
 # The following variables are not modified from the application defaults.
 
@@ -480,6 +511,6 @@ autonomy_dovecot_log_debug: ""
 # Dovecot Defaults
 #
 # ==================================================================================================
-__dovecot_sieve_global: ""
+__autonomy_dovecot_sieve_global: ""
 __autonomy_dovecot_default_vsz_limit: "256M"
 __autonomy_dovecot_process_min_avail: 0

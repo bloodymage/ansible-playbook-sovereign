@@ -1,26 +1,26 @@
 # {{ ansible_managed }}
 
-{% if autonomy_realm_identity_management_system == "samba" %}
+{% if autonomy_realm_identity_management_system == "ad" %}
 auth_gssapi_hostname = "$ALL"
-auth_krb5_keytab = "/etc/dovecot/dovecot.keytab"
+auth_krb5_keytab = "{{ autonomy_dovecot_etc }}/dovecot.keytab"
 {% endif %}
 
-{% if dovecot_auth_use_winbind is defined -%}
-  auth_use_winbind = {{ dovecot_auth_use_winbind }}
+{% if autonomy_dovecot_auth_use_winbind is truthy -%}
+  auth_use_winbind = {{ autonomy_dovecot_auth_use_winbind }}
+{% if autonomy_dovecot_auth_use_winbind is truthy -%}
+  auth_winbind_helper_path = {{ autonomy_dovecot_winbind_helper_path }}
 {% endif %}
-{% if dovecot_auth_use_winbind is defined -%}
-  auth_winbind_helper_path = {{ dovecot_winbind_helper_path }} 
 {% endif %}
 #auth_failure_delay = 2 secs
 #auth_ssl_require_client_cert = no
 #auth_ssl_username_from_cert = no
 
 auth_mechanisms =
-{%- for mechanism in dovecot_auth_mechanisms -%}
+{%- for mechanism in autonomy_dovecot_auth_mechanisms -%}
   {{ " " }}{{ mechanism }}
 {%- endfor %}
 
-{% for config in dovecot_auth_conf %}
+{% for config in autonomy_dovecot_auth_conf %}
   !include auth-{{ config.name }}.conf.ext
 {% endfor %}
 

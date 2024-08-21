@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-{% for namespace in dovecot_namespaces -%}
+{% for namespace in autonomy_dovecot_namespaces -%}
   namespace {{ namespace.name }} {
   inbox = {{ namespace.inbox | default('no') }}
   {% for mailbox in namespace.mailboxes -%}

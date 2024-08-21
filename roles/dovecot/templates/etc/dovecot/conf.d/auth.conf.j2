@@ -3,31 +3,31 @@
 {% for database in item.passdb %}
 passdb {
   driver = {{ database.driver }}
-{% if database.mechanisms is defined %} 
+{% if database.mechanisms is defined %}
   mechanisms = {{ database.mechanisms }}
 {% endif %}
-{% if database.args is defined %} 
+{% if database.args is defined %}
   args = {{ database.args }}
 {% endif %}
 {% if database.deny is defined %}
   deny = {{ database.deny }}
 {% endif %}
-{% if database.master is defined %} 
+{% if database.master is defined %}
   master = {{ database.master }}
 {% endif %}
-{% if database.pass is defined %} 
+{% if database.pass is defined %}
   pass = {{ database.pass }}
 {% endif %}
-{% if database.skip is defined %} 
+{% if database.skip is defined %}
   skip = {{ database.skip }}
 {% endif %}
-{% if database.result_failure is defined %} 
+{% if database.result_failure is defined %}
   result_failure = {{ database.result_failure }}
 {% endif %}
-{% if database.result_internalfail is defined %} 
+{% if database.result_internalfail is defined %}
   result_internalfail  = {{ database.result_internalfail }}
 {% endif %}
-{% if database.result_success is defined %} 
+{% if database.result_success is defined %}
   result_success = {{ database.result_success }}
 {% endif %}
 }
@@ -37,7 +37,7 @@ passdb {
 {% for database in item.userdb %}
 userdb {
   driver = {{ database.driver }}
-{% if database.args is defined %} 
+{% if database.args is defined %}
   args = {{ database.args }}
 {% endif %}
 }

@@ -36,9 +36,9 @@
     - role: bloodymage.autonomy.spamassassin
       tags:
         - spamassassin
-    #- role: bloodymage.autonomy.clamav
-    #  tags:
-    #    - clamav
+    # - role: bloodymage.autonomy.clamav
+    #   tags:
+    #     - clamav
 
 - name: "Configure OpenDKIM Servers."
   hosts: opendkim_servers
@@ -51,8 +51,6 @@
   hosts: dovecot_servers:!public_zone
   roles:
     - role: bloodymage.autonomy.dovecot
-      tags:
-        - dovecot
 
 - name: "Configure Postfix Servers."
   hosts: postfix_servers:!public_zone
