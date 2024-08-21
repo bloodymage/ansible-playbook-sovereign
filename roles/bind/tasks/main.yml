@@ -12,7 +12,7 @@
       files: "{{ __os_variables_files }}"
       paths:
         - "vars"
-  become: no
+  become: false
   when:
     - autonomy_virtual_host is falsy
     - inventory_hostname not in groups['public_zone'] | default([])
@@ -21,7 +21,7 @@
   ansible.builtin.package:
     name: "{{ autonomy_packages }}"
     state: present
-  become: yes
+  become: true
   when:
     - autonomy_virtual_host is falsy
     - inventory_hostname not in groups['public_zone'] | default([])
