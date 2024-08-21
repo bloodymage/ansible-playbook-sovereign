@@ -14,14 +14,14 @@
     - system-upgrade-debug
 
 - name: "Include Family Tasks."
-  include_tasks: "{{ ansible_os_family | lower }}.yml"
+  include_tasks: "upgrade_{{ ansible_os_family | lower }}.yml"
   when:
     - ansible_network_os is not defined
     - autonomy_virtual_host is falsy
     - ansible_connection != "local"
 
 - name: "Include NetworkOS tasks."
-  include_tasks: "{{ ansible_network_os.split('.')[2] | lower }}.yml"
+  include_tasks: "upgrade_{{ ansible_network_os.split('.')[2] | lower }}.yml"
   when:
     - ansible_network_os is defined
 
