@@ -5,7 +5,3 @@ ansible/releases/
 
 # Sphinx documentation
 docs/build/
-
-GPATH
-GRTAGS
-GTAGS
