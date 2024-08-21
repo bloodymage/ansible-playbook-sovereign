@@ -21,6 +21,9 @@ users_sudoers_options:
       - entity: "Default"
         value: "env_keep += WINDOW"
 
+autonomy_user_home_dir: "/home"
+autonomy_users_password_hash_seed: "{{ inventory_hostname }}"
+
 # ==================================================================================================
 #
 # User Dotfiles settings

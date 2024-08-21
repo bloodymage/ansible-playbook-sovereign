@@ -78,7 +78,7 @@
     __password_length: "length={{ autonomy_password_length }}"
     __password_overwrite: "overwrite={{ autonomy_sshca_regenerate_host_ca_password }} backup=yes"
     __password_create: "create=true"
-    __password_symbols: "nosymbols={{ autonomy_sshca_password_nosymbols }}"
+    __password_symbols: "nosymbols={{ autonomy_sshca_password_no_symbols }}"
     __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
   delegate_to: localhost
   run_once: true

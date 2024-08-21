@@ -12,7 +12,7 @@
 # ==================================================================================================
 - name: "Ensure we have user groups required by host role."
   ansible.builtin.set_fact:
-    __user_groups: "{{ __user_groups + autonomy_user_groups + [ item.group ] }}"
+    __user_groups: "{{ __user_groups + autonomy_user_groups + [ item['group'] ] }}"
   loop:
     - name: "mythtv"
       group: "{{ user_mythtv_group }}"
@@ -31,12 +31,12 @@
     - name: "keycloak"
       group: "{{ autonomy_user_keycloak_group }}"
   when:
-    - inventory_hostname in groups [item.name] | default([])
+    - inventory_hostname in groups [item['name']] | default([])
   become: no
 
 - name: "Ensure we have users required by host role."
   ansible.builtin.set_fact:
-    __users: "{{ __users + [ item.user ] }}"
+    __users: "{{ __users + [ item['user'] ] }}"
   loop:
     - name: "mythtv"
       user: "{{ user_mythtv }}"
@@ -55,15 +55,15 @@
     - name: "keycloak"
       user: "{{ autonomy_user_keycloak }}"
   when:
-    - inventory_hostname in groups[item.name] | default([])
+    - inventory_hostname in groups[item['name']] | default([])
   become: no
 
 - name: "Create groups."
   ansible.builtin.group:
-    name: "{{ item.name }}"
+    name: "{{ item['name'] }}"
     state: present
-    system: "{{ item.system | default('no') }}"
-    gid: "{{ item.gid | default(omit) }}"
+    system: "{{ item['system'] | default('no') }}"
+    gid: "{{ item['gid'] | default(omit) }}"
   loop: "{{ __user_groups }}"
   become: yes
 
@@ -81,28 +81,61 @@
   ansible.builtin.user:
     name: "{{ item['username'] }}"
     password: "{{ __user_password }}"
-    groups: "{{ item['groups'] + [autonomy_user_group_ansible_managed] | default([autonomy_user_group_ansible_managed]) }}"
+    groups: "{{ __groups }}"
     state: present
-    shell: "{{ item['shell'] | default('/bin/bash') }}"  # Defaults to /bin/bash
-    system: no                         # Defaults to no
-    create_home: yes                   # Defaults to yes
+    shell: "{{ item['shell'] | default('/bin/bash') }}"
+    system: false
+    create_home: true
     comment: "{{ item['name'] | default(omit) }}"
     home: "{{ item['unix_home'] | default('/nonexistent') }}"
     uid:  "{{ item['id_number'] | default(omit) }}"
     update_password: "always"
-    move_home: yes
+    move_home: true
   loop: "{{ __users }}"
   vars:
-    __password_store_id: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/{{ inventory_hostname_short }}/{{ item.username }}/password"
-    __password_length: "length={{ item.password_legnth | default(autonomy_password_length) }}"
-    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=yes"
-    __password_create: "create=true"
-    __password_symbols: "nosymbols=true"
-    __password_lookup: "{{ __password_store_id }} {{ __password_create }} {{ __password_length }} {{ __password_symbols }} {{ __password_overwrite }}"
+    __groups: >-
+      {% if item['groups'] is defined %}
+      {{ item['groups'] + [autonomy_user_group_ansible_managed]
+      {% else %}
+      {{ [autonomy_user_group_ansible_managed] }}
+      {% endif %}
+    __password_store_base_dir: "{{ autonomy_passdb }}/{{ autonomy_domain }}/hosts/"
+    __password_store_host_dir: "{{ __password_store_base_dir }}/{{ inventory_hostname_short }}"
+    __password_store_dir: "{{ __password_store_host_dir }}/{{ item['username'] }}"
+    __password_store_id: "{{ __password_store_dir }}/password"
+    __password_length: "length={{ item['password_legnth'] | default(autonomy_password_length) }}"
+    __password_overwrite: "overwrite={{ autonomy_overwrite_password }} backup=true"
+    __password_create_bool: >-
+      {% if item['password'] is defined and item['password'] in ['!', '*'] %}
+      false
+      {% elif item['password'] is defined and item['password'] != 'password' %}
+      false
+      {% else %}
+      true
+      {% endif %}
+    __password_create: "create={{ __password_create_bool }}"
+    __password_symbols: "nosymbols={{ autonomy_password_no_symbols }}"
+    __password_lookup: >-
+      {{ __password_store_id }}
+      {{ __password_create }}
+      {{ __password_length }}
+      {{ __password_symbols }}
+      {{ __password_overwrite }}
     __password1: "{{ lookup('community.general.passwordstore', __password_lookup) }}"
-    __password: "{% if item.password is defined %}{{ item.password }}{% else %}{{ __password1 }}{% endif %}"
-    __password_hash: "{{ __password | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string ) }}"
-    __user_password: "{% if item.password is defined and item.password in ['!','*'] %}{{ item.password }}{% else %}{{ __password_hash }}{% endif %}"
+    __password: >-
+      {% if item['password'] is defined %}
+      {{ item['password'] }}
+      {% else %}
+      {{ __password1 }}
+      {% endif %}
+    __password_hash: >-
+      {{ __password | password_hash('sha512', 65534 | random(seed=autonomy_users_password_hash_seed) | string ) }}
+    __user_password: >-
+      {% if item['password'] is defined and item.password in ['!','*'] %}
+      {{ item['password'] }}
+      {% else %}
+      {{ __password_hash }}
+      {% endif %}
   loop_control:
     index_var: index
   become: yes
