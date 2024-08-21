@@ -336,6 +336,7 @@
     - "restart all"
     - "restart tls"
     - "restart mysql"
+    - "restart mariadb"
   when:
     - inventory_hostname in groups ['mysql_compatable_servers'] | default([])
 

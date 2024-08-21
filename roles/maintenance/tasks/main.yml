@@ -24,3 +24,8 @@
   include_tasks: "wake_on_lan.yml"
   when:
     __maintenance_tasks == "wakeonlan"
+
+- name: "Include Database Tasks."
+  include_tasks: "database.yml"
+  when:
+    __maintenance_tasks == "database"

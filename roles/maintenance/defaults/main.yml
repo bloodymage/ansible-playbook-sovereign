@@ -52,3 +52,10 @@ autonomy_dns_dmarc_cloudflare_email: ""
 autonomy_dns_dmarc_email:
   - "{{ autonomy_dns_dmarc_cloudflare_email }}"
   - "{{ autonomy_dns_dmarc_local_email }}"
+
+# ==================================================================================================
+#
+# Do NOT use these variables.
+#
+# ==================================================================================================
+__databases_to_create: []

@@ -18,10 +18,12 @@
       tags:
         - mariadb
 
-- name: "Configure MySQL Databases."
-  hosts: mysql_compatible_servers
+- name: "Configure Databases."
+  hosts: mariadb_servers:postgresql_servers:mysql_servers
   roles:
-    - role: bloodymage.autonomy.mysql_databases
+    - role: bloodymage.autonomy.maintenance
+      vars:
+        __maintenance_tasks: "database"
       tags:
-        - mysql-databases
-        - mysql_databases
+        - databases
+        - database
