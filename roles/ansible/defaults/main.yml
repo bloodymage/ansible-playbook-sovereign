@@ -5,6 +5,12 @@ autonomy_ansible_packages:
   - python3-ldap
   - python3-paramiko
   - python3-winrm
+  - python3-jinja2
+  - python3-yaml
+  - python3-cryptography
+  - python3-packaging
+  - python3-passlib
+  - python3-resolvelib
 
 autonomy_ansible_default_host_list:
   - "/etc/ansible/hosts"
